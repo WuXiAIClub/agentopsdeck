@@ -16545,8 +16545,8 @@
     },
     {
       "path": "apps/server/src/connector/connector-openclaw-message-owner.test.ts",
-      "size": 24814,
-      "sha256": "323af12c82de8dae93cc019a30d19e7c84575366af16039155b72d5925dd0722",
+      "size": 24896,
+      "sha256": "93d6c5183a3a8a5525b7dfd7a5f860082d1a3a9296d8576d4343089ae15dcaaf",
       "module": "connector",
       "kind": "test",
       "depth": "semantic",

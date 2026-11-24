@@ -40,13 +40,14 @@ function fixture() {
 
 test('OpenClaw revoke at second physical file prevents later artifacts and gateway queue admission', async () => {
   const f = fixture(), inboundDir = join(f.directory, 'physical-files');
-  let finish!: () => void, checks = 0, revoked = false;
+  let finish!: () => void, entered!: () => void, checks = 0, revoked = false;
+  const enteredPromise = new Promise<void>(resolve => { entered = resolve; });
   const commands: string[] = [];
   const authority: ApplicationCommandScope = {
     intent: { action: 'message', runtime: 'openclaw', resource: key, commandKey: f.scope.commandKey, payloadDigest: 'a'.repeat(64) },
     local() { if (revoked) throw Error('original application revoked'); },
     async authorize(stage) {
-      if (stage === 'effect' && ++checks === 4) await new Promise<void>(resolve => { finish = resolve; });
+      if (stage === 'effect' && ++checks === 4) { entered(); await new Promise<void>(resolve => { finish = resolve; }); }
       if (revoked) throw Error('original application revoked');
     },
   };
@@ -59,7 +60,7 @@ test('OpenClaw revoke at second physical file prevents later artifacts and gatew
   try {
     const original = messages.sendPhysical({ ...f.scope, payloadJson: JSON.stringify({ message: '', media }) }, authority);
     const rejected = assert.rejects(original, /original application revoked/);
-    for (let i = 0; i < 1000 && !finish; i++) await tick();
+    await enteredPromise;
     assert.ok(finish, 'second file original authorization check entered');
     assert.equal(readdirSync(inboundDir).length, 1);
     revoked = true; finish(); await rejected;
