@@ -1,0 +1,53 @@
+/* Resource cards share the chat caption. Keep content surfaces calm, and scope
+   overrides so native terminal/editor/player controls retain their own layout. */
+.resource-card-toolbar { padding: 6px 8px; border-bottom: 1px solid #94a3b826; }
+.resource-card-tools { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; min-width: 0; }
+.resource-card-tools > form { display: flex; align-items: center; gap: 4px; min-width: 0; margin: 0; padding: 0; border: 0; }
+.resource-card-tools .workspace-dashboard-search { margin: 0; padding: 0 4px; border: 0; gap: 4px; background: transparent; }
+.resource-card-tools [role=status] { font-size: 11px; white-space: nowrap; opacity: .7; }
+.resource-card-tools > strong { font-size: 11px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.resource-card-tools button { display: inline-flex; align-items: center; justify-content: center; gap: 4px; min-width: 28px; height: 28px; padding: 4px 6px; border: 0; border-radius: 7px; background: transparent; color: inherit; cursor: pointer; }
+.resource-card-tools button:hover:not(:disabled) { background: #60a5fa18; color: #3b82f6; }
+.resource-card-tools button:disabled { opacity: .4; cursor: default; }
+.resource-card-tools button[aria-pressed=true] { color: #3b82f6; background: #60a5fa20; }
+.resource-card-tools :is(select,input:not([type=checkbox]):not([type=file])) { min-width: 0; width: auto; max-width: 160px; height: 28px; padding: 3px 6px; border: 1px solid #94a3b82b; border-radius: 6px; background: transparent; color: inherit; font: inherit; font-size: 11px; }
+.resource-card-tools :is(button,input,select):focus-visible { outline: 2px solid #60a5fa; outline-offset: 2px; }
+.resource-card-title { padding: 10px 12px; font-weight: 600; }
+.resource-card-title > input { width: 100%; }
+.resource-card-heading { margin: 0; font: inherit; }
+.session-pane-drag-title:has(.session-pane-title-slot:not(:empty)) > .resource-caption-fallback { display: none; }
+[data-resource-card] .session-pane-title-slot { min-width: 0; display: flex; overflow: hidden; }
+[data-resource-card] .session-pane-title-slot > :is(input,strong,span,h2) { min-width: 0; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+[data-resource-card] .session-pane-title-slot > input { height: 24px; padding: 0; border: 0; border-radius: 4px; background: transparent; color: inherit; font: inherit; }
+[data-resource-card] .session-pane-title-slot > input:focus { outline: 1px solid #60a5fa; background: #60a5fa0d; }
+[data-resource-card] .caption-overflow-content > .session-pane-custom-actions { display: flex; align-items: center; gap: 4px; }
+[data-resource-card] .caption-overflow[data-collapsed=false] .resource-card-tools { flex-wrap: nowrap; }
+[data-resource-card] .caption-overflow-content:popover-open > .session-pane-custom-actions { flex-wrap: wrap; min-width: 0; max-width: 100%; }
+[data-resource-card] .caption-overflow-content:popover-open .resource-card-tools { max-width: 100%; }
+[data-resource-card] .caption-overflow-content:popover-open form[data-caption-hidden] { flex-wrap: wrap; }
+.media-library-player { display: flex; flex-direction: column; }
+.media-library-player > :is(.resource-card-toolbar,.resource-card-title) { position: absolute; top: 4px; z-index: 2; color: #f1f5f9; background: #080b10d9; border-radius: 6px; }
+.media-library-player > .resource-card-title { left: 8px; right: 54px; padding: 4px 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; pointer-events: none; }
+.media-library-player > .resource-card-toolbar { right: 8px; padding: 0; }
+.media-library-player > .media-player-fill { flex: 1; min-height: 0; }
+[data-resource-card] .workspace-media-card { padding: 12px; }
+[data-resource-card] .workspace-media { gap: 10px; font-size: 12px; }
+[data-resource-card] .workspace-media :is(.font-black,.font-bold) { font-weight: 500; }
+[data-resource-card] .workspace-media > .rounded-2xl { border-radius: 12px; box-shadow: none; }
+[data-resource-card] .session-pane-content > section { --resource-border: #94a3b829; --resource-muted: #64748b; }
+[data-resource-card] .session-pane-content > :is(.workspace-taskboard,.workspace-status-card,.workspace-metric-card,.workspace-report,.workspace-research,.workspace-website,.workspace-browser,.workspace-terminal,.workspace-native-drawio,.workspace-files) { background: var(--surface-solid); padding: 12px; gap: 10px; }
+[data-resource-card] .session-pane-content > .workspace-metric-card { background: color-mix(in srgb, var(--card-accent) 5%, var(--surface-solid)); }
+[data-resource-card] .session-pane-content > section > :is(p[role=status],small,.workspace-board-status,.workspace-native-drawio-state) { font-size: 11px; line-height: 1.5; color: var(--resource-muted); margin: 0; }
+[data-resource-card] .session-pane-content > section > [role=alert] { padding: 10px 12px; border: 1px solid #f59e0b30; border-radius: 10px; background: color-mix(in srgb, #f59e0b 4%, var(--surface-solid)); color: #713f12; font-size: 12px; }
+[data-resource-card] :is(.workspace-board-columns > section,.workspace-research-results > article,.workspace-browser-empty,.workspace-terminal-setup) { border-radius: 12px; border: 1px solid var(--resource-border, #94a3b829); background: #94a3b805; }
+[data-resource-card] .workspace-board-counts { gap: 8px; }
+[data-resource-card] .workspace-board-counts > span { border-radius: 10px; border: 1px solid #94a3b820; }
+[data-resource-card] .workspace-report > .notebook-editor { flex: 1; min-height: 0; }
+[data-resource-card] .workspace-files-top { border: 0; padding: 0; }
+.resource-card-tools .workspace-files-sources { display: flex; gap: 3px; }
+.resource-card-tools .workspace-files-scope { padding: 0; border: 0; margin: 0; }
+@media (pointer: coarse) {
+  .resource-card-toolbar .resource-card-tools button,
+  .caption-overflow-content:popover-open .resource-card-tools :is(button[data-caption-hidden], [data-caption-hidden] button) { min-width: 44px; min-height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) { .resource-card-tools * { transition: none !important; } }

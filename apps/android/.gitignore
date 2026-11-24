@@ -1,0 +1,12 @@
+.gradle/
+local.properties
+**/build/
+app/src/main/assets/web/
+*.jks
+*.keystore
+test-results/
+*.log
+*.apk
+*.idsig
+*.p12
+*.pfx

@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-23",
+  "status": "inventory-only",
+  "releaseApproved": false,
+  "scope": "Selected installed packages reachable from the production dependency graph, including web build dependencies declared as production. Not a complete dependency, artifact or legal review.",
+  "limits": [
+    "Only top-level package license/notice files are inventoried; embedded and bundled third-party notices still require review.",
+    "Development-only dependencies, absent optional platform packages, native artifacts, fonts, browser binaries and container OS packages are outside this inventory.",
+    "Hashes identify inspected files, not legal title, license compatibility or compliant distribution."
+  ],
+  "packages": [
+    {
+      "name": "caniuse-lite",
+      "version": "1.0.30001826",
+      "declaredLicense": "CC-BY-4.0",
+      "files": [
+        {
+          "path": "LICENSE",
+          "size": 18651,
+          "sha256": "fd3a263fe19ed8faa9068b43abaebafc02c77897b0c6fc09abc04bb592e5f16e"
+        }
+      ]
+    },
+    {
+      "name": "class-variance-authority",
+      "version": "0.7.1",
+      "declaredLicense": "Apache-2.0",
+      "files": [
+        {
+          "path": "LICENSE",
+          "size": 10753,
+          "sha256": "0ccbf956cffc8dcf515809433cb5242ee67c94513d46e48c261d68d0880de406"
+        }
+      ]
+    },
+    {
+      "name": "lightningcss",
+      "version": "1.32.0",
+      "declaredLicense": "MPL-2.0",
+      "files": [
+        {
+          "path": "LICENSE",
+          "size": 15648,
+          "sha256": "5eba353fe5076ac3432177f8ab1cf75e3afcd0584251e37c3bfead5f447d040e"
+        }
+      ]
+    },
+    {
+      "name": "lightningcss-linux-x64-gnu",
+      "version": "1.32.0",
+      "declaredLicense": "MPL-2.0",
+      "files": [
+        {
+          "path": "LICENSE",
+          "size": 15648,
+          "sha256": "5eba353fe5076ac3432177f8ab1cf75e3afcd0584251e37c3bfead5f447d040e"
+        }
+      ]
+    },
+    {
+      "name": "lightningcss-linux-x64-musl",
+      "version": "1.32.0",
+      "declaredLicense": "MPL-2.0",
+      "files": [
+        {
+          "path": "LICENSE",
+          "size": 15648,
+          "sha256": "5eba353fe5076ac3432177f8ab1cf75e3afcd0584251e37c3bfead5f447d040e"
+        }
+      ]
+    },
+    {
+      "name": "lucide-react",
+      "version": "1.21.0",
+      "declaredLicense": "ISC",
+      "files": [
+        {
+          "path": "LICENSE",
+          "size": 3208,
+          "sha256": "b495047bd93a9b06913511076f504daba17d5bbeb3e0650f3bb53a4220329c57"
+        }
+      ]
+    },
+    {
+      "name": "node-pty",
+      "version": "1.1.0",
+      "declaredLicense": "MIT",
+      "files": [
+        {
+          "path": "LICENSE",
+          "size": 3326,
+          "sha256": "a3d60eaf32d2fb09c9d82ef39f14bd6e2c0f3ca7de30daa827486c0d6f8b6e9f"
+        }
+      ]
+    },
+    {
+      "name": "playwright-core",
+      "version": "1.63.0",
+      "declaredLicense": "Apache-2.0",
+      "files": [
+        {
+          "path": "LICENSE",
+          "size": 11601,
+          "sha256": "45873d00a0dd243596deb4aa23b2493b3d1f0671921bf2538ea431d7380220eb"
+        },
+        {
+          "path": "NOTICE",
+          "size": 254,
+          "sha256": "6d602191187b35b9b01d2cffa01c8469c2c8d9de8a96f1bf868e0f264f51c81d"
+        }
+      ]
+    }
+  ]
+}

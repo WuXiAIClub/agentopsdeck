@@ -1,0 +1,9 @@
+.build/
+build/
+*.xcodeproj/
+Config/Signing.local.xcconfig
+*.ipa
+*.xcarchive/
+*.p12
+*.mobileprovision
+.DS_Store

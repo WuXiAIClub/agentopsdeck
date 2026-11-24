@@ -1,0 +1,213 @@
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from 'react';
+import type { ChatMessage } from '@agentopsdeck/shared';
+import { countWindowMessages, MESSAGE_WINDOW_CHAT_LIMIT, visibleMessages } from '../components/messages';
+import { createHistoryAnchorIndex } from './history-anchor-index';
+import { desktopHistoryReads, type HistoryReadSchedule } from './history-read-scheduler';
+import { createHistoryBackfillAttempts, type HistoryBackfillOutcome } from './history-backfill-attempts';
+
+export function useMessageHistory({ messages, hiddenCount, loading, loadMore, containerRef, followingRef, autoScrollEnabled = true, automaticReadPriority }: {
+  messages: ChatMessage[]; hiddenCount: number; loading?: boolean | undefined;
+  loadMore?: ((schedule?: HistoryReadSchedule, signal?: AbortSignal) => Promise<HistoryBackfillOutcome>) | undefined;
+  containerRef: RefObject<HTMLElement | null>; followingRef: RefObject<boolean>;
+  autoScrollEnabled?: boolean | undefined;
+  automaticReadPriority?: (() => number) | undefined;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const pending = useRef(false);
+  const upwardIntent = useRef(false);
+  const [autoAttempt] = useState(createHistoryBackfillAttempts);
+  const retryTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const [retryRevision, setRetryRevision] = useState(0);
+  const latest = useRef({ messages, hiddenCount, loading, loadMore, autoScrollEnabled, automaticReadPriority });
+  latest.current = { messages, hiddenCount, loading, loadMore, autoScrollEnabled, automaticReadPriority };
+  const isFollowing = () => Boolean(followingRef.current && latest.current.autoScrollEnabled);
+  const automatic = useRef<{ controller: AbortController; scheduled?: { expedite(): void }; expedited: boolean } | undefined>(undefined);
+  useEffect(() => () => {
+    const run = automatic.current;
+    automatic.current = undefined;
+    run?.controller.abort();
+    pending.current = false;
+    clearTimeout(retryTimer.current);
+    autoAttempt.reset();
+  }, []);
+  const anchor = useRef<{ id: string; top: number; waitingForHeadId?: string | undefined } | undefined>(undefined);
+  const bottomPin = useRef<{ waitingForHeadId?: string | undefined } | undefined>(undefined);
+  const prevVisibleRef = useRef<{ sessionKey?: string | undefined; firstId?: string | undefined; length: number }>({ length: 0 });
+  const anchorIndex = useRef<ReturnType<typeof createHistoryAnchorIndex> | undefined>(undefined);
+  useLayoutEffect(() => {
+    if (!containerRef.current) return;
+    const index = createHistoryAnchorIndex(containerRef.current);
+    anchorIndex.current = index;
+    return () => { index.dispose(); anchorIndex.current = undefined; };
+  }, [containerRef]);
+  // Once the reader expands history, live appends must not evict its oldest row.
+  // Composer/search state must not rebuild the history window and every
+  // downstream grouping. Expansion and every actual history update still do.
+  const visible = useMemo(() => expanded ? messages : visibleMessages(messages), [expanded, messages]);
+  const rememberAnchor = (waitForPage = false) => {
+    const saved = anchorIndex.current?.capture();
+    const headId = visible[0]?.id ?? latest.current.messages[0]?.id;
+    if (saved) {
+      anchor.current = {
+        ...saved,
+        ...(waitForPage && headId !== undefined ? { waitingForHeadId: headId } : {}),
+      };
+    }
+  };
+  const rememberBeforePrepend = (waitForPage = false) => {
+    const headId = visible[0]?.id ?? latest.current.messages[0]?.id;
+    rememberAnchor(waitForPage);
+    if (isFollowing()) {
+      bottomPin.current = waitForPage && headId !== undefined ? { waitingForHeadId: headId } : {};
+    }
+  };
+  useLayoutEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    let touchY = 0;
+    const wheel = (event: WheelEvent) => { if (event.deltaY < 0) upwardIntent.current = true; };
+    const touchStart = (event: TouchEvent) => { touchY = event.touches[0]?.clientY ?? 0; };
+    const touchMove = (event: TouchEvent) => {
+      const y = event.touches[0]?.clientY ?? touchY;
+      if (y > touchY) upwardIntent.current = true;
+      touchY = y;
+    };
+    const key = (event: KeyboardEvent) => { if (['ArrowUp', 'PageUp', 'Home'].includes(event.key)) upwardIntent.current = true; };
+    const pointer = (event: PointerEvent) => {
+      if (event.target === container && event.clientX >= container.getBoundingClientRect().left + container.clientWidth) upwardIntent.current = true;
+    };
+    container.addEventListener('wheel', wheel, { passive: true });
+    container.addEventListener('touchstart', touchStart, { passive: true });
+    container.addEventListener('touchmove', touchMove, { passive: true });
+    container.addEventListener('keydown', key);
+    container.addEventListener('pointerdown', pointer);
+    return () => {
+      container.removeEventListener('wheel', wheel); container.removeEventListener('touchstart', touchStart);
+      container.removeEventListener('touchmove', touchMove); container.removeEventListener('keydown', key);
+      container.removeEventListener('pointerdown', pointer);
+    };
+  }, [containerRef]);
+  useLayoutEffect(() => {
+    const container = containerRef.current;
+    const currentSessionKey = visible[0]?.sessionKey ?? messages[0]?.sessionKey;
+    const currentFirstId = visible[0]?.id;
+    const prev = prevVisibleRef.current;
+    const sessionChanged = currentSessionKey !== undefined && prev.sessionKey !== undefined && currentSessionKey !== prev.sessionKey;
+    if (sessionChanged) {
+      anchor.current = undefined;
+      bottomPin.current = undefined;
+    }
+    const prepended = !sessionChanged
+      && prev.length > 0
+      && visible.length > prev.length
+      && currentFirstId !== undefined
+      && prev.firstId !== undefined
+      && currentFirstId !== prev.firstId;
+    prevVisibleRef.current = { sessionKey: currentSessionKey, firstId: currentFirstId, length: visible.length };
+
+    if (!container) return;
+    const waitingHeadId = bottomPin.current?.waitingForHeadId ?? anchor.current?.waitingForHeadId;
+    if (waitingHeadId !== undefined && !prepended) {
+      if (!pending.current) {
+        anchor.current = undefined;
+        bottomPin.current = undefined;
+      }
+      return;
+    }
+
+    if (bottomPin.current || (prepended && isFollowing())) {
+      bottomPin.current = undefined;
+      if (isFollowing() && container.clientHeight > 0) {
+        container.scrollTop = container.scrollHeight;
+        anchor.current = undefined;
+        return;
+      }
+    }
+    if (!anchor.current) return;
+    const saved = anchor.current;
+    anchor.current = undefined;
+    const node = anchorIndex.current?.get(saved.id);
+    if (node) container.scrollTop += node.getBoundingClientRect().top - saved.top;
+  }, [visible, messages, expanded]);
+  const loadOlder = async () => {
+    if (upwardIntent.current && automatic.current) {
+      automatic.current.expedited = true;
+      automatic.current.scheduled?.expedite();
+    }
+    if (pending.current || loading || !upwardIntent.current) return;
+    upwardIntent.current = false;
+    if (visible.length < messages.length) {
+      rememberBeforePrepend(false);
+      setExpanded(true);
+      return;
+    }
+    if (!loadMore || hiddenCount <= 0) return;
+    pending.current = true;
+    rememberBeforePrepend(true);
+    setExpanded(true);
+    try { await loadMore(); } finally { pending.current = false; }
+  };
+  // Tool events do not consume the 200-conversation-message initial budget.
+  // Page in bounded chunks and never spin on an unavailable/unchanged response.
+  useEffect(() => {
+    const key = `${messages[0]?.sessionKey}:${messages[0]?.id}:${messages.length}:${hiddenCount}`;
+    if (!loadMore || loading || pending.current || hiddenCount <= 0
+      || countWindowMessages(messages) >= MESSAGE_WINDOW_CHAT_LIMIT) return;
+    const attempt = autoAttempt.begin(key);
+    if (!attempt) return;
+    pending.current = true;
+    // Mobile retains its direct-loading path; desktop alone opts into scheduling.
+    if (!automaticReadPriority) {
+      rememberBeforePrepend(true);
+      let outcome: HistoryBackfillOutcome;
+      void loadMore().then(value => { outcome = value; }).catch(() => {}).finally(() => {
+        pending.current = false;
+        if (outcome !== undefined) {
+          anchor.current = undefined;
+          bottomPin.current = undefined;
+        }
+        const delay = autoAttempt.retryDelay(attempt, outcome);
+        if (delay !== undefined) {
+          clearTimeout(retryTimer.current);
+          retryTimer.current = setTimeout(() => {
+            if (autoAttempt.release(attempt)) setRetryRevision(value => value + 1);
+          }, delay);
+        }
+      });
+      return;
+    }
+    const run: NonNullable<typeof automatic.current> = { controller: new AbortController(), expedited: false };
+    automatic.current = run;
+    const schedule: HistoryReadSchedule = (read, signal) => {
+      const scheduled = desktopHistoryReads.schedule(() => {
+        // Capture geometry at dispatch, not while waiting behind other panes.
+        rememberBeforePrepend(true);
+        return read();
+      }, { signal, priority: () => latest.current.automaticReadPriority?.() ?? 5 });
+      run.scheduled = scheduled;
+      if (run.expedited) scheduled.expedite();
+      return scheduled.promise;
+    };
+    schedule.expedite = () => { run.expedited = true; run.scheduled?.expedite(); };
+    // Loaders own visible read errors; cancellation of queued work is not a sync
+    // failure and must not create an unhandled rejection during pane disposal.
+    let outcome: HistoryBackfillOutcome;
+    void loadMore(schedule, run.controller.signal).then(value => { outcome = value; }).catch(() => {}).finally(() => {
+      if (automatic.current !== run) return;
+      automatic.current = undefined;
+      pending.current = false;
+      if (outcome !== undefined) {
+        anchor.current = undefined;
+        bottomPin.current = undefined;
+      }
+      const delay = autoAttempt.retryDelay(attempt, outcome);
+      if (delay !== undefined && !run.controller.signal.aborted) {
+        clearTimeout(retryTimer.current);
+        retryTimer.current = setTimeout(() => {
+          if (autoAttempt.release(attempt)) setRetryRevision(value => value + 1);
+        }, delay);
+      }
+    });
+  }, [messages, hiddenCount, loading, loadMore, retryRevision]);
+  return { visible, loadOlder };
+}

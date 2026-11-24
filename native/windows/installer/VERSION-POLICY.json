@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "platform": "windows",
+  "coreSourceVersion": "1.0.0",
+  "wrapperVersion": "2.4.6",
+  "wrapperBuild": "2.4.6.12",
+  "launcherManifestVersion": "2.4.6.10",
+  "status": "historical-source-scaffold",
+  "releaseApproved": false,
+  "sealedCore": null,
+  "historicalPinsAreAODReleaseEvidence": false,
+  "policyEnglish": "Installer/launcher versions are independent of core. The differing historical identifiers, release-pins and upgrade profiles are reference fixtures, not proof of an AOD 1.0.0 payload. Direct Inno compilation is blocked in source. A future reviewed source change must replace historical/generated inputs and seal exact core commit/version, independently assigned native versions, byte inventory, dependency locks and final notices. Never reuse old hashes as a new seal or load private upstream configuration/history. Windows ACL, install/upgrade/rollback/uninstall, artifact provenance/rights and explicit publication authorization remain open.",
+  "policyChinese": "安装器和启动器版本独立于核心。不同的历史标识、发布哈希及升级配置仅为参考样本，不证明 AOD 1.0.0 载荷。源码已阻止直接 Inno 编译。未来经审查的源码修改必须替换历史及生成输入，并绑定准确的核心提交与版本、独立分配的原生版本、字节清单、依赖锁和最终声明。不得将旧哈希复用为新发布封印，也不得加载上游私有配置与历史。Windows ACL、安装升级回滚卸载、产物溯源与权利及明确发布授权仍未验收。"
+}

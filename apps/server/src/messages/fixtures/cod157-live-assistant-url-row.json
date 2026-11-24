@@ -1,0 +1,23 @@
+{
+  "id": "fixture-artifact-row",
+  "type": "message",
+  "timestamp": "2026-01-01T00:00:00.000Z",
+  "message": {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "[[reply_to_current]] 测试文件：\n\nhttps://deck.example.invalid__ARTIFACT_PATH__"
+      }
+    ],
+    "stopReason": "stop",
+    "timestamp": 1767225600000
+  },
+  "role": "assistant",
+  "content": [
+    {
+      "type": "text",
+      "text": "[[reply_to_current]] 测试文件：\n\nhttps://deck.example.invalid__ARTIFACT_PATH__"
+    }
+  ]
+}

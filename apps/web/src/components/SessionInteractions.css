@@ -1,0 +1,39 @@
+.session-interactions-trigger { position: relative; }
+.session-interactions-trigger.has-pending { color: var(--warning, #e5a93a); }
+.interaction-count { position: absolute; inset: -4px -5px auto auto; border-radius: 50%; min-width: 12px; font-size: 9px; background: #d09a27; color: #181818; }
+.session-files-dialog.session-interactions-dialog { width: min(620px, calc(100vw - 24px)); background: var(--surface-solid, #fffefa); color: var(--ink, #334155); }
+.session-interactions-body { padding: 16px; display: grid; gap: 12px; max-height: 70dvh; overflow-y: auto; }
+.interaction-mode, .interaction-question-status { display: flex; gap: 12px; justify-content: space-between; align-items: center; }
+.interaction-mode label { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; font-size: .85rem; font-weight: 600; }
+.interaction-question { border: 1px solid color-mix(in srgb, currentColor 18%, transparent); border-radius: 10px; padding: 12px; min-width: 0; }
+.interaction-question-status time { opacity: .65; font-size: .8em; }
+.interaction-prompt { white-space: pre-wrap; overflow-wrap: anywhere; margin: 10px 0; max-height: 240px; overflow-y: auto; }
+.interaction-question fieldset { border: 0; padding: 0; min-width: 0; }
+.interaction-option { display: flex; gap: 10px; align-items: baseline; padding: 9px 10px; margin-block: 5px; border: 1px solid var(--line, #e2e8f0); border-radius: 9px; background: var(--surface-solid, #fffefa); overflow-wrap: anywhere; cursor: pointer; }
+.interaction-option:has(input:checked) { border-color: #93b4e9; background: color-mix(in srgb, #6099ef 10%, var(--surface-solid, #fffefa)); }
+.interaction-option input { accent-color: #477ed0; }
+.interaction-option input { flex-shrink: 0; }
+.interaction-option small { display: block; opacity: .7; }
+.interaction-text { display: grid; gap: 6px; }
+.interaction-text textarea, .interaction-mode select { background: var(--surface-solid, #fffefa); color: inherit; border: 1px solid var(--line, #e2e8f0); border-radius: 8px; padding: 8px 10px; max-width: 100%; }
+.interaction-text textarea { width: 100%; resize: vertical; min-height: 76px; }
+.interaction-actions { display: flex; gap: 8px; margin-top: 10px; }
+.session-interactions-body button { border: 1px solid color-mix(in srgb, currentColor 22%, transparent); border-radius: 6px; padding: 5px 10px; }
+.session-interactions-body button:disabled, .interaction-question fieldset:disabled { opacity: .6; }
+.session-interactions-body .interaction-allow { background: #477ed0; border-color: #477ed0; color: white; font-weight: 600; }
+.session-interactions-body .interaction-deny { color: #b34848; border-color: #deb9b9; background: #b348480a; }
+.interaction-heading, .interaction-refresh { display: flex; align-items: center; gap: 8px; }
+.interaction-heading > svg { color: #477ed0; }
+.interaction-mode { padding: 12px; border: 1px solid var(--line, #e2e8f0); border-radius: 12px; background: color-mix(in srgb, #6099ef 5%, var(--surface-solid, #fffefa)); align-items: flex-start; }
+.interaction-mode-setting { min-width: 0; flex: 1; }
+.interaction-mode-description, .interaction-safety { display: flex; align-items: flex-start; gap: 7px; margin: 8px 0 0; font-size: .78rem; line-height: 1.55; color: var(--muted, #64748b); }
+.interaction-mode-description svg, .interaction-safety svg { flex: none; margin-top: 3px; }
+.interaction-safety { margin: 0 2px; }
+.interaction-refresh { flex: none; }
+.interaction-empty { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; padding: 22px 10px; color: var(--muted, #64748b); }
+.interaction-question[data-status=pending] { border-color: #a4bde3; }
+.interaction-question[data-status=confirmed] { border-color: #93bfac; }
+.interaction-feedback { padding: 10px 12px; background: #d69d2710; border: 1px solid #d69d2740; border-radius: 9px; }
+.session-interactions-body :is(button, select, textarea, input):focus-visible { outline: 2px solid #6099ef; outline-offset: 3px; }
+.interaction-question-status { gap: 8px; flex-wrap: wrap; }
+@media (max-width: 540px) { .session-interactions-body { padding: 12px; } .interaction-refresh span { display: none; } }

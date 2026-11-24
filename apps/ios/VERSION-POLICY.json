@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "platform": "ios",
+  "coreSourceVersion": "1.0.0",
+  "wrapperVersion": "0.1.1",
+  "wrapperBuild": "2",
+  "status": "historical-source-scaffold",
+  "releaseApproved": false,
+  "sealedCore": null,
+  "policyEnglish": "Native marketing/build versions are independent of AOD core. Historical source values do not identify an accepted AOD artifact. Do not renumber them to imply core compatibility or import upstream history/configuration. A future release must seal exact core commit/version, reviewed native version/build, source inputs, locks, payload hashes and notices. Device, signing, install/upgrade/uninstall, rights review and explicit release authorization are separate gates.",
+  "policyChinese": "原生展示版本和构建版本独立于 AOD 核心。历史源码值不代表已验收的 AOD 产物。不得通过重编号暗示核心兼容性或导入上游历史与配置。未来发布必须绑定准确的核心提交与版本、经审查的原生版本与构建号、源码输入、依赖锁、载荷哈希和声明。设备、签名、安装升级卸载验收、权利审查及明确发布授权均为独立门槛。"
+}

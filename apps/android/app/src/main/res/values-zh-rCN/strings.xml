@@ -1,0 +1,10 @@
+<resources>
+    <string name="cancel_downloads">取消下载及待保存文件</string>
+    <string name="download_busy">请先完成当前下载或保存。</string>
+    <string name="download_checking">正在检查下载…</string>
+    <string name="download_failed">下载失败或超过 64 MiB 上限。请检查登录状态、网络及文件权限后重试。</string>
+    <string name="download_title">下载文件？</string>
+    <string name="download_action">下载</string>
+    <string name="download_started">正在下载到私有临时存储…</string>
+    <string name="download_retention">上限为 64 MiB，同时仅下载一个文件。下载后请选择保存位置。退出登录不会删除 App 外已保存的副本，请自行删除。</string>
+</resources>

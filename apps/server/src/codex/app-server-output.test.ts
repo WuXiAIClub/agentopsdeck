@@ -1,0 +1,83 @@
+import assert from 'node:assert/strict';
+import childProcess from 'node:child_process';
+import { EventEmitter } from 'node:events';
+import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';
+import { syncBuiltinESMExports } from 'node:module';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { PassThrough } from 'node:stream';
+import { setImmediate as tick } from 'node:timers/promises';
+import test from 'node:test';
+import { ConnectorUserStore } from '../connector/connector-user-store.js';
+import { DeckStore } from '../projection/deck-store.js';
+import { CodexAppServer } from './app-server.js';
+import { codexOutputFrameLimit } from './native-output.js';
+
+test('Codex launch discards stderr and oversized stdout fences the original execution without replay', async context => {
+  const directory = mkdtempSync(join(tmpdir(), 'aod-codex-output-'));
+  const home = join(directory, 'home'), workspace = join(directory, 'workspace');
+  for (const root of [home, workspace]) mkdirSync(root, { mode: 0o700 });
+  const owner = new ConnectorUserStore(':memory:'), store = new DeckStore();
+  const child = Object.assign(new EventEmitter(), { stdin: new PassThrough(), stdout: new PassThrough(), stderr: new PassThrough() });
+  let launches = 0;
+  context.mock.method(childProcess, 'spawn', () => { launches++; return child; });
+  syncBuiltinESMExports();
+  const codex = new CodexAppServer({ enabled: true, command: 'must-not-launch', defaultCwd: workspace, homeDirectory: home,
+    defaultModel: 'synthetic', approvalPolicy: 'never', store, turnQueue: owner.turns,
+    executions: owner.codexExecutions, authorizeTurn: () => true });
+  const runtime = codex as any;
+  const requests: string[] = [];
+  runtime.request = async (method: string) => { requests.push(method); return {}; };
+  runtime.notify = () => {};
+  context.after(async () => {
+    child.stdout.end(); child.stderr.end(); child.emit('close', 0, null);
+    await codex.close(); owner.close();
+    context.mock.restoreAll(); syncBuiltinESMExports();
+    rmSync(directory, { recursive: true, force: true });
+  });
+  await runtime.start();
+  await runtime.nativeObservations.drain();
+  const key = 'codex:synthetic', connection = runtime.connectionId;
+  assert.equal(typeof connection, 'string');
+  assert.ok(owner.codexExecutions.begin(key, 'original-command', connection));
+  assert.ok(owner.codexExecutions.acknowledge(key, 'original-command', connection, 'original-run', () => {}));
+  owner.turns.enqueue('codex', { id: 'successor', sessionKey: key, createdAt: 1, payload: { text: 'successor', images: [] } });
+  const queued = owner.turns.list('codex', key);
+  for (const method of ['log', 'warn', 'error', 'info', 'debug'] as const) {
+    context.mock.method(console, method, () => assert.fail('native stderr must not be logged'));
+  }
+  child.stderr.write('Authorization: Bearer synthetic-private-diagnostic\n');
+  child.stderr.write(Buffer.alloc(2 * 1024 * 1024, 97));
+  assert.equal(child.stderr.readableLength, 0);
+  assert.equal(runtime.child, child);
+  child.stdout.write(Buffer.concat([Buffer.alloc(codexOutputFrameLimit + 1, 97), Buffer.from('\n{"method":"turn/completed"}\n')]));
+  await tick(); await runtime.nativeObservations.drain();
+  assert.equal(child.stdout.destroyed, true);
+  assert.equal(runtime.child, undefined);
+  assert.equal(runtime.connectionId, undefined);
+  const execution = owner.codexExecutions.get(key)!;
+  assert.equal(execution.commandId, 'original-command');
+  assert.equal(execution.runId, 'original-run');
+  assert.equal(execution.connectionId, connection);
+  assert.equal(execution.phase, 'running');
+  assert.equal(owner.codexExecutions.canStart(key), false);
+  assert.deepEqual(owner.turns.list('codex', key), queued);
+  assert.equal(store.getMessages(key).length, 0);
+  assert.equal(launches, 1);
+  assert.deepEqual(requests, ['initialize']);
+  assert.equal(runtime.childLifetimes.size, 1);
+  child.emit('close', 0, null); await tick();
+  assert.equal(runtime.childLifetimes.size, 0);
+  assert.equal(owner.codexExecutions.canStart(key), false);
+  assert.equal(launches, 1);
+  runtime.setConnection('independently-established-replacement');
+  await runtime.nativeObservations.drain();
+  const replaced = owner.codexExecutions.get(key)!;
+  assert.equal(replaced.phase, 'unknown');
+  assert.equal(replaced.commandId, execution.commandId);
+  assert.equal(replaced.runId, execution.runId);
+  assert.equal(replaced.connectionId, execution.connectionId);
+  assert.equal(owner.codexExecutions.canStart(key), false);
+  assert.deepEqual(owner.turns.list('codex', key), queued);
+  assert.equal(launches, 1);
+});

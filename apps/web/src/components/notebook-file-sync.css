@@ -1,0 +1,10 @@
+.notebook-file-sync { margin: .65rem 0; padding: .75rem; border: 1px solid var(--line, #cbd5e1); border-radius: .65rem; background: color-mix(in srgb, var(--accent, #6366f1) 6%, var(--surface-solid, #fff)); color: var(--ink, #1e293b); font-size: .85rem; line-height: 1.5; }
+.notebook-file-sync p { margin: .35rem 0; overflow-wrap: anywhere; }
+.notebook-file-sync label { display: flex; align-items: flex-start; gap: .4rem; margin: .5rem 0; }
+.notebook-file-sync input[type="checkbox"] { flex: none; margin-top: .25rem; }
+.notebook-file-sync button { min-height: 2.25rem; padding: .4rem .75rem; margin: .3rem .3rem .1rem 0; border: 1px solid var(--line, #cbd5e1); border-radius: .45rem; background: var(--surface-solid, #fff); color: inherit; font: inherit; cursor: pointer; }
+.notebook-file-sync button:hover:not(:disabled) { border-color: var(--accent, #6366f1); }
+.notebook-file-sync button:disabled { opacity: .55; cursor: not-allowed; }
+.notebook-file-sync button:focus-visible, .notebook-file-sync summary:focus-visible { outline: 2px solid var(--accent, #6366f1); outline-offset: 2px; }
+.notebook-file-sync details { margin-top: .5rem; }
+.notebook-file-sync summary { cursor: pointer; }

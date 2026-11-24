@@ -1,0 +1,13 @@
+.build/
+launcher/shipping/
+launcher/sql-fixture-*/
+launcher/repair-orchestration-*/
+installer/out/
+installer/logs/
+installer/generated/
+installer/payload/
+installer/tool-state/
+__pycache__/
+*.pdb
+*.exe
+*.log

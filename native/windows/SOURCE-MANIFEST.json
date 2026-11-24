@@ -1,0 +1,168 @@
+{
+  "applicationVersion": "1.0.0",
+  "status": "source-only; native installer not released",
+  "files": [
+    {
+      "file": "assets/AgentOpsDeck.ico"
+    },
+    {
+      "file": "build-launcher.py"
+    },
+    {
+      "file": "control-source/codex-discovery.cjs"
+    },
+    {
+      "file": "control-source/desktop-launcher.cjs"
+    },
+    {
+      "file": "control-source/lifecycle.cjs"
+    },
+    {
+      "file": "control-source/startup-receipts.cjs"
+    },
+    {
+      "file": "control-source/startup-worker.cjs"
+    },
+    {
+      "file": "control-source/ui-config.cjs"
+    },
+    {
+      "file": "control-source/ui-dependencies.cjs"
+    },
+    {
+      "file": "control-source/ui-manager.cjs"
+    },
+    {
+      "file": "installer/VERSION-POLICY.json"
+    },
+    {
+      "file": "installer/build.py"
+    },
+    {
+      "file": "installer/packaging/AgentOpsDeck.iss"
+    },
+    {
+      "file": "installer/packaging/lifecycle.iss"
+    },
+    {
+      "file": "installer/packaging/payload-verification.iss"
+    },
+    {
+      "file": "installer/release-pins.json"
+    },
+    {
+      "file": "installer/release.py"
+    },
+    {
+      "file": "installer/test_release.py"
+    },
+    {
+      "file": "installer/test_revision12.py"
+    },
+    {
+      "file": "installer/test_scaffold.py"
+    },
+    {
+      "file": "installer/toolchain.py"
+    },
+    {
+      "file": "installer/upgrade-profiles/inno-2.4.8.0.json"
+    },
+    {
+      "file": "installer/upgrade-profiles/inno-2.4.8.17.json"
+    },
+    {
+      "file": "installer/verify_final.py"
+    },
+    {
+      "file": "launcher/AgentOpsDeck.manifest"
+    },
+    {
+      "file": "launcher/cli.cjs"
+    },
+    {
+      "file": "launcher/cli.test.cjs"
+    },
+    {
+      "file": "launcher/cli_uninstall.h"
+    },
+    {
+      "file": "launcher/codex-discovery.cjs"
+    },
+    {
+      "file": "launcher/desktop-launcher.cjs"
+    },
+    {
+      "file": "launcher/lifecycle.cjs"
+    },
+    {
+      "file": "launcher/management.h"
+    },
+    {
+      "file": "launcher/presentation.h"
+    },
+    {
+      "file": "launcher/private-path-check.c"
+    },
+    {
+      "file": "launcher/repair.cjs"
+    },
+    {
+      "file": "launcher/repair.orchestration.test.cjs"
+    },
+    {
+      "file": "launcher/repair.test.cjs"
+    },
+    {
+      "file": "launcher/repair_native.h"
+    },
+    {
+      "file": "launcher/repair_policy.h"
+    },
+    {
+      "file": "launcher/resources.res"
+    },
+    {
+      "file": "launcher/startup-receipts.cjs"
+    },
+    {
+      "file": "launcher/startup-worker.cjs"
+    },
+    {
+      "file": "launcher/test_native.c"
+    },
+    {
+      "file": "launcher/test_policy.c"
+    },
+    {
+      "file": "launcher/test_ui.c"
+    },
+    {
+      "file": "launcher/tray.c"
+    },
+    {
+      "file": "launcher/ui-config.cjs"
+    },
+    {
+      "file": "launcher/ui-dependencies.cjs"
+    },
+    {
+      "file": "launcher/ui-helper.cjs"
+    },
+    {
+      "file": "launcher/ui-manager.cjs"
+    },
+    {
+      "file": "launcher/ui_diagnostics.h"
+    },
+    {
+      "file": "launcher/ui_state.h"
+    },
+    {
+      "file": "test_build_launcher.py"
+    },
+    {
+      "file": "verify_build.py"
+    }
+  ]
+}

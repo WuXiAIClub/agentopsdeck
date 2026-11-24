@@ -1,0 +1,4 @@
+"NSLocalNetworkUsageDescription" = "After you enable LAN priority, connect to your configured AgentOpsDeck computer on the same Wi-Fi to load chats, download files and play video. Use your public server if unreachable.";
+"NSCameraUsageDescription" = "Take a photo or video only when you choose to capture and upload it.";
+"NSMicrophoneUsageDescription" = "Record audio only when you choose to record and upload a video with sound.";
+"NSPhotoLibraryAddUsageDescription" = "Save downloaded photos or videos to your library only when you choose to do so.";

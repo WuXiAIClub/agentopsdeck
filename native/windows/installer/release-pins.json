@@ -1,0 +1,9 @@
+{
+  "application_version": "2.4.6",
+  "archive_sha256": "68e297a6f55ae4751512af61b246e83c31c23af88fbcff1ea96aae424e5a3509",
+  "changed_file_manifest_sha256": "bbeed013daab9e7536befc60e62737df63cf676d4f3692df72fab68dedf2dd90",
+  "frozen_inventory_sha256": "24e730b2474d0625fd7aeece75a56211cc1234409e9b9e2bb04fea36723d138e",
+  "installer_revision": "2.4.6.12",
+  "overlay_manifest_sha256": "0bb573d490b99347737074f97b5b199571f447287c1285f98310e74e63c4ebf2",
+  "target_inventory_sha256": "576f9fdf723172975344e4100de7029f51280082897d2b9f9238d8d89609aedd"
+}

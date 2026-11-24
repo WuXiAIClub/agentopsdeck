@@ -1,0 +1,10 @@
+<resources>
+    <string name="cancel_downloads">Cancel download and pending save</string>
+    <string name="download_busy">Finish the current download or save first.</string>
+    <string name="download_checking">Checking download…</string>
+    <string name="download_failed">Download failed or exceeded the 64 MiB limit. Check login, network and file permissions, then retry.</string>
+    <string name="download_title">Download file?</string>
+    <string name="download_action">Download</string>
+    <string name="download_started">Downloading to private temporary storage…</string>
+    <string name="download_retention">Limit: 64 MiB, one download at a time. Choose where to save after download. Saved copies remain outside the app after logout; remove them yourself.</string>
+</resources>

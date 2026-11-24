@@ -1,0 +1,762 @@
+[
+  {
+    "path": "apps/server/tests/hub-user-onboarding.browser.mts",
+    "category": "isolated-runtime",
+    "reason": "Needs real isolated Hub/Connector/SQLite or verified candidate build; not admitted to component fixture slice."
+  },
+  {
+    "path": "apps/web/tests/access-keys.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/access-sharing.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/account-lifecycle.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic account lifecycle UI with mocked API, no-replay and identity epoch assertions; not real two-member Hub/Connector or full deployment acceptance."
+  },
+  {
+    "path": "apps/web/tests/admission-maintenance.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/artifact-download.browser.mjs",
+    "category": "isolated-runtime",
+    "reason": "Needs real isolated Hub/Connector/SQLite or verified candidate build; not admitted to component fixture slice."
+  },
+  {
+    "path": "apps/web/tests/assistant-output.browser.mjs",
+    "category": "isolated-runtime",
+    "reason": "Verified candidate web build with fenced synthetic APIs; desktop/mobile output integrity and recovery visibility, no business replay."
+  },
+  {
+    "path": "apps/web/tests/batch-recovery.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate for R11 batch recovery; needs per-entry traffic, fixture/import, timeout and cleanup audit before CI admission."
+  },
+  {
+    "path": "apps/web/tests/board-delegation.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/board-picker.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/board-sync-dialog.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/candidate-app-recovery.browser.mjs",
+    "category": "isolated-runtime",
+    "reason": "Compiled candidate application recovery module; requires a fixture-owned loopback Hub, private generated cookies, disabled native/providers, network fences and original process shutdown. Not a standalone component fixture or full Windows/product acceptance."
+  },
+  {
+    "path": "apps/web/tests/caption-names.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/caption-overflow.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/chat-auto-scroll.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/closeout-ui.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/command-recovery.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/completion-timing.browser.mjs",
+    "category": "isolated-runtime",
+    "reason": "Full synthetic desktop/mobile app with fenced loopback GET reads; verifies completion-event refresh, message/render barriers, duplicate and successor suppression against the candidate build."
+  },
+  {
+    "path": "apps/web/tests/composer-paste.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/connection-control-recovery.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Network-fenced actual HubConnectionsPanel and API fixture; verifies original control journal, query-only recovery and account/storage fences at desktop and narrow widths. Not part of generic CI subset."
+  },
+  {
+    "path": "apps/web/tests/dashboard-users.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/desktop-cache-lifecycle.browser.mjs",
+    "category": "benchmark",
+    "reason": "Temporary instrumented build/performance profile; separately review runtime/resource and baseline requirements."
+  },
+  {
+    "path": "apps/web/tests/desktop-chat-visibility.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Built-app synthetic Hub fixture for Classic and OS Desktop history visibility, live updates and Chat Studio restoration; loopback-only traffic with mocked APIs. Requires AOD_TEST_WEB_ROOT pointing to an isolated production build. Not admitted to the required component-only CI slice."
+  },
+  {
+    "path": "apps/web/tests/desktop-history-controller.browser.mjs",
+    "category": "ci-selected",
+    "reason": "Reviewed deterministic Chromium fixture; synthetic metadata or DOM only; required gate."
+  },
+  {
+    "path": "apps/web/tests/desktop-history-pane-motion.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/desktop-layout-performance.browser.mjs",
+    "category": "benchmark",
+    "reason": "Temporary instrumented build/performance profile; separately review runtime/resource and baseline requirements."
+  },
+  {
+    "path": "apps/web/tests/desktop-message-isolation.browser.mjs",
+    "category": "benchmark",
+    "reason": "Temporary instrumented build/performance profile; separately review runtime/resource and baseline requirements."
+  },
+  {
+    "path": "apps/web/tests/desktop-pane-isolation.browser.mjs",
+    "category": "benchmark",
+    "reason": "Temporary instrumented build/performance profile; separately review runtime/resource and baseline requirements."
+  },
+  {
+    "path": "apps/web/tests/display-layout.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/environment-agents.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/event-stream-recovery.browser.mjs",
+    "category": "isolated-runtime",
+    "reason": "Native EventSource controller-only acceptance against an owned fenced loopback listener; includes the real 45-second silent deadline, not full product/native Windows acceptance."
+  },
+  {
+    "path": "apps/web/tests/execution-setup.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/experience-platform.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/file-browser.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/file-cards.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/font-preferences.browser.mjs",
+    "category": "helper",
+    "reason": "Exported browser assertion helper, not a standalone acceptance runner."
+  },
+  {
+    "path": "apps/web/tests/gateway-status.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/git-tree.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/history-anchor-index.browser.mjs",
+    "category": "ci-selected",
+    "reason": "Reviewed deterministic Chromium fixture; synthetic metadata or DOM only; required gate."
+  },
+  {
+    "path": "apps/web/tests/history-backfill.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/history-calibration.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/history-read-scheduler.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/hub-codex.browser.mjs",
+    "category": "isolated-runtime",
+    "reason": "Needs real isolated Hub/Connector/SQLite or verified candidate build; not admitted to component fixture slice."
+  },
+  {
+    "path": "apps/web/tests/hub-maintenance.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/interaction-polish.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/issues.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/lazy-management.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/lifecycle-maintenance.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/live-polling.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/maintenance-recovery.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/markdown-reuse.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/media-library.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/message-admission.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/message-cache-refresh.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/message-classification.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/message-focus-icon.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/message-history.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/message-video.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/mobile-ui.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/module-load-recovery.browser.mjs",
+    "category": "isolated-runtime",
+    "reason": "Needs real isolated Hub/Connector/SQLite or verified candidate build; not admitted to component fixture slice."
+  },
+  {
+    "path": "apps/web/tests/notebook-archive-split.browser.mjs",
+    "category": "helper",
+    "reason": "Reusable archive splitter assertions imported by native/shared notebook fixtures; not a standalone browser entry."
+  },
+  {
+    "path": "apps/web/tests/notebook-completions.browser.mjs",
+    "category": "isolated-runtime",
+    "reason": "Requires disposable Hub/store/runtime and synthetic providers or built assets; not admitted to the selected CI component slice."
+  },
+  {
+    "path": "apps/web/tests/notebook-docking.browser.mjs",
+    "category": "helper",
+    "reason": "Exported browser assertion helper, not a standalone acceptance runner."
+  },
+  {
+    "path": "apps/web/tests/notebook-recovery.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Loopback-only real notebook component, injected editor/archive import and render failures, touch viewports, synthetic controller saves; no production requests."
+  },
+  {
+    "path": "apps/web/tests/notebook-text-appearance.browser.mjs",
+    "category": "helper",
+    "reason": "Exported browser assertion helper, not a standalone acceptance runner."
+  },
+  {
+    "path": "apps/web/tests/notebook-wrap.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/passkey-capacity.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/passkey-lifecycle.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/passkey-list-retry.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/passkey-registration-recovery.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/passkey-revocation.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/passkey-scope.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/preview-lifecycle.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/preview-retention.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/pwa-offline.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/queue-version.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/quick-chat-workspace.browser.mjs",
+    "category": "isolated-runtime",
+    "reason": "Requires disposable Hub/store/runtime and synthetic providers or built assets; not admitted to the selected CI component slice."
+  },
+  {
+    "path": "apps/web/tests/quick-chat.browser.mjs",
+    "category": "isolated-runtime",
+    "reason": "Requires disposable Hub/store/runtime and synthetic providers or built assets; not admitted to the selected CI component slice."
+  },
+  {
+    "path": "apps/web/tests/reading-notebook.browser.mjs",
+    "category": "helper",
+    "reason": "Reusable reading-notebook assertions imported by isolated reading fixtures; not a standalone CI entry."
+  },
+  {
+    "path": "apps/web/tests/recovery-i18n.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/render-recovery.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/resource-content.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/resource-toolbar.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/session-automation.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/session-background-waiting.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/session-card-model.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/session-colors.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/session-compact.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/session-create.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/session-delete.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/session-fault-isolation.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate for session fault isolation; needs per-entry traffic, fixture/import, timeout and cleanup audit before CI admission."
+  },
+  {
+    "path": "apps/web/tests/session-files.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/session-goal-continuous.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Network-fenced production UI fixture for continuous Goal, previous-turn history errors, protected sending and retained drafts. Requires an explicit candidate web build and Playwright/Chromium; independently accepted at desktop and narrow widths, not admitted to the generic CI subset."
+  },
+  {
+    "path": "apps/web/tests/session-goal-control.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/session-goal-waiting.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/session-guidance.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/session-insights.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/session-interaction-compatibility.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/session-list-quick-message.browser.mjs",
+    "category": "isolated-runtime",
+    "reason": "Needs real isolated Hub/Connector/SQLite or verified candidate build; not admitted to component fixture slice."
+  },
+  {
+    "path": "apps/web/tests/session-message-pursuit.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/session-multipane.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/session-notebook.browser.mjs",
+    "category": "isolated-runtime",
+    "reason": "Needs real isolated Hub/Connector/SQLite or verified candidate build; not admitted to component fixture slice."
+  },
+  {
+    "path": "apps/web/tests/session-peek-workspace.browser.mjs",
+    "category": "isolated-runtime",
+    "reason": "Needs real isolated Hub/Connector/SQLite or verified candidate build; not admitted to component fixture slice."
+  },
+  {
+    "path": "apps/web/tests/session-polish.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/session-recovery-visibility.browser.mjs",
+    "category": "isolated-runtime",
+    "reason": "Verified candidate web build with fenced synthetic APIs; abnormal-only recovery controls and unchanged normal processing."
+  },
+  {
+    "path": "apps/web/tests/session-runtime-experience.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/session-settings-order.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/session-settings.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/session-subagents.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/shared-content.browser.mjs",
+    "category": "isolated-runtime",
+    "reason": "Requires disposable Hub/store/runtime and synthetic providers or built assets; not admitted to the selected CI component slice."
+  },
+  {
+    "path": "apps/web/tests/shared-grants.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/shared-request-recovery.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Real component/sessionStorage recovery with original-only GET and exact synthetic recovery POST; malformed proof and lost ACK; isolated browser network fence."
+  },
+  {
+    "path": "apps/web/tests/shared-scope.browser.mjs",
+    "category": "isolated-runtime",
+    "reason": "Requires disposable Hub/store/runtime and synthetic providers or built assets; not admitted to the selected CI component slice."
+  },
+  {
+    "path": "apps/web/tests/shared-session-address.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/shared-session-live.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/snapshot-order.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/source-preview.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/startup-auth-recovery.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Production build with synthetic auth status; explicit readonly retry retains Cookie and saved view, no auth/business writes, isolated network fence."
+  },
+  {
+    "path": "apps/web/tests/synthesis-actions.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/system-metrics.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/task-metadata.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/task-session.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/token-usage.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/tool-preparation.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/tool-timeline.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/transcript-performance.browser.mjs",
+    "category": "benchmark",
+    "reason": "Temporary instrumented build/performance profile; separately review runtime/resource and baseline requirements."
+  },
+  {
+    "path": "apps/web/tests/ui-closeout.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/usage-aggregation.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/weixin-settings.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/workspace-article-reading.browser.mjs",
+    "category": "isolated-runtime",
+    "reason": "Requires disposable Hub/store/runtime and synthetic providers or built assets; not admitted to the selected CI component slice."
+  },
+  {
+    "path": "apps/web/tests/workspace-binding-drop.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/browser candidate; needs per-entry network fence, fixture/build, timeout and cleanup review before CI admission."
+  },
+  {
+    "path": "apps/web/tests/workspace-binding-lines.browser.mjs",
+    "category": "ci-selected",
+    "reason": "Reviewed deterministic Chromium fixture; synthetic metadata or DOM only; required gate."
+  },
+  {
+    "path": "apps/web/tests/workspace-board-binding.browser.mjs",
+    "category": "isolated-runtime",
+    "reason": "Needs real isolated Hub/Connector/SQLite or verified candidate build; not admitted to component fixture slice."
+  },
+  {
+    "path": "apps/web/tests/workspace-browser.browser.mjs",
+    "category": "isolated-runtime",
+    "reason": "Needs real isolated Hub/Connector/SQLite or verified candidate build; not admitted to component fixture slice."
+  },
+  {
+    "path": "apps/web/tests/workspace-capacity.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/workspace-drawing.browser.mjs",
+    "category": "isolated-runtime",
+    "reason": "Needs real isolated Hub/Connector/SQLite or verified candidate build; not admitted to component fixture slice."
+  },
+  {
+    "path": "apps/web/tests/workspace-drawio-selfhost.browser.mjs",
+    "category": "external-opt-in",
+    "reason": "Requires operator-supplied editor webapp and isolated HTTPS setup; not supplied in CI."
+  },
+  {
+    "path": "apps/web/tests/workspace-drawio-upstream.browser.mjs",
+    "category": "external-opt-in",
+    "reason": "Explicit public upstream editor opt-in; excluded by no-external-traffic policy."
+  },
+  {
+    "path": "apps/web/tests/workspace-file-board.browser.mjs",
+    "category": "isolated-runtime",
+    "reason": "Needs real isolated Hub/Connector/SQLite or verified candidate build; not admitted to component fixture slice."
+  },
+  {
+    "path": "apps/web/tests/workspace-file-card.browser.mjs",
+    "category": "isolated-runtime",
+    "reason": "Needs real isolated Hub/Connector/SQLite or verified candidate build; not admitted to component fixture slice."
+  },
+  {
+    "path": "apps/web/tests/workspace-free-layout.browser.mjs",
+    "category": "isolated-runtime",
+    "reason": "Needs real isolated Hub/Connector/SQLite or verified candidate build; not admitted to component fixture slice."
+  },
+  {
+    "path": "apps/web/tests/workspace-metric-card.browser.mjs",
+    "category": "isolated-runtime",
+    "reason": "Needs real isolated Hub/Connector/SQLite or verified candidate build; not admitted to component fixture slice."
+  },
+  {
+    "path": "apps/web/tests/workspace-multi-reading.browser.mjs",
+    "category": "isolated-runtime",
+    "reason": "Requires disposable Hub/store/runtime and synthetic providers or built assets; not admitted to the selected CI component slice."
+  },
+  {
+    "path": "apps/web/tests/workspace-native-drawio.browser.mjs",
+    "category": "isolated-runtime",
+    "reason": "Needs real isolated Hub/Connector/SQLite or verified candidate build; not admitted to component fixture slice."
+  },
+  {
+    "path": "apps/web/tests/workspace-polish.browser.mjs",
+    "category": "isolated-runtime",
+    "reason": "Needs real isolated Hub/Connector/SQLite or verified candidate build; not admitted to component fixture slice."
+  },
+  {
+    "path": "apps/web/tests/workspace-polling.browser.mjs",
+    "category": "fixture-candidate",
+    "reason": "Synthetic UI/controller candidate; not run here. Needs per-entry traffic, fixture/import, timeout and cleanup audit before admission."
+  },
+  {
+    "path": "apps/web/tests/workspace-remote.browser.mjs",
+    "category": "isolated-runtime",
+    "reason": "Needs real isolated Hub/Connector/SQLite or verified candidate build; not admitted to component fixture slice."
+  },
+  {
+    "path": "apps/web/tests/workspace-research.browser.mjs",
+    "category": "isolated-runtime",
+    "reason": "Needs real isolated Hub/Connector/SQLite or verified candidate build; not admitted to component fixture slice."
+  },
+  {
+    "path": "apps/web/tests/workspace-taskboard-autosave.browser.mjs",
+    "category": "isolated-runtime",
+    "reason": "Requires disposable Hub/store/runtime and synthetic providers or built assets; not admitted to the selected CI component slice."
+  },
+  {
+    "path": "apps/web/tests/workspace-taskboard.browser.mjs",
+    "category": "isolated-runtime",
+    "reason": "Needs real isolated Hub/Connector/SQLite or verified candidate build; not admitted to component fixture slice."
+  },
+  {
+    "path": "apps/web/tests/workspace-terminal.browser.mjs",
+    "category": "isolated-runtime",
+    "reason": "Needs real isolated Hub/Connector/SQLite or verified candidate build; not admitted to component fixture slice."
+  },
+  {
+    "path": "apps/web/tests/workspace-website.browser.mjs",
+    "category": "isolated-runtime",
+    "reason": "Needs real isolated Hub/Connector/SQLite or verified candidate build; not admitted to component fixture slice."
+  }
+]

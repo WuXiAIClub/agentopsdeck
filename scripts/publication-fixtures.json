@@ -1,0 +1,212 @@
+[
+  {
+    "path": "apps/android/app/src/test/java/com/agentopsdeck/ServerAddressTest.java",
+    "category": "credential-url",
+    "sha256": "c6ec0ad656ab6eecde5f88444dc926e2a90520e021f745dcb6be8089868f3e06",
+    "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
+  },
+  {
+    "path": "apps/ios/Tests/ConnectionRouterTests.swift",
+    "category": "credential-url",
+    "sha256": "bbeb083682eec8c20f60065a69858dc4e07cd1dceb04fe8ec0093218abea50c6",
+    "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
+  },
+  {
+    "path": "apps/ios/Tests/EndpointTests.swift",
+    "category": "credential-url",
+    "sha256": "3fc13763daa69c47fb7c1faa394560fdef1039931491649af16f069b8fd68cf7",
+    "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
+  },
+  {
+    "path": "apps/ios/scripts/resource-routing.test.mjs",
+    "category": "credential-url",
+    "sha256": "ec29ee1356083db2182db30ad18a1d200ae3f1a8c77f3ad6d81c499ac90bd9d0",
+    "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
+  },
+  {
+    "path": "apps/server/src/claude/config.test.ts",
+    "category": "credential-url",
+    "sha256": "91765478d87fda26a81ad189ca566092653faae2ba87b3cc11c12ca207b0ee67",
+    "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
+  },
+  {
+    "path": "apps/server/src/codex/provider-model-catalog.test.ts",
+    "category": "credential-url",
+    "sha256": "af02857d7519e575400df6aeb03a24252909db22530be5b76ecf3ae04f840233",
+    "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
+  },
+  {
+    "path": "apps/server/src/codex/tool-image-compat.test.ts",
+    "category": "credential-url",
+    "sha256": "e19b6d856c6e6c74df742a5ddc2923f82ddff21b370d3517fd9186cddcaeecd7",
+    "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
+  },
+  {
+    "path": "apps/server/src/connector/issue-sources.test.ts",
+    "category": "credential-url",
+    "sha256": "f67b9ebe0c630fb36be2428968252be7818da32f1d31bc918837a911379cfba9",
+    "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
+  },
+  {
+    "path": "apps/server/src/connector/websites-http.test.ts",
+    "category": "credential-url",
+    "sha256": "1d12c9672df482bbb2b4845ac75e002ddcfbc2f3dff1ce6af3251616d3a43d23",
+    "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
+  },
+  {
+    "path": "apps/server/src/connector/workspace-file-card.test.ts",
+    "category": "credential-url",
+    "sha256": "e3ac42987b63e4457bde1dbfc89556fa2b79ac27977ce1dedafab1270a76fa54",
+    "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
+  },
+  {
+    "path": "apps/server/src/hub/lifecycle-commands.test.ts",
+    "category": "credential-url",
+    "sha256": "6e00d791550f047c080db1fdbfae9877d536124a9cbd8ee1bb386da68489ccd0",
+    "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
+  },
+  {
+    "path": "apps/server/src/hub/member-owner-execution-issuers.test.ts",
+    "category": "credential-url",
+    "sha256": "44a185e1425cc3ab4174cc5ca839b11748c39d184b44e0b37e346c6570f85c57",
+    "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
+  },
+  {
+    "path": "apps/server/src/hub/member-owner-maintenance.test.ts",
+    "category": "credential-url",
+    "sha256": "c7385e1a15c2aeb341a31b6d4664090e69b7c60b138364acfa5962bc2ce003c7",
+    "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
+  },
+  {
+    "path": "apps/server/src/hub/website-gateway.test.ts",
+    "category": "credential-url",
+    "sha256": "6c085fb1b6ee8172c7803135826ec9d469044b45534c2d2361fe7f48a8750b4f",
+    "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
+  },
+  {
+    "path": "apps/server/src/hub/workspace-board-bindings.test.ts",
+    "category": "credential-url",
+    "sha256": "5d3925f1b3a7191a6e484a7476344c5a4058aa3a68f21b1f0aad79b8e5f9f43c",
+    "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
+  },
+  {
+    "path": "apps/server/src/hub/workspace-browser.test.ts",
+    "category": "credential-url",
+    "sha256": "78f279b6c89b6ddec8eba7b58eff6b4968f83a514fbd4dfdc3199be4c7519eab",
+    "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
+  },
+  {
+    "path": "apps/server/src/hub/workspace-reader.test.ts",
+    "category": "credential-url",
+    "sha256": "6801f3aaeb2757726cd6ddb682925ca349f34cd34ba78da0b8eb320ab20c366e",
+    "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
+  },
+  {
+    "path": "apps/server/src/hub/workspace-research.test.ts",
+    "category": "credential-url",
+    "sha256": "e0dae9e3de959a0fbad409c656359fa18a4ce2bae441a0c831b6548ffcf73c01",
+    "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
+  },
+  {
+    "path": "apps/server/src/hub/workspace-search-provider.test.ts",
+    "category": "credential-url",
+    "sha256": "3f8844e4d8c3513a8183a9bb34a8a02e14171dcac2de1a0968e4a1d534914006",
+    "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
+  },
+  {
+    "path": "apps/server/src/hub/workspace-synthesis.test.ts",
+    "category": "credential-url",
+    "sha256": "1eaaa892a59ffc03c4b73f572c05c768ec837f350fe5fca658ff15ac2b7706c8",
+    "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
+  },
+  {
+    "path": "apps/server/src/lifecycle/maintenance-connector-client.test.ts",
+    "category": "credential-url",
+    "sha256": "3ff826a6129c7385786eda8324c0ecdb504bd34db3dcbe750718765a0796a945",
+    "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
+  },
+  {
+    "path": "apps/server/src/tools/workspace-board-cli.test.ts",
+    "category": "credential-url",
+    "sha256": "55968432fca2434b1cd163871da50ef3408fd3274cf379645f5e80b9409ea296",
+    "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
+  },
+  {
+    "path": "apps/server/src/web-bundle.test.ts",
+    "category": "credential-url",
+    "sha256": "89bfc3fbe8a7925cce25992993a43b80493e071fca93b00f6c9f000e41845dab",
+    "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
+  },
+  {
+    "path": "apps/web/src/lib/api-base.test.ts",
+    "category": "credential-url",
+    "sha256": "82ed575de6dec10efff9b23ba97c9ee68c27cc66b6225980feb5b8f82553a26d",
+    "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
+  },
+  {
+    "path": "apps/web/src/lib/resource-url.test.ts",
+    "category": "credential-url",
+    "sha256": "c6596e1805a3b3ff33205cd8a0ec3f69074b8d8af5ab39d0ee4388478d144097",
+    "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
+  },
+  {
+    "path": "apps/web/src/lib/workspace-browser.test.ts",
+    "category": "credential-url",
+    "sha256": "517445a8cfe5a2ef45de6e111d1c9893bf0d2e61e6c0cfb5c1bf489739c9675f",
+    "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
+  },
+  {
+    "path": "apps/web/src/lib/workspace-native-drawio.test.ts",
+    "category": "credential-url",
+    "sha256": "e55b9286550beaa760d6753ba22b016a0e926456477db7cf30762a345a3a62fc",
+    "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
+  },
+  {
+    "path": "apps/web/src/lib/workspace-website.test.ts",
+    "category": "credential-url",
+    "sha256": "f56bf71ef131a88e1e4ceff2dee53803b4b452fb3ff97dbcdcc20d8ccd67e7f7",
+    "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
+  },
+  {
+    "path": "scripts/ci-browser-network.test.mjs",
+    "category": "credential-url",
+    "sha256": "ea3df8444c00b02ffdf947333c2a55846ceacbe1fb6d1b5ecb36cb791dfb3fb1",
+    "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
+  },
+  {
+    "path": "scripts/lib/permissions-joint-mode.test.mjs",
+    "category": "credential-url",
+    "sha256": "672eaeea7b762e5da6780118aaa3064c33b3534e81cb1474e2a0050a91a988c7",
+    "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
+  },
+  {
+    "path": "scripts/lib/sdk-litellm-settings.test.mjs",
+    "category": "credential-url",
+    "sha256": "f95b51395d3b5bb0c70f784717c4df0aa34def7425ee877fced60e9c03a99971",
+    "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
+  },
+  {
+    "path": "scripts/observe-local-maintenance.test.mjs",
+    "category": "credential-url",
+    "sha256": "76dd076c01e215247f1a645cbaebeb91cb2922d6912f51114cfc20f5c77a8efd",
+    "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
+  },
+  {
+    "path": "scripts/prepare-connector-main.test.mjs",
+    "category": "credential-url",
+    "sha256": "275caadc9bd28e6419e53f1754729c58f8a35a1055244cf385690861f482636e",
+    "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
+  },
+  {
+    "path": "scripts/reconcile-local-maintenance.test.mjs",
+    "category": "credential-url",
+    "sha256": "4c3617acb2833d18e04ec2bb1bcde2b86b3ad1aff4555a6adbc9fe7186419bb2",
+    "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
+  },
+  {
+    "path": "scripts/verify-candidate-http-codex-stop-proof.test.mjs",
+    "category": "credential-url",
+    "sha256": "401b7440db1f4e7e380bcb2d77fcc4e261e097bb29970ad72ed26839c7020d33",
+    "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
+  }
+]

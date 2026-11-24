@@ -1,0 +1,124 @@
+{
+  "date": "2026-09-15T07:05:15.137Z",
+  "node": "v22.22.1",
+  "gcExposed": true,
+  "notes": "Loopback, one node/session, 256-byte ASCII messages, 100ms fixture heartbeat; no production runtime/files/config.",
+  "results": [
+    {
+      "mode": "local",
+      "browsers": 1,
+      "samples": 100,
+      "snapshotRpcMs": { "p50": 0.19, "p95": 0.3 },
+      "browserAckMs": { "p50": 1.717, "p95": 2.756 },
+      "browserFinalMsIncluding4msFakeWork": { "p50": 5.624, "p95": 6.944 },
+      "elapsedMs": 582.5,
+      "parentCpuMs": 378.239,
+      "workerCpuMs": null,
+      "parentRssDeltaBytes": 9949184,
+      "workerRssDeltaBytes": null,
+      "upstreamStreams": 1,
+      "upstreamEventBytes": 77332,
+      "deliveredEvents": 300,
+      "eventLoopP99Ms": 11.485,
+      "idle500ms": {
+        "extraRequests": 0,
+        "parentCpuMs": 1.037,
+        "workerCpuMs": null
+      },
+      "churn300": {
+        "parentHeapDeltaBytes": 448408,
+        "streams": 0,
+        "timers": 0,
+        "opened": 301,
+        "closed": 301
+      }
+    },
+    {
+      "mode": "local",
+      "browsers": 16,
+      "samples": 100,
+      "snapshotRpcMs": { "p50": 0.197, "p95": 0.299 },
+      "browserAckMs": { "p50": 2.865, "p95": 5.083 },
+      "browserFinalMsIncluding4msFakeWork": { "p50": 6.9, "p95": 8.594 },
+      "elapsedMs": 712.1,
+      "parentCpuMs": 735.631,
+      "workerCpuMs": null,
+      "parentRssDeltaBytes": 19529728,
+      "workerRssDeltaBytes": null,
+      "upstreamStreams": 1,
+      "upstreamEventBytes": 77345,
+      "deliveredEvents": 4800,
+      "eventLoopP99Ms": 12.837,
+      "idle500ms": {
+        "extraRequests": 0,
+        "parentCpuMs": 0.806,
+        "workerCpuMs": null
+      },
+      "churn300": {
+        "parentHeapDeltaBytes": -173040,
+        "streams": 0,
+        "timers": 0,
+        "opened": 301,
+        "closed": 301
+      }
+    },
+    {
+      "mode": "http",
+      "browsers": 1,
+      "samples": 100,
+      "snapshotRpcMs": { "p50": 0.52, "p95": 0.622 },
+      "browserAckMs": { "p50": 2.382, "p95": 3.761 },
+      "browserFinalMsIncluding4msFakeWork": { "p50": 6.27, "p95": 7.059 },
+      "elapsedMs": 629.3,
+      "parentCpuMs": 385.912,
+      "workerCpuMs": 125.067,
+      "parentRssDeltaBytes": 3932160,
+      "workerRssDeltaBytes": 561152,
+      "upstreamStreams": 1,
+      "upstreamEventBytes": 77332,
+      "deliveredEvents": 300,
+      "eventLoopP99Ms": 10.625,
+      "idle500ms": {
+        "extraRequests": 0,
+        "parentCpuMs": 1.194,
+        "workerCpuMs": 1.584
+      },
+      "churn300": {
+        "parentHeapDeltaBytes": -650440,
+        "streams": 0,
+        "timers": 0,
+        "opened": 301,
+        "closed": 301
+      }
+    },
+    {
+      "mode": "http",
+      "browsers": 16,
+      "samples": 100,
+      "snapshotRpcMs": { "p50": 0.545, "p95": 0.731 },
+      "browserAckMs": { "p50": 3.698, "p95": 6.205 },
+      "browserFinalMsIncluding4msFakeWork": { "p50": 7.452, "p95": 9.805 },
+      "elapsedMs": 779.3,
+      "parentCpuMs": 766.901,
+      "workerCpuMs": 154.201,
+      "parentRssDeltaBytes": 3014656,
+      "workerRssDeltaBytes": 1527808,
+      "upstreamStreams": 1,
+      "upstreamEventBytes": 77358,
+      "deliveredEvents": 4800,
+      "eventLoopP99Ms": 11.338,
+      "idle500ms": {
+        "extraRequests": 0,
+        "parentCpuMs": 1.031,
+        "workerCpuMs": 2.843
+      },
+      "churn300": {
+        "parentHeapDeltaBytes": 170624,
+        "streams": 0,
+        "timers": 0,
+        "opened": 301,
+        "closed": 301
+      }
+    }
+  ]
+}

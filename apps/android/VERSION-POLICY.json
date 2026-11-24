@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "platform": "android",
+  "coreSourceVersion": "1.0.0",
+  "wrapperVersion": "0.2.3",
+  "wrapperBuild": "13",
+  "status": "historical-source-scaffold",
+  "releaseApproved": false,
+  "sealedCore": null,
+  "policyEnglish": "Native wrapper/build versions are independent of AOD core. Existing values are historical source identifiers, not accepted AOD artifacts. Never infer bundled core from wrapper versions or import upstream version/history/configuration. A future release must use a reviewed monotonic native build identifier and seal exact core commit/version, wrapper inputs, dependency locks, payload hashes and notices together. Signing, device/install/upgrade/uninstall acceptance, inherited-source rights and explicit release authorization remain required.",
+  "policyChinese": "原生包装器和构建版本独立于 AOD 核心。现有值仅标识历史源码脚手架，不代表已验收的 AOD 产物。不得由包装器版本推断内嵌核心，也不得导入上游版本、历史或配置。未来发布需采用经审查的单调递增原生构建标识，并绑定准确的核心提交与版本、包装器输入、依赖锁、载荷哈希及声明。签名、设备与安装升级卸载验收、继承源码权利及明确发布授权仍为必需条件。"
+}

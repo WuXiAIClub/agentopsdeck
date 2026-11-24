@@ -1,0 +1,160 @@
+import { resourceCaption } from './resource-caption.mjs';
+// Real isolated Hub -> authenticated Connector -> PTY. No production data/keys.
+import assert from 'node:assert/strict';
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { once } from 'node:events';
+import { pathToFileURL } from 'node:url';
+import { createRequire } from 'node:module';
+import { HubStore } from '../../server/src/hub/hub-store.ts';
+import { ConnectorTokenStore } from '../../server/src/auth/connector-token.ts';
+import { ConnectorClient } from '../../server/src/hub/connector-client.ts';
+import { registerConnectorTerminals } from '../../server/src/connector/terminals-http.ts';
+import { spawnTerminal } from '../../server/src/connector/terminals.ts';
+import { loadConfig } from '../../server/src/config.ts';
+import { registerHubRoutes } from '../../server/src/routes/hub.ts';
+import { presetWorkspace } from '../src/lib/workspace-layout.ts';
+import { layoutSnapshot } from '../src/lib/current-layout.ts';
+import { CONNECTOR_PROTOCOL, CONNECTOR_PROTOCOL_HEADER } from '../../../packages/shared/dist/index.js';
+const require = createRequire(new URL('../../server/package.json', import.meta.url));
+const { Hono } = require('hono'), { serve } = require('@hono/node-server'), { serveStatic } = require('@hono/node-server/serve-static');
+const { chromium } = await import(pathToFileURL(process.env.AOD_TEST_PLAYWRIGHT).href);
+const directory = await mkdtemp(join(tmpdir(), 'agentopsdeck-terminal-browser-'));
+const hub = new HubStore(join(directory, 'hub.sqlite'), 'synthetic'), principal = { userId: 'default', admin: true };
+const tokens = new ConnectorTokenStore(join(directory, 'tokens.json')), token = tokens.createTransient(['terminals:use'], 'terminal-test');
+const connector = new Hono(), errors = [], forbidden = [], calls = [];
+let starts = 0, kills = 0, catalogMode = 'real', failedStarts = 0, rejectStart = false;
+connector.use('*', async (c, next) => { c.header(CONNECTOR_PROTOCOL_HEADER, String(CONNECTOR_PROTOCOL.max)); await next(); });
+const terminals = registerConnectorTerminals(connector, tokens, [{ id: 'shell', label: 'Isolated shell', tokenIds: ['terminal-test'], kind: 'local', executable: '/bin/sh', args: ['-i'], cwd: directory, home: directory, path: '/usr/bin:/bin' }], async (...args) => {
+  starts++; const pty = await spawnTerminal(...args), kill = pty.kill.bind(pty); pty.kill = () => { kills++; kill(); }; return pty;
+});
+hub.upsertConnection({ id: 'fixture', label: 'Fixture', connectorUrl: 'http://fixture', ownerUserId: 'default' });
+const app = new Hono();
+app.use('*', async (c, next) => { if (c.req.path.includes('/terminals')) calls.push(`${c.req.method} ${c.req.path}`); await next(); });
+const routes = registerHubRoutes(app, { config: loadConfig({ HOME: directory, AOD_SERVER_ROLE: 'hub' }), hubStore: hub,
+  principal: () => principal, normalizeError: () => 'Synthetic', connectorClient: () => new ConnectorClient('http://fixture', token.token, req => connector.fetch(req)) });
+hub.layouts.save('default', 'current', { revision: 0, content: JSON.stringify(layoutSnapshot(presetWorkspace([{ id: 'terminal-pane', kind: 'terminal', resourceId: 'catalog' }], 'single'), new Set())) });
+app.use('/*', serveStatic({ root: 'apps/web/dist' }));
+const server = serve({ fetch: app.fetch, hostname: '127.0.0.1', port: 0 }); if (!server.listening) await once(server, 'listening');
+let browser;
+try {
+  const origin = `http://127.0.0.1:${server.address().port}`;
+  browser = await chromium.launch({ executablePath: process.env.AOD_TEST_CHROMIUM, headless: true });
+  const context = await browser.newContext({ viewport: { width: 1280, height: 960 }, serviceWorkers: 'block' });
+  await context.addInitScript(() => {
+    localStorage.setItem('agentopsdeck.locale', 'en');
+    window.EventSource = class extends EventTarget { readyState = 1; static OPEN = 1; constructor() { super(); queueMicrotask(() => this.onopen?.(new Event('open'))); } close() { this.readyState = 2; } };
+  });
+  await context.route('**/*', async route => {
+    const req = route.request(), url = new URL(req.url());
+    if (url.origin !== origin) { forbidden.push(req.url()); return route.abort(); }
+    if (!url.pathname.startsWith('/api/')) return route.continue();
+    if (rejectStart && url.pathname.endsWith('/terminals') && req.method() === 'POST') {
+      failedStarts++; return route.fulfill({ status: 502, json: { error: 'Synthetic unknown startup' } });
+    }
+    if (url.pathname.endsWith('/terminals/targets') && catalogMode !== 'real') {
+      if (catalogMode === 'denied') return route.fulfill({ status: 403, json: { error: 'Synthetic denial' } });
+      if (catalogMode === 'offline') return route.fulfill({ status: 502, json: { error: 'Synthetic outage' } });
+      const local = { id: 'shell', label: 'Isolated shell', kind: 'local' }, ssh = { id: 'remote', label: 'Optional SSH', kind: 'ssh' };
+      return route.fulfill({ json: { targets: catalogMode === 'empty' ? [] : catalogMode === 'ssh' ? [ssh] : [ssh, local] } });
+    }
+    if (url.pathname.startsWith('/api/hub/v1/workspace/') || url.pathname.startsWith('/api/hub/v1/notebooks') || url.pathname.includes('/terminals')) return route.continue();
+    const json = value => route.fulfill({ json: value });
+    if (req.method() !== 'GET') { forbidden.push(`${req.method()} ${url.pathname}`); return route.abort(); }
+    if (url.pathname === '/api/auth/status') return json({ authenticated: true, recoveryScope: hub.identities.recoveryScope(principal), passkeys: { available: false, count: 0 } });
+    if (url.pathname.endsWith('/sessions/state')) return json({ revision: '1', groups: [] });
+    if (url.pathname === '/api/agents') return json({ agents: [] });
+    if (url.pathname === '/api/gateway/status') return json({ connected: true });
+    if (url.pathname === '/api/hub/v1/connections') return json({ connections: [{ id: 'fixture', label: 'Fixture', status: 'ready', kind: 'remote' }] });
+    return route.fulfill({ status: 404, json: {} });
+  });
+  const page = await context.newPage(); page.setDefaultTimeout(12000); page.on('pageerror', e => errors.push(e.message));
+  await page.goto(origin); const panel = page.getByRole('region', { name: 'Connector terminal', exact: true }); await panel.waitFor();
+  assert.equal(starts, 0, 'restoring layout never starts a process');
+  await (await resourceCaption(panel)).getByText('Not started', { exact: true }).waitFor();
+  await (await resourceCaption(panel)).getByLabel('Choose a Connector', { exact: true }).selectOption('fixture');
+  assert.equal(await panel.locator('header strong').count(), 0, 'setup reuses its header for the Connector selector, not a repeated card title');
+  await panel.getByText('Runs directly on the selected Connector, not on the Hub or through SSH.').waitFor();
+  assert.equal(await panel.getByLabel('Execution location', { exact: true }).count(), 0, 'one local shell needs no extra target selection');
+  assert.equal(await (await resourceCaption(panel)).getByRole('button', { name: 'Start terminal', exact: true }).isDisabled(), false);
+  await panel.getByText('Connecting allows commands and file changes as the configured OS user. This is not a sandbox.').waitFor();
+  assert.equal(await panel.locator('.workspace-terminal-screen').getAttribute('inert'), '', 'inactive emulator does not capture keyboard focus');
+  assert.equal(await panel.getByRole('checkbox', { name: 'Reconnect after page refresh' }).isChecked(), true);
+  await page.screenshot({ path: process.env.AOD_TERMINAL_SETUP_SCREENSHOT || join(directory, 'setup.png') });
+  await panel.getByRole('button', { name: 'Connect terminal', exact: true }).click();
+  await (await resourceCaption(panel)).getByText('Connected', { exact: true }).waitFor(); assert.equal(starts, 1);
+  assert.equal(await panel.locator('.workspace-terminal-screen').getAttribute('inert'), null);
+  await panel.locator('.xterm-helper-textarea').focus();
+  await page.keyboard.type("printf 'BROWSER_PTY_%s\\n' VERIFIED"); await page.keyboard.press('Enter');
+  await page.waitForFunction(() => document.querySelector('.xterm-screen')?.textContent?.includes('BROWSER_PTY_VERIFIED'));
+  await page.setViewportSize({ width: 1050, height: 720 }); await page.waitForTimeout(300);
+  assert.ok(calls.some(c => c.endsWith('/resize')));
+  await (await resourceCaption(panel)).getByRole('button', { name: 'Stop', exact: true }).click();
+  await (await resourceCaption(panel)).getByText('Disconnected', { exact: true }).waitFor(); await page.waitForTimeout(200); assert.ok(kills >= 1);
+  const count = calls.length; await page.waitForTimeout(600); assert.equal(calls.length, count, 'stopped terminal does not poll');
+  await (await resourceCaption(panel)).getByRole('button', { name: 'Start terminal', exact: true }).click(); await (await resourceCaption(panel)).getByText('Connected', { exact: true }).waitFor();
+  const inputCalls = calls.filter(c => c.endsWith('/input')).length;
+  assert.equal(starts, 2); await page.reload(); await panel.waitFor();
+  await (await resourceCaption(panel)).getByText('Connected', { exact: true }).waitFor();
+  assert.equal(starts, 3, 'opted-in page refresh starts exactly one NEW shell');
+  assert.equal(calls.filter(c => c.endsWith('/input')).length, inputCalls, 'refresh never replays terminal input');
+  assert.ok(kills >= 2, 'reload disconnect terminates old PTY');
+  assert.ok(!await panel.locator('.xterm-screen').textContent().then(text => text?.includes('BROWSER_PTY_VERIFIED')), 'new terminal does not restore old output');
+  await (await resourceCaption(panel)).getByRole('button', { name: 'Stop', exact: true }).click();
+  await page.reload(); await panel.getByRole('button', { name: 'Connect terminal', exact: true }).waitFor();
+  assert.equal(starts, 3, 'stopped cards restore configuration without auto-start');
+  assert.equal(await (await resourceCaption(panel)).getByLabel('Choose a Connector', { exact: true }).inputValue(), 'fixture');
+  await panel.getByRole('checkbox', { name: 'Reconnect after page refresh' }).uncheck();
+  await panel.getByRole('button', { name: 'Connect terminal', exact: true }).click();
+  await (await resourceCaption(panel)).getByText('Connected', { exact: true }).waitFor();
+  await page.reload(); await panel.getByRole('button', { name: 'Connect terminal', exact: true }).waitFor();
+  assert.equal(starts, 4, 'opt-out prevents auto-start after refresh');
+  assert.equal(await panel.getByRole('checkbox', { name: 'Reconnect after page refresh' }).isChecked(), false);
+  await panel.getByRole('checkbox', { name: 'Reconnect after page refresh' }).check();
+  await panel.getByRole('button', { name: 'Connect terminal', exact: true }).click();
+  await (await resourceCaption(panel)).getByText('Connected', { exact: true }).waitFor();
+  rejectStart = true;
+  await page.reload(); await panel.getByRole('alert').filter({ hasText: 'Terminal startup was not confirmed' }).waitFor();
+  assert.equal(failedStarts, 1);
+  await page.waitForTimeout(600); await page.reload();
+  await panel.getByRole('button', { name: 'Connect terminal', exact: true }).waitFor();
+  assert.equal(failedStarts, 1, 'unconfirmed auto-start is not retried even by another refresh');
+  rejectStart = false;
+  await panel.getByRole('button', { name: 'Connect terminal', exact: true }).click();
+  await (await resourceCaption(panel)).getByText('Connected', { exact: true }).waitFor();
+  catalogMode = 'denied';
+  await page.reload();
+  await panel.getByRole('alert').filter({ hasText: 'Terminal access is not enabled' }).waitFor();
+  assert.equal(await (await resourceCaption(panel)).getByText('Disconnected', { exact: true }).count(), 0, 'denied catalog is not a disconnected terminal');
+  assert.equal(await panel.getByRole('checkbox').count(), 0, 'no misleading executable consent when unavailable');
+  assert.equal(await (await resourceCaption(panel)).getByRole('button', { name: 'Start terminal', exact: true }).isDisabled(), true);
+  catalogMode = 'offline'; await (await resourceCaption(panel)).getByRole('button', { name: 'Refresh', exact: true }).click();
+  await panel.getByRole('alert').filter({ hasText: 'Could not load Connector terminals' }).waitFor();
+  catalogMode = 'empty'; await (await resourceCaption(panel)).getByRole('button', { name: 'Refresh', exact: true }).click();
+  await panel.getByText('No authorized terminal is configured on this Connector. Enable a local shell to run commands here; SSH is optional.').waitFor();
+  assert.equal(await panel.getByRole('alert').count(), 0);
+  catalogMode = 'ssh'; await (await resourceCaption(panel)).getByRole('button', { name: 'Refresh', exact: true }).click();
+  const location = (await resourceCaption(panel)).getByLabel('Execution location', { exact: true }); await location.waitFor();
+  assert.equal(await location.inputValue(), '', 'SSH never selected implicitly');
+  catalogMode = 'mixed'; await (await resourceCaption(panel)).getByRole('button', { name: 'Refresh', exact: true }).click();
+  await page.waitForFunction(() => document.querySelector('[aria-label="Execution location"]')?.value === 'shell');
+  await location.selectOption('remote');
+  assert.equal(starts, 6, 'catalog checks and changing target never start a process');
+  await (await resourceCaption(panel)).getByRole('button', { name: 'Refresh', exact: true }).click();
+  await page.waitForFunction(() => document.querySelector('[aria-label="Execution location"]')?.value === 'remote');
+  assert.equal(starts, 6, 'catalog refresh preserves explicit target without starting');
+  const storage = await page.evaluate(() => JSON.stringify({ local: { ...localStorage }, tab: { ...sessionStorage } })); assert.ok(!storage.includes('BROWSER_PTY_'));
+  // Phone mode deliberately hides multi-card workspaces. Exercise a real
+  // narrow card in desktop mode, not a screenshot of the phone chat list.
+  await page.setViewportSize({ width: 1280, height: 960 });
+  const narrowPane = panel.locator('xpath=ancestor::*[@data-workspace-pane][1]');
+  await narrowPane.evaluate(node => { node.style.width = '340px'; node.style.minWidth = '0'; node.style.maxWidth = '340px'; node.style.height = '560px'; });
+  await page.waitForTimeout(250);
+  await panel.getByRole('button', { name: 'Connect terminal', exact: true }).scrollIntoViewIfNeeded();
+  const bounds = await panel.boundingBox(); assert.ok(bounds && bounds.width <= 340 && bounds.width > 250);
+  assert.ok(await panel.evaluate(node => node.scrollWidth <= node.clientWidth + 1), 'narrow terminal has no horizontal overflow');
+  await narrowPane.screenshot({ path: process.env.AOD_TERMINAL_NARROW_SCREENSHOT || join(directory, 'terminal.png') });
+  assert.deepEqual(errors, []); assert.deepEqual(forbidden, []);
+  console.log(JSON.stringify({ verified: true, realPty: true, starts, kills, requests: calls.length, resize: true, refreshReconnect: true, stoppedRefresh: true, optOut: true, unknownStartNoRetry: true, revokedAccess: true, narrowCard: true, noReplay: true, noChatWrites: true }));
+} finally { await browser?.close(); routes.close(); terminals.close(); token.dispose(); await new Promise(resolve => server.close(resolve)); hub.close(); await rm(directory, { recursive: true, force: true }); }

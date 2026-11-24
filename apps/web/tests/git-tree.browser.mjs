@@ -1,0 +1,100 @@
+import assert from 'node:assert/strict';
+import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { createRequire } from 'node:module';
+import { createHash } from 'node:crypto';
+import { deflateSync } from 'node:zlib';
+import { createServer } from 'vite';
+import react from '@vitejs/plugin-react';
+import { ConnectorTokenStore } from '../../server/src/auth/connector-token.ts';
+import { registerConnectorFileRoutes } from '../../server/src/connector/files-http.ts';
+const require = createRequire(new URL('../../server/package.json', import.meta.url));
+const { Hono } = require('hono');
+const { chromium } = await import(process.env.AOD_TEST_PLAYWRIGHT ? pathToFileURL(process.env.AOD_TEST_PLAYWRIGHT).href : 'playwright');
+const temp = await mkdtemp(join(tmpdir(), 'tree-browser-'));
+const server = await createServer({ root: fileURLToPath(new URL('..', import.meta.url)), configFile: false, envFile: false,
+  plugins: [react()], logLevel: 'error', server: { host: '127.0.0.1', port: 0 } });
+let browser;
+try {
+  const root = join(temp, 'root'); await mkdir(root); await mkdir(join(root, 'a-directory'));
+  await writeFile(join(root, 'a-directory', 'private-file.txt'), 'NEVER_READ_THIS_CONTENT');
+  // Native loose-object fixture: no git process, global config, hooks or credentials.
+  const sha = raw => createHash('sha1').update(raw).digest();
+  const object = async (type, body) => {
+    const raw = Buffer.concat([Buffer.from(`${type} ${body.length}\0`), body]), id = sha(raw).toString('hex');
+    await mkdir(join(root, '.git', 'objects', id.slice(0, 2)), { recursive: true });
+    await writeFile(join(root, '.git', 'objects', id.slice(0, 2), id.slice(2)), deflateSync(raw)); return id;
+  };
+  const blob = await object('blob', Buffer.from('ORIGINAL_INDEX_CONTENT'));
+  const subtree = await object('tree', Buffer.concat([Buffer.from('100644 private-file.txt\0'), Buffer.from(blob, 'hex')]));
+  const tree = await object('tree', Buffer.concat([Buffer.from('40000 a-directory\0'), Buffer.from(subtree, 'hex')]));
+  const commit = await object('commit', Buffer.from(`tree ${tree}\n\nfixture\n`));
+  await mkdir(join(root, '.git', 'refs', 'heads'), { recursive: true });
+  await writeFile(join(root, '.git', 'HEAD'), 'ref: refs/heads/main\n');
+  await writeFile(join(root, '.git', 'refs', 'heads', 'main'), `${commit}\n`);
+  const name = 'a-directory/private-file.txt', header = Buffer.alloc(12);
+  header.write('DIRC'); header.writeUInt32BE(2, 4); header.writeUInt32BE(1, 8);
+  const entry = Buffer.alloc(Math.ceil((62 + Buffer.byteLength(name) + 1) / 8) * 8);
+  entry.writeUInt32BE(0o100644, 24); Buffer.from(blob, 'hex').copy(entry, 40); entry.writeUInt16BE(name.length, 60); entry.write(name, 62);
+  const index = Buffer.concat([header, entry]); await writeFile(join(root, '.git', 'index'), Buffer.concat([index, sha(index)]));
+  await Promise.all(Array.from({ length: 201 }, (_, i) => writeFile(join(root, `file-${i}`), '')));
+  const tokens = new ConnectorTokenStore(join(temp, 'tokens.json')), token = tokens.createTransient(['files:read']);
+  const app = new Hono(); registerConnectorFileRoutes(app, tokens, { fixture: root });
+  await server.listen(); const origin = `http://127.0.0.1:${server.httpServer.address().port}`;
+  browser = await chromium.launch({ headless: true }); const errors = [];
+  for (const width of [390, 320]) {
+    const context = await browser.newContext({ serviceWorkers: 'block', viewport: { width, height: 900 } });
+    await context.addInitScript(() => localStorage.setItem('agentopsdeck.locale', 'en'));
+    let hold, release, delayed = false;
+    await context.route('**/*', async route => {
+      const req = route.request(), url = new URL(req.url()); assert.equal(url.origin, origin);
+      if (!url.pathname.startsWith('/api/')) return route.continue();
+      assert.equal(req.method(), 'GET');
+      if (url.pathname === '/api/hub/v1/connections') return route.fulfill({ json: { connections: [{ id: 'fixture', label: 'Fixture environment' }] } });
+      assert.ok(url.pathname.startsWith('/api/hub/v1/connections/fixture/files/git/'));
+      const response = await app.request(url.pathname.replace('/api/hub/v1/connections/fixture', '/api/connector/v1') + url.search, { headers: { authorization: `Bearer ${token.token}` } });
+      const body = await response.text(); if (!url.pathname.endsWith('/preview')) assert.ok(!body.includes('NEVER_READ_THIS_CONTENT')); assert.ok(!body.includes(temp));
+      if (delayed && url.pathname.endsWith('/tree')) { hold?.(); await new Promise(resolve => { release = resolve; }); }
+      await route.fulfill({ status: response.status, contentType: 'application/json', body });
+    });
+    const page = await context.newPage(); page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${origin}/tests/fixtures/git-tree.html`);
+    await page.getByRole('button', { name: 'a-directory', exact: true }).waitFor();
+    assert.equal(await page.getByLabel('Repository', { exact: true }).inputValue(), 'fixture', 'single authorized repository is selected automatically');
+    assert.equal(await page.getByLabel('Repository', { exact: true }).locator('option:checked').textContent(), 'root');
+    assert.equal(await page.getByText('.git', { exact: true }).count(), 0);
+    await page.getByLabel('Filter this page').fill('a-directory');
+    assert.equal(await page.getByRole('button', { name: 'file-0', exact: true }).count(), 0);
+    await page.getByRole('button', { name: 'a-directory', exact: true }).click();
+    await page.getByText('private-file.txt', { exact: true }).waitFor();
+    await page.getByText('NEVER_READ_THIS_CONTENT', { exact: true }).waitFor({ state: 'detached' });
+    await page.getByRole('button', { name: 'private-file.txt', exact: true }).click();
+    await page.getByText('NEVER_READ_THIS_CONTENT', { exact: true }).waitFor();
+    await page.getByText('Raw-byte difference from index', { exact: true }).click();
+    assert.ok((await page.locator('details pre').textContent()).includes('-ORIGINAL_INDEX_CONTENT'));
+    assert.ok((await page.locator('details pre').textContent()).includes('+NEVER_READ_THIS_CONTENT'));
+    await page.getByLabel('Target session',{exact:true}).selectOption('draft');await page.getByRole('button',{name:'Confirm: place in session draft',exact:true}).click();
+    assert.ok((await page.getByLabel('Fixture draft').inputValue()).includes('NEVER_READ_THIS_CONTENT'));
+    await page.getByLabel('Target notebook',{exact:true}).selectOption('note');await page.getByRole('button',{name:'Confirm: add to notebook',exact:true}).click();
+    assert.ok((await page.getByLabel('Fixture note').inputValue()).includes('sha256'));
+    await page.reload();await page.getByRole('button', { name: 'a-directory', exact: true }).waitFor();
+    assert.equal(await page.getByLabel('Repository',{exact:true}).inputValue(),'fixture');
+    await page.getByRole('button', { name: 'a-directory', exact: true }).click();
+    await page.getByRole('button', { name: 'Parent directory', exact: true }).click();
+    await page.getByText('NEVER_READ_THIS_CONTENT', { exact: true }).waitFor({ state: 'detached' });
+    await page.getByRole('button', { name: 'Next page', exact: true }).click();
+    await page.getByText('file-99', { exact: true }).waitFor();
+    assert.equal(await page.getByRole('button', { name: 'a-directory', exact: true }).count(), 0);
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+    delayed = true; const admitted = new Promise(resolve => { hold = resolve; });
+    await page.getByRole('button', { name: 'Refresh', exact: true }).click(); await admitted;
+    await page.getByRole('button', { name: 'Change account', exact: true }).click(); release();
+    await page.getByLabel('Repository path').waitFor({ state: 'detached' });
+    assert.equal(await page.getByText('file-99', { exact: true }).count(), 0);
+    assert.equal(await page.evaluate(() => Object.values(localStorage).concat(Object.values(sessionStorage)).some(value => value.includes('private-file.txt'))), false);
+    await context.close();
+  }
+  assert.deepEqual(errors, []); console.log(JSON.stringify({ verified: true, viewports: [390, 320], strictMode: true, realConnector: true, accountFence: true, mutations: 0 }));
+} finally { await browser?.close(); await server.close(); await rm(temp, { recursive: true, force: true }); }

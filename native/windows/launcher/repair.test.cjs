@@ -1,0 +1,11 @@
+'use strict';
+const {test}=require('node:test'),a=require('node:assert/strict');
+const fs=require('node:fs'),path=require('node:path'),{DatabaseSync}=require('node:sqlite');
+const r=require('./repair.cjs');
+test('minified shipping API cancels without filesystem or runtime effects',async()=>{const shipping=fs.existsSync(path.join(__dirname,'shipping','repair.cjs'))?require('./shipping/repair.cjs'):require('./repair.cjs');a.equal(shipping.CONFIRM,r.CONFIRM);a.deepEqual(await shipping.run(''),{code:12,state:'repair-cancelled-no-change'});});
+const node='node_12345678-1234-4234-8234-123456789abc',storeFile='C:\\private\\connector.sqlite';
+const marker=Buffer.from(JSON.stringify({format:1,token:'12345678-1234-4234-8234-123456789abc',pid:42,nodeId:node}));
+const binding=Buffer.from(JSON.stringify({format:1,nodeId:node,storeFile}));
+test('exact legacy bytes/node/binding, no pid authority',()=>{a.equal(r.validate(marker,binding,node,storeFile),true);a.throws(()=>r.validate(marker,binding,node+'x',storeFile));a.throws(()=>r.validate(marker,binding,node,storeFile+'x'));a.throws(()=>r.validate(Buffer.from('{}'),binding,node,storeFile));});
+test('confirmation requires all exact trusted chronology attestations',()=>{a.equal(r.confirmed(''),false);a.equal(r.confirmed(r.CONFIRM),true);for(const line of r.CONFIRM.trimEnd().split('\n'))a.equal(r.confirmed(r.CONFIRM.replace(line+'\n','')),false);a.equal(r.confirmed(r.CONFIRM+'unknown\n'),false);});
+test('existing-only SQL fence reads identity without schema/bootstrap or byte changes',()=>{const dir=fs.mkdtempSync(path.join(__dirname,'sql-fixture-'));const f=path.join(dir,'existing.sqlite');try{let db=new DatabaseSync(f);db.exec('CREATE TABLE connector_identity(singleton INTEGER PRIMARY KEY,node_id TEXT NOT NULL)');db.prepare('INSERT INTO connector_identity VALUES(1,?)').run(node);db.close();const before=fs.readFileSync(f);const fence=r.existingFence(f);a.equal(fence.nodeId,node);fence.close();a.deepEqual(fs.readFileSync(f),before);a.throws(()=>r.existingFence(path.join(dir,'missing.sqlite')));a.equal(fs.existsSync(path.join(dir,'missing.sqlite')),false);}finally{fs.rmSync(dir,{recursive:true,force:true});}});

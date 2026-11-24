@@ -1,0 +1,58 @@
+name: AgentOpsDeck source validation
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: aod-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      NODE_ENV: development
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.22.1'
+      - run: node scripts/ci-bootstrap-pnpm.mjs
+      - run: pnpm install --frozen-lockfile --prod=false
+      - run: pnpm check:security
+      - run: pnpm check:i18n
+      - run: pnpm check:api
+      - run: pnpm check:review
+      - run: pnpm --workspace-concurrency=1 -r build
+      - run: pnpm --workspace-concurrency=1 -r typecheck
+      - run: node scripts/run-script-tests.mjs
+      - run: node scripts/run-source-tests.mjs web
+      - run: pnpm audit --prod --audit-level=high
+      - run: pnpm audit --audit-level=high
+  server-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    env:
+      NODE_ENV: development
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.22.1'
+      - run: node scripts/ci-bootstrap-pnpm.mjs
+      - run: pnpm install --frozen-lockfile --prod=false
+      - run: pnpm --filter @agentopsdeck/shared build
+      - run: node scripts/github-source-tests.mjs ${{ matrix.shard }} 12

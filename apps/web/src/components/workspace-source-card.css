@@ -1,0 +1,9 @@
+.workspace-source-card { min-width: 0; height: 100%; overflow: auto; padding: 8px; font-size: 12px; }
+.workspace-source-card select { min-width: 0; max-width: 100%; flex: 1 1 90px; }
+.workspace-source-card .resource-card-tools { flex-wrap: wrap; min-width: 0; }
+.workspace-source-card ul { list-style: none; padding: 0; margin: 8px 0; }
+.workspace-source-card li > button, .workspace-source-card li > span { display: flex; gap: 6px; align-items: center; min-width: 0; width: 100%; padding: 5px; text-align: left; }
+.workspace-source-card li span, .workspace-source-path { overflow-wrap: anywhere; }
+.workspace-source-card svg { flex: 0 0 15px; }
+.workspace-source-card pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+.workspace-source-card article { min-width: 0; overflow-wrap: anywhere; }

@@ -1,0 +1,19 @@
+<mxfile host="embed.diagrams.net">
+  <diagram name="Synthetic interoperability check" id="0">
+    <mxGraphModel dx="1244" dy="766" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="n-477749df-faa4-47df-96f4-4211223a785a" parent="1" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#dbeafe;strokeColor=#64748b;fontColor=#000000;" value="Edited synthetic root" vertex="1">
+          <mxGeometry height="100" width="200" x="32" y="32" as="geometry" />
+        </mxCell>
+        <mxCell id="n-40c73fb9-005d-4b0d-b524-67ffa27b78b1" parent="1" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#123456;strokeColor=#64748b;fontColor=#ffffff;" value="Synthetic child" vertex="1">
+          <mxGeometry height="64" width="160" x="300" y="64" as="geometry" />
+        </mxCell>
+        <mxCell id="e-e87be3dd-2e2d-4130-bb2c-d73158fa40c0" edge="1" parent="1" source="n-477749df-faa4-47df-96f4-4211223a785a" style="endArrow=none;html=0;strokeColor=#64748b;" target="n-40c73fb9-005d-4b0d-b524-67ffa27b78b1" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,436 @@
+.workspace-files { display:flex; flex-direction:column; gap:8px; height:100%; min-height:0; padding:10px; color:var(--ink); background:var(--surface-solid); }
+.workspace-files-bar { display:flex; align-items:center; flex-wrap:wrap; gap:6px; flex-shrink:0; }
+.workspace-files select,.workspace-files input,.workspace-files textarea { min-width:0; background:var(--surface-solid); color:inherit; border:1px solid #75849b55; border-radius:6px; padding:5px 8px; }
+.workspace-files select { max-width:100%; flex:1; }
+.workspace-files button { border:1px solid #75849b44; border-radius:6px; padding:5px 8px; display:inline-flex; align-items:center; gap:5px; }
+.workspace-files button:disabled { opacity:.45; }
+.workspace-files-path { overflow-wrap:anywhere; font-size:12px; opacity:.8; }
+.workspace-files-list { flex:1; min-height:0; overflow:auto; scrollbar-width:thin; display:flex; flex-direction:column; gap:3px; }
+.workspace-files-list button { flex-shrink:0; text-align:left; border-color:transparent; overflow-wrap:anywhere; }
+.workspace-files-list button:hover,.workspace-files-list button[aria-current=true] { background:#609aff22; border-color:#6ca4fb66; }
+.workspace-files textarea { flex:1; min-height:100px; resize:none; font:13px/1.6 ui-monospace,monospace; tab-size:2; white-space:pre-wrap; overflow-wrap:anywhere; scrollbar-width:thin; }
+.workspace-files-image { flex:1; min-height:0; overflow:auto; display:grid; place-items:center; }
+.workspace-files-image img { max-width:100%; max-height:100%; object-fit:contain; }
+.workspace-files-image[data-actual=true] { display:block; }
+.workspace-files-image[data-actual=true] img { max-width:none; max-height:none; }
+.workspace-files [role=alert] { color:#b93827; font-size:12px; overflow-wrap:anywhere; }
+.workspace-files [role=status] { font-size:12px; opacity:.8; }
+.workspace-files-overlay { position:fixed; inset:0; z-index:10000; display:grid; place-items:center; background:#0007; padding:16px; }
+.workspace-files-dialog { margin:auto; width:min(420px,calc(100% - 32px)); max-height:80dvh; overflow:auto; color:var(--ink); background:var(--surface-solid); border:1px solid #738ba866; border-radius:12px; padding:16px; box-shadow:0 16px 60px #0008; }
+.workspace-files-dialog::backdrop { background:#0007; }
+.workspace-files :focus-visible,.workspace-files-dialog :focus-visible { outline:2px solid #3976de; outline-offset:2px; }
+.workspace-files-dialog header { display:flex; justify-content:space-between; align-items:center; }
+.workspace-files-dialog p { font-size:12px; opacity:.8; margin:12px 0; }
+.workspace-files-dialog label { display:flex; gap:10px; padding:8px 0; }
+
+/* Quiet, theme-aware Explorer chrome, shared by workspace and library views. */
+.workspace-file-browser { gap:10px; padding:12px; }
+.workspace-files-top,.workspace-files-location { display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; flex-shrink:0; }
+.workspace-files-sources,.workspace-files-modes { display:flex; align-items:center; gap:2px; padding:3px; border-radius:10px; background:color-mix(in srgb,var(--ink) 5%,transparent); }
+.workspace-files-sources button,.workspace-files-modes button { min-height:32px; border:0; border-radius:7px; background:transparent; color:inherit; font-size:12px; white-space:nowrap; }
+.workspace-files-sources button[aria-pressed=true],.workspace-files-modes button[aria-pressed=true] { background:var(--surface-solid); color:var(--accent,#3976de); box-shadow:0 1px 4px #142e5018; }
+.workspace-files-scope { flex-wrap:nowrap; gap:8px; }
+.workspace-files-scope select { width:0; min-height:36px; border-radius:9px; text-overflow:ellipsis; }
+.workspace-files-scope button { min-height:36px; flex:none; border-radius:9px; background:transparent; }
+.workspace-files-path { display:flex; align-items:center; gap:7px; padding:6px 2px; min-width:0; font:12px/1.5 ui-monospace,monospace; }
+.workspace-files-path svg { flex:none; }
+.workspace-files-list { gap:2px; padding:3px; border-top:1px solid #75849b25; padding-top:8px; }
+.workspace-files-item { flex-shrink:0; min-width:0; }
+.workspace-files-row { display:flex; align-items:center; min-width:0; }
+.workspace-files-row .workspace-files-entry { flex:1; min-width:0; width:100%; min-height:38px; padding:8px; border-radius:8px; background:transparent; gap:9px; }
+.workspace-files-entry svg { flex:none; opacity:.75; }
+.workspace-files-item[data-folder=true] > .workspace-files-row > .workspace-files-entry > svg,.workspace-files-parent svg { color:var(--accent,#3976de); opacity:.85; fill:none; stroke-width:1.75; }
+.workspace-files-entry span { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.workspace-files-entry small { margin-left:auto; white-space:nowrap; font-size:10px; opacity:.55; }
+.workspace-files-row .workspace-files-expand { padding:4px; flex:none; width:24px; height:32px; background:transparent; }
+.workspace-files-expand[aria-expanded=true] svg { transform:rotate(90deg); }
+.workspace-files-children { margin-left:12px; padding-left:7px; border-left:1px solid #75849b38; }
+.workspace-files-children [role=status],.workspace-files-children [role=alert] { margin:6px; }
+.workspace-files-explorer { display:grid; grid-template-columns:repeat(auto-fill,minmax(100px,1fr)); align-content:start; gap:8px; }
+.workspace-files-explorer .workspace-files-entry,.workspace-files-explorer .workspace-files-parent { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:98px; gap:9px; text-align:center; }
+.workspace-files-explorer .workspace-files-entry > svg,.workspace-files-explorer .workspace-files-parent > svg { width:26px; height:26px; stroke-width:1.75; }
+.workspace-files-explorer .workspace-files-entry span { white-space:normal; overflow-wrap:anywhere; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; font-size:12px; line-height:1.4; }
+.workspace-files-more { justify-content:center; grid-column:1/-1; }
+.workspace-files button { transition:background .14s,border-color .14s; }
+.workspace-files button:disabled { cursor:not-allowed; }
+/* Narrow is a real desktop card, not a phone viewport. Keep controls in the
+   caption overflow and reserve the remaining height for the directory. */
+@container (max-width: 360px) {
+  [data-resource-card] .session-pane-content > .workspace-file-browser { padding:6px; gap:4px; }
+  .workspace-file-browser .workspace-files-path { padding:2px; max-height:36px; overflow:auto; font-size:11px; }
+  .workspace-file-browser .workspace-files-list { padding:4px 0 0; }
+  .workspace-file-browser .workspace-files-row .workspace-files-entry { min-height:32px; padding:5px; gap:6px; }
+  .workspace-file-browser .workspace-files-explorer { grid-template-columns:repeat(auto-fill,minmax(76px,1fr)); gap:3px; }
+  .workspace-file-browser .workspace-files-explorer .workspace-files-entry,.workspace-file-browser .workspace-files-explorer .workspace-files-parent { min-height:76px; }
+  .workspace-file-browser .workspace-files-entry small { display:none; }
+}
+@media (pointer:coarse) { .workspace-files button,.workspace-files-scope select { min-height:44px; } }
+@media (prefers-reduced-motion:reduce) { .workspace-files button { transition:none; } }
+
+/* A quiet document surface; the caption owns all commands and permissions. */
+.workspace-file-editor { padding:0; gap:0; background:linear-gradient(150deg,color-mix(in srgb,var(--accent,#3976de) 3%,var(--surface-solid)),var(--surface-solid) 45%); }
+[data-resource-card] .session-pane-content > .workspace-file-editor { padding:0; gap:0; }
+.file-editor-location { display:flex; align-items:center; gap:9px; min-width:0; flex-shrink:0; padding:10px 14px; border-bottom:1px solid #94a3b81f; }
+.file-editor-location > svg { flex:none; color:var(--accent,#3976de); opacity:.8; }
+.file-editor-location > span:first-of-type { flex:1; min-width:0; }
+.file-editor-location strong,.file-editor-location small { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.file-editor-location strong { font-size:12px; font-weight:600; }
+.file-editor-location small { font:10px/1.5 ui-monospace,monospace; opacity:.5; }
+.file-editor-location > i { width:6px; height:6px; border-radius:50%; background:var(--accent,#3976de); flex:none; }
+.file-editor-state { display:flex; color:var(--accent,#3976de); }
+.file-editor-readonly { display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; color:var(--muted); flex:none; border-radius:7px; }
+.file-text-editor { display:flex; position:relative; flex:1; min-height:0; overflow:hidden; }
+.file-text-gutter { width:52px; flex:none; overflow:hidden; background:#94a3b805; border-right:1px solid #94a3b812; color:color-mix(in srgb,var(--ink) 35%,transparent); user-select:none; }
+.file-text-gutter pre { margin:0; padding:0 10px 0 0; text-align:right; font:12px/22px ui-monospace,SFMono-Regular,Consolas,monospace; }
+.workspace-files .file-text-editor textarea { display:block; width:0; flex:1; min-height:0; margin:0; padding:12px 14px; border:0; border-radius:0; background:transparent; font:12px/22px ui-monospace,SFMono-Regular,Consolas,monospace; white-space:pre; overflow-wrap:normal; outline:none; box-shadow:none; }
+.file-text-editor:focus-within { box-shadow:inset 0 0 0 1px #60a5fa40; }
+.file-editor-empty { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; padding:24px; text-align:center; min-height:0; overflow:auto; color:var(--muted); }
+.file-editor-empty > svg { flex:none; color:var(--accent,#3976de); opacity:.55; }
+.file-editor-empty p { max-width:28ch; margin:0; font-size:12px; line-height:1.8; }
+.workspace-file-editor > [role=alert] { margin:8px; }
+.resource-card-tools button > svg { display:block; flex:none; width:15px; height:15px; stroke-width:1.75; }
+.session-workspace-preset-menu button > svg { flex:none; width:15px; height:15px; stroke-width:1.75; }
+@container (max-width:360px) {
+  .file-editor-location { padding:7px 9px; }
+  .file-text-gutter { width:42px; }
+  .workspace-files .file-text-editor textarea { padding-left:9px; padding-right:9px; }
+}
+
+/* Multi-session shared co-binding switcher bar for Notebook & Taskboard cards */
+.workspace-cobound-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 4px 10px;
+  border-bottom: 1px solid color-mix(in srgb, var(--ink, #334155) 10%, transparent);
+  background: color-mix(in srgb, var(--surface-solid, #1e293b) 94%, var(--accent, #3976de) 6%);
+  flex-shrink: 0;
+  min-height: 28px;
+}
+.workspace-cobound-pills {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-width: 0;
+  width: 100%;
+}
+.workspace-cobound-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--ink, #64748b) 18%, transparent);
+  background: color-mix(in srgb, var(--surface-solid, #0f172a) 85%, transparent);
+  color: inherit;
+  font-size: 11px;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: background 0.14s, border-color 0.14s, color 0.14s;
+}
+.workspace-cobound-pill:hover {
+  border-color: color-mix(in srgb, var(--accent, #3976de) 55%, transparent);
+}
+.workspace-cobound-pill[data-active="true"] {
+  background: color-mix(in srgb, var(--accent, #3976de) 18%, var(--surface-solid, #0f172a));
+  border-color: var(--accent, #3976de);
+  color: var(--accent, #3976de);
+  font-weight: 600;
+}
+.workspace-cobound-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.7;
+}
+.workspace-cobound-manage-btn {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  border: 1px dashed color-mix(in srgb, var(--ink, #64748b) 26%, transparent);
+  background: transparent;
+  color: inherit;
+  font-size: 11px;
+  opacity: 0.82;
+  cursor: pointer;
+}
+.workspace-cobound-manage-btn:hover {
+  opacity: 1;
+  border-style: solid;
+  border-color: var(--accent, #3976de);
+  color: var(--accent, #3976de);
+}
+
+
+/* Windows Explorer-style File Browser Command Bar, Split Inspector & Status Bar */
+.workspace-files-nav-btns {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+}
+.workspace-files-nav-btn {
+  width: 26px;
+  height: 26px;
+  padding: 0 !important;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+  cursor: pointer;
+}
+.workspace-files-win-tools {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-left: auto;
+  min-width: 0;
+}
+.workspace-files-filter-input {
+  width: 145px;
+  height: 28px;
+  font-size: 11.5px;
+  padding: 3px 8px !important;
+  border-radius: 7px !important;
+}
+.workspace-files-sort-select {
+  width: auto !important;
+  flex: 0 0 auto !important;
+  height: 28px;
+  font-size: 11.5px;
+  padding: 2px 6px !important;
+  border-radius: 7px !important;
+}
+.workspace-files-cmd-btn {
+  height: 28px;
+  padding: 0 8px !important;
+  font-size: 11.5px;
+  font-weight: 500;
+  border-radius: 7px !important;
+  white-space: nowrap;
+  cursor: pointer;
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
+}
+.workspace-files-cmd-btn.is-active,
+.workspace-files-cmd-btn.is-primary {
+  background: color-mix(in srgb, var(--accent, #3976de) 16%, var(--surface-solid));
+  border-color: var(--accent, #3976de);
+  color: var(--accent, #3976de);
+  font-weight: 600;
+}
+.workspace-files-cmd-btn.is-danger:hover {
+  background: rgba(239, 68, 68, 0.14);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #dc2626;
+}
+.workspace-files-split-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  gap: 10px;
+  overflow: hidden;
+}
+.workspace-files-split-body > .workspace-files-list {
+  flex: 1;
+  min-width: 0;
+}
+.workspace-files-split-body.has-inspector > .workspace-files-list {
+  flex: 1.1;
+}
+.workspace-files-inspector-pane {
+  flex: 1;
+  min-width: 240px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid color-mix(in srgb, var(--ink) 14%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface-solid) 96%, var(--accent, #3976de) 4%);
+  overflow: hidden;
+}
+.workspace-files-inspector-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-bottom: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+  flex-shrink: 0;
+}
+.workspace-files-inspector-title {
+  flex: 1;
+  min-width: 0;
+}
+.workspace-files-inspector-title strong,
+.workspace-files-inspector-title small {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.workspace-files-inspector-title strong {
+  font-size: 12px;
+}
+.workspace-files-inspector-title small {
+  font-size: 10px;
+  opacity: 0.6;
+  font-family: ui-monospace, monospace;
+}
+.workspace-files-inspector-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.workspace-files-statusbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 4px;
+  border-top: 1px solid color-mix(in srgb, var(--ink) 10%, transparent);
+  font-size: 11px;
+  opacity: 0.72;
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@container (max-width: 480px) {
+  .workspace-files-nav-btns,
+  .workspace-files-win-tools,
+  .workspace-files-statusbar,
+  .workspace-files-inspector-pane {
+    display: none !important;
+  }
+}
+@media (max-width: 480px) {
+  .workspace-files-nav-btns,
+  .workspace-files-win-tools,
+  .workspace-files-statusbar {
+    display: none !important;
+  }
+}
+
+/* Windows "This PC" Multi-Connector Disk Drives Bar */
+.workspace-files-drives-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border-bottom: 1px solid #94a3b824;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent, #3976de) 4%, transparent), transparent);
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+.workspace-files-drives-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  white-space: nowrap;
+  padding-right: 4px;
+  border-right: 1px solid #94a3b82e;
+}
+.workspace-files-drives-list {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.workspace-files-drive-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 9px;
+  border-radius: 8px;
+  border: 1px solid #94a3b830;
+  background: color-mix(in srgb, var(--surface-solid, #ffffff) 85%, transparent);
+  color: var(--ink);
+  cursor: pointer;
+  text-align: left;
+  min-width: 118px;
+  max-width: 190px;
+  transition: border-color 0.14s ease, background 0.14s ease, box-shadow 0.14s ease;
+}
+.workspace-files-drive-card:hover {
+  border-color: color-mix(in srgb, var(--accent, #3976de) 50%, #94a3b8);
+}
+.workspace-files-drive-card.is-active {
+  border-color: var(--accent, #3976de);
+  background: color-mix(in srgb, var(--accent, #3976de) 12%, var(--surface-solid, #ffffff));
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12);
+}
+.workspace-files-drive-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--accent, #3976de) 14%, transparent);
+  color: var(--accent, #3976de);
+  flex: none;
+}
+.workspace-files-drive-dot {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #94a3b8;
+  border: 1.5px solid var(--surface-solid, #fff);
+}
+.workspace-files-drive-dot.is-online {
+  background: #22c55e;
+}
+.workspace-files-drive-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.workspace-files-drive-meta strong {
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.workspace-files-drive-meta small {
+  font-size: 10px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Prevent accidental blue text selection across File Explorer chrome */
+.workspace-files,
+.workspace-files-drives-bar,
+.workspace-files-location,
+.workspace-files-list,
+.workspace-files-statusbar,
+.workspace-files button,
+.workspace-files label {
+  user-select: none;
+  -webkit-user-select: none;
+}
+.workspace-files .file-text-editor textarea,
+.workspace-files input,
+.workspace-files-path,
+.workspace-files-inspector-body {
+  user-select: text;
+  -webkit-user-select: text;
+}

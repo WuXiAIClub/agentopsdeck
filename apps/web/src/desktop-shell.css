@@ -1,0 +1,84 @@
+/* desktop-shell.css
+ * R6: narrow desktop globals only.
+ * The full hand-written `.desktop-*` component CSS (rail/list/cards/chat/composer)
+ * was retired in R6 — those surfaces are now built with Tailwind utilities +
+ * shadcn-style primitives (Button/Card/Badge/Input) directly in main.tsx.
+ * We keep ONLY the load-bearing desktop globals here so the fixed app shell
+ * behaves correctly at >=700px (no body scroll bleed, consistent font + bg). */
+
+@media (min-width: 700px) {
+  html,
+  body {
+    min-width: 700px;
+    overflow: hidden;
+    background: #eef2f7;
+  }
+
+  body,
+  button,
+  textarea,
+  input {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", Inter,
+      ui-sans-serif, "Segoe UI", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Tailwind focus-visible rings handle component focus; this is a safe global
+   * fallback for native buttons without an explicit ring class. Text inputs and
+   * textareas use component-level focus styling to avoid a double outline inside
+   * the composer/search surfaces. */
+  :where(button):focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+  }
+
+  :where(textarea, input):focus-visible {
+    outline: none;
+  }
+}
+
+.desktop-session-rail {
+  --text-xs: 0.6975rem;
+  --text-sm: 0.81375rem;
+  --text-base: 0.93rem;
+  --text-xl: 1.1625rem;
+}
+
+.desktop-session-rail [class~="text-[0.82rem]"] { font-size: 0.7626rem; }
+.desktop-session-rail [class~="text-[0.68rem]"] { font-size: 0.6324rem; }
+.desktop-session-rail [class~="text-[0.62rem]"] { font-size: 0.5766rem; }
+.desktop-session-rail [class~="text-[0.56rem]"] { font-size: 0.5208rem; }
+.desktop-session-rail input { font-size: 14.88px; }
+.desktop-session-rail h1 { font-size: clamp(1.2834rem, 6.51vw, 1.6926rem); }
+
+@media (min-width: 1024px) {
+  .desktop-session-rail h1 { font-size: clamp(1.488rem, 2.418vw, 2.0925rem); }
+}
+
+@media (min-width: 1280px) {
+  .desktop-session-rail [class~="xl:text-xs"] { font-size: var(--text-xs); }
+  .desktop-session-rail [class~="xl:text-sm"]:not(input) { font-size: var(--text-sm); }
+}
+
+/* Native selects inherit a 16px mobile-safe global size. Desktop chat header
+ * controls intentionally use one compact type scale across select/input/button. */
+.desktop-chat-toolbar-control {
+  height: 2rem !important;
+  border-radius: 0.75rem !important;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", Inter,
+    ui-sans-serif, "Segoe UI", system-ui, sans-serif !important;
+  font-size: 0.72rem !important;
+  font-weight: 600 !important;
+  line-height: 1rem !important;
+  letter-spacing: 0 !important;
+}
+
+[data-desktop-chat-toolbar] :where(button, select, input, summary) {
+  height: 2rem !important;
+  min-height: 2rem !important;
+  max-height: 2rem !important;
+  box-sizing: border-box;
+  vertical-align: middle;
+}

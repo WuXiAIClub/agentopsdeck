@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "sourceVersion": "1.0.0",
+  "sourceSha256": "1af1e6c159fd68559cd4e915ab4543aaf442a106994af60aba16c7c3a714980a",
+  "gates": {
+    "inheritedRights": {
+      "status": "approved",
+      "approvedBy": "WuXiAIClub <hi@wuxiaiclub.com>",
+      "approvedAt": "2026-11-24T09:24:55.415Z",
+      "evidence": [
+        {
+          "path": "LICENSE",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        },
+        {
+          "path": "LICENSE-STATUS.md",
+          "sha256": "c1b0f0971b3ed3acb2b7d5e90a6403f8f04b1705ba71f980274051e1d7f27152"
+        },
+        {
+          "path": "docs/licensing-review.md",
+          "sha256": "d415f4dac8bcba3aa79d16ccc812c1355ff75acaeccada8f539537f0508b4d0a"
+        }
+      ]
+    },
+    "artifactAttribution": {
+      "status": "approved",
+      "approvedBy": "WuXiAIClub <hi@wuxiaiclub.com>",
+      "approvedAt": "2026-11-24T09:24:55.415Z",
+      "evidence": [
+        {
+          "path": "docs/review/third-party-license-inventory.json",
+          "sha256": "d62308205dfcf6407a1c1ea581a6f5b52e9be6a35ff99196456e69785f1e5e4b"
+        },
+        {
+          "path": "docs/licensing-review.md",
+          "sha256": "d415f4dac8bcba3aa79d16ccc812c1355ff75acaeccada8f539537f0508b4d0a"
+        }
+      ]
+    },
+    "acceptance": {
+      "status": "approved",
+      "approvedBy": "WuXiAIClub <hi@wuxiaiclub.com>",
+      "approvedAt": "2026-11-24T09:24:55.415Z",
+      "evidence": [
+        {
+          "path": "docs/validation-1.0.0.md",
+          "sha256": "d024659c5bb1c2e44838649ef8ddac05e87db638d3ad75970af45b6a2aa60565"
+        },
+        {
+          "path": "docs/review/findings.json",
+          "sha256": "18ea2683bcaaf466396cf5eedb45f8fa5e8bd0ee3b3100f902a05591b75ef92e"
+        }
+      ]
+    },
+    "releaseAuthorization": {
+      "status": "approved",
+      "approvedBy": "WuXiAIClub <hi@wuxiaiclub.com>",
+      "approvedAt": "2026-11-24T09:24:55.415Z",
+      "evidence": [
+        {
+          "path": "package.json",
+          "sha256": "7e00baf8c7a719d04b5fdfa64145026179359431fbc34918be385e4e166253e0"
+        },
+        {
+          "path": "README.md",
+          "sha256": "352f34ed62ef0e0a842ba051fbba69defde3f5a16961f107ac8fc51c01fd1220"
+        },
+        {
+          "path": "docs/open-source-review-1.0.0.md",
+          "sha256": "0bc862b40ee161ae75faa0364d733cb87cc0a63dd5516f7b0562e65b1cf15b54"
+        }
+      ]
+    }
+  }
+}

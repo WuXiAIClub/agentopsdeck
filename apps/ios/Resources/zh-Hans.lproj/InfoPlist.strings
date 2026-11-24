@@ -1,0 +1,4 @@
+"NSLocalNetworkUsageDescription" = "在你启用局域网优先后，连接你配置的同 Wi-Fi AgentOpsDeck 电脑，加载聊天、下载文件和播放视频。不可达时使用公网服务。";
+"NSCameraUsageDescription" = "用于你主动选择拍摄并上传图片或视频。";
+"NSMicrophoneUsageDescription" = "用于你主动选择录制并上传带声音的视频。";
+"NSPhotoLibraryAddUsageDescription" = "用于你主动将下载的图片或视频保存到相册。";

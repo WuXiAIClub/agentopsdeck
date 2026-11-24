@@ -1,0 +1,21 @@
+image: node:22-bookworm
+stages: [test]
+source-tests:
+  stage: test
+  timeout: 60 minutes
+  variables:
+    NODE_ENV: development
+  script:
+    - node scripts/ci-bootstrap-pnpm.mjs
+    - pnpm install --frozen-lockfile --prod=false
+    - pnpm check:security
+    - pnpm check:i18n
+    - pnpm check:api
+    - pnpm check:review
+    - pnpm --workspace-concurrency=1 -r build
+    - pnpm --workspace-concurrency=1 -r typecheck
+    - node scripts/run-script-tests.mjs
+    - node scripts/run-source-tests.mjs server
+    - node scripts/run-source-tests.mjs web
+    - pnpm audit --prod --audit-level=high
+    - pnpm audit --audit-level=high

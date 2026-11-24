@@ -1,0 +1,30 @@
+import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
+import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import test from 'node:test';
+import { stageFrontendRelease } from './stage-frontend-release.mjs';
+
+test('frontend candidate preserves backend, rejects stale pins and never overwrites destinations', async (t) => {
+  const root = await mkdtemp(join(tmpdir(), 'agentopsdeck-frontend-stage-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const previous = join(root, 'previous'), webRoot = join(root, 'web'), destination = join(root, 'candidate');
+  await mkdir(join(previous, 'apps/server/dist'), { recursive: true });
+  await mkdir(join(previous, 'apps/web/dist'), { recursive: true });
+  await mkdir(webRoot);
+  const entries = [['apps/server/dist/index.js', 'backend'], ['apps/web/dist/index.html', 'old']];
+  for (const [path, text] of entries) await writeFile(join(previous, path), text);
+  const manifest = JSON.stringify({ format: 1, entrypoint: 'apps/server/dist/index.js', files: entries.map(([path, text]) => ({ path, bytes: Buffer.byteLength(text), sha256: createHash('sha256').update(text).digest('hex') })) });
+  await writeFile(join(previous, 'candidate-manifest.json'), manifest);
+  await writeFile(join(webRoot, 'index.html'), 'new');
+  const expectedManifest = createHash('sha256').update(manifest).digest('hex');
+  await assert.rejects(stageFrontendRelease({ previous, webRoot, destination, expectedManifest: '0'.repeat(64) }), /Previous release changed/);
+  const result = await stageFrontendRelease({ previous, webRoot, destination, expectedManifest });
+  assert.equal(result.backendUnchanged, true);
+  assert.equal(await readFile(join(destination, 'apps/web/dist/index.html'), 'utf8'), 'new');
+  assert.equal(await readFile(join(destination, 'apps/server/dist/index.js'), 'utf8'), 'backend');
+  assert.equal(await readFile(join(previous, 'apps/web/dist/index.html'), 'utf8'), 'old');
+  await assert.rejects(stageFrontendRelease({ previous, webRoot, destination, expectedManifest }), /EEXIST/);
+  await assert.rejects(stageFrontendRelease({ previous, webRoot, destination: join(previous, 'nested'), expectedManifest }), /disjoint/);
+});

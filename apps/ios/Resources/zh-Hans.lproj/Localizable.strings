@@ -1,0 +1,4 @@
+"download_failed_title" = "无法下载";
+"download_failed_message" = "请检查登录状态、网络及权限。仅支持同源 HTTP(S) GET 下载，不支持 blob 或 POST 下载。每个文件最多 64 MiB，下载与分享合计最多两个名额，暂存总量上限 128 MiB。登录 Cookie 变化将取消下载及待分享文件。请先保存或关闭分享再重试。退出登录不会删除您保存到 App 外的副本。";
+"cancel_downloads" = "取消下载及待分享文件";
+"ok" = "好";

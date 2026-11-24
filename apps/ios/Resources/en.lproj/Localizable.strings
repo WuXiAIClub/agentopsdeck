@@ -1,0 +1,4 @@
+"download_failed_title" = "Download unavailable";
+"download_failed_message" = "Check login, network and permissions. Only same-origin HTTP(S) GET downloads are supported, not blob or POST downloads. Each file is limited to 64 MiB, with at most two download/share slots and 128 MiB total staging. Login-cookie changes cancel downloads and queued shares. Save or dismiss shares before retrying. Copies saved outside this app remain after logout.";
+"cancel_downloads" = "Cancel downloads and queued shares";
+"ok" = "OK";

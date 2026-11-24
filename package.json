@@ -1,0 +1,55 @@
+{
+  "name": "agentopsdeck",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "description": "AgentOpsDeck: a bilingual, self-hosted agent operations deck.",
+  "homepage": "https://agentopsdeck.com",
+  "type": "module",
+  "scripts": {
+    "check:publication": "node scripts/publication-check.mjs",
+    "check:publication:release": "node scripts/publication-check.mjs --release",
+    "check:i18n": "node scripts/check-web-i18n.mjs && node scripts/check-i18n-catalog.mjs",
+    "check:security": "node scripts/publication-check.mjs",
+    "check:api": "node scripts/api-docs.mjs --check",
+    "check:review": "node scripts/open-source-review.mjs",
+    "check:review:complete": "node scripts/open-source-review.mjs --require-complete",
+    "test:i18n": "node --test scripts/check-web-i18n.test.mjs",
+    "test:runner": "node --test scripts/run-source-tests.test.mjs",
+    "test:scripts": "node scripts/run-script-tests.mjs",
+    "dev": "pnpm --filter @agentopsdeck/shared build && pnpm --parallel --filter @agentopsdeck/server --filter @agentopsdeck/web dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm --filter @agentopsdeck/shared build && pnpm -r typecheck",
+    "lint": "pnpm check:i18n && pnpm -r lint",
+    "test:modules": "node scripts/test-modules.mjs --list",
+    "test:module": "node scripts/test-modules.mjs",
+    "test:agent": "node scripts/test-modules.mjs agent",
+    "test:core": "node scripts/test-modules.mjs core",
+    "test:api": "node scripts/test-modules.mjs api",
+    "test:storage": "node scripts/test-modules.mjs storage",
+    "test:web": "node scripts/test-modules.mjs web"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
+  },
+  "pnpm": {
+    "overrides": {
+      "@babel/helper-compilation-targets>browserslist": "^4.28.7",
+      "@tailwindcss/node>source-map-js": "^1.2.2",
+      "browserslist>baseline-browser-mapping": "^2.11.0",
+      "vite>postcss": "^8.5.23",
+      "postcss>nanoid": "^3.3.18",
+      "postcss>source-map-js": "^1.2.2"
+    }
+  }
+}
