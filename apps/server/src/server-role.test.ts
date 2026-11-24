@@ -3,14 +3,14 @@ import test from 'node:test';
 import { loadConfig, redactedConfig } from './config.js';
 import { shouldRegisterConnectorRoutes, shouldRegisterHubRoutes } from './server-role.js';
 
-test('listener host remains unspecified unless explicitly configured', () => {
-  assert.equal(loadConfig({}).listenHost, undefined);
-  assert.equal(loadConfig({ AOD_LISTEN_HOST: '  ' }).listenHost, undefined);
+test('listener host defaults to loopback unless explicitly configured', () => {
+  assert.equal(loadConfig({}).listenHost, '127.0.0.1');
+  assert.equal(loadConfig({ AOD_LISTEN_HOST: '  ' }).listenHost, '127.0.0.1');
 });
 
 test('listener accepts explicit IPv4 and IPv6 addresses without changing the requested port', () => {
   for (const address of ['127.0.0.1', '0.0.0.0', '::1', '::']) {
-    const config = loadConfig({ AOD_LISTEN_HOST: ` ${address} `, PORT: '0' });
+    const config = loadConfig({ AOD_LISTEN_HOST: ` ${address} `, AOD_ACCESS_KEY: 'secret-key', PORT: '0' });
     assert.equal(config.listenHost, address);
     assert.equal(config.port, 0);
     assert.equal(redactedConfig(config).listenHost, address);
@@ -46,14 +46,14 @@ test('hub-only role gates Connector routes and keeps split token redacted', () =
   assert.equal(shouldRegisterConnectorRoutes(config), false);
   assert.equal(config.hub.localConnectorUrl, 'http://127.0.0.1:8791');
   const redacted = redactedConfig(config) as any;
-  assert.equal(redacted.hub.localConnectorToken, 'hub-…cret');
+  assert.equal(redacted.hub.localConnectorToken, '***');
   assert.equal(JSON.stringify(redacted).includes('hub-to-connector-secret'), false);
 });
 
 
 test('artifact receiver defaults include openclaw root direct-child artifact policy', () => {
   const config = loadConfig({ HOME: '/home/tester' } as NodeJS.ProcessEnv);
-  assert.deepEqual(config.artifactReceiver.allowedDirectChildDirs, ['/home/tester/.openclaw']);
+  assert.deepEqual(config.artifactReceiver.allowedDirectChildDirs, ['/home/tester/.local/share/agentopsdeck/openclaw-home']);
   assert.equal(config.artifactReceiver.directChildAllowedExtensions.includes('.xlsx'), true);
   assert.equal(config.artifactReceiver.directChildAllowedExtensions.includes('.json'), false);
   assert.equal(config.artifactReceiver.allowedDirs.includes('/home/tester/.openclaw'), false);

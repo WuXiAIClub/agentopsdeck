@@ -38,7 +38,7 @@ async function fixture(t: TestContext, mode: 'original' | 'worker', noResolver =
     assert.equal(request.headers.get('authorization'), url.hostname === 'connector.invalid' ? 'Bearer PRIVATE_DAILY' : 'Bearer PRIVATE_PROBE');
     await behavior.transport?.(request);
     const headers = {[CONNECTOR_PROTOCOL_HEADER]: String(CONNECTOR_PROTOCOL.max), [NODE_ID_HEADER]: nodeId};
-    return behavior.response?.(request, headers) ?? Response.json(url.pathname.endsWith('/identity') ? {nodeId, protocol: 1} : {ok: true}, {headers});
+    return behavior.response?.(request, headers) ?? Response.json(url.pathname.endsWith('/identity') ? {nodeId, protocol: 1} : url.pathname.endsWith('/info') ? {service: 'aod-connector'} : {ok: true}, {headers});
   });
   let guarded = false;
   const store = new Proxy(metadata, {get(target, property, receiver) {if (guarded) throw Error('SYNC_VERIFICATION_STORE'); return Reflect.get(target, property, receiver);}});
@@ -109,7 +109,7 @@ for (const mode of ['original', 'worker'] as const) {
   test(`${mode}: unsaved probe uses only supplied URL/token, validates schema and preserves successful DTO`, async t => {
     const f = await fixture(t, mode), response = await f.app.fetch(f.request('test', {connectorUrl: 'http://probe.invalid/', token: 'PRIVATE_PROBE'}));
     assert.equal(response.status, 200); const body = await response.json(); assert.equal(body.ok, true); assert.equal(body.connectorUrl, 'http://probe.invalid');
-    assert.deepEqual(body.connector, {ok: true}); assert.deepEqual(body.health, {ok: true});
+    assert.deepEqual(body.connector, {service: 'aod-connector'}); assert.deepEqual(body.health, {ok: true});
     assert.deepEqual(f.behavior.calls.map(value => new URL(value.url).pathname).sort(), ['/api/connector/v1/health', '/api/connector/v1/info']);
     for (const raw of [{connectorUrl: 3}, {token: {}}, {connectorUrl: 'bad'}, {authorized: true}])
       assert.equal((await f.app.fetch(f.request('test', raw))).status, 400);

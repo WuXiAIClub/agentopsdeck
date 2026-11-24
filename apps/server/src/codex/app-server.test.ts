@@ -418,7 +418,7 @@ test('batch native history preserves duplicate text, image-only messages, attach
   context.after(()=>codex.close());
   runtime.connectionId='synthetic-connection'; runtime.ensureStarted=async()=>{}; runtime.ensureThreadLoaded=async()=>{};
   runtime.threadRefreshResult.set(sessionKey,{at:Date.now(),available:true});
-  const image=(name:string)=>({filePath:join(process.env.HOME!,'.openclaw','media','inbound',name),
+  const image=(name:string)=>({filePath:join(process.env.HOME!,'.local','share','agentopsdeck','media','inbound',name),
     media:{type:'image' as const,url:`/api/media/inbound/${name}`,name}});
   const texts = ['', 'same', 'same', '  indented\n', '', ''];
   const images = [[image('first.png')], [], [], [], [image('middle.png')], [image('last.png')]];
@@ -724,7 +724,7 @@ test('Codex list restores metadata and explicit history read restores persisted 
     if (method === 'thread/read') return { thread: { id: params.threadId, turns: [{ id: 'turn-1', status: 'completed', startedAt: 20, items: [
       { type: 'userMessage', id: 'user-1', content: [
         { type: 'text', text: 'Review the project' },
-        { type: 'localImage', path: join(process.env.HOME ?? '', '.openclaw', 'media', 'inbound', 'agentopsdeck-1786243452325-CUaK5WpJ-screen.png') },
+        { type: 'localImage', path: join(process.env.HOME ?? '', '.local', 'share', 'agentopsdeck', 'media', 'inbound', 'agentopsdeck-1786243452325-CUaK5WpJ-screen.png') },
       ] },
       { type: 'commandExecution', id: 'tool-1', command: 'git status', cwd: 'C:\\workspace', status: 'completed', aggregatedOutput: 'clean', exitCode: 0, durationMs: 50 },
       { type: 'agentMessage', id: 'assistant-1', text: 'Done' },

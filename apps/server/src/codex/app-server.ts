@@ -3040,7 +3040,6 @@ export class CodexAppServer {
     if (connectionId !== this.connectionId) throw new Error('Codex session list connection changed');
     const model = this.threadModelOverrides.get(threadId) ?? this.threadModels.get(threadId);
     if (model !== undefined) this.threadModels.set(threadId, model);
-    const rolloutBytes = statRolloutBytes(thread?.path);
     const current = this.options.store.getSession(sessionKey);
     this.options.store.upsertSession(this.session(sessionKey, {
       ...current,
@@ -3049,7 +3048,6 @@ export class CodexAppServer {
       lastActiveAt: updatedAt,
       ...(model !== undefined ? { model } : {}),
       ...(modelProvider ? { modelProvider } : {}),
-      ...(rolloutBytes !== undefined ? { rolloutBytes } : {}),
     }));
   }
 
@@ -4952,12 +4950,14 @@ export class CodexAppServer {
         || child !== this.child || generation !== this.nativeConnectionGeneration) throw new RunControlConflict();
     };
     const task = Promise.resolve().then(async () => {
-      let receipt: NativeResumeReceipt | null = null, dispatched = false, finished = false;
+      let receipt: NativeResumeReceipt | null = null, preparing = false, dispatched = false, finished = false;
       try {
         local(); check();
+        preparing = true;
         receipt = await journal.prepareResume({ expected: { sessionKey: execution.sessionKey, commandId: execution.commandId,
           connectionId: execution.connectionId, runId, revision: execution.revision },
           nativeConnectionId: connectionId!, threadId, fingerprint, continuation });
+        preparing = false;
         if (!receipt) throw new RunControlConflict();
         local(); check();
         if (!await journal.beginResume(receipt)) throw new RunControlConflict();
@@ -4980,7 +4980,8 @@ export class CodexAppServer {
         local();
         return result;
       } catch (error) {
-        if (receipt && !dispatched) {
+        if (preparing) this.invalidateExecution();
+        else if (receipt && !dispatched) {
           try { if (!await journal.finishResume(receipt, 'not_dispatched')) this.invalidateExecution(); }
           catch { this.invalidateExecution(); }
         } else if (dispatched && !finished) this.invalidateExecution();
@@ -5762,7 +5763,13 @@ export class CodexAppServer {
   }
   private retainAssistantOutput(sessionKey: string, itemId: string, bytes: number, execution: CodexExecution | undefined, turnId: string | undefined) {
     const identity = JSON.stringify([this.connectionId, execution?.commandId, turnId]);
-    const retained = this.assistantRetention.get(sessionKey);
+    let retained = this.assistantRetention.get(sessionKey);
+    if (retained && retained.identity !== identity && !this.assistantProjections.get(sessionKey)?.size) {
+      this.assistantRetainedBytes -= retained.bytes;
+      this.assistantRetainedItems -= retained.items.size;
+      this.assistantRetention.delete(sessionKey);
+      retained = undefined;
+    }
     const previousBytes = retained?.items.get(itemId);
     const addedBytes = Math.max(0, bytes - (previousBytes ?? 0));
     const addedItems = previousBytes === undefined ? 1 : 0;
@@ -6329,17 +6336,6 @@ function historicalUserImages(content: unknown): NonNullable<ChatMessage['media'
 
 function codexThreadTitle(thread: any) {
   return stringValue(thread?.name) ?? stringValue(thread?.preview)?.split(/\r?\n/, 1)[0]?.slice(0, 120) ?? `Codex ${String(thread?.id ?? '').slice(0, 8)}`;
-}
-
-function statRolloutBytes(rolloutPath: unknown): number | undefined {
-  const normalized = stringValue(rolloutPath);
-  if (!normalized) return undefined;
-  try {
-    const stat = statSync(normalized, { throwIfNoEntry: false });
-    return stat?.isFile() && Number.isSafeInteger(stat.size) && stat.size >= 0 ? stat.size : undefined;
-  } catch {
-    return undefined;
-  }
 }
 
 function secondsToMilliseconds(value: unknown) {

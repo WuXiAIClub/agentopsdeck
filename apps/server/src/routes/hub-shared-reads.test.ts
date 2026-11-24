@@ -25,7 +25,7 @@ import { OpenClawTurnQueue } from '../openclaw/turn-queue.js';
 async function fixture(mode: 'local' | 'http' = 'local', runtime: 'codex' | 'openclaw' = 'codex', events = false, directory = false, channel = false, files = false, workspaceConfigured = files, fileWrites = false, issues = false) {
   const dir = mkdtempSync(join(tmpdir(), 'shared-reads-')), previousHome = process.env.HOME;
   process.env.HOME = dir;
-  const inbound = join(dir, '.openclaw', 'media', 'inbound'); mkdirSync(inbound, { recursive: true });
+  const inbound = join(dir, '.local', 'share', 'agentopsdeck', 'media', 'inbound'); mkdirSync(inbound, { recursive: true, mode: 0o700 });
   const hub = new HubStore(join(dir, 'hub.sqlite'), 'synthetic-vault');
   const alice = hub.createUser('Alice'), bob = hub.createUser('Bob'), charlie = hub.createUser('Charlie');
   const ownerUserId = mode === 'local' ? 'default' : alice.id;
@@ -46,7 +46,7 @@ async function fixture(mode: 'local' | 'http' = 'local', runtime: 'codex' | 'ope
   const message: ChatMessage = { id: 'message:one', sessionKey, role: 'assistant', text: 'Synthetic files', createdAt: 1,
     media: [{ type: 'file', name: 'file.bin', url: '/api/media/inbound/file.bin' }, { type: 'file', name: 'report.zip', url: `/api/artifacts/${artifactId}` },
       { type: 'file', name: 'external', url: 'https://example.invalid/file' }] };
-  writeFileSync(join(inbound, 'file.bin'), Buffer.alloc(1024 * 1024, 7)); deck.addMessage(message);
+  writeFileSync(join(inbound, 'file.bin'), Buffer.alloc(1024 * 1024, 7), { mode: 0o600 }); deck.addMessage(message);
   let refresh = async () => {};
   let historyReady = true;
   const connector = new Hono();

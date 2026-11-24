@@ -17,6 +17,7 @@ function fixture(t: TestContext) {
   runtime.setConnection('native-connection');
   runtime.request = async () => { nativeCalls++; throw Error('must not invoke native'); };
   runtime.threadRefreshResult.set(key, { at: Date.now(), available: true });
+  deck.replaceMessages(key, [{ id: 'synthetic:completed', sessionKey: key, role: 'assistant', text: 'Synthetic completed history', status: 'sent', createdAt: Date.now(), updatedAt: Date.now() }]);
   const facts = users.codexExecutions;
   facts.begin(key, 'prior', 'native-connection'); facts.acknowledge(key, 'prior', 'native-connection', 'prior-turn', () => {});
   facts.observe(key, 'native-connection', 'prior-turn', 'completed');

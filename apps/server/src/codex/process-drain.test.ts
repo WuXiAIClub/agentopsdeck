@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import childProcess, { type ChildProcessWithoutNullStreams } from 'node:child_process';
 import { once } from 'node:events';
-import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { syncBuiltinESMExports } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -52,7 +52,7 @@ test('Connector retains SQLite after launcher exit until its own Linux descendan
     });
     syncBuiltinESMExports();
     const runtime = createConnectorRuntime(loadConfig({ AOD_SERVER_ROLE: 'connector', AOD_CODEX_ENABLED: 'true',
-      AOD_LOCAL_OPENCLAW_CLI: 'false', AOD_CODEX_COMMAND: 'synthetic-descendant-only', AOD_CODEX_DEFAULT_CWD: directory,
+      AOD_LOCAL_OPENCLAW_CLI: 'false', AOD_CODEX_COMMAND: 'synthetic-descendant-only', AOD_CODEX_DEFAULT_CWD: (() => { const cwd = join(directory, 'workspace'); const home = join(directory, 'codex-home'); mkdirSync(cwd, { recursive: true, mode: 0o700 }); mkdirSync(home, { recursive: true, mode: 0o700 }); return cwd; })(), AOD_CODEX_HOME: join(directory, 'codex-home'),
       AOD_CONNECTOR_USERS_DATABASE_FILE: file, AOD_CONNECTOR_TOKENS_FILE: `${file}.tokens`,
       AOD_SESSION_TITLES_FILE: `${file}.titles`, AOD_QUEUE_FILE: `${file}.queue`,
       AOD_MIRROR_OUTBOX_FILE: `${file}.mirror`, AOD_ARTIFACT_INDEX_FILE: `${file}.artifacts`,
@@ -106,7 +106,7 @@ for (const retire of [false, true]) test(`Connector retains SQLite owner until r
     syncBuiltinESMExports();
     const runtime = createConnectorRuntime(loadConfig({
       AOD_SERVER_ROLE: 'connector', AOD_CODEX_ENABLED: 'true', AOD_LOCAL_OPENCLAW_CLI: 'false',
-      AOD_CODEX_COMMAND: 'synthetic-codex-process-only', AOD_CODEX_DEFAULT_CWD: directory,
+      AOD_CODEX_COMMAND: 'synthetic-codex-process-only', AOD_CODEX_DEFAULT_CWD: (() => { const cwd = join(directory, 'workspace'); const home = join(directory, 'codex-home'); mkdirSync(cwd, { recursive: true, mode: 0o700 }); mkdirSync(home, { recursive: true, mode: 0o700 }); return cwd; })(), AOD_CODEX_HOME: join(directory, 'codex-home'),
       AOD_CONNECTOR_USERS_DATABASE_FILE: file, AOD_CONNECTOR_TOKENS_FILE: `${file}.tokens`,
       AOD_SESSION_TITLES_FILE: `${file}.titles`, AOD_QUEUE_FILE: `${file}.queue`,
       AOD_MIRROR_OUTBOX_FILE: `${file}.mirror`, AOD_ARTIFACT_INDEX_FILE: `${file}.artifacts`,
@@ -161,7 +161,7 @@ test('CodexAppServer handles EPIPE on child.stdin without uncaught error during 
     syncBuiltinESMExports();
     const runtime = createConnectorRuntime(loadConfig({
       AOD_SERVER_ROLE: 'connector', AOD_CODEX_ENABLED: 'true', AOD_LOCAL_OPENCLAW_CLI: 'false',
-      AOD_CODEX_COMMAND: 'synthetic-codex-epipe-only', AOD_CODEX_DEFAULT_CWD: directory,
+      AOD_CODEX_COMMAND: 'synthetic-codex-epipe-only', AOD_CODEX_DEFAULT_CWD: (() => { const cwd = join(directory, 'workspace'); const home = join(directory, 'codex-home'); mkdirSync(cwd, { recursive: true, mode: 0o700 }); mkdirSync(home, { recursive: true, mode: 0o700 }); return cwd; })(), AOD_CODEX_HOME: join(directory, 'codex-home'),
       AOD_CONNECTOR_USERS_DATABASE_FILE: file, AOD_CONNECTOR_TOKENS_FILE: `${file}.tokens`,
       AOD_SESSION_TITLES_FILE: `${file}.titles`, AOD_QUEUE_FILE: `${file}.queue`,
       AOD_MIRROR_OUTBOX_FILE: `${file}.mirror`, AOD_ARTIFACT_INDEX_FILE: `${file}.artifacts`,

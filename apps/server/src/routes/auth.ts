@@ -3,7 +3,7 @@ import type { LoginAttemptDecision } from '../auth/security.js';
 import { AuthRoutePersistence, type AuthPasskeyStore, type AuthRouteSessionStore, type AuthRouteAuthority, type AuthRouteAuditStore, type AuthRouteLoginLimiter, type Awaitable } from '../auth/route-persistence.js';
 import { copyLoginAttemptDecision } from '../auth/login-attempt-decision.js';
 import type { PerformanceDiagnostics } from '../diagnostics/performance.js';
-import { clearSessionCookieHeader, createDeckSession, sessionCookieHeader, PasskeyChallengeCapacityError, PasskeyVerificationCapacityError, PasskeyVerificationRateError } from '../auth/passkeys.js';
+import { clearSessionCookieHeader, createDeckSession, sessionCookieHeader, PasskeyChallengeCapacityError, PasskeyUnavailableError, PasskeyVerificationCapacityError, PasskeyVerificationRateError, PasskeyVerificationRejectedError } from '../auth/passkeys.js';
 import { clearAccessCookieHeader as clearLegacyAccessCookieHeader, isValidAccessKey } from '../auth/access-key.js';
 import { fingerprintRequest, keyIdentityHash, loginLimiterSubject } from '../auth/security.js';
 import { AuthPersistenceError } from '../auth/private-store.js';
@@ -308,6 +308,7 @@ export function registerAuthRoutes(app: Hono, deps: AuthRoutesDeps) {
         c.header('Retry-After', String(error.retryAfterSeconds));
         return c.json({ error: error.message, retryAfterSeconds: error.retryAfterSeconds }, 429);
       }
+      if (error instanceof PasskeyUnavailableError) return c.json({ error: error.message }, 400);
       return c.json({ error: normalizeError(error) }, 500);
     }
   }));
@@ -351,6 +352,7 @@ export function registerAuthRoutes(app: Hono, deps: AuthRoutesDeps) {
         c.header('Retry-After', String(error.retryAfterSeconds));
         return c.json({ error: error.message, retryAfterSeconds: error.retryAfterSeconds }, 429);
       }
+      if (error instanceof PasskeyVerificationRejectedError) return c.json({ error: error.message }, 400);
       if (error instanceof AuthPersistenceError) return persistenceFailure(c, error);
       await appendAudit({
         event: 'passkey_bind',
@@ -425,6 +427,7 @@ export function registerAuthRoutes(app: Hono, deps: AuthRoutesDeps) {
         c.header('Retry-After', String(error.retryAfterSeconds));
         return c.json({ error: error.message, retryAfterSeconds: error.retryAfterSeconds }, 429);
       }
+      if (error instanceof PasskeyVerificationRejectedError) return c.json({ error: error.message }, 400);
       if (error instanceof AuthPersistenceError) return persistenceFailure(c, error);
       await appendAudit({
         event: 'passkey_assertion',

@@ -62,7 +62,7 @@
   {
     "path": "apps/server/src/hub/lifecycle-commands.test.ts",
     "category": "credential-url",
-    "sha256": "6e00d791550f047c080db1fdbfae9877d536124a9cbd8ee1bb386da68489ccd0",
+    "sha256": "253c40b8d570cc5bef9aedd495b7a09bd76c1f5d64ea7f9331610f8837081e3e",
     "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
   },
   {

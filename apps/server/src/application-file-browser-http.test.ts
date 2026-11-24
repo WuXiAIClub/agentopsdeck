@@ -143,10 +143,17 @@ for (const ending of ['timeout', 'disconnect', 'close'] as const)
   test(`original upload ${ending} retains dispatched physical FS and never replays`, { timeout: 15_000 }, async t => {
     const f = await fixture(t, 'standalone', 'sqlite', true, ending === 'timeout' ? 250 : 5_000);
     const entered = f.gate(), held = f.gate(), destination = join(f.home, 'workspace-main', 'upload.txt');
-    const original = fs.writeFile; let calls = 0;
-    const mocked = t.mock.method(fs, 'writeFile', async (...args: Parameters<typeof fs.writeFile>) => {
-      if (args[0] === destination) { calls++; entered.release(); await held.promise; }
-      return original(...args);
+    const original = fs.open; let calls = 0;
+    const mocked = t.mock.method(fs, 'open', async (...args: Parameters<typeof fs.open>) => {
+      const handle = await original(...args);
+      if (args[0] === destination) {
+        const writeFile = handle.writeFile.bind(handle);
+        t.mock.method(handle, 'writeFile', async (...writeArgs: Parameters<typeof handle.writeFile>) => {
+          calls++; entered.release(); await held.promise;
+          return writeFile(...writeArgs);
+        });
+      }
+      return handle;
     });
     syncBuiltinESMExports();
     const clock = ending === 'timeout' ? controlledHttpDeadline(t) : undefined;
@@ -167,11 +174,18 @@ for (const ending of ['timeout', 'disconnect', 'close'] as const)
 
 test('logout after original file write suppresses delivery but preserves the actual single write', async t => {
   const f = await fixture(t), entered = f.gate(), held = f.gate(), destination = join(f.home, 'workspace-main', 'upload.txt');
-  const original = fs.writeFile; let calls = 0;
-  const mocked = t.mock.method(fs, 'writeFile', async (...args: Parameters<typeof fs.writeFile>) => {
-    const value = await original(...args);
-    if (args[0] === destination) { calls++; entered.release(); await held.promise; }
-    return value;
+  const original = fs.open; let calls = 0;
+  const mocked = t.mock.method(fs, 'open', async (...args: Parameters<typeof fs.open>) => {
+    const handle = await original(...args);
+    if (args[0] === destination) {
+      const writeFile = handle.writeFile.bind(handle);
+      t.mock.method(handle, 'writeFile', async (...writeArgs: Parameters<typeof handle.writeFile>) => {
+        const value = await writeFile(...writeArgs);
+        calls++; entered.release(); await held.promise;
+        return value;
+      });
+    }
+    return handle;
   });
   syncBuiltinESMExports();
   try {

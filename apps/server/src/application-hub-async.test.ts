@@ -10,7 +10,8 @@ import { createAsyncHubApplication } from './application-hub-async.js';
 import { HubStore } from './hub/hub-store.js';
 import { AsyncHubMemberOwner } from './hub/async-member-owner.js';
 import { WeixinService } from './hub/weixin-service.js';
-import { PasskeyManager, PersistentDeckSessionSet } from './auth/passkeys.js';
+import { PasskeyManager } from './auth/passkeys.js';
+import { OriginalJsonAuthCommandStore } from './auth/original-json-command-store.js';
 import { openSqliteAuth } from './auth/sqlite-store.js';
 import { keyIdentityHash, credentialHashForAudit } from './auth/security.js';
 import { writePrivateAuthStore } from './auth/private-store.js';
@@ -53,10 +54,11 @@ test('production Hub JSON: original bound Passkey authenticates without granting
   writePrivateAuthStore(f.config.passkeysFile, { credentials: [{ id: credentialId,
     publicKey: Buffer.from('isolated-unused-cose').toString('base64url'), counter: 0, rpId: 'localhost',
     keyIdentityHash: keyIdentityHash(admin), label: 'isolated credential', createdAt: 1 }] });
-  const sessions = new PersistentDeckSessionSet(f.config.authSessionsFile);
+  const store = new OriginalJsonAuthCommandStore(f.config.passkeysFile, f.config.authSessionsFile, keyIdentityHash(admin));
   const bound = 'p'.repeat(43), key = 'k'.repeat(43);
-  sessions.add(bound, { credentialHash: credentialHashForAudit(credentialId), keyIdentityHash: keyIdentityHash(admin) });
-  sessions.add(key);
+  store.sessions.add(bound, { credentialHash: credentialHashForAudit(credentialId), keyIdentityHash: keyIdentityHash(admin) });
+  store.sessions.add(key);
+  store.close();
   const application = await f.open(), headers = { cookie: `agentopsdeck_session=${bound}` };
   assert.equal((await (await f.request(application, '/api/auth/status', headers)).json()).authenticated, true);
   const status = await f.request(application, '/api/hub/v1/weixin', headers);
@@ -85,7 +87,11 @@ for (const mode of ['json', 'sqlite'] as const) {
     const adminToken = 'a'.repeat(43);
     if (mode === 'sqlite') {
       const original = openSqliteAuth(f.config.authSqliteFile!, [], () => keyIdentityHash(admin)); original.sessions.add(adminToken); await original.close();
-    } else new PersistentDeckSessionSet(f.config.authSessionsFile).add(adminToken);
+    } else {
+      const original = new OriginalJsonAuthCommandStore(f.config.passkeysFile, f.config.authSessionsFile, keyIdentityHash(admin));
+      original.sessions.add(adminToken);
+      original.close();
+    }
     // Prototype changes apply only on this thread. Worker must be the sole
     // place constructing the original Auth/Hub and running their SQL/files.
     t.mock.method(HubStore.prototype, 'importLegacySessionPreferences', () => { throw Error('MAIN_THREAD_HUB_SQL'); });

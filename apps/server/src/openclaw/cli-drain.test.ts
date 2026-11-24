@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
 import childProcess from 'node:child_process';
 import { EventEmitter } from 'node:events';
+import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { syncBuiltinESMExports } from 'node:module';
 import { PassThrough } from 'node:stream';
 import test from 'node:test';
@@ -18,6 +21,10 @@ function barrier() {
 const tick = () => new Promise<void>(resolve => setImmediate(resolve));
 
 for (const failure of [false, true]) test(`CLI lifetime includes stdio close and asynchronous completion finally, failure=${failure}`, async t => {
+  const home = mkdtempSync(join(tmpdir(), 'aod-cli-drain-'));
+  mkdirSync(home, { recursive: true, mode: 0o700 });
+  const saved = { AOD_LOCAL_OPENCLAW_CLI: process.env.AOD_LOCAL_OPENCLAW_CLI, AOD_OPENCLAW_HOME: process.env.AOD_OPENCLAW_HOME, AOD_OPENCLAW_CLI_PATH: process.env.AOD_OPENCLAW_CLI_PATH };
+  Object.assign(process.env, { AOD_LOCAL_OPENCLAW_CLI: 'true', AOD_OPENCLAW_HOME: home, AOD_OPENCLAW_CLI_PATH: process.execPath });
   const child = Object.assign(new EventEmitter(), { stdout: new PassThrough(), stderr: new PassThrough(), unref() {} });
   const finish = barrier();
   let lifetime: Promise<void> | undefined, closed = false, callbacks = 0;
@@ -26,6 +33,8 @@ for (const failure of [false, true]) test(`CLI lifetime includes stdio close and
   t.after(async () => {
     finish.release(); child.emit('close', 0, null); await lifetime;
     t.mock.restoreAll(); syncBuiltinESMExports();
+    for (const [k, v] of Object.entries(saved)) { if (v === undefined) delete process.env[k]; else process.env[k] = v; }
+    rmSync(home, { recursive: true, force: true });
   });
   t.mock.method(console, 'warn', () => {});
   const starting = startOpenClawAgentFallback('synthetic', undefined, 'synthetic', 'input', 'one', async () => {
@@ -45,11 +54,19 @@ for (const failure of [false, true]) test(`CLI lifetime includes stdio close and
 });
 
 for (const fault of ['throw', 'error']) test(`CLI releases failed spawn lifetime only after its actual boundary: ${fault}`, async t => {
+  const home = mkdtempSync(join(tmpdir(), 'aod-cli-drain-fault-'));
+  mkdirSync(home, { recursive: true, mode: 0o700 });
+  const saved = { AOD_LOCAL_OPENCLAW_CLI: process.env.AOD_LOCAL_OPENCLAW_CLI, AOD_OPENCLAW_HOME: process.env.AOD_OPENCLAW_HOME, AOD_OPENCLAW_CLI_PATH: process.env.AOD_OPENCLAW_CLI_PATH };
+  Object.assign(process.env, { AOD_LOCAL_OPENCLAW_CLI: 'true', AOD_OPENCLAW_HOME: home, AOD_OPENCLAW_CLI_PATH: process.execPath });
   const child = Object.assign(new EventEmitter(), { stdout: new PassThrough(), stderr: new PassThrough(), unref() {} });
   let lifetime: Promise<void> | undefined, closed = false;
   t.mock.method(childProcess, 'spawn', () => { if (fault === 'throw') throw new Error('synthetic spawn failure'); return child; });
   syncBuiltinESMExports();
-  t.after(async () => { child.emit('close', -1, null); await lifetime; t.mock.restoreAll(); syncBuiltinESMExports(); });
+  t.after(async () => {
+    child.emit('close', -1, null); await lifetime; t.mock.restoreAll(); syncBuiltinESMExports();
+    for (const [k, v] of Object.entries(saved)) { if (v === undefined) delete process.env[k]; else process.env[k] = v; }
+    rmSync(home, { recursive: true, force: true });
+  });
   const starting = startOpenClawAgentFallback('synthetic', undefined, 'synthetic', 'input', 'one', undefined,
     pending => { lifetime = pending; void pending.then(() => { closed = true; }); });
   if (fault === 'error') child.emit('error', new Error('synthetic spawn failure'));

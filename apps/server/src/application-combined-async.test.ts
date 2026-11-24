@@ -116,7 +116,7 @@ for (const mode of ['json', 'sqlite'] as const) for (const keyed of [true, false
     assert.equal((await (await f.request('/api/gateway/status')).json()).enabled, false);
     assert.equal((await f.request('/api/gateway/restart', keyed ? { 'x-agentopsdeck-key': key } : {}, { method: 'POST' })).status, 502);
     const files = await f.request('/api/files/agents/invalid.id');
-    assert.equal(files.status, 400); assert.match(await files.text(), /invalid agent id/);
+    assert.equal(files.status, 400); assert.match(await files.text(), /invalid_file_request/);
     assert.equal(files.headers.get('cache-control'), 'no-store');
     assert.equal((await f.request('/api/files/roots', { ...(keyed ? { 'x-agentopsdeck-key': key } : {}),
       'x-agentopsdeck-execution-grant': 'not-user-authority' })).status, 403);

@@ -896,6 +896,7 @@ test(`ordinary terminal refresh uses the original durable resume and never repla
     let resumes = 0;
     f.runtime.request = async (method: string, ...args: unknown[]) => {
       if (method === 'thread/resume') {
+        if (typeof args[3] === 'function') (args[3] as () => void)();
         resumes++;
         if (fault === 'native-ack') throw Error('synthetic lost native ACK');
         if (fault === 'malformed-ack') return { thread: { id: 'wrong-identity', turns: [] } };
@@ -1020,13 +1021,14 @@ test(`original cold recovery handles physical resume ACK loss without replay: ${
     let resumes = 0;
     f.runtime.request = async (method: string, ...args: unknown[]) => {
       if (method === 'thread/resume') {
+        if (typeof args[3] === 'function') (args[3] as () => void)();
         resumes++;
         if (fault === 'native-ack') throw Error('synthetic lost native ACK after write');
         if (fault === 'malformed-ack') return { thread: { id: 'wrong-identity', turns: [] } };
         return request('thread/read');
       }
       const result = await request(method, ...args);
-      if (method === 'thread/read') result.thread.status.type = 'notLoaded';
+      if (method === 'thread/read') result.thread.status.type = resumes ? 'idle' : 'notLoaded';
       return result;
     };
     const prepare = f.journal.prepareResume, begin = f.journal.beginResume, finish = f.journal.finishResume;
@@ -1104,6 +1106,7 @@ test(`original cold recovery uses worker revision and keeps blocked checkpoint w
     let reads = 0, resumes = 0;
     f.runtime.request = async (method: string, ...args: unknown[]) => {
       if (method === 'thread/resume') {
+        if (typeof args[3] === 'function') (args[3] as () => void)();
         resumes++;
         if (mutation === 'after-resume') f.runtime.nativeConnectionGeneration++;
         if (mutation === 'after-resume-protection' || mutation === 'after-resume-protection-and-tool')
@@ -1115,7 +1118,7 @@ test(`original cold recovery uses worker revision and keeps blocked checkpoint w
         return request('thread/read');
       }
       const result = await request(method, ...args);
-      if (method === 'thread/read') { reads++; result.thread.status.type = 'notLoaded'; }
+      if (method === 'thread/read') { reads++; result.thread.status.type = resumes ? 'idle' : 'notLoaded'; }
       if (method === 'thread/goal/get' && reads >= 2 && mutation === 'before-resume')
         await f.owner.command('codexExecutionTool', { sessionKey: key, connectionId: connection,
           runId: 'native-run', itemId: 'racing-tool', completed: false });

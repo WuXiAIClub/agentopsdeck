@@ -787,7 +787,7 @@ test('update service rejects manifest hash mismatch before install and refuses r
   const dir = await mkdtemp(path.join(tmpdir(), 'cod146-update-'));
   const manifest = JSON.stringify({ releases: [{ version: '2.0.0', artifactUrl: 'https://example.test/artifact.tgz', sha256: 'abc' }] });
   (globalThis as any).fetch = async () => new Response(manifest, { status: 200 });
-  const service = new ConnectorUpdateService(loadConfig({ AOD_CONNECTOR_UPDATE_MANIFEST_URL: 'https://example.test/manifest.json', AOD_CONNECTOR_UPDATE_STATE_FILE: path.join(dir, 'state.json'), AOD_CONNECTOR_INSTALL_ROOT: dir, AOD_CONNECTOR_CURRENT_SYMLINK: path.join(dir, 'current') } as any));
+  const service = new ConnectorUpdateService(loadConfig({ AOD_CONNECTOR_UPDATE_ENABLED: 'true', AOD_CONNECTOR_UPDATE_MANIFEST_URL: 'https://example.test/manifest.json', AOD_CONNECTOR_UPDATE_STATE_FILE: path.join(dir, 'state.json'), AOD_CONNECTOR_INSTALL_ROOT: dir, AOD_CONNECTOR_CURRENT_SYMLINK: path.join(dir, 'current') } as any));
   const status = await service.apply({ version: '2.0.0', manifestSha256: 'wrong' });
   assert.equal(status.state, 'failed');
   assert.match(status.lastError ?? '', /manifest hash mismatch/);
@@ -810,7 +810,7 @@ test('update service extracts prebuilt tar, validates layout, persists atomicall
   const manifest = JSON.stringify({ releases: [{ version: '2.0.0', revision: 'rev1', artifactUrl: 'https://example.test/artifact.tar', sha256: artifactHash, size: bytes.length }] });
   const manifestHash = createHash('sha256').update(manifest).digest('hex');
   (globalThis as any).fetch = async (url: string) => url.includes('artifact') ? new Response(bytes, { status: 200 }) : new Response(manifest, { status: 200 });
-  const service = new ConnectorUpdateService(loadConfig({ AOD_CONNECTOR_UPDATE_MANIFEST_URL: 'https://example.test/manifest.json', AOD_CONNECTOR_UPDATE_STATE_FILE: path.join(dir, 'state.json'), AOD_CONNECTOR_INSTALL_ROOT: dir, AOD_CONNECTOR_CURRENT_SYMLINK: current } as any));
+  const service = new ConnectorUpdateService(loadConfig({ AOD_CONNECTOR_UPDATE_ENABLED: 'true', AOD_CONNECTOR_UPDATE_MANIFEST_URL: 'https://example.test/manifest.json', AOD_CONNECTOR_UPDATE_STATE_FILE: path.join(dir, 'state.json'), AOD_CONNECTOR_INSTALL_ROOT: dir, AOD_CONNECTOR_CURRENT_SYMLINK: current } as any));
   const previous = await service.status();
   // Synthetic record of a prior selection, not a known-good/native compatibility claim.
   await writeFile(path.join(dir, 'state.json'), JSON.stringify({ ...previous, selectedRelease: { path: old, version: previous.currentVersion } }));
@@ -839,7 +839,7 @@ test('update service rejects traversal, symlink escape, size mismatch and missin
     await symlink(old, current);
     const manifest = JSON.stringify({ releases: [{ version: '2.0.0', artifactUrl: 'https://example.test/artifact.tar', sha256: createHash('sha256').update(artifact).digest('hex'), size: artifact.length }] });
     (globalThis as any).fetch = async (url: string) => url.includes('artifact') ? new Response(artifact, { status: 200 }) : new Response(manifest, { status: 200 });
-    const service = new ConnectorUpdateService(loadConfig({ AOD_CONNECTOR_VERSION: '1.0.0', AOD_CONNECTOR_UPDATE_MANIFEST_URL: 'https://example.test/manifest.json', AOD_CONNECTOR_UPDATE_STATE_FILE: path.join(dir, 'state.json'), AOD_CONNECTOR_INSTALL_ROOT: dir, AOD_CONNECTOR_CURRENT_SYMLINK: current } as any));
+    const service = new ConnectorUpdateService(loadConfig({ AOD_CONNECTOR_UPDATE_ENABLED: 'true', AOD_CONNECTOR_VERSION: '1.0.0', AOD_CONNECTOR_UPDATE_MANIFEST_URL: 'https://example.test/manifest.json', AOD_CONNECTOR_UPDATE_STATE_FILE: path.join(dir, 'state.json'), AOD_CONNECTOR_INSTALL_ROOT: dir, AOD_CONNECTOR_CURRENT_SYMLINK: current } as any));
     const status = await service.apply({ version: '2.0.0', manifestSha256: createHash('sha256').update(manifest).digest('hex') });
     assert.equal(status.state, 'failed');
     assert.match(status.lastError ?? '', error);
@@ -867,7 +867,7 @@ test('update service rejects malformed tar headers, truncated payloads, and acti
     await symlink(old, current);
     const manifest = JSON.stringify({ releases: [{ version: '2.0.0', artifactUrl: 'https://example.test/artifact.tar', sha256: createHash('sha256').update(artifact).digest('hex'), size: artifact.length }] });
     (globalThis as any).fetch = async (url: string) => url.includes('artifact') ? new Response(artifact, { status: 200 }) : new Response(manifest, { status: 200 });
-    const service = new ConnectorUpdateService(loadConfig({ AOD_CONNECTOR_VERSION: '1.0.0', AOD_CONNECTOR_UPDATE_MANIFEST_URL: 'https://example.test/manifest.json', AOD_CONNECTOR_UPDATE_STATE_FILE: path.join(dir, 'state.json'), AOD_CONNECTOR_INSTALL_ROOT: dir, AOD_CONNECTOR_CURRENT_SYMLINK: current } as any));
+    const service = new ConnectorUpdateService(loadConfig({ AOD_CONNECTOR_UPDATE_ENABLED: 'true', AOD_CONNECTOR_VERSION: '1.0.0', AOD_CONNECTOR_UPDATE_MANIFEST_URL: 'https://example.test/manifest.json', AOD_CONNECTOR_UPDATE_STATE_FILE: path.join(dir, 'state.json'), AOD_CONNECTOR_INSTALL_ROOT: dir, AOD_CONNECTOR_CURRENT_SYMLINK: current } as any));
     const status = await service.apply({ version: '2.0.0', manifestSha256: createHash('sha256').update(manifest).digest('hex') });
     assert.equal(status.state, 'failed');
     assert.match(status.lastError ?? '', error);
@@ -881,7 +881,7 @@ test('update service rejects malformed tar headers, truncated payloads, and acti
   await symlink(activeRelease, current);
   const manifest = JSON.stringify({ releases: [{ version: '2.0.0', artifactUrl: 'https://example.test/artifact.tar', sha256: createHash('sha256').update(good).digest('hex'), size: good.length }] });
   (globalThis as any).fetch = async (url: string) => url.includes('artifact') ? new Response(good, { status: 200 }) : new Response(manifest, { status: 200 });
-  const service = new ConnectorUpdateService(loadConfig({ AOD_CONNECTOR_UPDATE_MANIFEST_URL: 'https://example.test/manifest.json', AOD_CONNECTOR_UPDATE_STATE_FILE: path.join(dir, 'state.json'), AOD_CONNECTOR_INSTALL_ROOT: dir, AOD_CONNECTOR_CURRENT_SYMLINK: current, AOD_CONNECTOR_VERSION: '1.0.0' } as any));
+  const service = new ConnectorUpdateService(loadConfig({ AOD_CONNECTOR_UPDATE_ENABLED: 'true', AOD_CONNECTOR_UPDATE_MANIFEST_URL: 'https://example.test/manifest.json', AOD_CONNECTOR_UPDATE_STATE_FILE: path.join(dir, 'state.json'), AOD_CONNECTOR_INSTALL_ROOT: dir, AOD_CONNECTOR_CURRENT_SYMLINK: current, AOD_CONNECTOR_VERSION: '1.0.0' } as any));
   const status = await service.apply({ version: '2.0.0', manifestSha256: createHash('sha256').update(manifest).digest('hex') });
   assert.equal(status.state, 'failed');
   assert.match(status.lastError ?? '', /active release path/);

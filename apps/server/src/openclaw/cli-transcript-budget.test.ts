@@ -16,11 +16,25 @@ const row = (id: string, text: string) => JSON.stringify({ id, timestamp: Date.n
 
 function fixture(context: TestContext, bytes: string | Buffer) {
   const directory = mkdtempSync(join(tmpdir(), 'agentopsdeck-cli-transcript-'));
-  const sessionDirectory = join(directory, '.openclaw', 'agents', 'synthetic', 'sessions');
+  const ambientHome = join(directory, 'ambient');
+  const openclawHome = join(directory, 'openclaw-home');
+  mkdirSync(ambientHome, { recursive: true, mode: 0o700 });
+  mkdirSync(openclawHome, { recursive: true, mode: 0o700 });
+  const sessionDirectory = join(openclawHome, 'agents', 'synthetic', 'sessions');
   const file = join(sessionDirectory, 'original.jsonl');
   mkdirSync(sessionDirectory, { recursive: true }); writeFileSync(file, bytes);
-  const originalHome = process.env.HOME;
-  process.env.HOME = directory;
+  const saved = {
+    HOME: process.env.HOME,
+    AOD_LOCAL_OPENCLAW_CLI: process.env.AOD_LOCAL_OPENCLAW_CLI,
+    AOD_OPENCLAW_HOME: process.env.AOD_OPENCLAW_HOME,
+    AOD_OPENCLAW_CLI_PATH: process.env.AOD_OPENCLAW_CLI_PATH,
+  };
+  Object.assign(process.env, {
+    HOME: ambientHome,
+    AOD_LOCAL_OPENCLAW_CLI: 'true',
+    AOD_OPENCLAW_HOME: openclawHome,
+    AOD_OPENCLAW_CLI_PATH: process.execPath,
+  });
   const child = Object.assign(new EventEmitter(), { stdout: new PassThrough(), stderr: new PassThrough() });
   let lifetime!: Promise<void>, result: Completion | undefined, drained = false;
   context.mock.method(childProcess, 'spawn', () => child);
@@ -30,7 +44,7 @@ function fixture(context: TestContext, bytes: string | Buffer) {
   context.after(async () => {
     child.emit('exit', 0, null); child.emit('close', 0, null); await starting; await lifetime;
     context.mock.restoreAll(); syncBuiltinESMExports();
-    if (originalHome === undefined) delete process.env.HOME; else process.env.HOME = originalHome;
+    for (const [k, v] of Object.entries(saved)) { if (v === undefined) delete process.env[k]; else process.env[k] = v; }
     rmSync(directory, { recursive: true, force: true });
   });
   return { file, sessionDirectory, drained: () => drained, complete: async () => {

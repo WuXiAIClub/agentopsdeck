@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import childProcess, { type ChildProcess } from 'node:child_process';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';
 import fsPromises from 'node:fs/promises';
 import { syncBuiltinESMExports } from 'node:module';
 import { tmpdir } from 'node:os';
@@ -175,6 +175,10 @@ test('CLI mirror parsing accepts only structured successful output and preserves
 
 test('inert CLI child stdout reaches the original completion as structured reply evidence', { timeout: 10_000 }, async context => {
   const directory = mkdtempSync(join(tmpdir(), 'agentopsdeck-cli-reply-'));
+  const openclawHome = join(directory, 'openclaw-home');
+  mkdirSync(openclawHome, { mode: 0o700 });
+  const saved = { AOD_LOCAL_OPENCLAW_CLI: process.env.AOD_LOCAL_OPENCLAW_CLI, AOD_OPENCLAW_HOME: process.env.AOD_OPENCLAW_HOME, AOD_OPENCLAW_CLI_PATH: process.env.AOD_OPENCLAW_CLI_PATH };
+  Object.assign(process.env, { AOD_LOCAL_OPENCLAW_CLI: 'true', AOD_OPENCLAW_HOME: openclawHome, AOD_OPENCLAW_CLI_PATH: process.execPath });
   const nativeSpawn = childProcess.spawn;
   let child: ChildProcess | undefined, lifetime: Promise<void> | undefined;
   let completion: Parameters<Complete>[0] | undefined;
@@ -182,10 +186,11 @@ test('inert CLI child stdout reaches the original completion as structured reply
     if (child && child.exitCode === null && child.signalCode === null) child.kill('SIGKILL');
     await lifetime;
     context.mock.restoreAll(); syncBuiltinESMExports();
+    for (const [k, v] of Object.entries(saved)) { if (v === undefined) delete process.env[k]; else process.env[k] = v; }
     rmSync(directory, { recursive: true, force: true });
   });
   context.mock.method(childProcess, 'spawn', (command: string, args: string[]) => {
-    assert.equal(command, 'openclaw');
+    assert.equal(command, process.execPath);
     assert.equal(args[0], 'agent');
     assert.ok(args.includes('--json'));
     child = nativeSpawn(process.execPath, ['-e', 'process.stdout.write(JSON.stringify({status:"ok",result:{payloads:[{text:"original child reply"}]}}))'],
@@ -205,6 +210,10 @@ test('inert CLI child stdout reaches the original completion as structured reply
 for (const stream of ['stdout', 'stderr'] as const) {
   test(`real CLI ${stream} overflow durably blocks only the original mirror without retry`, { timeout: 10_000 }, async context => {
     const directory = mkdtempSync(join(tmpdir(), 'agentopsdeck-cli-budget-mirror-'));
+    const openclawHome = join(directory, 'openclaw-home');
+    mkdirSync(openclawHome, { mode: 0o700 });
+    const saved = { AOD_LOCAL_OPENCLAW_CLI: process.env.AOD_LOCAL_OPENCLAW_CLI, AOD_OPENCLAW_HOME: process.env.AOD_OPENCLAW_HOME, AOD_OPENCLAW_CLI_PATH: process.env.AOD_OPENCLAW_CLI_PATH };
+    Object.assign(process.env, { AOD_LOCAL_OPENCLAW_CLI: 'true', AOD_OPENCLAW_HOME: openclawHome, AOD_OPENCLAW_CLI_PATH: process.execPath });
     const file = join(directory, 'connector.sqlite');
     const nativeSpawn = childProcess.spawn;
     const db = new ConnectorUserStore(file), store = new DeckStore();
@@ -220,10 +229,11 @@ for (const stream of ['stdout', 'stderr'] as const) {
       if (child && child.exitCode === null && child.signalCode === null) child.kill('SIGKILL');
       await dispatch.close(); await mirror.close(); db.close();
       context.mock.restoreAll(); syncBuiltinESMExports();
+      for (const [k, v] of Object.entries(saved)) { if (v === undefined) delete process.env[k]; else process.env[k] = v; }
       rmSync(directory, { recursive: true, force: true });
     });
     context.mock.method(childProcess, 'spawn', (command: string, args: string[]) => {
-      assert.equal(command, 'openclaw'); assert.equal(args[0], 'agent'); spawns++;
+      assert.equal(command, process.execPath); assert.equal(args[0], 'agent'); spawns++;
       child = nativeSpawn(process.execPath, ['-e', `
         process.stdout.write(JSON.stringify({ result: { payloads: [{ text: 'do not forward truncated reply' }] } }));
         process[${JSON.stringify(stream)}].write(Buffer.alloc(${stream === 'stdout' ? 1024 * 1024 + 1 : 64 * 1024 + 1}, 32));

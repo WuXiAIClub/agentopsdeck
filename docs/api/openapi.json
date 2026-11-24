@@ -285,7 +285,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/routes/auth.ts",
-            "line": 366
+            "line": 368
           }
         ],
         "x-aod-raw-path": "/api/auth/passkeys/login/options",
@@ -309,7 +309,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/routes/auth.ts",
-            "line": 380
+            "line": 382
           }
         ],
         "x-aod-raw-path": "/api/auth/passkeys/login/verify",
@@ -357,7 +357,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/routes/auth.ts",
-            "line": 315
+            "line": 316
           }
         ],
         "x-aod-raw-path": "/api/auth/passkeys/register/verify",

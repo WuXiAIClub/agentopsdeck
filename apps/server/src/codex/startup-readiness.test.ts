@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import childProcess from 'node:child_process';
 import { EventEmitter } from 'node:events';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';
 import { syncBuiltinESMExports } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -13,6 +13,10 @@ import { CodexAppServer } from './app-server.js';
 
 function fixture(t: test.TestContext) {
   const directory = mkdtempSync(join(tmpdir(), 'agentopsdeck-codex-startup-'));
+  const homeDirectory = join(directory, 'codex-home');
+  const workspace = join(directory, 'workspace');
+  mkdirSync(homeDirectory, { mode: 0o700 });
+  mkdirSync(workspace, { mode: 0o700 });
   const users = new ConnectorUserStore(':memory:');
   const store = new DeckStore({ sessionTitlesFile: join(directory, 'titles.json') });
   const children: ReturnType<typeof makeChild>[] = [];
@@ -48,7 +52,7 @@ function fixture(t: test.TestContext) {
     return true;
   });
   syncBuiltinESMExports();
-  const codex = new CodexAppServer({ enabled: true, command: 'synthetic-codex-no-executable', defaultCwd: directory,
+  const codex = new CodexAppServer({ enabled: true, command: 'synthetic-codex-no-executable', defaultCwd: workspace, homeDirectory,
     defaultModel: 'synthetic-model', approvalPolicy: 'never', store, turnQueue: users.turns, executions: users.codexExecutions,
     authorizeTurn: () => true });
   t.after(async () => {

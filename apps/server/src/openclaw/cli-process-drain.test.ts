@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import childProcess, { type ChildProcessWithoutNullStreams } from 'node:child_process';
 import { once } from 'node:events';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';
 import fsPromises from 'node:fs/promises';
 import { syncBuiltinESMExports } from 'node:module';
 import { tmpdir } from 'node:os';
@@ -16,6 +16,10 @@ import { OpenClawTurnQueue } from './turn-queue.js';
 
 for (const operation of ['close', 'pause', 'pause-before-fallback'] as const) test(`Connector ${operation} owns a real CLI child and its post-close transcript read`, { timeout: 15_000 }, async t => {
   const directory = mkdtempSync(join(tmpdir(), 'agentopsdeck-cli-process-drain-'));
+  const openclawHome = join(directory, 'openclaw-home');
+  mkdirSync(join(openclawHome, 'agents', 'synthetic', 'sessions'), { recursive: true, mode: 0o700 });
+  const saved = { AOD_LOCAL_OPENCLAW_CLI: process.env.AOD_LOCAL_OPENCLAW_CLI, AOD_OPENCLAW_HOME: process.env.AOD_OPENCLAW_HOME, AOD_OPENCLAW_CLI_PATH: process.env.AOD_OPENCLAW_CLI_PATH };
+  Object.assign(process.env, { AOD_LOCAL_OPENCLAW_CLI: 'true', AOD_OPENCLAW_HOME: openclawHome, AOD_OPENCLAW_CLI_PATH: process.execPath });
   const file = join(directory, 'connector.sqlite');
   const sessionKey = 'agent:synthetic:dashboard:agentopsdeck-web-drain';
   const nativeSpawn = childProcess.spawn;
@@ -28,7 +32,7 @@ for (const operation of ['close', 'pause', 'pause-before-fallback'] as const) te
   const gatewayWait = new Promise<void>(resolve => { releaseGateway = resolve; });
   const gatewayReady = new Promise<void>(resolve => { gatewayEntered = resolve; });
   t.mock.method(childProcess, 'spawn', (command: string, args: string[]) => {
-    assert.equal(command, 'openclaw'); assert.equal(args[0], 'agent');
+    assert.equal(command, process.execPath); assert.equal(args[0], 'agent');
     assert.equal(child, undefined, 'queued successor cannot spawn during shutdown');
     child = nativeSpawn(process.execPath, ['-e', `
       process.stdin.once('data', () => {
@@ -41,7 +45,7 @@ for (const operation of ['close', 'pause', 'pause-before-fallback'] as const) te
     return child;
   });
   t.mock.method(fsPromises, 'opendir', async (path: unknown) => {
-    assert.equal(String(path), join(process.env.HOME!, '.openclaw', 'agents', 'synthetic', 'sessions'));
+    assert.equal(String(path), join(openclawHome, 'agents', 'synthetic', 'sessions'));
     reading(); await transcript; return { async *[Symbol.asyncIterator]() {} };
   });
   t.mock.method(OpenClawTurnQueue.prototype, 'start', function(this: OpenClawTurnQueue) { queue = this; });
@@ -59,6 +63,7 @@ for (const operation of ['close', 'pause', 'pause-before-fallback'] as const) te
     if (child && child.exitCode === null && child.signalCode === null) child.kill('SIGKILL');
     await exited; await runtime.close();
     t.mock.restoreAll(); syncBuiltinESMExports();
+    for (const [k, v] of Object.entries(saved)) { if (v === undefined) delete process.env[k]; else process.env[k] = v; }
     rmSync(directory, { recursive: true, force: true });
   });
   // Real runtime/queue/dispatch/CLI, with only native transport, transcript and

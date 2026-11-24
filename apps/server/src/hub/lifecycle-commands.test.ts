@@ -71,10 +71,10 @@ test('endpoint opt-in is strict, TLS or loopback only, no browser-selected desti
   assert.deepEqual(parseLifecycleEndpoints(undefined), []);
   assert.deepEqual(parseLifecycleEndpoints(JSON.stringify([valid])), [valid]);
   for (const origin of ['http://10.0.0.2:8793', 'https://user:pass@example.com', 'https://example.com/path', 'https://example.com/?secret=x', 'file:///tmp/file']) {
-    assert.throws(() => parseLifecycleEndpoints(JSON.stringify([{ ...valid, origin }])), /Invalid AGENTOPSDECK/);
+    assert.throws(() => parseLifecycleEndpoints(JSON.stringify([{ ...valid, origin }])), /Invalid AOD_HUB_LIFECYCLE_ENDPOINTS_JSON/);
   }
   for (const value of [[valid, valid], [{ ...valid, command: 'restart' }], [{ ...valid, nodeId: '' }], {}]) {
-    assert.throws(() => parseLifecycleEndpoints(JSON.stringify(value)), /Invalid AGENTOPSDECK/);
+    assert.throws(() => parseLifecycleEndpoints(JSON.stringify(value)), /Invalid AOD_HUB_LIFECYCLE_ENDPOINTS_JSON/);
   }
 });
 

@@ -39,10 +39,9 @@ async function fixture(work: (f: { root: string; file: string; passkeysFile: str
   const root = mkdtempSync(join(tmpdir(), 'hub-original-json-')), file = join(root, 'hub.sqlite');
   const passkeysFile = join(root, 'passkeys.json'), sessionsFile = join(root, 'sessions.json');
   writePrivateAuthStore(passkeysFile, { credentials });
-  const passkeys = new PasskeyManager(passkeysFile);
-  const sessions = new PersistentDeckSessionSet(sessionsFile,
-    binding => binding.keyIdentityHash === keyIdentityHash(key) && passkeys.isCredentialCurrent(binding.credentialHash, binding.keyIdentityHash));
-  sessions.add(token); sessions.add(legacyToken);
+  const store = new OriginalJsonAuthCommandStore(passkeysFile, sessionsFile, keyIdentityHash(key));
+  store.sessions.add(token); store.sessions.add(legacyToken); store.close();
+  const sessions = new OriginalJsonAuthCommandStore(passkeysFile, sessionsFile, keyIdentityHash(key)).sessions;
   const hub = new HubStore(file, secret, [], key, createAccessKeyGuard(key, sessions));
   const member = hub.createUser('original JSON member'), memberKey = hub.identities.issueKey(member.id);
   const memberToken = hub.identities.createSession(memberKey.token)!;
@@ -76,7 +75,7 @@ test('original JSON cookies, including noncanonical legacy tokens, preserve Hub 
     assert.equal(await port.authority.authorize(request(legacyToken)), false);
     assert.equal(await owner.command('workspaceSave', { evidence: { sessionToken: legacyToken }, expectedScope: f.scope, document: document(1) }), null);
     assert.ok(await owner.command('memberSnapshot', { sessionToken: f.memberToken }));
-    assert.deepEqual(JSON.parse(readFileSync(f.sessionsFile, 'utf8')), { sessions: [token] });
+    assert.deepEqual(JSON.parse(readFileSync(f.sessionsFile, 'utf8')).sessions.map((s: { token: string }) => s.token), [token]);
     await owner.close();
     assert.throws(() => port.sessions.delete(''), AuthPersistenceError);
     const reopened = new AsyncHubMemberOwner(f.config, quiet);

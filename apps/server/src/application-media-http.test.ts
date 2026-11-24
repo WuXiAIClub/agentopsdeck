@@ -28,7 +28,7 @@ async function fixture(t: TestContext, role: 'hub' | 'standalone' = 'hub', mode:
     try { await close?.(); await closeCommands?.(); await registry?.close(); await auth.closeForShutdown(); }
     finally { link.closeUnused(); await rm(root, { recursive: true, force: true }); }
   });
-  await mkdir(inboundDir); await mkdir(videos);
+  await mkdir(inboundDir, { mode: 0o700 }); await mkdir(videos, { mode: 0o700 });
   await writeFile(join(videos, 'original.mp4'), '0123456789abcdef');
   await writeFile(join(inboundDir, 'original.txt'), 'original inbound');
   const artifact = join(root, 'report.zip'); await writeFile(artifact, 'original artifact');
@@ -109,10 +109,17 @@ for (const role of ['hub', 'standalone'] as const) for (const mode of ['json', '
 for (const ending of ['timeout', 'disconnect', 'close'] as const)
   test(`media ${ending} retains already dispatched write and never replays`, { timeout: 15_000 }, async t => {
     const f = await fixture(t, 'standalone', 'sqlite', true, ending === 'timeout' ? 250 : 5_000);
-    const entered = f.gate(), held = f.gate(), original = fs.writeFile; let calls = 0;
-    const mocked = t.mock.method(fs, 'writeFile', async (...args: Parameters<typeof fs.writeFile>) => {
-      if (String(args[0]).startsWith(f.inboundDir)) { calls++; entered.release(); await held.promise; }
-      return original(...args);
+    const entered = f.gate(), held = f.gate(), original = fs.open; let calls = 0;
+    const mocked = t.mock.method(fs, 'open', async (...args: Parameters<typeof fs.open>) => {
+      const handle = await original(...args);
+      if (typeof handle.writeFile === 'function') {
+        const writeFile = handle.writeFile.bind(handle);
+        t.mock.method(handle, 'writeFile', async (...writeArgs: Parameters<typeof handle.writeFile>) => {
+          calls++; entered.release(); await held.promise;
+          return writeFile(...writeArgs);
+        });
+      }
+      return handle;
     });
     syncBuiltinESMExports();
     const abort = new AbortController(); let drained = false;

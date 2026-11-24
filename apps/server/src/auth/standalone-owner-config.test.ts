@@ -82,7 +82,8 @@ test('standalone JSON uses original legacy evidence for mutation; SQLite protoco
   const credentialId = Buffer.from('legacy-authority').toString('base64url');
   writePrivateAuthStore(passkeysFile, { credentials: [{ id: credentialId, publicKey: 'AA', counter: 0,
     rpId: 'hub.example', keyIdentityHash: digest.slice(0, 24), createdAt: 1 }] });
-  writePrivateAuthStore(sessionsFile, { sessions: [legacyToken] });
+  const issuedAt = Date.now(), expiresAt = issuedAt + 60_000;
+  writePrivateAuthStore(sessionsFile, { sessions: [{ token: legacyToken, administrator: true, keyIdentityHash: digest.slice(0, 24), issuedAt, expiresAt }] });
   const owner = manage(t, new AsyncSqliteAuthOwner({ kind: 'json', passkeysFile, sessionsFile, accessKeyDigest: digest }, quiet()));
   await owner.open(); const port = new AsyncSqliteAuthRoutePort(owner, digest);
   const request = new Request(origin, { headers: { cookie: `agentopsdeck_session=${legacyToken}` } });

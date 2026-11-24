@@ -70,8 +70,8 @@ test('production public reads use original worker credentials after protocol/nod
   try {
     await owner.open();
     const token = await owner.command('tokenCreate', { label: 'public', scopes: ['agents:read', 'events:read', 'media:read', 'system:metrics:read'] });
-    const headers = { authorization: `Bearer ${token.token}` }, mediaRoot = join(f.home, '.openclaw', 'media', 'inbound');
-    mkdirSync(mediaRoot, { recursive: true }); writeFileSync(join(mediaRoot, 'public.txt'), 'original bytes');
+    const headers = { authorization: `Bearer ${token.token}` }, mediaRoot = f.config.inboundMediaDir;
+    mkdirSync(mediaRoot, { recursive: true, mode: 0o700 }); chmodSync(mediaRoot, 0o700); writeFileSync(join(mediaRoot, 'public.txt'), 'original bytes', { mode: 0o600 });
     t.mock.method(f.tokens, 'authenticateAuthorization', () => assert.fail('no synchronous authentication'));
     t.mock.method(f.tokens, 'hasScope', () => assert.fail('no synchronous scope lookup'));
     for (const suffix of ['/agents', '/system/metrics', '/media/inbound/public.txt', '/events/stream']) {
@@ -1439,9 +1439,9 @@ for (const mode of ['local', 'http'] as const) test(`${mode}: Connector director
 test('Connector media stops delivery after token revocation', async () => {
   const f = createConnectorFixture();
   try {
-    const mediaDir = join(f.home, '.openclaw', 'media', 'inbound');
-    mkdirSync(mediaDir, { recursive: true });
-    writeFileSync(join(mediaDir, 'test.bin'), Buffer.alloc(1024 * 1024, 7));
+    const mediaDir = f.config.inboundMediaDir;
+    mkdirSync(mediaDir, { recursive: true, mode: 0o700 }); chmodSync(mediaDir, 0o700);
+    writeFileSync(join(mediaDir, 'test.bin'), Buffer.alloc(1024 * 1024, 7), { mode: 0o600 });
     const token = f.tokens.create({ label: 'reader', scopes: ['media:read'] });
     const response = await f.app.request('/api/connector/v1/media/inbound/test.bin', { headers: { authorization: `Bearer ${token.token}` } });
     assert.equal(response.status, 200);
@@ -1476,9 +1476,9 @@ test('authorized idle connector stream flushes a heartbeat without a message ID'
 test('connector media endpoint requires media:read and streams scoped inbound media bytes', async () => {
   const fixture = createConnectorFixture();
   try {
-    const mediaDir = join(fixture.home, '.openclaw', 'media', 'inbound');
-    mkdirSync(mediaDir, { recursive: true });
-    writeFileSync(join(mediaDir, 'remote.png'), Buffer.from([0x89, 0x50, 0x4e, 0x47]));
+    const mediaDir = fixture.config.inboundMediaDir;
+    mkdirSync(mediaDir, { recursive: true, mode: 0o700 }); chmodSync(mediaDir, 0o700);
+    writeFileSync(join(mediaDir, 'remote.png'), Buffer.from([0x89, 0x50, 0x4e, 0x47]), { mode: 0o600 });
     const token = fixture.tokens.create({ label: 'media reader', scopes: ['media:read'] }).token;
     const noScopeToken = fixture.tokens.create({ label: 'sessions reader', scopes: ['sessions:read'] }).token;
 
@@ -3207,6 +3207,7 @@ function createConnectorFixture(codex?: any, durableEvents = false, boards = fal
     AOD_SESSION_TITLES_FILE: join(dir, 'titles.json'),
     AOD_CONNECTOR_ENV_ID: 'connector-env',
     AOD_CONNECTOR_ENV_LABEL: 'Connector Env',
+    AOD_LOCAL_OPENCLAW_CLI: 'true',
   } as NodeJS.ProcessEnv);
   if (boards) {
     const directory = join(dir, 'private-boards');

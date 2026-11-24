@@ -79,6 +79,9 @@ async function eventually(check: () => boolean | Promise<boolean>, label: string
 }
 
 function configuration(directory: string, role: ServerRole) {
+  const workspace = join(directory, "workspace"), nativeHome = join(directory, "native-home");
+  mkdirSync(workspace, { recursive: true, mode: 0o700 });
+  mkdirSync(nativeHome, { recursive: true, mode: 0o700 });
   return loadConfig({ HOME: directory, AOD_SERVER_ROLE: role,
     AOD_ACCESS_KEY: 'synthetic-access-key', AOD_HUB_VAULT_SECRET: 'synthetic-vault',
     AOD_HUB_DATABASE_FILE: join(directory, 'hub.sqlite'),
@@ -94,8 +97,8 @@ function configuration(directory: string, role: ServerRole) {
     AOD_ARTIFACT_INDEX_FILE: join(directory, 'artifacts.json'),
     AOD_MEDIA_BRIDGE_ENABLED: 'false', AOD_ARTIFACT_RECEIVER_ENABLED: 'false',
     AOD_CODEX_ENABLED: role === 'hub' ? 'false' : 'true',
-    AOD_CODEX_COMMAND: 'synthetic-codex-process-only', AOD_CODEX_DEFAULT_CWD: directory,
-    AOD_CODEX_HOME: join(directory, 'native-home'),
+    AOD_CODEX_COMMAND: 'synthetic-codex-process-only', AOD_CODEX_DEFAULT_CWD: workspace,
+    AOD_CODEX_HOME: nativeHome,
     AOD_CODEX_DEFAULT_MODEL: 'synthetic-model', AOD_CODEX_APPROVAL_POLICY: 'never' });
 }
 
@@ -136,7 +139,7 @@ test('assembled two-user two-node Codex isolates colliding identities, shared ex
     });
     context.mock.method(childProcess, 'spawn', (command: string, _args: string[], options: { cwd: string; env: NodeJS.ProcessEnv; detached?: boolean }) => {
       assert.equal(command, 'synthetic-codex-process-only');
-      const node = nodes.find(candidate => candidate.home === options.cwd);
+      const node = nodes.find(candidate => join(candidate.home, 'workspace') === options.cwd);
       assert.ok(node, 'native child must belong to one isolated Connector');
       assert.equal(options.env.CODEX_HOME, join(node.home, 'native-home'));
       node.child = nativeSpawn(process.execPath, ['-e', simulator, node.stateFile], {

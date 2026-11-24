@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
@@ -13,6 +13,10 @@ import { DeckStore } from '../projection/deck-store.js';
 test('original native startup receives only an opt-in base URL override and disposes the relay on close',
   { skip: process.platform === 'win32', timeout: 10000 }, async () => {
     const directory = await mkdtemp(join(tmpdir(), 'agentopsdeck-image-compat-startup-'));
+    const homeDirectory = join(directory, 'home');
+    const workspace = join(directory, 'workspace');
+    await mkdir(homeDirectory, { mode: 0o700 });
+    await mkdir(workspace, { mode: 0o700 });
     const database = new DatabaseSync(':memory:');
     const upstream = createServer(async (incoming, outgoing) => {
       let body = ''; for await (const chunk of incoming) body += chunk;
@@ -33,7 +37,7 @@ createInterface({ input: process.stdin }).on('line', line => {
   if (request.id !== undefined) process.stdout.write(JSON.stringify({ id: request.id, result: {} }) + '\\n');
 });
 `, { mode: 0o700 });
-    const options = { enabled: true, command, defaultCwd: directory, homeDirectory: directory,
+    const options = { enabled: true, command, defaultCwd: workspace, homeDirectory,
       defaultModel: 'gemini-4-carbon', modelProvider: 'litellm', approvalPolicy: 'never' as const,
       toolImageCompatibility: { provider: 'litellm', upstreamBaseUrl: `http://127.0.0.1:${address.port}/v1` },
       store: new DeckStore(), turnQueue: new TurnQueue(database), executions: new CodexExecutions(database),

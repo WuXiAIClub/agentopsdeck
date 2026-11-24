@@ -1413,7 +1413,7 @@ test('hub creates remote connector sessions through selected environment and wra
 });
 
 test('hub creates in-process local sessions through selected local environment', async () => {
-  const fixture = createHubFixture();
+  const fixture = createHubFixture({ AOD_OPENCLAW_GATEWAY_WS_URL: 'ws://127.0.0.1:18789' });
   fixture.hubStore.pinConnectionNode('local', 'default', fixture.hubStore.connectionAuthority('local', 'default')!, fixture.connectorUsers.nodeId);
   const calls: any[] = [];
   fixture.gateway.request = async (method: string, params: any) => {
