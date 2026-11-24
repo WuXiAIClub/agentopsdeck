@@ -151,6 +151,7 @@ export type ServerConfig = {
     defaultCwd: string;
     defaultModel: string;
     modelProvider?: string | undefined;
+    modelProviderEnvironment?: Readonly<Record<string, string | undefined>> | undefined;
     toolImageCompatibility?: import('./codex/tool-image-compat.js').ToolImageCompatibilityOptions | undefined;
     modelChoices?: string[];
     autoCompactTokenLimit?: number | undefined;
@@ -344,6 +345,7 @@ export function loadConfig(env = process.env): ServerConfig {
       // Empty means let the installed native runtime choose its own model.
       defaultModel: env.AOD_CODEX_DEFAULT_MODEL?.trim() || '',
       modelProvider: emptyToUndefined(env.AOD_CODEX_MODEL_PROVIDER?.trim()),
+      ...(env.AOD_CODEX_ENV_PASSTHROUGH?.trim() ? { modelProviderEnvironment: parseCodexEnvPassthrough(env.AOD_CODEX_ENV_PASSTHROUGH, env) } : {}),
       toolImageCompatibility: env.AOD_CODEX_GEMINI_TOOL_IMAGE_UPSTREAM?.trim() ? {
         provider: env.AOD_CODEX_MODEL_PROVIDER?.trim() || '',
         upstreamBaseUrl: env.AOD_CODEX_GEMINI_TOOL_IMAGE_UPSTREAM.trim(),
@@ -415,6 +417,8 @@ export function redactedConfig(config: ServerConfig) {
     },
     codex: {
       ...config.codex,
+      modelProviderEnvironment: config.codex.modelProviderEnvironment
+        ? Object.fromEntries(Object.keys(config.codex.modelProviderEnvironment).map(key => [key, redact(key)])) : undefined,
       toolImageCompatibility: config.codex.toolImageCompatibility
         ? { enabled: true, provider: config.codex.toolImageCompatibility.provider } : undefined,
     },
@@ -431,6 +435,24 @@ function parseCsv(value: string | undefined) {
 
 function parseUpdateChannel(value: string | undefined): 'stable' | 'candidate' | 'manual' {
   return value === 'candidate' || value === 'manual' ? value : 'stable';
+}
+
+const FORBIDDEN_CODEX_PASSTHROUGH = /^(?:AOD_.*|LD_.*|DYLD_.*|NODE_OPTIONS|PYTHONPATH|PYTHONHOME|RUBYOPT|PERL5OPT|JAVA_TOOL_OPTIONS|BASH_ENV|ENV|SHELLOPTS|PS4|IFS|CDPATH|GLOBIGNORE|HOME|USERPROFILE|HOMEDRIVE|HOMEPATH|APPDATA|LOCALAPPDATA|XDG_.*|TMPDIR|TMP|TEMP|PATH|CODEX_HOME|HERMES_HOME|OPENCLAW_.*)$/i;
+
+function parseCodexEnvPassthrough(value: string | undefined, env: NodeJS.ProcessEnv): Readonly<Record<string, string | undefined>> | undefined {
+  const names = parseCsv(value);
+  if (!names.length) return undefined;
+  const result: Record<string, string | undefined> = Object.create(null);
+  for (const name of names) {
+    if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name) || FORBIDDEN_CODEX_PASSTHROUGH.test(name)) {
+      throw new Error(`Invalid or forbidden AOD_CODEX_ENV_PASSTHROUGH variable name: ${name}`);
+    }
+    const resolved = env[name];
+    if (typeof resolved === 'string' && resolved.length > 0 && !/[\x00\r\n]/.test(resolved)) {
+      result[name] = resolved;
+    }
+  }
+  return Object.freeze(result);
 }
 
 function parseCodexApprovalPolicy(value: string | undefined): 'never' | 'on-request' | 'untrusted' {

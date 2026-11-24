@@ -26,7 +26,11 @@ These are example absolute paths, not directories the repository has provisioned
 Create and secure them for the service account before use. The command defaults
 to `codex` on POSIX and `codex.cmd` on Windows; `AOD_CODEX_COMMAND` overrides it.
 Leave model/provider overrides unset to let the native runtime choose its defaults.
-Keep actual provider configuration outside source.
+Keep actual provider configuration outside source. Provider API keys referenced by
+`<AOD_CODEX_HOME>/config.toml` (`env_key`) can be placed in a private
+`<AOD_CODEX_HOME>/.env` file (`chmod 600`, owned by the service account) or
+forwarded from the service environment by listing their variable names in
+`AOD_CODEX_ENV_PASSTHROUGH`.
 
 Accepted approval values are `never`, `on-request` and `untrusted`; the inherited
 default is `never`. **Approval policy is not a filesystem sandbox**: the harness

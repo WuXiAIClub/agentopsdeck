@@ -23,6 +23,9 @@ AOD_CODEX_APPROVAL_POLICY=on-request
 这些是绝对路径示例，并非仓库已创建的目录。使用前应为服务账号创建并保护。
 POSIX 默认命令为 `codex`，Windows 为 `codex.cmd`，可用 `AOD_CODEX_COMMAND`
 覆盖。不指定模型／供应商时由原生运行时选择默认值；真实供应商配置放在源码外。
+`<AOD_CODEX_HOME>/config.toml`（`env_key`）引用的供应商 API 密钥可写入专属
+`<AOD_CODEX_HOME>/.env`（权限 `0600` 且归属服务账号），或通过
+`AOD_CODEX_ENV_PASSTHROUGH` 显式列出变量名从服务进程环境透传。
 
 审批值支持 `never`、`on-request`、`untrusted`，继承默认值为 `never`。
 **审批策略不等于文件系统沙箱**：执行器可以访问服务账号拥有权限的文件。

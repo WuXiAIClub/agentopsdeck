@@ -51,6 +51,8 @@ Cookie 不按端口隔离；不同认证实例需不同主机名或浏览器配�
 | `AOD_VITE_API_TARGET` | 开发 API 目标，默认 `http://127.0.0.1:8890`。 |
 | `AOD_VITE_ALLOWED_HOSTS` | 开发主机允许列表，不应公开暴露 Vite。 |
 | `AOD_WEB_RESOURCE_ORIGINS` | 网页资源来源，在 Vite 构建／开发时读取。 |
+| `AOD_CODEX_COMMAND` | 可选 Codex CLI 可执行文件的显式路径。 |
+| `AOD_CODEX_ENV_PASSTHROUGH` | 可选逗号分隔的供应商环境变量名列表，从服务进程环境透传给 Codex。 |
 
 独立本机配置示例，密钥另行私有配置：
 

@@ -57,6 +57,8 @@ public resource origins separately when using an external server config.
 | `AOD_VITE_API_TARGET` | Development API target; default `http://127.0.0.1:8890`. |
 | `AOD_VITE_ALLOWED_HOSTS` | Explicit development host allowlist; do not expose Vite publicly. |
 | `AOD_WEB_RESOURCE_ORIGINS` | Web resource origins, read during Vite build/dev. |
+| `AOD_CODEX_COMMAND` | Optional explicit path to the Codex CLI executable. |
+| `AOD_CODEX_ENV_PASSTHROUGH` | Optional comma-separated provider variable names passed from the service environment to Codex. |
 
 Example independent local instance (private key configured separately):
 

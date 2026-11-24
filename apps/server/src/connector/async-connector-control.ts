@@ -54,7 +54,7 @@ export class AsyncConnectorControl {
     return {
       principal: original,
       check: async () => {
-        if (request.signal.aborted) throw new ReadRequestError(408, 'Request aborted');
+        if (request.signal.aborted) throw new ReadRequestError(408);
         await this.work.run(request, async context => {
           const actor = await this.principal(authorization); context.check();
           if (!validConnectorOwnerOutput('tokenAuthenticate', actor)) throw new HTTPException(503);

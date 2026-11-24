@@ -1,6 +1,7 @@
 import { randomBytes } from 'node:crypto';
-import { chmodSync, closeSync, existsSync, lstatSync, openSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { chmodSync, closeSync, existsSync, lstatSync, mkdirSync, openSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
+import { homedir } from 'node:os';
+import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export function createLocalConfig(root) {
@@ -30,6 +31,33 @@ function createLockedConfig(root) {
     chmodSync(temporary, 0o600);
     renameSync(temporary, file);
   } finally { rmSync(temporary, { force: true }); }
+  provisionDefaultDirectories(lines);
+}
+
+function provisionDefaultDirectories(lines) {
+  if (process.platform === 'win32') return;
+  const values = Object.create(null);
+  for (const line of lines) {
+    const match = /^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)\s*$/.exec(line);
+    if (!match) continue;
+    const raw = match[2].trim();
+    values[match[1]] = (raw.startsWith('"') && raw.endsWith('"')) || (raw.startsWith("'") && raw.endsWith("'"))
+      ? raw.slice(1, -1).trim() : raw;
+  }
+  const home = process.env.HOME?.trim() || homedir();
+  const xdg = process.env.XDG_DATA_HOME?.trim() || (home ? join(home, '.local', 'share') : '');
+  const dataDir = values.AOD_DATA_DIR || process.env.AOD_DATA_DIR?.trim() || (xdg ? join(xdg, 'agentopsdeck') : '');
+  if (!dataDir || !isAbsolute(dataDir)) return;
+  const dirs = [
+    dataDir,
+    values.AOD_CODEX_HOME || join(dataDir, 'codex-home'),
+    values.AOD_CODEX_DEFAULT_CWD || join(dataDir, 'workspace'),
+    values.AOD_OPENCLAW_HOME || join(dataDir, 'openclaw-home'),
+  ];
+  for (const dir of dirs) {
+    if (!isAbsolute(dir) || existsSync(dir)) continue;
+    try { mkdirSync(dir, { recursive: true, mode: 0o700 }); chmodSync(dir, 0o700); } catch {}
+  }
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

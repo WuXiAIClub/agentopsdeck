@@ -96,8 +96,8 @@
     },
     {
       "path": ".env.example",
-      "size": 566,
-      "sha256": "4909d10409f7a8c96af1b06a6d190bc77e742d9fe1afcafdfeda6165f60e424a",
+      "size": 612,
+      "sha256": "f5cb393e800813ab324c755917b85b21587fd8364f01eff2db7c1c0c23804975",
       "module": "governance",
       "kind": "config",
       "depth": "semantic",
@@ -7076,8 +7076,8 @@
       ],
       "notes": "Complete authored 193-line synthetic regression plus all patch changes reviewed. Ten cases cover exact POSIX environment/probe forwarding, preserved explicit synthetic auth.json/config.toml, default AOD root, physical close before replacement, six unsafe-home refusals, Windows worker fields, and actual Windows IPC entry executed with transpiled source in a bounded VM and mocked probe/spawn. No Windows native process, provider or real credentials. Complete synthetic test source and every authored patch are inspected together with relevant native start/config/private-environment/Windows IPC contracts. This selector passed in current 201-test selection. Semantic test review is completed without certifying the giant app-server or actual provider/Windows device acceptance; prior report remains historical.",
       "findings": [],
-      "size": 12487,
-      "sha256": "42ed2cec07ad1348bc083a7aa508ae885dbd1bd0dac90cd9b81fdf1db304f3f9"
+      "size": 13967,
+      "sha256": "e37cf2f812d202875ae58d269498e2a99c2f90f21614057e7c8d3c7402721601"
     },
     {
       "path": "apps/server/src/codex/app-server.test.ts",
@@ -7101,8 +7101,8 @@
     },
     {
       "path": "apps/server/src/codex/app-server.ts",
-      "sha256": "afb3df52484227042b8ec8692b8ba48109e2fc6355c4fcbc515a42892dff5c2c",
-      "size": 392602,
+      "sha256": "460e84ea01d9556f14dcc1c1eb718dc00951127e0940e443e5ef0d6f268172b4",
+      "size": 395029,
       "module": "codex",
       "kind": "runtime",
       "depth": "semantic",
@@ -11587,8 +11587,8 @@
     },
     {
       "path": "apps/server/src/config-portability.test.ts",
-      "size": 4160,
-      "sha256": "8c18c266e3cf07dd55bcd433bb7a36a15c0bd44a62973c18d0984ae34e194dc5",
+      "size": 5253,
+      "sha256": "a054faee0eac5aafc8d011f4b312ab0228a78c4528b2cb917d36afdc50ce7e2f",
       "module": "api-auth",
       "kind": "test",
       "depth": "semantic",
@@ -11609,8 +11609,8 @@
     },
     {
       "path": "apps/server/src/config.ts",
-      "size": 29066,
-      "sha256": "23cd33faafe5f07d93e23e02e6aa56523c0d5eea78b4b725b3a0f6e8a8c355d5",
+      "size": 30523,
+      "sha256": "2f1b877f2e5465d8f3045b2922c80bbaaa18e1c1aa98b661ddbdc3197d450f29",
       "module": "api-auth",
       "kind": "config",
       "depth": "semantic",
@@ -12436,8 +12436,8 @@
     },
     {
       "path": "apps/server/src/connector/async-codex-runtime.ts",
-      "size": 21365,
-      "sha256": "169c2b543dde14562e81e0294222858f1acc811dd869666f496530ea4b381a37",
+      "size": 21509,
+      "sha256": "8eb74f64baa454679b03328d91db4f7a81c31f83c5d07ff846612ace0e6cecdb",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
@@ -12630,8 +12630,8 @@
     },
     {
       "path": "apps/server/src/connector/async-connector-control.ts",
-      "size": 9039,
-      "sha256": "7377f0836daac489d9f49282e0791621381caab4809d337e314cca52bc7d29b8",
+      "size": 9020,
+      "sha256": "472fd7369fafa704d80803dcc11c1edc9eeaf89dea22c39ca8ef692fd7b0d26b",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
@@ -18413,8 +18413,8 @@
       ],
       "notes": "Complete original source and every authored patch read (124 current lines). Disposable fixtures verify captured AOD root despite ambient mutation, explicit AOD config and legacy connector override compatibility, default AOD_DATA_DIR root, private reconcile with ambient file untouched, catalogs and additive/native options preservation, backup, dry-run, empty policy, idempotence and invalid array rejection. Selector passed in both 28-test and 201-test selections; no provider invoked.",
       "findings": [],
-      "size": 9726,
-      "sha256": "85723d4e8137cdc56055c22ffef47fe2bbd8a42fa3c1c64fb020d9d3a7cefecf"
+      "size": 9727,
+      "sha256": "800d4fae9f80090b8293dc4778671ab8fb431c61da3c8bbc19933f55907db736"
     },
     {
       "path": "apps/server/src/connector/model-set.ts",
@@ -38554,8 +38554,8 @@
     },
     {
       "path": "apps/server/src/routes/hub-automation.test.ts",
-      "size": 12429,
-      "sha256": "d3390fd5c4d6f74aae0220b3644da29e38cb227400d012f3a74918db6ed4de51",
+      "size": 12446,
+      "sha256": "6b9525252c528fd0e19b1514985ed4f7e187486ece63b2baa3a124114db93d67",
       "module": "api-auth",
       "kind": "test",
       "depth": "semantic",
@@ -40389,8 +40389,8 @@
     },
     {
       "path": "apps/server/src/routes/hub-terminals.test.ts",
-      "size": 13679,
-      "sha256": "3fab19e10022f423dacdcba4f97266ff08eb4555e02fa8b6820b7243cb16d10e",
+      "size": 13696,
+      "sha256": "c12d187d6b85c45fd4544eaf018fb8dd6ce82d4f592b12a00e35db47db02bcf5",
       "module": "api-auth",
       "kind": "test",
       "depth": "semantic",
@@ -40587,8 +40587,8 @@
     },
     {
       "path": "apps/server/src/routes/hub-website-actions.test.ts",
-      "size": 13416,
-      "sha256": "457771f21f07f6652f62815f817986c14c3d7d2f6070a26acfaa2f05ffee642f",
+      "size": 13433,
+      "sha256": "bf3b1769eaffa19b9c89e13d61f7d3a0e1d64ecb76f6791a2d8aada043141a5d",
       "module": "api-auth",
       "kind": "test",
       "depth": "semantic",
@@ -40641,8 +40641,8 @@
     },
     {
       "path": "apps/server/src/routes/hub-websites.test.ts",
-      "size": 5759,
-      "sha256": "f052fb063db040e4373fc35e30b9ccbe6e04b353cc11aee506b16712fb774e9a",
+      "size": 5776,
+      "sha256": "afeae1e9861083cbfbca8465930dee6bf5e05e48758884ce6846a9e463e0b36b",
       "module": "api-auth",
       "kind": "test",
       "depth": "semantic",
@@ -59221,8 +59221,8 @@
     },
     {
       "path": "docs/configuration.md",
-      "size": 9427,
-      "sha256": "fc552b3f4718a28369ee3a066a87dc3118e88efc83c8749b648a8bd509217846",
+      "size": 9634,
+      "sha256": "996bc235dfb11fc1be6b0f74e1d68f5a1f8d534f1620b24c59dedea9337d0845",
       "module": "governance",
       "kind": "docs",
       "depth": "semantic",
@@ -59265,8 +59265,8 @@
     },
     {
       "path": "docs/configuration.zh-CN.md",
-      "size": 6731,
-      "sha256": "9c3c477ef487d0bcaebbf51702159899d3de90aeef40f00929fbe5575af72dcd",
+      "size": 6936,
+      "sha256": "882bc32a30a4146c1b2f358bfc521d35bb52e4022313737a4936c9dc6cd9b861",
       "module": "governance",
       "kind": "docs",
       "depth": "semantic",
@@ -59435,8 +59435,8 @@
     },
     {
       "path": "docs/integrations.md",
-      "size": 4380,
-      "sha256": "eab27448f789ce04cebca89c2f2903e3cee10baea5306d52c7e6fbf64747fd96",
+      "size": 4661,
+      "sha256": "890256c7c3fe6a5ee637f5b13ff5a31d1ce2e7f0dbc10deff747dbf938ee91ff",
       "module": "governance",
       "kind": "docs",
       "depth": "semantic",
@@ -59464,8 +59464,8 @@
     },
     {
       "path": "docs/integrations.zh-CN.md",
-      "size": 3866,
-      "sha256": "b2353a460bc7044d63a62669b424d001093b25397de5a2db3cc6db7657dc97b6",
+      "size": 4113,
+      "sha256": "b3f7d4b4aca5013c472eaacde35d839e1e8758df941b45d3fd8a3f53cefbe0b0",
       "module": "governance",
       "kind": "docs",
       "depth": "semantic",
@@ -60011,7 +60011,7 @@
     },
     {
       "path": "docs/review/release-approval.json",
-      "sha256": "708f9e050755dbd9c47f602143ae9a903aa8bfe55555ec179dd9f00b4e2737f2",
+      "sha256": "4883d7647bb77182c82eea0c5b5f89e8982d18b55bfa03d3e7f7c169de97bb19",
       "size": 2436,
       "module": "release-boundary",
       "kind": "config",
@@ -63348,8 +63348,8 @@
     },
     {
       "path": "scripts/create-local-config.mjs",
-      "size": 2099,
-      "sha256": "05f2f11dc09d87cd7a92298c956d764c64a0edcc5d99185f985e5a1ac96695ff",
+      "size": 3363,
+      "sha256": "a67474cd2a7c27d310a7e8a5792c791a23e159ace9c196c98bd26ce9d2046962",
       "module": "main",
       "kind": "runtime",
       "depth": "semantic",

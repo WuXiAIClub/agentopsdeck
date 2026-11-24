@@ -208,7 +208,7 @@ type CodexAppServerCommonOptions = {
   defaultCwd: string;
   defaultModel: string;
   modelProvider?: string | undefined;
-  modelProviderEnvironment?: Readonly<Record<string, string | undefined>>;
+  modelProviderEnvironment?: Readonly<Record<string, string | undefined>> | undefined;
   toolImageCompatibility?: ToolImageCompatibilityOptions | undefined;
   autoCompactTokenLimit?: number | undefined;
   disableRemoteCompaction?: boolean | undefined;
@@ -1042,7 +1042,7 @@ export class CodexAppServer {
       await this.ensureStarted();
       const connection = this.connectionId;
       const config = await this.request('config/read', { includeLayers: false, cwd: null });
-      const provider = configuredModelProvider(config, this.options.modelProvider, this.modelProviderEnvironment);
+      const provider = configuredModelProvider(config, this.options.modelProvider, this.effectiveModelProviderEnvironment());
       const check = () => { if (this.closed || connection !== this.connectionId) throw new Error('Codex model catalog changed'); };
       check();
       if (provider) { const models = await this.providerModelCatalog.read(provider); check(); return models; }
@@ -3627,6 +3627,12 @@ export class CodexAppServer {
     }
   }
 
+  private effectiveModelProviderEnvironment(): Readonly<Record<string, string | undefined>> {
+    const homeEnv = this.options.homeDirectory ? readPrivateCodexHomeEnv(this.options.homeDirectory) : undefined;
+    if (!homeEnv) return this.modelProviderEnvironment;
+    return Object.freeze(Object.assign(Object.create(null), homeEnv, this.modelProviderEnvironment));
+  }
+
   private async start() {
     if (this.childLifetimes.size) {
       await Promise.all(Array.from(this.childLifetimes.values(), lifetime => lifetime.closed));
@@ -3634,8 +3640,12 @@ export class CodexAppServer {
     if (this.closed) throw new Error('Codex App Server closed');
     if (this.maintenanceRecovery.getStore()) await this.authorizeMaintenanceRecovery();
     if (!this.options.homeDirectory) throw new Error('Native execution private configuration could not be verified');
+    const baseEnv = prepareExecutionHome(this.options.homeDirectory, [this.options.defaultCwd, this.options.command]);
+    const providerEnv = this.effectiveModelProviderEnvironment();
     const env = {
-      ...prepareExecutionHome(this.options.homeDirectory, [this.options.defaultCwd, this.options.command]),
+      ...baseEnv,
+      ...providerEnv,
+      ...baseEnv,
       CODEX_HOME: this.options.homeDirectory,
       NO_PROXY: 'localhost,127.0.0.1,::1',
     };
@@ -6346,3 +6356,37 @@ function codexTimestampMilliseconds(value: unknown) {
 }
 import type { SessionFileIndex } from '../messages/session-file-index.js';
 import { projectionFileEvidence } from '../messages/session-file-evidence.js';
+
+const FORBIDDEN_CODEX_HOME_ENV = /^(?:AOD_.*|LD_.*|DYLD_.*|NODE_OPTIONS|PYTHONPATH|PYTHONHOME|RUBYOPT|PERL5OPT|JAVA_TOOL_OPTIONS|BASH_ENV|ENV|SHELLOPTS|PS4|IFS|CDPATH|GLOBIGNORE|HOME|USERPROFILE|HOMEDRIVE|HOMEPATH|APPDATA|LOCALAPPDATA|XDG_.*|TMPDIR|TMP|TEMP|PATH|CODEX_HOME|HERMES_HOME|OPENCLAW_.*)$/i;
+
+function readPrivateCodexHomeEnv(homeDirectory: string): Record<string, string> | undefined {
+  const file = path.join(homeDirectory, '.env');
+  let info;
+  try { info = lstatSync(file); }
+  catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return undefined;
+    throw new Error('Native execution private configuration could not be verified');
+  }
+  if (!info.isFile() || info.isSymbolicLink() || info.size > 65536
+    || (process.platform !== 'win32' && (process.getuid?.() === undefined || info.uid !== process.getuid() || (info.mode & 0o077) !== 0))) {
+    throw new Error('Native execution private configuration could not be verified');
+  }
+  let raw: string;
+  try { raw = readFileSync(file, 'utf8'); }
+  catch { throw new Error('Native execution private configuration could not be verified'); }
+  const result: Record<string, string> = Object.create(null);
+  for (const line of raw.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const match = /^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$/.exec(trimmed);
+    if (!match) continue;
+    const key = match[1]!;
+    if (FORBIDDEN_CODEX_HOME_ENV.test(key)) throw new Error('Native execution private configuration could not be verified');
+    let value = match[2]!.trim();
+    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.slice(1, -1);
+    }
+    if (value.length > 0 && !/[\x00\r\n]/.test(value)) result[key] = value;
+  }
+  return Object.keys(result).length ? result : undefined;
+}

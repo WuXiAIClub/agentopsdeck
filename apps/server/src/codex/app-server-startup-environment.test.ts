@@ -191,3 +191,28 @@ test('actual Windows IPC entry passes only the supplied native environment to it
     assert.equal(JSON.stringify(launches[0]!.options.env).includes('synthetic-private'), false);
     assert.deepEqual(JSON.parse(JSON.stringify(sent)), [{ kind: 'bootstrap-ready' }, { kind: 'features', supported: true }]);
   });
+
+test('Codex launch and model discovery honor private .env in AOD_CODEX_HOME and AOD_CODEX_ENV_PASSTHROUGH while refusing unsafe .env',
+  { skip: process.platform === 'win32', timeout: 10000 }, async context => {
+    const setup = fixture(context);
+    writeFileSync(join(setup.home, '.env'), 'CUSTOM_PROVIDER_KEY="from-home-dotenv"\nOVERRIDDEN_KEY=from-home\n', { mode: 0o600 });
+    setup.runtime.modelProviderEnvironment = Object.freeze({ OVERRIDDEN_KEY: 'from-passthrough', PASSTHROUGH_ONLY: 'from-env' });
+    await setup.runtime.start();
+    assert.equal(setup.launches.length, 1);
+    const env = setup.launches[0]!.options.env!;
+    assert.equal(env.CUSTOM_PROVIDER_KEY, 'from-home-dotenv');
+    assert.equal(env.OVERRIDDEN_KEY, 'from-passthrough');
+    assert.equal(env.PASSTHROUGH_ONLY, 'from-env');
+    assert.equal(env.HOME, setup.home);
+    assert.equal(env.CODEX_HOME, setup.home);
+
+    // Permissive .env mode is refused
+    chmodSync(join(setup.home, '.env'), 0o644);
+    setup.children[0]!.stdout.end(); setup.children[0]!.emit('close', 0, null);
+    await assert.rejects(setup.runtime.start(), /Native execution private configuration could not be verified/);
+
+    // Forbidden variable in .env is refused
+    writeFileSync(join(setup.home, '.env'), 'NODE_OPTIONS=--inspect\n', { mode: 0o600 });
+    chmodSync(join(setup.home, '.env'), 0o600);
+    await assert.rejects(setup.runtime.start(), /Native execution private configuration could not be verified/);
+  });

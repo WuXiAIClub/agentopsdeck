@@ -3,7 +3,7 @@ import test from 'node:test';
 import { mkdtempSync, mkdirSync, rmSync } from 'node:fs';
 import { homedir, tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { agentOpsDeckDataDirectory, loadConfig } from './config.js';
+import { agentOpsDeckDataDirectory, loadConfig, redactedConfig } from './config.js';
 
 test('native model and compaction choices are not tied to one installation', () => {
   const defaults = loadConfig({});
@@ -54,4 +54,25 @@ test('portable defaults never widen explicitly configured artifact or media boun
   assert.deepEqual(config.artifactReceiver.allowedDirs, ['/deliverables']);
   assert.deepEqual(config.artifactReceiver.allowedDirectChildDirs, []);
   assert.deepEqual(config.mediaBridge.allowedDirs, ['/media']);
+});
+
+test('AOD_CODEX_ENV_PASSTHROUGH selects explicit provider environment variables and rejects unsafe names', () => {
+  assert.equal(loadConfig({}).codex.modelProviderEnvironment, undefined);
+  const configured = loadConfig({
+    AOD_CODEX_ENV_PASSTHROUGH: 'OPENAI_API_KEY, MY_PROVIDER_TOKEN, MISSING_VAR',
+    OPENAI_API_KEY: 'synthetic-openai-key',
+    MY_PROVIDER_TOKEN: 'synthetic-provider-token',
+    UNLISTED_SECRET: 'must-not-pass',
+  });
+  assert.deepEqual(
+     { ...configured.codex.modelProviderEnvironment },
+    { OPENAI_API_KEY: 'synthetic-openai-key', MY_PROVIDER_TOKEN: 'synthetic-provider-token' },
+  );
+  assert.deepEqual(
+    redactedConfig(configured).codex.modelProviderEnvironment,
+    { OPENAI_API_KEY: '***', MY_PROVIDER_TOKEN: '***' },
+  );
+  for (const forbidden of ['PATH', 'HOME', 'CODEX_HOME', 'NODE_OPTIONS', 'LD_PRELOAD', 'DYLD_INSERT_LIBRARIES', 'AOD_ACCESS_KEY', 'XDG_CONFIG_HOME', 'TMPDIR', '123INVALID']) {
+    assert.throws(() => loadConfig({ AOD_CODEX_ENV_PASSTHROUGH: forbidden }), /Invalid or forbidden AOD_CODEX_ENV_PASSTHROUGH/);
+  }
 });

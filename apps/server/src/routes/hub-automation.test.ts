@@ -161,7 +161,7 @@ test('automation close retains aborted original physical POST and source cancel 
   await postEntered;
   controller.abort();
   let settled = false;
-  void pending.then(() => { settled = true; });
+  void Promise.resolve(pending).then(() => { settled = true; });
   let closed = false;
   const closing = routes.close().then(() => { closed = true; });
   await new Promise(resolve => setImmediate(resolve));

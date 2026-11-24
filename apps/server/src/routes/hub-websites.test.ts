@@ -60,7 +60,7 @@ test('website Hub route close retains aborted physical dispatch and source cance
     await entered;
     controller.abort();
     let settled = false;
-    void pending.then(() => { settled = true; });
+    void Promise.resolve(pending).then(() => { settled = true; });
     let closed = false;
     const closing = routes.close().then(() => { closed = true; });
     await new Promise(resolve => setImmediate(resolve));

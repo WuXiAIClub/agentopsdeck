@@ -78,7 +78,7 @@ test('explicit reconcile adds configured models, preserves existing models/optio
   assert.equal((await stat(configFile)).mode & 0o777, 0o600);
   const backups = (await readdir(dir)).filter((name) => name.includes('.agentopsdeck-backup-'));
   assert.equal(backups.length, 1);
-  assert.equal((await stat(path.join(dir, backups[0]))).mode & 0o777, 0o600);
+  assert.equal((await stat(path.join(dir, backups[0]!))).mode & 0o777, 0o600);
 });
 
 test('reconcile dry-run reports restart requirement without writing or backing up', async context => {

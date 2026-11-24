@@ -139,7 +139,7 @@ test('website action execute and cleanup retain aborted physical dispatch and so
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ body: '{}' }), signal: controller.signal,
     });
     let execDone = false;
-    void pendingExec.then(() => { execDone = true; });
+    void Promise.resolve(pendingExec).then(() => { execDone = true; });
     await execEntered;
     controller.abort();
     await new Promise(resolve => setImmediate(resolve));

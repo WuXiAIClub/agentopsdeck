@@ -171,7 +171,7 @@ test('Hub terminal idle output and cleanup retain physical dispatch and source c
     await outEntered;
     controller.abort();
     let outSettled = false;
-    void pendingOutput.then(() => { outSettled = true; });
+    void Promise.resolve(pendingOutput).then(() => { outSettled = true; });
     await new Promise(resolve => setImmediate(resolve));
     assert.equal(outSettled, false);
     outDispatch(new Response(new ReadableStream({

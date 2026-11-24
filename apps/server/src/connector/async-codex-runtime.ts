@@ -31,7 +31,7 @@ import { checkMaintenanceLocal } from './maintenance-local-guard.js';
 import { persistUploadedMedia } from '../messages/send-message.js';
 
 export type AsyncCodexNativeConfig = Pick<CodexAppServerOptions,
-  'enabled' | 'command' | 'homeDirectory' | 'defaultCwd' | 'defaultModel' | 'modelProvider'
+  'enabled' | 'command' | 'homeDirectory' | 'defaultCwd' | 'defaultModel' | 'modelProvider' | 'modelProviderEnvironment'
   | 'autoCompactTokenLimit' | 'disableRemoteCompaction' | 'toolImageCompatibility' | 'approvalPolicy' | 'historyCache'
   | 'boardToolsDirectory' | 'projectAssistant' | 'requestTimeoutMs' | 'runtimeOverridesFile'>;
 export type AsyncCodexRuntimeState = 'new' | 'opening' | 'ready' | 'failed' | 'closing' | 'closed';
@@ -68,6 +68,7 @@ export function createAsyncCodexRuntime(options: {
     ...(c.projectAssistant === undefined ? {} : { projectAssistant: c.projectAssistant }),
     ...(c.requestTimeoutMs === undefined ? {} : { requestTimeoutMs: c.requestTimeoutMs }),
     ...(c.runtimeOverridesFile === undefined ? {} : { runtimeOverridesFile: c.runtimeOverridesFile }),
+    ...(c.modelProviderEnvironment === undefined ? {} : { modelProviderEnvironment: c.modelProviderEnvironment }),
   };
   let state: AsyncCodexRuntimeState = 'new';
   let runtime: CodexAppServer;
