@@ -33,12 +33,12 @@ function assertLockedInChild(file: string) {
     assert.throws(() => new ConnectorUserStore(${JSON.stringify(file)}, undefined, { runtimeOwner: true }), /locked|busy/i);`);
 }
 
-function runtimeConfig(file: string) {
+function runtimeConfig(file: string, overrides: NodeJS.ProcessEnv = {}) {
   return loadConfig({ AOD_SERVER_ROLE: 'connector', AOD_CODEX_ENABLED: 'false', AOD_LOCAL_OPENCLAW_CLI: 'false',
     AOD_CONNECTOR_USERS_DATABASE_FILE: file, AOD_CONNECTOR_TOKENS_FILE: `${file}.tokens`,
     AOD_SESSION_TITLES_FILE: `${file}.titles`, AOD_QUEUE_FILE: `${file}.queue`,
     AOD_MIRROR_OUTBOX_FILE: `${file}.mirror`, AOD_ARTIFACT_INDEX_FILE: `${file}.artifacts`,
-    AOD_CONNECTOR_UPDATE_STATE_FILE: `${file}.updates` });
+    AOD_CONNECTOR_UPDATE_STATE_FILE: `${file}.updates`, ...overrides });
 }
 
 for (const first of ['resolve', 'reject'] as const) test(`runtime drains both cancelled legacy event authority owners, first ${first}`, { timeout: 5000 }, async context => {
@@ -103,8 +103,9 @@ test('Codex-only empty runtime advertises Codex without inventing main or callin
 });
 
 test('real runtime async registry discovery preserves both agent HTTP formats and ignores non-directories', async context => {
-  const file = fixture(context), config = runtimeConfig(file), registry = `${file}.registry`;
+  const file = fixture(context), registry = `${file}.registry`;
   mkdirSync(join(registry, 'agents', 'local-目录'), { recursive: true });
+  chmodSync(registry, 0o700);
   writeFileSync(join(registry, 'agents', 'not-an-agent'), 'fixture');
   const previous = process.env.AOD_OPENCLAW_HOME;
   process.env.AOD_OPENCLAW_HOME = registry;
@@ -112,6 +113,7 @@ test('real runtime async registry discovery preserves both agent HTTP formats an
     if (previous === undefined) delete process.env.AOD_OPENCLAW_HOME;
     else process.env.AOD_OPENCLAW_HOME = previous;
   });
+  const config = runtimeConfig(file, { AOD_OPENCLAW_HOME: registry });
   config.localOpenClawCli = true; config.codex.enabled = true;
   const runtime = createConnectorRuntime(config, () => true, { deferActivation: true });
   runtime.gateway.request = async () => { throw Error('fixture gateway unavailable'); };

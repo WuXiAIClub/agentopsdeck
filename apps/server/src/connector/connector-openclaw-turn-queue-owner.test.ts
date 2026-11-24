@@ -255,7 +255,9 @@ test('original TurnWorker recovers ACKed session without queue rows, via async r
     f.begin(); const synced = deferred<void>();
     const q = f.queue({ recovery: { connectionId: () => 'connection', query: async () => normal() },
       refreshMessages: async () => { synced.resolve(); } });
-    q.start(); await synced.promise; await q.close();
+    const keepAlive = setInterval(() => {}, 1000);
+    try { q.start(); await synced.promise; } finally { clearInterval(keepAlive); }
+    await q.close();
     assert.equal(f.store.openClawExecutions.get(key)?.phase, 'completed');
     assert.equal(f.store.openClawExecutions.get(key)?.historySync?.state, 'current'); assert.equal(f.sends, 0);
   } finally { await f.close(); }

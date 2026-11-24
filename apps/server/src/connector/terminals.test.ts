@@ -122,7 +122,7 @@ test('configured daily shell loads login profile, interactive aliases and comple
     writeFileSync(join(dir, '.bash_profile'), 'export PATH="$HOME/bin:$PATH"\nexport PROFILE_LOADED=yes\n. "$HOME/.bashrc"\n');
     writeFileSync(join(dir, '.bashrc'), 'alias profile_alias="true"\ncomplete -W "one two" development-tool\n');
     const { id } = await s.start('alice', { ...target, cwd: dir, home: dir, executable: '/bin/bash', args: ['--login', '-i'] }, randomUUID(), 80, 24);
-    s.write('alice', id, 1, [
+    writeFileSync(join(dir, 'check.sh'), [
       'test "$PROFILE_LOADED" = yes',
       'test -z "${AOD_TERMINAL_TEST_SECRET+x}"',
       'test -z "${AOD_ACCESS_KEY+x}"',
@@ -134,7 +134,9 @@ test('configured daily shell loads login profile, interactive aliases and comple
       'alias profile_alias >/dev/null',
       'complete -p development-tool >/dev/null',
       "printf '%s%s\\n' 'DAILY_PROFILE_' 'OK'",
-    ].join(' && ') + '; exit\r');
+      '',
+    ].join('\n'));
+    s.write('alice', id, 1, '. "$HOME/check.sh"; exit\r');
     let output = '', cursor = 0;
     for (;;) {
       const result = await s.read('alice', id, cursor, controller.signal, 1000);

@@ -5290,8 +5290,8 @@
     },
     {
       "path": "apps/server/src/auth/session-read-authority.test.ts",
-      "size": 11595,
-      "sha256": "498ab9aa135fda5623ae6db95de0fb575f45493dcacc21fc5976af220826deaa",
+      "size": 11597,
+      "sha256": "1bb763398b0cead7adb71413b41cedd5fb96fa8aabd0dcf9d1fde7defd5ad36d",
       "module": "api-auth",
       "kind": "test",
       "depth": "semantic",
@@ -16664,8 +16664,8 @@
     },
     {
       "path": "apps/server/src/connector/connector-openclaw-turn-queue-owner.test.ts",
-      "size": 22350,
-      "sha256": "6c5d270cea4f6e43d73cc9fb1837ea936172a5ba45ff5a8ea0b14862247f502a",
+      "size": 22451,
+      "sha256": "bce68c3bd96e4ffc28432a8cb4e7b3d3cc8f5172ff0004b125e247b6aded1b70",
       "module": "connector",
       "kind": "test",
       "depth": "semantic",
@@ -19070,8 +19070,8 @@
     },
     {
       "path": "apps/server/src/connector/runtime-ownership.test.ts",
-      "size": 32587,
-      "sha256": "1d5f07672914811a8127ad646d9ef481358405c70ef8088c60c306ed1aba5952",
+      "size": 32707,
+      "sha256": "2f5df6130e73fce16f6b3db37142c0def9d2f85eea0d6cca2ea0a1799b03854b",
       "module": "connector",
       "kind": "test",
       "depth": "semantic",
@@ -20501,8 +20501,8 @@
     },
     {
       "path": "apps/server/src/connector/terminals.test.ts",
-      "size": 11506,
-      "sha256": "0107feb6b4ce8d9f246d1c47c387df3031d6d404fb125ec5d1b4918d6f52d227",
+      "size": 11573,
+      "sha256": "82f07d236c45d5056f4aa96b073abf40aea5e40e95293278041c4f9fe6d4631b",
       "module": "connector",
       "kind": "test",
       "depth": "semantic",

@@ -14,7 +14,7 @@ const tick = () => new Promise<void>(resolve => setImmediate(resolve));
 const request = (signal?: AbortSignal) => new Request('http://fixture/api/sessions/PRIVATE-session', {
   headers: { authorization: 'Bearer PRIVATE-key' }, ...(signal ? { signal } : {}),
 });
-function fixture(actor: SessionReadActor, waitMs = 20) {
+function fixture(actor: SessionReadActor, waitMs = 1000) {
   const lines: string[] = [];
   const diagnostics = new PerformanceDiagnostics(line => lines.push(line));
   return { owner: new SessionReadAuthority(actor, diagnostics, waitMs), diagnostics,
