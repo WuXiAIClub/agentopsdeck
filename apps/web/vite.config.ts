@@ -5,7 +5,10 @@ import { fileURLToPath } from 'node:url';
 import { fontScaleCss } from './src/lib/font-scale-css';
 import { normalizeResourceOrigins } from './src/lib/resource-url';
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ command, mode }) => {
+  if (command === 'build' && mode === 'production') {
+    process.env.NODE_ENV = 'production';
+  }
   const env = { ...loadEnv(mode, fileURLToPath(new URL('../..', import.meta.url)), ''), ...process.env };
   const resourceOrigins = normalizeResourceOrigins([
     env.AOD_PUBLIC_BASE_URL ?? '',

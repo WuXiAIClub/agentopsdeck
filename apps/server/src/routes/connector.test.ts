@@ -1812,14 +1812,22 @@ test('connector message send fallback keeps display session key after definitive
   const fixture = createConnectorFixture();
   const previousPath = process.env.PATH;
   const previousArgsFile = process.env.AOD_TEST_OPENCLAW_ARGS_FILE;
+  const previousLocalCli = process.env.AOD_LOCAL_OPENCLAW_CLI;
+  const previousCliHome = process.env.AOD_OPENCLAW_HOME;
+  const previousCliPath = process.env.AOD_OPENCLAW_CLI_PATH;
   const binDir = join(fixture.dir, 'bin');
+  const cliHome = join(fixture.dir, 'openclaw-home');
   const argsFile = join(fixture.dir, 'openclaw-args.txt');
   mkdirSync(binDir, { recursive: true });
+  mkdirSync(cliHome, { mode: 0o700 });
   const openclawBin = join(binDir, 'openclaw');
-  writeFileSync(openclawBin, '#!/bin/sh\nprintf "%s\\n" "$@" > "$AOD_TEST_OPENCLAW_ARGS_FILE"\nprintf \'{"result":{"meta":{"finalAssistantVisibleText":"assistant ok"}}}\\n\'\n');
+  writeFileSync(openclawBin, `#!/bin/sh\nprintf "%s\\n" "$@" > ${JSON.stringify(argsFile)}\nprintf '{"result":{"meta":{"finalAssistantVisibleText":"assistant ok"}}}\\n'\n`);
   chmodSync(openclawBin, 0o755);
   process.env.PATH = `${binDir}:${previousPath ?? ''}`;
   process.env.AOD_TEST_OPENCLAW_ARGS_FILE = argsFile;
+  process.env.AOD_LOCAL_OPENCLAW_CLI = 'true';
+  process.env.AOD_OPENCLAW_HOME = cliHome;
+  process.env.AOD_OPENCLAW_CLI_PATH = openclawBin;
 
   fixture.gateway.request = async () => { throw new GatewayRpcError('agent', 'INVALID_REQUEST', 'missing scope: operator.write'); };
   fixture.store.upsertSession({
@@ -1864,6 +1872,12 @@ test('connector message send fallback keeps display session key after definitive
     else process.env.PATH = previousPath;
     if (previousArgsFile === undefined) delete process.env.AOD_TEST_OPENCLAW_ARGS_FILE;
     else process.env.AOD_TEST_OPENCLAW_ARGS_FILE = previousArgsFile;
+    if (previousLocalCli === undefined) delete process.env.AOD_LOCAL_OPENCLAW_CLI;
+    else process.env.AOD_LOCAL_OPENCLAW_CLI = previousLocalCli;
+    if (previousCliHome === undefined) delete process.env.AOD_OPENCLAW_HOME;
+    else process.env.AOD_OPENCLAW_HOME = previousCliHome;
+    if (previousCliPath === undefined) delete process.env.AOD_OPENCLAW_CLI_PATH;
+    else process.env.AOD_OPENCLAW_CLI_PATH = previousCliPath;
     await fixture.cleanup();
   }
 });
@@ -1873,14 +1887,22 @@ test('connector message send fallback keeps synthetic web sessions isolated from
   const fixture = createConnectorFixture();
   const previousPath = process.env.PATH;
   const previousArgsFile = process.env.AOD_TEST_OPENCLAW_ARGS_FILE;
+  const previousLocalCli = process.env.AOD_LOCAL_OPENCLAW_CLI;
+  const previousCliHome = process.env.AOD_OPENCLAW_HOME;
+  const previousCliPath = process.env.AOD_OPENCLAW_CLI_PATH;
   const binDir = join(fixture.dir, 'bin');
+  const cliHome = join(fixture.dir, 'openclaw-synthetic-home');
   const argsFile = join(fixture.dir, 'openclaw-synthetic-args.txt');
   mkdirSync(binDir, { recursive: true });
+  mkdirSync(cliHome, { mode: 0o700 });
   const openclawBin = join(binDir, 'openclaw');
-  writeFileSync(openclawBin, '#!/bin/sh\nprintf "%s\\n" "$@" > "$AOD_TEST_OPENCLAW_ARGS_FILE"\nprintf \'{"result":{"meta":{"finalAssistantVisibleText":"synthetic ok"}}}\\n\'\n');
+  writeFileSync(openclawBin, `#!/bin/sh\nprintf "%s\\n" "$@" > ${JSON.stringify(argsFile)}\nprintf '{"result":{"meta":{"finalAssistantVisibleText":"synthetic ok"}}}\\n'\n`);
   chmodSync(openclawBin, 0o755);
   process.env.PATH = `${binDir}:${previousPath ?? ''}`;
   process.env.AOD_TEST_OPENCLAW_ARGS_FILE = argsFile;
+  process.env.AOD_LOCAL_OPENCLAW_CLI = 'true';
+  process.env.AOD_OPENCLAW_HOME = cliHome;
+  process.env.AOD_OPENCLAW_CLI_PATH = openclawBin;
 
   fixture.gateway.request = async () => { throw new GatewayRpcError('agent', 'INVALID_REQUEST', 'missing scope: operator.write'); };
   fixture.store.upsertSession({
@@ -1922,6 +1944,12 @@ test('connector message send fallback keeps synthetic web sessions isolated from
     else process.env.PATH = previousPath;
     if (previousArgsFile === undefined) delete process.env.AOD_TEST_OPENCLAW_ARGS_FILE;
     else process.env.AOD_TEST_OPENCLAW_ARGS_FILE = previousArgsFile;
+    if (previousLocalCli === undefined) delete process.env.AOD_LOCAL_OPENCLAW_CLI;
+    else process.env.AOD_LOCAL_OPENCLAW_CLI = previousLocalCli;
+    if (previousCliHome === undefined) delete process.env.AOD_OPENCLAW_HOME;
+    else process.env.AOD_OPENCLAW_HOME = previousCliHome;
+    if (previousCliPath === undefined) delete process.env.AOD_OPENCLAW_CLI_PATH;
+    else process.env.AOD_OPENCLAW_CLI_PATH = previousCliPath;
     await fixture.cleanup();
   }
 });

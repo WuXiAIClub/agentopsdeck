@@ -1169,9 +1169,9 @@ export function registerConnectorRoutes(app: Hono, deps: {
   });
   app.post(`${base}/agents/:agentId/sessions`, async (c, next) => {
     const principal = requireScope(c.req.raw, deps.tokens, 'sessions:create');
-    if (!principal) throw new HTTPException(403);
+    if (!principal) return c.json({ error: 'session authorization changed' }, 403);
     const body = await readJsonBody(c.req.raw, 64 * 1024);
-    if (requireScope(c.req.raw, deps.tokens, 'sessions:create')?.tokenId !== principal.tokenId) throw new HTTPException(403);
+    if (requireScope(c.req.raw, deps.tokens, 'sessions:create')?.tokenId !== principal.tokenId) return c.json({ error: 'session authorization changed' }, 403);
     c.req.bodyCache.json = Promise.resolve(body);
     await next();
   });

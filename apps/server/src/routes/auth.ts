@@ -371,6 +371,7 @@ export function registerAuthRoutes(app: Hono, deps: AuthRoutesDeps) {
       return c.json(await deps.passkeys.authenticationOptions(c.req.raw, currentKeyHash()));
     } catch (error) {
       if (error instanceof AuthPersistenceError) return persistenceFailure(c, error);
+      if (error instanceof PasskeyUnavailableError) return c.json({ error: error.message }, 400);
       if (error instanceof PasskeyChallengeCapacityError) {
         c.header('Retry-After', String(error.retryAfterSeconds));
         return c.json({ error: error.message, retryAfterSeconds: error.retryAfterSeconds }, 429);

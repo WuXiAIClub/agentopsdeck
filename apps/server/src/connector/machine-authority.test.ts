@@ -39,11 +39,12 @@ class FakePty implements TerminalPty {
   stopped = gate();
   writes: string[] = []; sizes: number[][] = []; killed = 0;
   data = new Set<(value: string) => void>();
+  exits = new Set<(event: { exitCode: number }) => void>();
   write(value: string) { this.writes.push(value); }
   resize(cols: number, rows: number) { this.sizes.push([cols, rows]); }
-  kill() { this.killed++; this.stopped.release(); }
+  kill() { this.killed++; this.stopped.release(); for (const fn of [...this.exits]) fn({ exitCode: 0 }); }
   onData(fn: (value: string) => void) { this.data.add(fn); return { dispose: () => { this.data.delete(fn); } }; }
-  onExit(_fn: (event: { exitCode: number }) => void) { return { dispose() {} }; }
+  onExit(fn: (event: { exitCode: number }) => void) { this.exits.add(fn); return { dispose: () => { this.exits.delete(fn); } }; }
 }
 function http(app: Hono, token: string) {
   return (path: string, method = 'GET', body?: unknown, signal?: AbortSignal) => app.request(path, {
