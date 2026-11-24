@@ -66,13 +66,15 @@ test('whole read deadline cannot restart for each fresh authority check', { time
 
 test('history capacity remains reserved after HTTP timeout, not just while SQL is pending', { timeout: 15_000 }, async () => {
   const gates: ReturnType<typeof held<Response>>[] = []; let calls = 0;
-  const owner = new SessionReadAuthority(async () => { calls++; return 'actor'; }, new PerformanceDiagnostics(() => {}), 5);
+  const owner = new SessionReadAuthority(async () => { calls++; return 'actor'; }, new PerformanceDiagnostics(() => {}), 50);
+  const responses: Promise<Response>[] = [];
   for (let index = 0; index < 256; index++) {
     const gate = held<Response>(), entered = held<void>(); gates.push(gate);
-    const response = owner.run(request(), () => { entered.resolve(); return gate.promise; });
-    await entered.promise; assert.equal((await response).status, 503);
+    responses.push(owner.run(request(), () => { entered.resolve(); return gate.promise; }));
+    await entered.promise;
     assert.equal(owner.pending, index + 1);
   }
+  for (const response of await Promise.all(responses)) assert.equal(response.status, 503);
   assert.equal(calls, 256);
   assert.equal((await owner.run(request(), () => assert.fail('No capacity'))).status, 503);
   assert.equal(calls, 256); assert.equal(owner.pending, 256);

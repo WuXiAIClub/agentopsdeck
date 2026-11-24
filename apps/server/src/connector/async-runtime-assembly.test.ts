@@ -258,7 +258,10 @@ test('a failed startup freezes sibling admission before a slow original prefligh
   const work = f.assembly.start(), failed = assert.rejects(work);
   let settled = false; void work.then(() => { settled = true; }, () => { settled = true; });
   try {
-    await until(() => f.assembly.state === 'failed');
+    await until(() => f.assembly.state === 'failed'
+      && f.assembly.sdk.claude?.status === 'closed'
+      && f.assembly.sdk.copilot?.status === 'closed'
+      && f.assembly.codex.status().state === 'closed');
     assert.equal(f.assembly.sdk.claude?.status, 'closed');
     assert.equal(f.assembly.sdk.copilot?.status, 'closed');
     assert.equal(f.assembly.codex.status().state, 'closed');

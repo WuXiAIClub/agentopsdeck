@@ -5323,8 +5323,8 @@
     },
     {
       "path": "apps/server/src/auth/session-read-lifetime.test.ts",
-      "size": 6269,
-      "sha256": "7bf53e9d97379edb8783d42ce2881d957a1694cef8fd830a3b8acfd0208a1db0",
+      "size": 6361,
+      "sha256": "db95bea9b7ca88151cc459a9aabccd96111884d73515190cef236e22fb8bbda7",
       "module": "api-auth",
       "kind": "test",
       "depth": "semantic",
@@ -5395,8 +5395,8 @@
     },
     {
       "path": "apps/server/src/auth/sqlite-owner-diagnostics.test.ts",
-      "size": 7781,
-      "sha256": "eade6dd3c7759c7830262af8c90cc2e76e9e21e76d3f2f7bdb23078bbc0591c9",
+      "size": 7807,
+      "sha256": "3140206241d77c5a44d950eddc96a5c89bf7c1bf58f4190f854b645d21a99fb8",
       "module": "api-auth",
       "kind": "test",
       "depth": "semantic",
@@ -13624,8 +13624,8 @@
     },
     {
       "path": "apps/server/src/connector/async-runtime-assembly.test.ts",
-      "size": 21051,
-      "sha256": "9492b3a59b26046a9e571e024b31f3f713384a082a5e8068cc75c0f63a2db845",
+      "size": 21210,
+      "sha256": "51bc3b4e650f7dcc261461f604cf0cb9bbbddfe102bd21a38f5408802007fc0b",
       "module": "connector",
       "kind": "test",
       "depth": "semantic",

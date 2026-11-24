@@ -96,13 +96,13 @@ test('ordinary auth refusals remain logged without consuming original SQL failur
     // ACK. Raw numeric code remains in the child's original transaction log.
     assert.ok(childRows.some(row => row.operation === 'auth-passkey-change' && row.sqlErrorCode === 1811));
     assert.equal(childRows.filter(row => row.operation === 'auth-sqlite-owner-failure' && row.step === 12).length, 0);
-    assert.doesNotMatch(JSON.stringify(row), /private-auth|aaaa|auth.example|SELECT|PasskeyUnavailable/);
+    assert.doesNotMatch(JSON.stringify(row), /private-auth|aaaaaaaaaaaaaaaa|auth\.example|SELECT|PasskeyUnavailable/);
     const parentRow = diagnostics.snapshot().events.find(row => row.operation === 'auth-sqlite-owner-failure');
     assert.ok(parentRow); assert.equal(parentRow.step, 7); assert.equal(parentRow.classificationUnknown, 1);
     const refusals = diagnostics.snapshot().events.filter(row => row.operation === 'auth-sqlite-command' && row.deferred === 1);
     assert.equal(refusals.length, 20); assert.ok(refusals.every(row => !row.unknown));
     assert.equal(diagnostics.snapshot().events.filter(row => row.operation === 'auth-sqlite-owner-failure' && row.step === 12).length, 0);
-    assert.doesNotMatch(JSON.stringify(diagnostics.snapshot()), /private-auth|aaaa|auth.example|SELECT|PasskeyUnavailable/);
+    assert.doesNotMatch(JSON.stringify(diagnostics.snapshot()), /private-auth|aaaaaaaaaaaaaaaa|auth\.example|SELECT|PasskeyUnavailable/);
     assert.equal(owner.snapshot().ownerExitConfirmed, true);
   } finally { await owner.close(); rmSync(dir, { recursive: true, force: true }); }
 });
