@@ -2948,14 +2948,6 @@ export class CodexAppServer {
 
   private projectInterruptedTools(sessionKey: string, turn: any, messages: ChatMessage[],
     execution: CodexExecution | null = this.legacyExecutions.get(sessionKey) ?? null) {
-    if (turn.status === 'failed') {
-      for (const message of messages) {
-        if (message.turnId !== turn.id || message.role !== 'tool' || message.status !== 'sending') continue;
-        message.status = 'failed';
-        message.failureReason = 'Turn failed before tool completion was received';
-      }
-      return;
-    }
     if (turn.status !== 'interrupted') return;
     for (const message of messages) {
       if (message.turnId !== turn.id || message.role !== 'tool' || message.status !== 'sending') continue;
@@ -6475,16 +6467,13 @@ const unfinishedAssistantStreamReason = 'Stream ended without a completed native
  */
 function preserveUnfinishedAssistantStreams(turns: any[], live: ChatMessage[], snapshot: ChatMessage[]): ChatMessage[] {
   const completed = new Set(turns.filter(turn => turn.status === 'completed').map(turn => turn.id));
-  const terminatedWithoutCompletion = new Set(turns.filter(turn => turn.status === 'failed' || turn.status === 'interrupted').map(turn => turn.id));
   const ids = new Set(snapshot.map(message => message.id));
-  const retained = live.filter(message => message.role === 'assistant' && !!message.turnId
-    && (completed.has(message.turnId) || terminatedWithoutCompletion.has(message.turnId))
+  const retained = live.filter(message => message.role === 'assistant' && !!message.turnId && completed.has(message.turnId)
     && !ids.has(message.id) && !message.phase && !message.media?.length && !message.parentToolUseId && message.text.trim()
     && (!message.status || message.status === 'failed' && message.failureReason === unfinishedAssistantStreamReason)
     && !snapshotCoversAssistantDelta(message, snapshot, live)
-    && (terminatedWithoutCompletion.has(message.turnId)
-      || snapshot.some(candidate => candidate.sessionKey === message.sessionKey && candidate.turnId === message.turnId
-        && candidate.role === 'assistant' && candidate.status === 'sent' && !candidate.parentToolUseId && candidate.text.trim())))
+    && snapshot.some(candidate => candidate.sessionKey === message.sessionKey && candidate.turnId === message.turnId
+      && candidate.role === 'assistant' && candidate.status === 'sent' && !candidate.parentToolUseId && candidate.text.trim()))
     .map(message => ({ ...message, status: 'failed' as const, failureReason: unfinishedAssistantStreamReason }));
   return retained.length ? [...snapshot, ...retained] : snapshot;
 }

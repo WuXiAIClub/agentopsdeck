@@ -6900,7 +6900,7 @@
     {
       "path": "apps/server/src/codex/app-server.ts",
       "sha256": "2bcf7801dd6b5e3868f6e0877fb49e68672c1d9883020c74ae8b17824bd00df5",
-      "size": 408495,
+      "size": 407897,
       "module": "codex",
       "kind": "runtime",
       "depth": "semantic",
@@ -6931,7 +6931,7 @@
     {
       "path": "apps/server/src/codex/automation-completions.test.ts",
       "size": 3211,
-      "sha256": "a790947f612205e3fc5e1853e7e0a0b527e062c61965f940068f863c52682328",
+      "sha256": "61325c57c1b24722fcf194c65accbd0fc7ab34a4eff4090c9ffbf143b2822cc1",
       "module": "execution",
       "kind": "test",
       "depth": "semantic",
