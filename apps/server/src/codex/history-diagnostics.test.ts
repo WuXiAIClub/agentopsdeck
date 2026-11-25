@@ -34,13 +34,16 @@ test('history failure input rejects arbitrary text, extra fields and invalid num
 test('terminal recovery gates use fixed allowlists, hashed identities and the shared budget', () => {
   const rows: Record<string, unknown>[] = [], tags: string[] = [];
   const diagnostic = new HistoryDiagnostics((tag, row) => { tags.push(tag); rows.push(row); }, () => 0);
-  for (const gate of ['eligibility', 'single-attempt', 'path', 'goal', 'rollout', 'unsubscribe', 'resume', 'confirm',
-    'confirm-status', 'confirm-history', 'confirm-goal', 'recovered', 'SECRET-GATE']) {
+  const gates = ['eligibility', 'single-attempt', 'path', 'goal', 'rollout', 'journal-prepare', 'journal-begin',
+    'unsubscribe', 'resume', 'resume-ack', 'archive', 'unarchive', 'journal-finish', 'confirm',
+    'confirm-status', 'confirm-history', 'confirm-goal', 'recovered'];
+  for (const gate of [...gates, 'SECRET-GATE']) {
     diagnostic.failure('recovery', 'SECRET-SESSION', 'SECRET-CONNECTION', 'SECRET-TURN',
       { stage: 'terminal-reload', fault: gate === 'recovered' ? 'recovered' : 'protected', gate });
   }
   assert.ok(tags.every(tag => tag === '[codex-terminal-recovery]'));
   assert.ok(rows.every(row => row.event === 'terminal_recovery_observed'));
+  assert.deepEqual(rows.slice(0, -1).map(row => row.gate), gates);
   assert.equal(rows.at(-1)!.gate, 'unknown');
   assert.equal(rows.at(-2)!.fault, 'recovered');
   assert.doesNotMatch(JSON.stringify(rows), /SECRET/);

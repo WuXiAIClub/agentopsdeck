@@ -1304,6 +1304,105 @@ test('owned-journal mode prohibits unjournaled unsubscribe/resume in reloadError
   }
 });
 
+test('stream disconnect after partial assistant delta settles failed turn without deadlocking owned execution', async t => {
+  const f = fixture(t);
+  f.users.codexExecutions.begin(f.key, 'command', 'synthetic-connection');
+  f.users.codexExecutions.acknowledge(f.key, 'command', 'synthetic-connection', 'turn', () => {});
+  f.store.upsertSession({ sessionKey: f.key, agentId: 'codex', title: 'Streaming', status: 'running', hasActiveRun: true,
+    runtime: { turnId: 'turn', phase: 'running', threadActivity: 'running', connection: 'connected', sync: 'current', lastEventAt: 1 } });
+  f.runtime.handleNotification('item/agentMessage/delta', { threadId: 'synthetic', turnId: 'turn', itemId: 'partial-msg', delta: 'Partial streamed answer' });
+
+  const errorMessage = 'stream disconnected before completion: stream closed before response.completed';
+  f.runtime.request = async (method: string) => {
+    if (method === 'thread/backgroundTerminals/list') return { data: [] };
+    if (method === 'thread/goal/get') return { threadId: 'synthetic', goal: null };
+    assert.equal(method, 'thread/read');
+    return { thread: { id: 'synthetic', status: { type: 'idle' }, canAcceptDirectInput: true, turns: [
+      { id: 'turn', status: 'failed', error: { message: errorMessage }, items: [] },
+    ] } };
+  };
+  f.runtime.handleNotification('turn/completed', { threadId: 'synthetic', turn: { id: 'turn', status: 'failed', error: { message: errorMessage } } });
+  await f.runtime.completingTurns.get(f.key);
+
+  const execution = f.users.codexExecutions.get(f.key);
+  assert.equal(execution?.phase, 'failed');
+  assert.equal(execution?.sync, 'current');
+  assert.equal(f.users.codexExecutions.canStart(f.key), true);
+  assert.equal(f.store.getSession(f.key)?.hasActiveRun, false);
+  const messages = f.store.getMessages(f.key);
+  const partial = messages.find(message => message.text === 'Partial streamed answer');
+  assert.equal(partial?.status, 'failed');
+  assert.match(partial?.failureReason ?? '', /partial text preserved/i);
+  const failure = messages.find(message => message.failureReason === errorMessage);
+  assert.equal(failure?.status, 'failed');
+});
+
+for (const unknownDispatch of [false, true]) {
+  test(`owned-journal rehydrateCheckpointThread journals systemError unsubscribe/resume and recovers (${unknownDispatch})`, async t => {
+    const f = failedReloadFixture(t);
+    const resumes = f.users.codexExecutions.nativeResumes;
+    const order: string[] = [];
+    const outcomes: string[] = [];
+    f.runtime.options.nativeJournal = {
+      readHistory: async (sessionKey: string) => ({
+        execution: f.users.codexExecutions.get(sessionKey),
+        deleted: f.users.codexExecutions.isDeletedTerminal(sessionKey),
+        outcomeUnknown: resumes.pending(sessionKey),
+      }),
+      prepareResume: async (input: NativeResumeInput) => {
+        order.push('prepareResume');
+        return resumes.prepare(input, () => true);
+      },
+      beginResume: async (receipt: NativeResumeReceipt) => {
+        order.push('beginResume');
+        return resumes.begin(receipt, () => true);
+      },
+      finishResume: async (receipt: NativeResumeReceipt, outcome: 'acknowledged' | 'not_dispatched') => {
+        order.push(`finishResume:${outcome}`);
+        outcomes.push(outcome);
+        return resumes.finish(receipt, outcome);
+      },
+    };
+    let loaded = false;
+    f.runtime.request = async (method: string, _params: unknown, _timeout?: number, _goal?: unknown, beforeDispatch?: () => void) => {
+      order.push(method);
+      if (method === 'thread/goal/get') return { threadId: 'synthetic', goal: null };
+      if (method === 'thread/backgroundTerminals/list') return { data: [] };
+      if (method === 'thread/unsubscribe') {
+        beforeDispatch?.();
+        return { status: 'unsubscribed' };
+      }
+      if (method === 'thread/resume') {
+        beforeDispatch?.();
+        if (unknownDispatch) throw new Error('synthetic lost resume ack');
+        loaded = true;
+        return f.snapshot('idle');
+      }
+      assert.equal(method, 'thread/read');
+      return f.snapshot(loaded ? 'idle' : 'systemError');
+    };
+    try {
+      const action = f.runtime.rehydrateCheckpointThread(f.key);
+      if (unknownDispatch) {
+        await assert.rejects(action, /synthetic lost resume ack/);
+        assert.equal(resumes.pending(f.key), true);
+        assert.equal(f.runtime.executionUnavailable, true);
+        assert.deepEqual(outcomes, []);
+      } else {
+        await action;
+        assert.deepEqual(outcomes, ['acknowledged']);
+        assert.equal(resumes.pending(f.key), false);
+        assert.equal(f.runtime.loadedThreadIds.has('synthetic'), true);
+        assert.ok(order.indexOf('beginResume') < order.indexOf('thread/unsubscribe'));
+        assert.ok(order.indexOf('thread/unsubscribe') < order.indexOf('thread/resume'));
+        assert.ok(order.indexOf('thread/resume') < order.indexOf('finishResume:acknowledged'));
+      }
+    } finally {
+      f.runtime.options.nativeJournal = undefined;
+    }
+  });
+}
+
 test('owned-journal reloadJournaledErroredTerminal falls back to archive/unarchive/resume when unsubscribe keeps systemError', async t => {
   const f = failedReloadFixture(t);
   const resumes = f.users.codexExecutions.nativeResumes;
@@ -1324,7 +1423,7 @@ test('owned-journal reloadJournaledErroredTerminal falls back to archive/unarchi
   const calls: string[] = [];
   let unarchived = false;
   let resumedAfterUnarchive = false;
-  f.runtime.request = async (method: string, _params: any, _timeout?: number, _goal?: unknown, beforeDispatch?: () => void) => {
+  f.runtime.request = async (method: string, params: { excludeTurns?: boolean; includeTurns?: boolean }, _timeout?: number, _goal?: unknown, beforeDispatch?: () => void) => {
     calls.push(method);
     if (method === 'thread/goal/get') return { threadId: 'synthetic', goal: null };
     if (method === 'thread/backgroundTerminals/list') return { data: [], nextCursor: null };
@@ -1342,15 +1441,16 @@ test('owned-journal reloadJournaledErroredTerminal falls back to archive/unarchi
       return { thread: { id: 'synthetic', status: { type: 'notLoaded' } } };
     }
     if (method === 'thread/resume') {
+      assert.equal(params.excludeTurns, true);
       beforeDispatch?.();
       if (!unarchived) {
-        // Simulate codex-cli 0.147+ where thread/unsubscribe does not evict systemError.
-        return f.snapshot('systemError');
+        return { thread: { id: 'synthetic', status: { type: 'systemError' }, turns: [] } };
       }
       resumedAfterUnarchive = true;
-      return f.snapshot('idle');
+      return { thread: { id: 'synthetic', status: { type: 'idle' }, turns: [] } };
     }
     if (method === 'thread/read') {
+      assert.equal(params.includeTurns, true);
       return f.snapshot(resumedAfterUnarchive ? 'idle' : 'systemError');
     }
     throw new Error(`unexpected method ${method}`);
@@ -1372,6 +1472,34 @@ test('owned-journal reloadJournaledErroredTerminal falls back to archive/unarchi
     assert.deepEqual(outcomes, ['acknowledged']);
     assert.equal(resumes.pending(f.key), false);
     assert.equal(f.runtime.executionUnavailable, false);
+  } finally {
+    f.runtime.options.nativeJournal = undefined;
+  }
+});
+
+test('owned-journal terminal reload keeps an unverified resume fenced without archiving or retrying', async t => {
+  const f = failedReloadFixture(t);
+  const resumes = f.users.codexExecutions.nativeResumes;
+  f.runtime.options.nativeJournal = {
+    readHistory: async () => ({ execution: f.users.codexExecutions.get(f.key), deleted: false, outcomeUnknown: resumes.pending(f.key) }),
+    prepareResume: async (input: NativeResumeInput) => resumes.prepare(input, () => true),
+    beginResume: async (receipt: NativeResumeReceipt) => resumes.begin(receipt, () => true),
+    finishResume: async () => assert.fail('unverified acknowledgement must not settle'),
+  };
+  f.runtime.request = async (method: string, params: { excludeTurns?: boolean }, _timeout?: number, _goal?: unknown, beforeDispatch?: () => void) => {
+    if (method === 'thread/goal/get') return { threadId: 'synthetic', goal: null };
+    if (method === 'thread/backgroundTerminals/list') return { data: [] };
+    if (method === 'thread/unsubscribe') { beforeDispatch?.(); return { status: 'unsubscribed' }; }
+    assert.equal(method, 'thread/resume');
+    assert.equal(params.excludeTurns, true);
+    beforeDispatch?.();
+    return { thread: { id: 'different-thread', status: { type: 'systemError' }, turns: [] } };
+  };
+  try {
+    await assert.rejects(f.runtime.reloadJournaledErroredTerminal(f.key, f.snapshot()), /Invalid Codex resume acknowledgement/);
+    assert.equal(resumes.pending(f.key), true);
+    assert.equal(f.runtime.executionUnavailable, true);
+    assert.equal(f.runtime.loadedThreadIds.has('synthetic'), false);
   } finally {
     f.runtime.options.nativeJournal = undefined;
   }

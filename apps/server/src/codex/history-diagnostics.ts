@@ -10,7 +10,8 @@ const stages = ['startup', 'native-read', 'native-snapshot', 'rollout-snapshot',
 const faults = ['schema', 'system-error', 'identity', 'item-view', 'native-read', 'incomplete',
   'rollout-pending', 'background-terminals', 'interrupted-dispatch', 'authority-changed', 'unavailable', 'protected', 'recovered'];
 const recoveryGates = ['eligibility', 'single-attempt', 'native-schema', 'path', 'head', 'active-history',
-  'child-work', 'goal', 'background-work', 'rollout', 'unsubscribe', 'resume', 'confirm',
+  'child-work', 'goal', 'background-work', 'rollout', 'journal-prepare', 'journal-begin', 'unsubscribe',
+  'resume', 'resume-ack', 'archive', 'unarchive', 'journal-finish', 'confirm',
   'confirm-status', 'confirm-history', 'confirm-goal', 'recovered'];
 const member = (value: unknown, allowed: readonly string[]) => typeof value === 'string' && allowed.includes(value) ? value : 'unknown';
 const fingerprint = (value: unknown) => typeof value === 'string' && value

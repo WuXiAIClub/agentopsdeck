@@ -3646,9 +3646,21 @@ export class CodexAppServer {
       observed = await this.readHistoryFact(sessionKey);
       check();
       const fingerprint = nativeHistoryFingerprint(before);
-      const resumeParams = { threadId, ...(this.options.modelProvider ? { modelProvider: this.options.modelProvider } : {}) };
+      const resumeParams = { threadId, excludeTurns: true,
+        ...(this.options.modelProvider ? { modelProvider: this.options.modelProvider } : {}) };
       const effect = Promise.resolve().then(async () => {
         let receipt: NativeResumeReceipt | null = null, preparing = false, dispatched = false, finished = false;
+        const resume = async () => {
+          gate = 'resume';
+          const response = await this.request('thread/resume', resumeParams, undefined, undefined,
+            () => { local(); authorityCheck(); dispatched = true; });
+          gate = 'resume-ack';
+          const thread = response?.thread;
+          if (thread?.id !== threadId || !['idle', 'active', 'systemError'].includes(thread.status?.type)) {
+            throw new NativeHistoryReadError('schema', 'Invalid Codex resume acknowledgement');
+          }
+          return thread.status.type;
+        };
         try {
           gate = 'journal-prepare';
           local(); check();
@@ -3669,40 +3681,31 @@ export class CodexAppServer {
           gate = 'unsubscribe';
           reservation.effectStarted = true;
           const unloaded = await this.request('thread/unsubscribe', { threadId }, undefined, undefined,
-            () => { local(); dispatched = true; });
+            () => { local(); authorityCheck(); dispatched = true; });
           if (unloaded?.status === 'unsubscribed' && connectionId === this.connectionId) this.loadedThreadIds.delete(threadId);
           local(); authorityCheck();
           if (unloaded?.status !== 'unsubscribed') throw new RunControlConflict();
-          gate = 'resume';
-          let resumed = await this.request('thread/resume', resumeParams, undefined, undefined,
-            () => { local(); dispatched = true; });
+          let resumedStatus = await resume();
           // codex-cli 0.147+ keeps systemError threads loaded across thread/unsubscribe;
           // archive -> unarchive -> resume genuinely evicts the errored in-memory state
           // while preserving turns, path, title, and goal.
-          if (resumed?.thread?.status?.type === 'systemError') {
+          if (resumedStatus === 'systemError') {
             local(); authorityCheck();
             gate = 'archive';
             await this.request('thread/archive', { threadId }, undefined, undefined,
-              () => { local(); dispatched = true; });
+              () => { local(); authorityCheck(); dispatched = true; });
             if (connectionId === this.connectionId) this.loadedThreadIds.delete(threadId);
             local(); authorityCheck();
             gate = 'unarchive';
             await this.request('thread/unarchive', { threadId }, undefined, undefined,
-              () => { local(); dispatched = true; });
+              () => { local(); authorityCheck(); dispatched = true; });
             local(); authorityCheck();
-            gate = 'resume';
-            resumed = await this.request('thread/resume', resumeParams, undefined, undefined,
-              () => { local(); dispatched = true; });
+            resumedStatus = await resume();
           }
-          let resumedError: unknown = null;
-          try {
-            historyThread(resumed, threadId);
-          } catch (error) {
-            resumedError = error;
-          }
+          gate = 'journal-finish';
           if (!await journal.finishResume(receipt, 'acknowledged')) throw new RunControlConflict();
           finished = true;
-          if (resumedError) throw resumedError;
+          if (resumedStatus === 'systemError') throw new NativeHistoryReadError('system-error', 'Codex thread unavailable');
           local();
         } catch (error) {
           if (preparing) this.invalidateExecution();
@@ -3736,7 +3739,8 @@ export class CodexAppServer {
       report('recovered');
       return refreshed;
     } catch (error) {
-      report(error instanceof RunControlConflict ? 'authority-changed' : 'unavailable');
+      report(error instanceof RunControlConflict ? 'authority-changed'
+        : error instanceof NativeHistoryReadError ? error.fault : 'unavailable');
       throw error;
     } finally {
       reservation.reloading = false;

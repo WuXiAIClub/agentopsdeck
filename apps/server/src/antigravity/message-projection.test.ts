@@ -22,6 +22,10 @@ test('Antigravity tool projection whitelists metadata, not executable input or n
     status: 'failed', rawInput: 'synthetic-private', rawOutput: 'synthetic-private', content: ['synthetic-native-body'] }), {
     sessionUpdate: 'tool_call_update', toolCallId: 'synthetic-tool', status: 'failed',
   });
+  assert.deepEqual(projectAntigravityUpdate({ sessionUpdate: 'tool_call_update', toolCallId: 'synthetic-tool',
+    title: null, status: null, kind: null }), {
+    sessionUpdate: 'tool_call_update', toolCallId: 'synthetic-tool',
+  });
   for (const invalid of [{ toolCallId: '' }, { title: ['Read'] }, { title: '好'.repeat(171) }, { title: 'synthetic\nprivate' },
     { status: ['completed'] }, { status: 'unknown' }, { kind: 'native-exec' }]) {
     if ('title' in invalid && typeof invalid.title === 'string') {
