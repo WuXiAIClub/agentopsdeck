@@ -967,3 +967,24 @@ test('events snapshot retries when refreshProjection reports ExecutionProjection
   await reader.cancel();
   assert.ok(projectionAttempts >= 3);
 });
+
+test('surface self-heals a non-unknown projection gap on snapshot and event reads while keeping unknown fences closed', async t => {
+  const f = await fixture(t);
+  await f.surface.start();
+  const initialRes = await f.request('/sessions/state');
+  assert.equal(initialRes.status, 200);
+  const initialCursor = (await initialRes.json()).sourceCursor;
+
+  // Trigger a recoverable projection gap (empty event batch admission rejection -> gap === 'projection').
+  await assert.rejects(f.surface.events.append([]));
+  assert.equal(f.surface.events.status().unavailable, true);
+  assert.equal(f.surface.events.status().unknown, false);
+
+  // Concurrent session state reads coalesce recovery, reset epoch, and return 200 instead of permanent 503.
+  const [resA, resB] = await Promise.all([f.request('/sessions/state'), f.request('/sessions/directory')]);
+  assert.equal(resA.status, 200);
+  assert.equal(resB.status, 200);
+  const healedState = await resA.json();
+  assert.notEqual(healedState.sourceCursor.split(':')[0], initialCursor.split(':')[0]);
+  assert.equal(f.surface.events.status().unavailable, false);
+});

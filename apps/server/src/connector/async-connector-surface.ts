@@ -180,7 +180,27 @@ export async function createAsyncConnectorSurface(options: AsyncConnectorSurface
       assertLive();
     });
   });
-  const snapshot: EventSnapshotRead = capture => events.snapshot(capture, fullRefresh);
+  let recoveryWork: Promise<boolean> | undefined;
+  const ensureEventsHealthy = async () => {
+    const current = events.status();
+    if (!current.unavailable) return;
+    if (!ready() || current.unknown) throw new ConnectorOwnerUnavailable();
+    if (!recoveryWork) {
+      const work = events.recover();
+      recoveryWork = work;
+      void work.then(() => { if (recoveryWork === work) recoveryWork = undefined; },
+        () => { if (recoveryWork === work) recoveryWork = undefined; });
+    }
+    if (!await recoveryWork) throw new ConnectorOwnerUnavailable();
+  };
+  const snapshot: EventSnapshotRead = async capture => {
+    await ensureEventsHealthy();
+    return events.snapshot(capture, fullRefresh);
+  };
+  const replayEvents = async (after: string | null) => {
+    await ensureEventsHealthy();
+    return events.replay(after);
+  };
   const safe = (action: () => Promise<unknown> | undefined) => {
     try { return Promise.resolve(action()); } catch (error) { return Promise.reject(error); }
   };
@@ -257,7 +277,7 @@ export async function createAsyncConnectorSurface(options: AsyncConnectorSurface
         maintenance = createAsyncConnectorMaintenance(app, { owner, nodeId, config, runtimes: assembly!, deck,
           available: ready, pauseRefresh: refreshes.pause, diagnostics });
       },
-      publicReads: { authority, changes: events.changes, replay: after => events.replay(after), agents: () => binding!.agents(),
+      publicReads: { authority, changes: events.changes, replay: replayEvents, agents: () => binding!.agents(),
         mediaRoot: config.inboundMediaDir, sampler, connector: options.connector, diagnostics, ...wait } });
     const base = '/api/connector/v1';
     const authFailure = (error: unknown, scope: string): { error: string; status: 403 | 408 | 503 } => {
@@ -429,7 +449,7 @@ export async function createAsyncConnectorSurface(options: AsyncConnectorSurface
     });
     if (options.legacyReads) legacyReads = registerAsyncLegacySessionReads(app, {
       deck, observeActor: options.legacyReads.observeActor, available: ready,
-      refreshSessions: fullRefresh, refreshMessages, snapshot, replay: after => events.replay(after),
+      refreshSessions: fullRefresh, refreshMessages, snapshot, replay: replayEvents,
       agents: () => binding!.agents(), diagnostics, ...wait,
     });
     const machineAuthority = workerConnectorMachineAuthority(owner);

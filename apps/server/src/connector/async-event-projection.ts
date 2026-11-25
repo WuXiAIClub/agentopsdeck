@@ -7,11 +7,12 @@ import { performanceDiagnostics, type PerformanceDiagnostics, type PerformanceTr
 import type { AsyncConnectorOwner } from './async-connector-owner.js';
 import { CONNECTOR_RESULT_BYTES, ConnectorOwnerUnavailable, encodeConnectorOwnerJson, encodeConnectorProjectionJson, validConnectorOwnerInput, validConnectorOwnerOutput,
   type ConnectorOwnerCommands } from './connector-owner-domain.js';
-import { CONNECTOR_EVENT_COMMAND_BYTES, connectorEventReplayMatches, validConnectorEventOutput,
+import { CONNECTOR_EVENT_BATCH_LIMIT, CONNECTOR_EVENT_COMMAND_BYTES, connectorEventReplayMatches, validConnectorEventOutput,
   type ConnectorEventReplay } from './connector-event-domain.js';
 
 const MAX_PENDING = 64;
 const MAX_STARTUP_PENDING = 256;
+const MAX_COALESCED_BATCH_BYTES = 256 * 1024;
 const MAX_INPUT_BYTES = 8 * 1024 * 1024;
 type Owner = Pick<AsyncConnectorOwner, 'command'>;
 /** Trusted assembly callback: refresh EVERY projection represented by capture,
@@ -45,13 +46,14 @@ export class AsyncConnectorEventProjection {
             ...(descriptors.deleted?.value === true ? { deleted: true } : {}),
           } };
         });
-      void this.append(notifications).catch(() => {});
+      void this.appendDeckNotifications(notifications).catch(() => {});
     },
   });
   private tail: Promise<void> = Promise.resolve();
   private revision = 0;
   private count = 0;
   private bytes = 0;
+  private coalescedTail: { events: DeckEvent[]; encodedBytes: number; reservedBytes: number; active: boolean } | undefined;
   private gap: 'read' | 'projection' | 'unknown' | undefined;
   private controlling = false;
   private closing = false;
@@ -105,6 +107,7 @@ export class AsyncConnectorEventProjection {
     if (this.closing || this.gap || this.controlling) this.unavailable();
   }
   private queue<T>(step: number, work: () => Promise<T>, inputBytes = 0): Promise<T> {
+    this.coalescedTail = undefined;
     const pendingLimit = this.bootstrapping ? MAX_STARTUP_PENDING : MAX_PENDING;
     if (this.closing || this.count >= pendingLimit || this.bytes + inputBytes > MAX_INPUT_BYTES) this.unavailable();
     this.count++; this.bytes += inputBytes;
@@ -127,6 +130,7 @@ export class AsyncConnectorEventProjection {
     return original;
   }
   append(events: readonly DeckEvent[]): Promise<string> {
+    this.coalescedTail = undefined;
     // Invalid admission still represents a memory mutation with no log proof.
     // Fence snapshots immediately, without an unbounded reset/retry queue.
     if (!this.closing) this.revision++;
@@ -152,6 +156,55 @@ export class AsyncConnectorEventProjection {
       this.invalidate('projection'); this.failure(1); return Promise.reject(new ConnectorOwnerUnavailable());
     }
   }
+  private appendDeckNotifications(events: readonly DeckEvent[]): Promise<string> {
+    if (!this.closing) this.revision++;
+    try {
+      this.readable();
+      const encoded = encodeConnectorProjectionJson({ events }, CONNECTOR_EVENT_COMMAND_BYTES);
+      const input = JSON.parse(encoded) as { events: DeckEvent[] };
+      if (!validConnectorOwnerInput('eventProjectionAppend', input)) this.unavailable();
+      const encodedBytes = Buffer.byteLength(encoded);
+      const tail = this.coalescedTail;
+      // When the queue is near capacity, coalesce waiting Deck notifications
+      // into the unstarted tail command instead of overflowing MAX_PENDING.
+      if (tail?.active && this.count >= MAX_PENDING - 8
+        && tail.events.length + input.events.length <= CONNECTOR_EVENT_BATCH_LIMIT
+        && tail.encodedBytes + encodedBytes <= MAX_COALESCED_BATCH_BYTES
+        && this.bytes + encodedBytes <= MAX_INPUT_BYTES) {
+        tail.events.push(...input.events);
+        tail.encodedBytes += encodedBytes;
+        tail.reservedBytes += encodedBytes;
+        this.bytes += encodedBytes;
+        return Promise.resolve('');
+      }
+      const bucket = { events: [...input.events], encodedBytes, reservedBytes: 0, active: true };
+      const queued = this.queue(1, async () => {
+        bucket.active = false;
+        if (this.coalescedTail === bucket) this.coalescedTail = undefined;
+        try {
+          if (this.gap) this.unavailable();
+          let reply: unknown;
+          try { reply = await this.owner.command('eventProjectionAppend', { events: bucket.events }); }
+          catch { this.invalidate('unknown'); this.unavailable(); }
+          reply = this.copyReply(reply);
+          if (!validConnectorEventOutput('eventProjectionAppend', reply)) {
+            this.invalidate('unknown'); this.unavailable();
+          }
+          const cursor = (reply as { cursor: string | null }).cursor;
+          if (cursor === null) { this.invalidate('projection'); this.unavailable(); }
+          this.changes.notify(); return cursor;
+        } finally {
+          this.bytes -= bucket.reservedBytes;
+          bucket.reservedBytes = 0;
+        }
+      }, encodedBytes);
+      this.coalescedTail = bucket;
+      return queued;
+    } catch {
+      this.coalescedTail = undefined;
+      this.invalidate('projection'); this.failure(1); return Promise.reject(new ConnectorOwnerUnavailable());
+    }
+  }
   private async observe(after: string | null): Promise<ConnectorEventReplay> {
     let reply: unknown;
     try { reply = await this.owner.command('eventReplay', { after }); }
@@ -169,7 +222,7 @@ export class AsyncConnectorEventProjection {
     try {
       this.readable();
       if (!validConnectorOwnerInput('eventReplay', { after })) this.unavailable();
-      return this.queue(2, async () => { this.readable(); const reply = await this.observe(after); this.readable(); return reply; });
+    return this.queue(2, async () => { this.readable(); const reply = await this.observe(after); this.readable(); return reply; });
     } catch { this.failure(2); return Promise.reject(new ConnectorOwnerUnavailable()); }
   }
   snapshot<T>(capture: (cursor: string) => T, refresh: ConnectorProjectionRefresh): Promise<T> {
