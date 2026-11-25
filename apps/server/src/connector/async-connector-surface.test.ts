@@ -968,6 +968,28 @@ test('events snapshot retries when refreshProjection reports ExecutionProjection
   assert.ok(projectionAttempts >= 3);
 });
 
+test('startup retries initial fullRefresh when refreshProjection reports ExecutionProjectionChanged', async t => {
+  let projectionAttempts = 0;
+  const f = await fixture(t, options => {
+    const original = options.bind!;
+    options.bind = async context => {
+      const binding = await original(context);
+      binding.attach = async assembly => {
+        const refreshProjection = assembly.refreshProjection.bind(assembly);
+        assembly.refreshProjection = async settings => {
+          projectionAttempts++;
+          if (projectionAttempts === 1) throw new ExecutionProjectionChanged();
+          return refreshProjection(settings);
+        };
+      };
+      return binding;
+    };
+  });
+  await f.surface.start();
+  assert.equal(f.surface.ready, true);
+  assert.ok(projectionAttempts >= 2);
+});
+
 test('surface self-heals a non-unknown projection gap on snapshot and event reads while keeping unknown fences closed', async t => {
   const f = await fixture(t);
   await f.surface.start();
