@@ -2290,7 +2290,7 @@ export class CodexAppServer {
   }
 
   private effectiveRawEffort(threadId: string): string | undefined {
-    return this.threadEfforts.get(threadId) ?? this.options.store.getSession(this.sessionKey(threadId))?.thinkingLevel;
+    return this.threadEfforts.get(threadId) ?? this.options.store.localSessionThinkingLevel(this.sessionKey(threadId));
   }
 
   private threadResumeEffort(threadId: string): string | undefined {

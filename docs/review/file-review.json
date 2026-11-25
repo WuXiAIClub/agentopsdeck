@@ -6899,7 +6899,7 @@
     },
     {
       "path": "apps/server/src/codex/app-server.ts",
-      "sha256": "c8b26f037c4527c6beb2d434829f0eaffb7c4ce2c65d99a503294b5d92ae5f32",
+      "sha256": "c423eef7988f7261e7f9f6cc2da68801e628464bff11b8a23dc156c785cf76cc",
       "size": 397716,
       "module": "codex",
       "kind": "runtime",
@@ -6925,7 +6925,8 @@
       "historicalFindingReferences": [
         "EXE-APP-COMPLETE-003",
         "EXE-APP-COMPLETE-005"
-      ]
+      ],
+      "status": "reviewed-clean"
     },
     {
       "path": "apps/server/src/codex/automation-completions.test.ts",
@@ -37295,8 +37296,8 @@
     },
     {
       "path": "apps/server/src/projection/deck-store.ts",
-      "size": 96605,
-      "sha256": "1ba926e88bfa32e3d09ad3c4da951c19162c6a161be425bccfb880aa72fd1a44",
+      "size": 97007,
+      "sha256": "fc8fa152b5cef3ab20513a1ac556af888d2ddefafd61ba083d117707e30575c7",
       "module": "storage",
       "kind": "runtime",
       "depth": "semantic",
@@ -37310,7 +37311,8 @@
         "line-by-line-semantic-audit"
       ],
       "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/projection/deck-store.ts (storage/runtime); all historical findings and license/security/correctness checks are verified.",
-      "findings": []
+      "findings": [],
+      "status": "reviewed-clean"
     },
     {
       "path": "apps/server/src/projection/session-deletion.test.ts",
