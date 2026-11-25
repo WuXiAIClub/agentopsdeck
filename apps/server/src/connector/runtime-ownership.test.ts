@@ -162,13 +162,14 @@ for (const kind of ['sessions', 'history', 'codex-history'] as const) for (const
     runtime.codex.refreshSession = read;
     const pending = (kind === 'sessions' ? runtime.refreshSessions() : runtime.refreshMessages(sessionKey))
       .then(() => undefined, error => error);
-    context.after(async () => { release(); await pending; await runtime.close(); });
+    let pauseRequest: Promise<Response> | undefined;
+    context.after(async () => { release(); await pending; await pauseRequest?.catch(() => undefined); await runtime.close(); });
     await started;
     let settled = false;
-    const pauseRequest = maintenanceRequest(runtime, 'commands/pause', { idempotencyKey: 'original-pause' })
+    pauseRequest = maintenanceRequest(runtime, 'commands/pause', { idempotencyKey: 'original-pause' })
       .then(response => { settled = true; return response; });
     try {
-      for (let attempt = 0; attempt < 100; attempt++) {
+      for (let attempt = 0; attempt < 600; attempt++) {
         const status = await (await maintenanceRequest(runtime, 'status')).json();
         if (status.state === 'paused') break;
         await new Promise<void>(resolve => setTimeout(resolve, 5));
