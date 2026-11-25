@@ -127,8 +127,10 @@ export function unsafePathCategory(path) {
 export function checkIdentityHistory(history) {
   return history.split('\n').filter(Boolean).every(line => {
     const [author, email, committer, committerEmail] = line.split('\t');
+    const allowedCommitter = (committer === initialIdentity.name && committerEmail === initialIdentity.email)
+      || (committer === 'GitHub' && committerEmail === 'noreply@github.com');
     return author === initialIdentity.name && email === initialIdentity.email
-      && committer === initialIdentity.name && committerEmail === initialIdentity.email;
+      && allowedCommitter;
   });
 }
 
