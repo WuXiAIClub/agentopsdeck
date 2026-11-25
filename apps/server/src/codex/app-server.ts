@@ -4372,6 +4372,17 @@ export class CodexAppServer {
         const id = codexScopedId(sessionKey, `codex-${itemId}`);
         if (this.completedAssistantItems.has(`${id}:${JSON.stringify([execution?.commandId, notifiedTurnId])}`)) return;
         const assistantText = text || this.assistantText.get(`${sessionKey}:${itemId}`) || '';
+        if (!assistantText.trim()) {
+          this.completedAssistantItems.add(`${id}:${JSON.stringify([execution?.commandId, notifiedTurnId])}`);
+          this.assistantText.delete(`${sessionKey}:${itemId}`);
+          this.releaseAssistantItemRetention(sessionKey, itemId);
+          const placeholder = this.options.store.getMessage(sessionKey, id);
+          if (placeholder && !placeholder.text.trim() && !placeholder.media?.length) {
+            this.touchProjection(sessionKey);
+            this.options.store.removeMessage(sessionKey, id);
+          }
+          return;
+        }
         if (!this.retainAssistantOutput(sessionKey, itemId, Buffer.byteLength(assistantText), execution, notifiedTurnId)) return;
         const pending = this.assistantProjections.get(sessionKey) ?? new Set<Promise<void>>();
         const task = this.recordAssistantMessage(sessionKey, itemId, assistantText, now, notifiedTurnId, item?.phase, execution)
@@ -5592,13 +5603,13 @@ export class CodexAppServer {
     if (current?.phase === 'unknown' || execution?.commandId !== current?.commandId
       || (execution?.runId && execution.runId !== current?.runId)
       || (turnId && current?.runId && turnId !== current.runId)) return;
-    if (!this.retainAssistantOutput(sessionKey, itemId, Buffer.byteLength(projected.text), execution, turnId)) return;
     const live = this.options.store.getMessages(sessionKey);
     // Native streams can complete an empty commentary item. History omits
     // these content-free records; retaining one live would block final sync
     // forever as a "missing assistant". Retire only its empty placeholder,
     // never another item's text or a media-only assistant message.
     if (!text.trim() && !projected.media.length) {
+      this.releaseAssistantItemRetention(sessionKey, itemId);
       const placeholder = live.find(message => message.id === id);
       if (placeholder && !placeholder.text.trim() && !placeholder.media?.length) {
         this.touchProjection(sessionKey);
@@ -5606,6 +5617,7 @@ export class CodexAppServer {
       }
       return;
     }
+    if (!this.retainAssistantOutput(sessionKey, itemId, Buffer.byteLength(projected.text), execution, turnId)) return;
     // Some Codex streams use an opaque delta ID, then a canonical item-N ID
     // at completion. Replace only a unique, unfinished alias in this turn;
     // completed commentary and identical replies in other turns are distinct.
@@ -5794,6 +5806,16 @@ export class CodexAppServer {
     this.assistantRetainedBytes += addedBytes;
     this.assistantRetainedItems += addedItems;
     return true;
+  }
+  private releaseAssistantItemRetention(sessionKey: string, itemId: string) {
+    const retained = this.assistantRetention.get(sessionKey);
+    const previousBytes = retained?.items.get(itemId);
+    if (retained === undefined || previousBytes === undefined) return;
+    retained.bytes -= previousBytes;
+    retained.items.delete(itemId);
+    this.assistantRetainedBytes -= previousBytes;
+    this.assistantRetainedItems -= 1;
+    if (!retained.items.size) this.assistantRetention.delete(sessionKey);
   }
   private clearTransientBuffers(sessionKey?: string) {
     if (!sessionKey) {
