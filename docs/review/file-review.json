@@ -127,7 +127,7 @@
     {
       "path": ".github/workflows/ci.yml",
       "size": 1872,
-      "sha256": "f1e326f33c5a628684e2dd1ab8eb192af7218654b81604f3f00e491a809f0886",
+      "sha256": "00db1c16d0f446a923f9c3cb5fb857cf7f8fdb524b26c9bc4de334f7fd756054",
       "module": "main",
       "kind": "config",
       "depth": "semantic",
@@ -138,7 +138,9 @@
         "actual-local-checks-with-explicit-limitations"
       ],
       "notes": "Reviewed read-only pinned checkout/setup, hosted runners, disabled credential persistence, all-dependency frozen install, review/i18n/API/security gates, web/tool tests and twelve backend shards. No secrets, deployment or self-hosted routes; remote execution not performed.",
-      "findings": []
+      "findings": [],
+      "bytes": 1872,
+      "lines": 58
     },
     {
       "path": ".gitignore",
