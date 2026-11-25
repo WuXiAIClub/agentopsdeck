@@ -1409,7 +1409,12 @@ export class CodexAppServer {
         authority();
         const nativeStarted = performance.now();
         result = await this.request('thread/read', { threadId, includeTurns: true });
-        if (!options.readOnly) result = await this.reloadErroredTerminal(sessionKey, result);
+        if (!options.readOnly) {
+          const hasResumeJournal = Boolean(this.maintenanceRecovery.getStore()?.resumes ?? this.options.nativeJournal?.prepareResume);
+          result = hasResumeJournal
+            ? await this.reloadJournaledErroredTerminal(sessionKey, result)
+            : await this.reloadErroredTerminal(sessionKey, result);
+        }
         historyTrace.add('bodyMs', performance.now() - nativeStarted);
         this.unmaterializedThreadIds.delete(threadId);
       } catch (error) {
@@ -2943,6 +2948,14 @@ export class CodexAppServer {
 
   private projectInterruptedTools(sessionKey: string, turn: any, messages: ChatMessage[],
     execution: CodexExecution | null = this.legacyExecutions.get(sessionKey) ?? null) {
+    if (turn.status === 'failed') {
+      for (const message of messages) {
+        if (message.turnId !== turn.id || message.role !== 'tool' || message.status !== 'sending') continue;
+        message.status = 'failed';
+        message.failureReason = 'Turn failed before tool completion was received';
+      }
+      return;
+    }
     if (turn.status !== 'interrupted') return;
     for (const message of messages) {
       if (message.turnId !== turn.id || message.role !== 'tool' || message.status !== 'sending') continue;
@@ -3552,6 +3565,176 @@ export class CodexAppServer {
       if (after.status?.type !== 'idle') throw new RunControlConflict();
       gate = 'confirm-history';
       if (nativeHistoryFingerprint(after) !== nativeHistoryFingerprint(before)) throw new RunControlConflict();
+      gate = 'confirm-goal';
+      const afterGoal = nativeGoalEvidence(await read('thread/goal/get', { threadId }), threadId);
+      if (nativeGoalProtection(afterGoal.status) || afterGoal.version !== goal.version) throw new RunControlConflict();
+      check(true);
+      this.loadedThreadIds.add(threadId);
+      gate = 'recovered';
+      report('recovered');
+      return refreshed;
+    } catch (error) {
+      report(error instanceof RunControlConflict ? 'authority-changed' : 'unavailable');
+      throw error;
+    } finally {
+      reservation.reloading = false;
+      if (!reservation.effectStarted && this.erroredThreadReloads.get(sessionKey) === reservation) {
+        this.erroredThreadReloads.delete(sessionKey);
+      }
+    }
+  }
+
+  /** Journaled systemError reload for owned-journal mode: persists the durable
+   * resume intent BEFORE thread/unsubscribe or thread/resume so a crash or
+   * lost ACK can never leave an unjournaled native mutation. */
+  private async reloadJournaledErroredTerminal(sessionKey: string, result: any,
+    nativeRead: (method: string, params: unknown, timeoutMs?: number) => Promise<any> = this.request.bind(this),
+    authorityCheck: () => void = () => {},
+    continuation: NativeResumeInput['continuation'] = null) {
+    if (result?.thread?.status?.type !== 'systemError') return result;
+    const journal = this.maintenanceRecovery.getStore()?.resumes ?? this.options.nativeJournal;
+    let observed = await this.readHistoryFact(sessionKey);
+    const expected = observed.execution, connectionId = this.connectionId;
+    const child = this.child, generation = this.nativeConnectionGeneration;
+    let gate = 'eligibility';
+    const report = (fault: string) => this.historyDiagnostics.failure('recovery', sessionKey, connectionId, expected?.runId,
+      { stage: 'terminal-reload', fault, gate });
+    if (!journal?.prepareResume || observed.deleted || observed.outcomeUnknown || !expected?.runId || !connectionId
+      || expected.connectionId !== connectionId || expected.phase !== 'failed'
+      || expected.preparation || expected.reason || !expected.completedAt || this.authorizingEffects.size >= 128) {
+      report('protected'); return result;
+    }
+    const identity = `${connectionId}:${expected.runId}`;
+    gate = 'single-attempt';
+    if (this.erroredThreadReloads.get(sessionKey)?.identity === identity) { report('protected'); return result; }
+    const reservation = { identity, effectStarted: false, reloading: true };
+    this.erroredThreadReloads.set(sessionKey, reservation);
+    try {
+      const version = this.projectionVersion(sessionKey), threadId = this.threadId(sessionKey);
+      const local = () => {
+        if (this.closed || this.executionUnavailable || connectionId !== this.connectionId
+          || child !== this.child || generation !== this.nativeConnectionGeneration) throw new RunControlConflict();
+      };
+      const check = (allowProtectionOnly = false) => {
+        authorityCheck();
+        local();
+        const current = this.options.nativeJournal ? observed.execution : this.legacyExecutions.get(sessionKey);
+        if ((this.options.nativeJournal ? observed.deleted || observed.outcomeUnknown : this.legacyExecutions.isDeletedTerminal(sessionKey))
+          || !current
+          || (current.revision !== expected.revision && !(allowProtectionOnly && resumeProtectionOnly(expected, current)))
+          || current.commandId !== expected.commandId
+          || current.runId !== expected.runId || this.projectionVersion(sessionKey) !== version) throw new RunControlConflict();
+      };
+      const read = async (method: string, params: unknown, timeoutMs?: number) => {
+        const response = await nativeRead(method, params, timeoutMs);
+        observed = await this.readHistoryFact(sessionKey);
+        return response;
+      };
+      check();
+      gate = 'native-schema';
+      const before = historyThread({ thread: { ...result.thread, status: { type: 'idle' } } }, threadId);
+      const head = before.turns.at(-1);
+      const skip = () => { report('protected'); return result; };
+      gate = 'path';
+      if (typeof before.path !== 'string' || !before.path.trim()) return skip();
+      gate = 'head';
+      if (head?.id !== expected.runId || head.status !== expected.phase) return skip();
+      gate = 'active-history';
+      if (before.turns.some((turn: any) => !['completed', 'failed', 'interrupted'].includes(turn.status))) return skip();
+      gate = 'child-work';
+      if (before.turns.some((turn: any) => hasNativeChildWork(turn.items, threadId))) return skip();
+      gate = 'goal';
+      const goal = nativeGoalEvidence(await read('thread/goal/get', { threadId }), threadId);
+      if (nativeGoalProtection(goal.status)) return skip();
+      check();
+      gate = 'background-work';
+      if ((await backgroundTerminals(read, threadId, check)).length) return skip();
+      gate = 'rollout';
+      await this.validateRolloutSnapshot(before.path);
+      observed = await this.readHistoryFact(sessionKey);
+      check();
+      const fingerprint = nativeHistoryFingerprint(before);
+      const resumeParams = { threadId, ...(this.options.modelProvider ? { modelProvider: this.options.modelProvider } : {}) };
+      const effect = Promise.resolve().then(async () => {
+        let receipt: NativeResumeReceipt | null = null, preparing = false, dispatched = false, finished = false;
+        try {
+          gate = 'journal-prepare';
+          local(); check();
+          preparing = true;
+          receipt = await journal.prepareResume({
+            expected: {
+              sessionKey: expected.sessionKey, commandId: expected.commandId,
+              connectionId: expected.connectionId, runId: expected.runId!, revision: expected.revision,
+            },
+            nativeConnectionId: connectionId, threadId, fingerprint, continuation,
+          });
+          preparing = false;
+          if (!receipt) throw new RunControlConflict();
+          gate = 'journal-begin';
+          local(); check();
+          if (!await journal.beginResume(receipt)) throw new RunControlConflict();
+          local(); check();
+          gate = 'unsubscribe';
+          reservation.effectStarted = true;
+          const unloaded = await this.request('thread/unsubscribe', { threadId }, undefined, undefined,
+            () => { local(); dispatched = true; });
+          if (unloaded?.status === 'unsubscribed' && connectionId === this.connectionId) this.loadedThreadIds.delete(threadId);
+          local(); authorityCheck();
+          if (unloaded?.status !== 'unsubscribed') throw new RunControlConflict();
+          gate = 'resume';
+          let resumed = await this.request('thread/resume', resumeParams, undefined, undefined,
+            () => { local(); dispatched = true; });
+          // codex-cli 0.147+ keeps systemError threads loaded across thread/unsubscribe;
+          // archive -> unarchive -> resume genuinely evicts the errored in-memory state
+          // while preserving turns, path, title, and goal.
+          if (resumed?.thread?.status?.type === 'systemError') {
+            local(); authorityCheck();
+            gate = 'archive';
+            await this.request('thread/archive', { threadId }, undefined, undefined,
+              () => { local(); dispatched = true; });
+            if (connectionId === this.connectionId) this.loadedThreadIds.delete(threadId);
+            local(); authorityCheck();
+            gate = 'unarchive';
+            await this.request('thread/unarchive', { threadId }, undefined, undefined,
+              () => { local(); dispatched = true; });
+            local(); authorityCheck();
+            gate = 'resume';
+            resumed = await this.request('thread/resume', resumeParams, undefined, undefined,
+              () => { local(); dispatched = true; });
+          }
+          let resumedError: unknown = null;
+          try {
+            historyThread(resumed, threadId);
+          } catch (error) {
+            resumedError = error;
+          }
+          if (!await journal.finishResume(receipt, 'acknowledged')) throw new RunControlConflict();
+          finished = true;
+          if (resumedError) throw resumedError;
+          local();
+        } catch (error) {
+          if (preparing) this.invalidateExecution();
+          else if (receipt && !dispatched) {
+            try { if (!await journal.finishResume(receipt, 'not_dispatched')) this.invalidateExecution(); }
+            catch { this.invalidateExecution(); }
+          } else if (dispatched && !finished) this.invalidateExecution();
+          throw error;
+        }
+      });
+      const physical = new Promise<void>(resolve => { void Promise.prototype.then.call(effect, () => resolve(), () => resolve()); });
+      this.authorizingEffects.add(physical);
+      void physical.then(() => { this.authorizingEffects.delete(physical); });
+      await effect;
+      observed = await this.readHistoryFact(sessionKey);
+      check(true);
+      gate = 'confirm';
+      const refreshed = await read('thread/read', { threadId, includeTurns: true });
+      check(true);
+      const after = historyThread(refreshed, threadId);
+      gate = 'confirm-status';
+      if (after.status?.type !== 'idle') throw new RunControlConflict();
+      gate = 'confirm-history';
+      if (nativeHistoryFingerprint(after) !== fingerprint) throw new RunControlConflict();
       gate = 'confirm-goal';
       const afterGoal = nativeGoalEvidence(await read('thread/goal/get', { threadId }), threadId);
       if (nativeGoalProtection(afterGoal.status) || afterGoal.version !== goal.version) throw new RunControlConflict();
@@ -4547,7 +4730,10 @@ export class CodexAppServer {
           incompleteReason = 'Codex final thread read unavailable';
           continue;
         }
-        result = await this.reloadErroredTerminal(sessionKey, result, nativeRead);
+        const hasResumeJournal = Boolean(this.maintenanceRecovery.getStore()?.resumes ?? this.options.nativeJournal?.prepareResume);
+        result = hasResumeJournal
+          ? await this.reloadJournaledErroredTerminal(sessionKey, result, nativeRead)
+          : await this.reloadErroredTerminal(sessionKey, result, nativeRead);
         if (!sameTurn()) return;
         if (revision !== (this.options.nativeJournal ? observed : this.legacyExecutions.get(sessionKey))?.revision) continue;
         let thread;
@@ -5096,7 +5282,11 @@ export class CodexAppServer {
     // The worker must perform fresh final reconciliation after loading.
     // Read-only refreshes remain pure.
     if (snapshot?.thread?.status?.type === 'systemError') {
-      historyThread(await this.reloadErroredTerminal(sessionKey, snapshot, nativeRead, authorityCheck), threadId);
+      const hasResumeJournal = Boolean(this.maintenanceRecovery.getStore()?.resumes ?? this.options.nativeJournal?.prepareResume);
+      const recovered = hasResumeJournal
+        ? await this.reloadJournaledErroredTerminal(sessionKey, snapshot, nativeRead, authorityCheck, continuation)
+        : await this.reloadErroredTerminal(sessionKey, snapshot, nativeRead, authorityCheck);
+      historyThread(recovered, threadId);
       authorityCheck();
       return;
     }
@@ -6285,13 +6475,16 @@ const unfinishedAssistantStreamReason = 'Stream ended without a completed native
  */
 function preserveUnfinishedAssistantStreams(turns: any[], live: ChatMessage[], snapshot: ChatMessage[]): ChatMessage[] {
   const completed = new Set(turns.filter(turn => turn.status === 'completed').map(turn => turn.id));
+  const terminatedWithoutCompletion = new Set(turns.filter(turn => turn.status === 'failed' || turn.status === 'interrupted').map(turn => turn.id));
   const ids = new Set(snapshot.map(message => message.id));
-  const retained = live.filter(message => message.role === 'assistant' && !!message.turnId && completed.has(message.turnId)
+  const retained = live.filter(message => message.role === 'assistant' && !!message.turnId
+    && (completed.has(message.turnId) || terminatedWithoutCompletion.has(message.turnId))
     && !ids.has(message.id) && !message.phase && !message.media?.length && !message.parentToolUseId && message.text.trim()
     && (!message.status || message.status === 'failed' && message.failureReason === unfinishedAssistantStreamReason)
     && !snapshotCoversAssistantDelta(message, snapshot, live)
-    && snapshot.some(candidate => candidate.sessionKey === message.sessionKey && candidate.turnId === message.turnId
-      && candidate.role === 'assistant' && candidate.status === 'sent' && !candidate.parentToolUseId && candidate.text.trim()))
+    && (terminatedWithoutCompletion.has(message.turnId)
+      || snapshot.some(candidate => candidate.sessionKey === message.sessionKey && candidate.turnId === message.turnId
+        && candidate.role === 'assistant' && candidate.status === 'sent' && !candidate.parentToolUseId && candidate.text.trim())))
     .map(message => ({ ...message, status: 'failed' as const, failureReason: unfinishedAssistantStreamReason }));
   return retained.length ? [...snapshot, ...retained] : snapshot;
 }

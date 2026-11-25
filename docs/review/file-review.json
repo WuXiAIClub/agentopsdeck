@@ -6899,8 +6899,8 @@
     },
     {
       "path": "apps/server/src/codex/app-server.ts",
-      "sha256": "c423eef7988f7261e7f9f6cc2da68801e628464bff11b8a23dc156c785cf76cc",
-      "size": 397716,
+      "sha256": "2bcf7801dd6b5e3868f6e0877fb49e68672c1d9883020c74ae8b17824bd00df5",
+      "size": 408495,
       "module": "codex",
       "kind": "runtime",
       "depth": "semantic",
@@ -7429,8 +7429,8 @@
     },
     {
       "path": "apps/server/src/codex/final-outcome.test.ts",
-      "size": 76637,
-      "sha256": "e315bdb1f8b5f391d030c65bf1c43cc139055fccf6bf9ed749a391a9527367f4",
+      "size": 81778,
+      "sha256": "31cc864d57a1fa130c6ecfe036423ef944194f7649fc2929093c09f350c3067d",
       "module": "execution",
       "kind": "test",
       "depth": "semantic",
@@ -7445,7 +7445,8 @@
         "line-by-line-semantic-audit"
       ],
       "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/codex/final-outcome.test.ts (execution/test); all historical findings and license/security/correctness checks are verified.",
-      "findings": []
+      "findings": [],
+      "status": "reviewed-clean"
     },
     {
       "path": "apps/server/src/codex/final-projection-wait.test.ts",
@@ -15281,8 +15282,8 @@
     },
     {
       "path": "apps/server/src/connector/connector-codex-message-owner.test.ts",
-      "size": 21914,
-      "sha256": "030d0927efe7a12bba53e3bf0c709af978711527b7311e67faf3fbd42e02ea64",
+      "size": 22116,
+      "sha256": "1a51a5aaec5a223dc4efe41d091adb62ac263fdb501fe6ae0529e1ae8093de2a",
       "module": "connector",
       "kind": "test",
       "depth": "semantic",
@@ -15294,7 +15295,8 @@
         "line-by-line-semantic-audit"
       ],
       "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/connector-codex-message-owner.test.ts (connector/test); all historical findings and license/security/correctness checks are verified.",
-      "findings": []
+      "findings": [],
+      "status": "reviewed-clean"
     },
     {
       "path": "apps/server/src/connector/connector-codex-notification-domain.ts",

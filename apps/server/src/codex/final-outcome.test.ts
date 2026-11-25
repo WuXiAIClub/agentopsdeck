@@ -41,6 +41,7 @@ function failedReloadFixture(t: test.TestContext) {
   const request = async (method: string) => {
     calls.push(method);
     if (method === 'thread/goal/get') return { threadId: 'synthetic', goal: null };
+    if (method === 'thread/backgroundTerminals/list') return { data: [], nextCursor: null };
     if (method === 'thread/backgroundTerminals/list') return { data: [] };
     if (method === 'thread/unsubscribe') return { status: 'unsubscribed' };
     if (method === 'thread/resume') { loaded = true; return {}; }
@@ -396,6 +397,7 @@ for (const initialStatus of ['notLoaded', 'systemError']) test(`cold failed reco
   let loaded = false, starts = 0;
   f.runtime.request = async (method: string, params: any) => {
     if (method === 'thread/goal/get') return { threadId: 'synthetic', goal: null };
+    if (method === 'thread/backgroundTerminals/list') return { data: [], nextCursor: null };
     if (method === 'thread/backgroundTerminals/list') return { data: [] };
     if (method === 'thread/unsubscribe') return { status: 'unsubscribed' };
     if (method === 'thread/resume') {
@@ -1239,6 +1241,7 @@ for (const unknownDispatch of [false, true]) {
     let loaded = false;
     f.runtime.request = async (method: string, params: any, _timeout?: number, _goal?: unknown, beforeDispatch?: () => void) => {
       if (method === 'thread/goal/get') return { threadId: 'synthetic', goal: null };
+    if (method === 'thread/backgroundTerminals/list') return { data: [], nextCursor: null };
       if (method === 'thread/resume') {
         assert.equal(params.excludeTurns, true);
         beforeDispatch?.();
@@ -1296,6 +1299,118 @@ test('owned-journal mode prohibits unjournaled unsubscribe/resume in reloadError
     assert.equal(result.thread.status.type, 'systemError');
     assert.deepEqual(f.calls, []);
     assert.equal(f.runtime.erroredThreadReloads.has(f.key), false);
+  } finally {
+    f.runtime.options.nativeJournal = undefined;
+  }
+});
+
+test('owned-journal reloadJournaledErroredTerminal falls back to archive/unarchive/resume when unsubscribe keeps systemError', async t => {
+  const f = failedReloadFixture(t);
+  const resumes = f.users.codexExecutions.nativeResumes;
+  const outcomes: string[] = [];
+  f.runtime.options.nativeJournal = {
+    readHistory: async (sessionKey: string) => ({
+      execution: f.users.codexExecutions.get(sessionKey),
+      deleted: f.users.codexExecutions.isDeletedTerminal(sessionKey),
+      outcomeUnknown: resumes.pending(sessionKey),
+    }),
+    prepareResume: async (input: NativeResumeInput) => resumes.prepare(input, () => true),
+    beginResume: async (receipt: NativeResumeReceipt) => resumes.begin(receipt, () => true),
+    finishResume: async (receipt: NativeResumeReceipt, outcome: 'acknowledged' | 'not_dispatched') => {
+      outcomes.push(outcome);
+      return resumes.finish(receipt, outcome);
+    },
+  };
+  const calls: string[] = [];
+  let unarchived = false;
+  let resumedAfterUnarchive = false;
+  f.runtime.request = async (method: string, _params: any, _timeout?: number, _goal?: unknown, beforeDispatch?: () => void) => {
+    calls.push(method);
+    if (method === 'thread/goal/get') return { threadId: 'synthetic', goal: null };
+    if (method === 'thread/backgroundTerminals/list') return { data: [], nextCursor: null };
+    if (method === 'thread/unsubscribe') {
+      beforeDispatch?.();
+      return { status: 'unsubscribed' };
+    }
+    if (method === 'thread/archive') {
+      beforeDispatch?.();
+      return {};
+    }
+    if (method === 'thread/unarchive') {
+      beforeDispatch?.();
+      unarchived = true;
+      return { thread: { id: 'synthetic', status: { type: 'notLoaded' } } };
+    }
+    if (method === 'thread/resume') {
+      beforeDispatch?.();
+      if (!unarchived) {
+        // Simulate codex-cli 0.147+ where thread/unsubscribe does not evict systemError.
+        return f.snapshot('systemError');
+      }
+      resumedAfterUnarchive = true;
+      return f.snapshot('idle');
+    }
+    if (method === 'thread/read') {
+      return f.snapshot(resumedAfterUnarchive ? 'idle' : 'systemError');
+    }
+    throw new Error(`unexpected method ${method}`);
+  };
+  try {
+    const recovered = await f.runtime.reloadJournaledErroredTerminal(f.key, f.snapshot('systemError'));
+    assert.equal(recovered.thread.status.type, 'idle');
+    assert.deepEqual(calls, [
+      'thread/goal/get',
+      'thread/backgroundTerminals/list',
+      'thread/unsubscribe',
+      'thread/resume',
+      'thread/archive',
+      'thread/unarchive',
+      'thread/resume',
+      'thread/read',
+      'thread/goal/get',
+    ]);
+    assert.deepEqual(outcomes, ['acknowledged']);
+    assert.equal(resumes.pending(f.key), false);
+    assert.equal(f.runtime.executionUnavailable, false);
+  } finally {
+    f.runtime.options.nativeJournal = undefined;
+  }
+});
+
+test('owned-journal reloadJournaledErroredTerminal settles journal without wedging runtime if systemError persists', async t => {
+  const f = failedReloadFixture(t);
+  const resumes = f.users.codexExecutions.nativeResumes;
+  const outcomes: string[] = [];
+  f.runtime.options.nativeJournal = {
+    readHistory: async (sessionKey: string) => ({
+      execution: f.users.codexExecutions.get(sessionKey),
+      deleted: f.users.codexExecutions.isDeletedTerminal(sessionKey),
+      outcomeUnknown: resumes.pending(sessionKey),
+    }),
+    prepareResume: async (input: NativeResumeInput) => resumes.prepare(input, () => true),
+    beginResume: async (receipt: NativeResumeReceipt) => resumes.begin(receipt, () => true),
+    finishResume: async (receipt: NativeResumeReceipt, outcome: 'acknowledged' | 'not_dispatched') => {
+      outcomes.push(outcome);
+      return resumes.finish(receipt, outcome);
+    },
+  };
+  f.runtime.request = async (method: string, _params: any, _timeout?: number, _goal?: unknown, beforeDispatch?: () => void) => {
+    if (method === 'thread/goal/get') return { threadId: 'synthetic', goal: null };
+    if (method === 'thread/backgroundTerminals/list') return { data: [], nextCursor: null };
+    if (method === 'thread/unsubscribe') { beforeDispatch?.(); return { status: 'unsubscribed' }; }
+    if (method === 'thread/archive') { beforeDispatch?.(); return {}; }
+    if (method === 'thread/unarchive') { beforeDispatch?.(); return {}; }
+    if (method === 'thread/resume') { beforeDispatch?.(); return f.snapshot('systemError'); }
+    throw new Error(`unexpected method ${method}`);
+  };
+  try {
+    await assert.rejects(
+      f.runtime.reloadJournaledErroredTerminal(f.key, f.snapshot('systemError')),
+      /Codex thread unavailable/,
+    );
+    assert.deepEqual(outcomes, ['acknowledged']);
+    assert.equal(resumes.pending(f.key), false);
+    assert.equal(f.runtime.executionUnavailable, false);
   } finally {
     f.runtime.options.nativeJournal = undefined;
   }
