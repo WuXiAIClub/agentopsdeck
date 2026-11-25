@@ -13,6 +13,7 @@ import type { resolveExecutionActor } from './execution-authority.js';
 import type { ExecutionAction } from './execution-grants.js';
 import type { ClaudeConnectorRuntime } from '../claude/connector-runtime.js';
 import type { CopilotConnectorRuntime } from '../copilot/connector-runtime.js';
+import type { AntigravityConnectorRuntime } from '../antigravity/sdk-runtime.js';
 import { SdkUnsupportedTextCommand } from './sdk-text-command.js';
 
 // One durable queue and the existing receipt table. Versioned legacy callers
@@ -23,6 +24,7 @@ export function registerQueueRoutes(app: Hono, path: string, deps: {
   hermes?: HermesRuntime | undefined;
   claude?: ClaudeConnectorRuntime | undefined;
   copilot?: CopilotConnectorRuntime | undefined;
+  antigravity?: AntigravityConnectorRuntime | undefined;
 }) {
   const { turns, commands } = deps.users;
   const scope = (actorId: string, c: Context, id: string) => JSON.stringify(['queue-mutation-v1', actorId, c.req.param('sessionKey'), id]);
@@ -80,7 +82,7 @@ export function registerQueueRoutes(app: Hono, path: string, deps: {
       const manager = !actor.executionGrant && actor.principal.scopes.includes('queue:manage');
       // SDK commands currently support the sending actor only. Do not claim
       // a mutation receipt which can only fail at the deeper owner boundary.
-      if (['claude-code', 'ghcp'].includes(sessionRuntimeId(c.req.param('sessionKey')!))
+      if (['claude-code', 'ghcp', 'antigravity'].includes(sessionRuntimeId(c.req.param('sessionKey')!))
         && !actor.principal.scopes.includes('messages:send')) return undefined;
       return actor.principal.scopes.includes('messages:send') || (method === 'DELETE' && manager) ? actor : undefined;
     };
@@ -97,7 +99,7 @@ export function registerQueueRoutes(app: Hono, path: string, deps: {
     c.req.raw.signal.throwIfAborted();
     const sessionKey = c.req.param('sessionKey')!, id = target(actor.actorId, c);
     const runtime = sessionRuntimeId(sessionKey);
-    const manager = () => !['claude-code', 'ghcp'].includes(runtime) && method === 'DELETE' && !actor!.executionGrant && actor!.principal.scopes.includes('queue:manage');
+    const manager = () => !['claude-code', 'ghcp', 'antigravity'].includes(runtime) && method === 'DELETE' && !actor!.executionGrant && actor!.principal.scopes.includes('queue:manage');
     const key = c.req.header('idempotency-key'), receiptScope = scope(actor.actorId, c, id);
     if (c.req.param('commandKey') !== undefined && key === undefined) return c.json({ error: 'Queue mutation key is required' }, 400);
     let entry = turns.ownedEntry(runtime, sessionKey, id, actor.actorId, manager());
@@ -139,8 +141,8 @@ export function registerQueueRoutes(app: Hono, path: string, deps: {
     if (!entry) return result(404, { error: 'queued message not found' });
     if (turns.version(runtime, sessionKey, id) !== version) return result(412, { error: 'queue version changed; refresh before retrying' });
     if (entry.state !== 'queued' && !(method === 'DELETE' && entry.state === 'blocked')) return result(409, { error: 'queued message is not editable or cancelable in its current state' });
-    const sdk = runtime === 'ghcp' ? deps.copilot : runtime === 'claude-code' ? deps.claude : undefined;
-    if (['ghcp', 'claude-code'].includes(runtime) ? !sdk : runtime === 'hermes' ? !deps.hermes : runtime === 'codex' ? !deps.codex : !deps.openclaw) return result(503, { error: 'runtime queue is unavailable' });
+    const sdk = runtime === 'ghcp' ? deps.copilot : runtime === 'claude-code' ? deps.claude : runtime === 'antigravity' ? deps.antigravity : undefined;
+    if (['ghcp', 'claude-code', 'antigravity'].includes(runtime) ? !sdk : runtime === 'hermes' ? !deps.hermes : runtime === 'codex' ? !deps.codex : !deps.openclaw) return result(503, { error: 'runtime queue is unavailable' });
     try {
       const commit = key === undefined ? undefined : commands.queueCommit(receiptScope, key, { status: 200, body: { ok: true } });
       const changed = sdk

@@ -88,7 +88,7 @@ function registerReadiness<R extends void | Promise<void>>(app: Hono, deps: {
       const body = value as Record<string, unknown>;
       if (Object.keys(body).some(key => !['fenceId', 'sessionKey'].includes(key))
         || typeof body.fenceId !== 'string' || !/^[a-f0-9-]{36}$/.test(body.fenceId)
-        || typeof body.sessionKey !== 'string' || !/^(?:codex|claude-code|ghcp):[A-Za-z0-9-]{1,128}$/.test(body.sessionKey)) {
+        || typeof body.sessionKey !== 'string' || !/^(?:codex|claude-code|ghcp|antigravity):[A-Za-z0-9-]{1,128}$/.test(body.sessionKey)) {
         return c.json({ error: 'Invalid readiness request' }, 400);
       }
       if (!deps.probe) return c.json({ error: 'Business maintenance probe is not supported' }, 501);

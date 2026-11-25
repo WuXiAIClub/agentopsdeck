@@ -8,6 +8,7 @@ import ts from 'typescript';
 const exceptions = [
   ...['components/UsageAggregationPanel.tsx', 'components/WorkspaceTaskSession.tsx'].flatMap(file =>
     ['Codex', 'Claude Code', 'GitHub Copilot'].map(name => [file, 'text', name, 'Product name'])),
+  ['components/WorkspaceTaskSession.tsx', 'text', 'Antigravity', 'Product name'],
   ['components/WorkspaceSubagentCompanion.tsx', 'text', 'Codex', 'Product name'],
   ['components/WorkspaceSubagentCompanion.tsx', 'text', 'GHCP', 'Product abbreviation'],
   ['components/SystemMetricsPanel.tsx', 'text', 'CPU', 'Standard processor abbreviation'],

@@ -32,7 +32,7 @@ const fields = (v: unknown, required: string[], optional: string[] = []): v is R
   && typeof v === 'object' && !Array.isArray(v) && required.every(k => Object.hasOwn(v, k))
   && Object.keys(v).every(k => required.includes(k) || optional.includes(k));
 const id = (v: unknown): v is string => typeof v === 'string' && v.length > 0 && v.length <= 512 && !/[\u0000-\u001f\u007f]/.test(v);
-const runtime = (v: unknown): v is SdkAgentId => v === 'claude-code' || v === 'ghcp';
+const runtime = (v: unknown): v is SdkAgentId => v === 'claude-code' || v === 'ghcp' || v === 'antigravity';
 const key = (v: unknown, r?: unknown): v is string => id(v) && runtime(sessionRuntimeId(v))
   && v !== `${sessionRuntimeId(v)}:` && (r === undefined || sessionRuntimeId(v) === r);
 const digest = (v: unknown): v is string => typeof v === 'string' && /^[a-f0-9]{64}$/.test(v);
@@ -104,7 +104,7 @@ export function validConnectorSdkDispatchOutput(kind: ConnectorSdkDispatchKind, 
 export function executeConnectorSdkDispatch<K extends ConnectorSdkDispatchKind>(kind: K,
   input: ConnectorSdkDispatchCommands[K]['input'], owner: ConnectorUserStore, tokens?: ConnectorTokenStore): ConnectorSdkDispatchCommands[K]['output'] {
   if (!validConnectorSdkDispatchInput(kind, input) || !tokens) throw Error('connector_storage_unavailable');
-  const journal = input.runtime === 'claude-code' ? owner.claudeJournal : owner.copilotJournal;
+  const journal = input.runtime === 'claude-code' ? owner.claudeJournal : input.runtime === 'ghcp' ? owner.copilotJournal : owner.antigravityJournal;
   const authorize = createTurnAuthorizer(owner.executionGrants, (token, scope) => tokens.hasScope(token, scope));
   const live = (r: SdkCompactRef, dispatchOnly = false) => {
     const snapshot = journal.readSnapshot(r.key), e = snapshot.execution;

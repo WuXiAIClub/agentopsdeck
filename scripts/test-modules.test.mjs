@@ -35,6 +35,9 @@ test('every discovered server, web, and script test belongs to exactly one subca
 
 test('module selector resolves major categories, subcategories, and exact file paths while rejecting unknown selectors', async () => {
   assert.equal(classifyServerTest('execution/private-environment.test.ts'), 'agent:gateway');
+  assert.equal(classifyServerTest('antigravity/owned-execution.test.ts'), 'agent:antigravity');
+  assert.equal(classifyServerTest('antigravity/acp-client.test.ts'), 'agent:antigravity');
+  assert.equal(classifyServerTest('antigravity/config.test.ts'), 'agent:antigravity');
   const { serverFiles, webFiles, scriptFiles } = await buildInventory();
 
   const codexOnly = resolveModuleFiles('server', serverFiles, ['agent:codex']);
@@ -43,6 +46,10 @@ test('module selector resolves major categories, subcategories, and exact file p
   const allAgents = resolveModuleFiles('server', serverFiles, ['agent']);
   assert.ok(allAgents.length > codexOnly.length);
   assert.ok(allAgents.every(file => classifyServerTest(file).startsWith('agent:')));
+
+  const antigravityOnly = resolveModuleFiles('server', serverFiles, ['agent:antigravity']);
+  assert.ok(antigravityOnly.length >= 5 && antigravityOnly.every(file => file.startsWith('antigravity/')));
+  assert.ok(antigravityOnly.includes('antigravity/owned-execution.test.ts'));
 
   const mixedServer = resolveModuleFiles('server', serverFiles, ['agent:copilot', 'web-bundle.test.ts']);
   assert.ok(mixedServer.includes('web-bundle.test.ts'));

@@ -12,7 +12,7 @@ export type NativeCumulativeCoverage = {
 };
 export type NativeTokenUsage = {
   version: 1;
-  runtime: 'codex' | 'claude-code' | 'ghcp';
+  runtime: 'codex' | 'claude-code' | 'ghcp' | 'antigravity';
   attribution: 'root-agent';
   timeBasis: 'observed-at';
   coverage: 'partial';
@@ -58,7 +58,7 @@ export function validateNativeTokenUsage(value: unknown): NativeTokenUsage {
   const range = tokenUsageRange(row.from, row.to, row.bucketMs);
   if (row.cumulativeCoverage !== undefined && row.runtime !== 'codex') throw Error('Invalid cumulative coverage runtime');
   const cumulativeCoverage = row.cumulativeCoverage === undefined ? undefined : validateNativeCumulativeCoverage(row.cumulativeCoverage);
-  const accounting = { codex: 'includes-cache', 'claude-code': 'excludes-cache', ghcp: 'provider-defined' } as const;
+  const accounting = { codex: 'includes-cache', 'claude-code': 'excludes-cache', ghcp: 'provider-defined', antigravity: 'provider-defined' } as const;
   if (row.version !== 1 || !Object.hasOwn(accounting, row.runtime) || row.inputAccounting !== accounting[row.runtime]
     || row.attribution !== 'root-agent' || row.timeBasis !== 'observed-at' || row.coverage !== 'partial'
     || row.observedSince !== null && !integer(row.observedSince) || !Array.isArray(row.buckets) || row.buckets.length > 745) throw Error('Invalid native token usage');

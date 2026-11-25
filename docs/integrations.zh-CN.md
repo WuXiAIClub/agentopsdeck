@@ -38,6 +38,10 @@ POSIX 默认命令为 `codex`，Windows 为 `codex.cmd`，可用 `AOD_CODEX_COMM
 
 ## 其他适配器
 
+Antigravity CLI 正在功能分支中独立开发。ACP 传输测试还不代表已提供可选择的
+生产连接器；参见 [Antigravity CLI 开发](antigravity-cli.zh-CN.md)，了解已实现的
+契约以及尚待完成的生命周期、标识和界面接入。目前不宣称可以启用。
+
 初始 `AOD_LOCAL_OPENCLAW_CLI`、`AOD_HERMES_ENABLED`、`AOD_CLAUDE_ENABLED`、
 `AOD_COPILOT_ENABLED` 均为 false。打开开关不等于安装 CLI、认证成功或兼容
 验收。OpenClaw 网关使用 `AOD_OPENCLAW_GATEWAY_WS_URL`、

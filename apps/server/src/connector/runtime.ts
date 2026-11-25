@@ -42,6 +42,7 @@ import { CodexAppServer } from '../codex/app-server.js';
 import { HermesRuntime } from '../hermes/runtime.js';
 import { ClaudeConnectorRuntime } from '../claude/connector-runtime.js';
 import { CopilotConnectorRuntime } from '../copilot/connector-runtime.js';
+import { AntigravityConnectorRuntime } from '../antigravity/sdk-runtime.js';
 import { ConnectorAgentRuntimes } from './agent-runtimes.js';
 import { createFallbackAgentCatalog } from './agent-catalog.js';
 import type { ServerConfig } from '../config.js';
@@ -64,6 +65,7 @@ export type SdkRuntimeFactories = {
   deferActivation?: boolean;
   claude?: (options: ConstructorParameters<typeof ClaudeConnectorRuntime>[0]) => ClaudeConnectorRuntime;
   copilot?: (options: ConstructorParameters<typeof CopilotConnectorRuntime>[0]) => CopilotConnectorRuntime;
+  antigravity?: (options: ConstructorParameters<typeof AntigravityConnectorRuntime>[0]) => AntigravityConnectorRuntime;
 };
 
 export function createConnectorRuntime(config: ServerConfig, isAuthorizedRequest: (request: Request) => boolean,
@@ -186,6 +188,13 @@ function createOwnedRuntime(config: ServerConfig, isAuthorizedRequest: (request:
     authorize: (key, actor, action) => authorizeTurn(actor.actorId,
       { runtime: 'ghcp', sessionKey: key }, action, actor.executionGrant) }) : undefined;
   if (copilot) startup.drains.push(() => copilot.close());
+  const antigravity = config.antigravity ? (sdkFactories.antigravity ?? (options => new AntigravityConnectorRuntime(options)))({
+    config: config.antigravity, store: connectorUsers, projection: store,
+    turnContext: (key, actor) => sdkFileBoardContext(key, actor.actorId, actor.executionGrant),
+    authorize: (key, actor, action) => authorizeTurn(actor.actorId,
+      { runtime: 'antigravity', sessionKey: key }, action, actor.executionGrant),
+  }) : undefined;
+  if (antigravity) startup.drains.push(() => antigravity.close());
   const agentRuntimes = new ConnectorAgentRuntimes([
     { id: 'codex', refreshSession: (key, options) => codex.refreshSession(key, options),
       isSessionHistoryReady: key => codex.isSessionHistoryReady(key), pauseQueueWorker: () => codex.pauseQueueWorker(), close: () => codex.close() },
@@ -193,6 +202,7 @@ function createOwnedRuntime(config: ServerConfig, isAuthorizedRequest: (request:
       isSessionHistoryReady: (key: string) => hermes.isSessionHistoryReady(key), pauseQueueWorker: () => hermes.pauseQueueWorker(), close: () => hermes.close() }] : []),
     ...(claude ? [claude] : []),
     ...(copilot ? [copilot] : []),
+    ...(antigravity ? [antigravity] : []),
   ]);
 
   // Model discovery is a daily read, not a maintenance operation. Keep this
@@ -300,7 +310,7 @@ function createOwnedRuntime(config: ServerConfig, isAuthorizedRequest: (request:
     };
     check();
     const native = await codex.inspectMaintenance(check, observedAt + 4000);
-    const sdkRuntimes = [claude, copilot].filter(runtime => !!runtime);
+    const sdkRuntimes = [claude, copilot, antigravity].filter(runtime => !!runtime);
     const sdkFacts = await Promise.all(sdkRuntimes.map(runtime => runtime.inspectMaintenance()));
     check();
     const persisted = await maintenancePersistence.command('runtimeMaintenanceObserve', { historyRecovery }, check);
@@ -319,7 +329,7 @@ function createOwnedRuntime(config: ServerConfig, isAuthorizedRequest: (request:
   const probeMaintenance = async (sessionKey: string, authorize: () => void): Promise<Omit<MaintenanceBusinessObservation, 'fenceId'>> => {
     const revision = config.connector.revision;
     const deadline = Date.now() + 55_000;
-    const sdkProbe = sessionKey.startsWith('claude-code:') ? claude : sessionKey.startsWith('ghcp:') ? copilot : undefined;
+    const sdkProbe = sessionKey.startsWith('claude-code:') ? claude : sessionKey.startsWith('ghcp:') ? copilot : sessionKey.startsWith('antigravity:') ? antigravity : undefined;
     if ((!sdkProbe && (!codex.enabled || !codex.owns(sessionKey))) || hermes?.enabled || config.gatewayWsUrl || config.localOpenClawCli
       || !revision || !/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(revision)) throw new Error('Pinned runtime business probe unavailable');
     const check = () => {
@@ -402,11 +412,12 @@ function createOwnedRuntime(config: ServerConfig, isAuthorizedRequest: (request:
       ...(hermes ? [{ id: 'hermes', label: 'Hermes · dedicated runtime', status: hermes.ready ? 'available' : 'degraded' }] : []),
       ...(claude ? [{ id: 'claude-code', label: 'Claude Code', status: claude.ready ? 'available' : 'degraded', readiness: claude.status }] : []),
       ...(copilot ? [{ id: 'ghcp', label: 'GitHub Copilot', status: copilot.ready ? 'available' : 'degraded', readiness: copilot.status }] : []),
+      ...(antigravity ? [{ id: 'antigravity', label: 'Antigravity', status: antigravity.ready ? 'available' : 'degraded', readiness: antigravity.status }] : []),
     ],
   });
   const fallbackAgents = (error?: string) => agentCatalog.list(error);
   startup.drains.push(() => agentCatalog.close());
-  const routes = registerConnectorRoutes(app, { config, interactions, automation, updateService, inspectMaintenance, probeMaintenance, tokens: connectorTokens, connectorUsers, store, gateway, codex, ...(hermes ? { hermes } : {}), ...(claude ? { claude } : {}), ...(copilot ? { copilot } : {}), artifactRegistry, openclawQueue, refreshSessions,
+  const routes = registerConnectorRoutes(app, { config, interactions, automation, updateService, inspectMaintenance, probeMaintenance, tokens: connectorTokens, connectorUsers, store, gateway, codex, ...(hermes ? { hermes } : {}), ...(claude ? { claude } : {}), ...(copilot ? { copilot } : {}), ...(antigravity ? { antigravity } : {}), artifactRegistry, openclawQueue, refreshSessions,
     sessionSnapshotReady: () => discovery?.current === true && codex.isSessionListReady(),
     historySnapshotReady: key => agentRuntimes.historyReady(key) ?? refreshOpenClawHistory.ready(key),
     refreshMessages, fallbackAgents, isAuthorizedRequest, normalizeError });
@@ -421,8 +432,8 @@ function createOwnedRuntime(config: ServerConfig, isAuthorizedRequest: (request:
         return { exists: !connectorUsers.commands.sessionDeletion(key) && !!store.getSession(key),
           ready: codex.enabled && codex.isSessionListReady() };
       }
-      const journal = key.startsWith('claude-code:') ? connectorUsers.claudeJournal : key.startsWith('ghcp:') ? connectorUsers.copilotJournal : undefined;
-      return { exists: !!journal?.session(key) && !journal.deletion(key), ready: key.startsWith('claude-code:') ? !!claude?.ready : !!copilot?.ready };
+      const journal = key.startsWith('claude-code:') ? connectorUsers.claudeJournal : key.startsWith('ghcp:') ? connectorUsers.copilotJournal : key.startsWith('antigravity:') ? connectorUsers.antigravityJournal : undefined;
+      return { exists: !!journal?.session(key) && !journal.deletion(key), ready: key.startsWith('claude-code:') ? !!claude?.ready : key.startsWith('ghcp:') ? !!copilot?.ready : !!antigravity?.ready };
     };
   const fileRuntimes = (owner: string) => fileBoardRuntimes(owner, config);
   const contentReplicas = fileCards ? connectorUsers.createContentReplicas(fileCards) : undefined;
@@ -494,7 +505,7 @@ function createOwnedRuntime(config: ServerConfig, isAuthorizedRequest: (request:
   discovery = createConnectorSessionDiscovery({ gateway, projection: store,
     local: config.localOpenClawCli, configured: !!(config.localOpenClawCli || config.gatewayWsUrl),
     readLocal: sessionSource.readSessions,
-    refreshDirectories: () => { claude?.refreshDirectory(); copilot?.refreshDirectory(); } });
+    refreshDirectories: () => { claude?.refreshDirectory(); copilot?.refreshDirectory(); antigravity?.refreshDirectory(); } });
   const sessionDiscovery = discovery;
   startup.drains.push(() => sessionDiscovery.close());
   const refreshOpenClawHistory = createOpenClawHistory({ gateway, local: config.localOpenClawCli,
@@ -597,10 +608,10 @@ function createOwnedRuntime(config: ServerConfig, isAuthorizedRequest: (request:
     if (config.claude?.boardToolsDirectory || config.copilot?.boardToolsDirectory || fileBoardRoutes) {
       void observeBackgroundStartup(3, async () => {
         await bindingsReady;
-        if (!startup.failed && !closing && !drainRequests.isStopping()) { claude?.activate(); copilot?.activate(); }
+        if (!startup.failed && !closing && !drainRequests.isStopping()) { claude?.activate(); copilot?.activate(); antigravity?.activate(); }
       });
     } else {
-      try { claude?.activate(); copilot?.activate(); }
+      try { claude?.activate(); copilot?.activate(); antigravity?.activate(); }
       catch (error) { reportStartupFailure(3); throw error; }
     }
   }
@@ -621,7 +632,7 @@ function createOwnedRuntime(config: ServerConfig, isAuthorizedRequest: (request:
           mirrorOutbox: connectorUsers.mirrorOutbox,
         }),
     },
-    store, gateway, codex, hermes, claude, copilot, connectorUsers, mediaLibrary, refreshSessions, refreshMessages, normalizeError, registerLegacyRoutes,
+    store, gateway, codex, hermes, claude, copilot, antigravity, connectorUsers, mediaLibrary, refreshSessions, refreshMessages, normalizeError, registerLegacyRoutes,
     inspectHistoryReads: historyReads.inspect,
     close: () => closing = closeOwners(),
   };

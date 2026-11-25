@@ -45,6 +45,20 @@ function executableExamples(content) {
     .map(match => match[1].trim());
 }
 
+test('Antigravity Connector docs stay paired, navigable and document isolation and capability boundaries', () => {
+  const english = text('docs/antigravity-cli.md'), chinese = text('docs/antigravity-cli.zh-CN.md');
+  assert.deepEqual(english.match(/^```bash\n([\s\S]*?)^```/gm), chinese.match(/^```bash\n([\s\S]*?)^```/gm));
+  for (const [language, content] of [['', english], ['.zh-CN', chinese]]) {
+    assert.ok(text(`docs/README${language}.md`).includes(`antigravity-cli${language}.md`));
+    assert.ok(text(`docs/modules${language}.md`).includes('apps/server/src/antigravity'));
+    for (const contract of ['1.0.0', 'AOD_ANTIGRAVITY_', 'AntigravityOwnedExecution', 'AntigravityJournal', 'AntigravityProcessWorker', 'stopAndDrain()', 'unknown']) {
+      assert.ok(content.includes(contract), `Missing Antigravity contract: ${contract}`);
+    }
+  }
+  assert.ok(english.includes('AOD_ANTIGRAVITY_DEDICATED=true'));
+  assert.ok(chinese.includes('AOD_ANTIGRAVITY_DEDICATED=true'));
+});
+
 test('every server source directory is covered by both module maps', () => {
   const directories = readdirSync(join(repository, 'apps/server/src'), { withFileTypes: true })
     .filter(entry => entry.isDirectory()).map(entry => `apps/server/src/${entry.name}`);
@@ -52,6 +66,17 @@ test('every server source directory is covered by both module maps', () => {
     const content = text(`docs/modules${language}.md`);
     for (const path of directories) assert.ok(content.includes(path), `Undocumented module: ${path}`);
   }
+});
+
+test('Antigravity guides are bilingual and keep core contracts aligned', () => {
+  const english = text('docs/antigravity-cli.md'), chinese = text('docs/antigravity-cli.zh-CN.md');
+  assert.ok(english.includes('AOD_ANTIGRAVITY_DEDICATED=true'));
+  assert.ok(chinese.includes('AOD_ANTIGRAVITY_DEDICATED=true'));
+  for (const token of ['1.0.0', 'AOD_ANTIGRAVITY_', 'assertOwnership', 'persistIntent', 'inspectTransportClosed()', 'agent:antigravity']) {
+    assert.ok(english.includes(token)); assert.ok(chinese.includes(token));
+  }
+  assert.ok(text('docs/README.md').includes('(antigravity-cli.md)'));
+  assert.ok(text('docs/README.zh-CN.md').includes('(antigravity-cli.zh-CN.md)'));
 });
 
 test('public Markdown links resolve locally without escaping the source tree', () => {

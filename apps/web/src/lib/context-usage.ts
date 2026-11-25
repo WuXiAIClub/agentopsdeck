@@ -6,7 +6,7 @@ const number = (value: number) => numberFormatter.format(Math.round(value));
 export function contextUsageValues(session: SessionSummary) {
   const finite = (value: unknown): value is number => typeof value === 'number' && Number.isFinite(value) && value >= 0;
   const used = finite(session.contextUsedTokens) ? session.contextUsedTokens
-    : session.contextUsedTokens === null || ['codex', 'claude-code', 'ghcp'].includes(session.source ?? '') ? undefined
+    : session.contextUsedTokens === null || ['codex', 'claude-code', 'ghcp', 'antigravity'].includes(session.source ?? '') ? undefined
     : finite(session.totalTokens) ? session.totalTokens : finite(session.estimatedTokens) ? session.estimatedTokens : undefined;
   const limit = session.contextSampleBasis !== 'last-request-input' && finite(session.contextTokens) && session.contextTokens > 0 ? session.contextTokens : undefined;
   const ratio = limit && used !== undefined ? Math.max(0, Math.min(1, used / limit)) : 0;

@@ -38,7 +38,7 @@ export class AsyncSdkConnectorRuntime<R extends SdkAgentId, O extends Owned<R>> 
 
   private observe(step: number, failed: boolean) {
     const trace = guardedTrace(this.diagnostics, 'sdk-owned-lifecycle');
-    trace.add('step', step + (this.id === 'ghcp' ? 100 : 0)); trace.finish(failed);
+    trace.add('step', step + (this.id === 'ghcp' ? 100 : this.id === 'antigravity' ? 200 : 0)); trace.finish(failed);
   }
   activate(): void {
     if (this.activated || this.closed) return;

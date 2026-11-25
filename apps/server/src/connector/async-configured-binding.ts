@@ -85,6 +85,7 @@ export async function createAsyncConfiguredBinding(config: ServerConfig, context
           ...(config.hermes?.enabled ? [{ id: 'hermes', label: 'Hermes · dedicated runtime', status: runtime.hermes.ready ? 'available' : 'degraded' }] : []),
           ...(runtime.sdk.claude ? [{ id: 'claude-code', label: 'Claude Code', status: runtime.sdk.claude.ready ? 'available' : 'degraded', readiness: runtime.sdk.claude.status }] : []),
           ...(runtime.sdk.copilot ? [{ id: 'ghcp', label: 'GitHub Copilot', status: runtime.sdk.copilot.ready ? 'available' : 'degraded', readiness: runtime.sdk.copilot.status }] : []),
+          ...(runtime.sdk.antigravity ? [{ id: 'antigravity', label: 'Antigravity', status: runtime.sdk.antigravity.ready ? 'available' : 'degraded', readiness: runtime.sdk.antigravity.status }] : []),
         ];
       },
     });
@@ -107,6 +108,7 @@ export async function createAsyncConfiguredBinding(config: ServerConfig, context
         sdk: {
           ...(config.claude ? { claude: structuredClone(config.claude) } : {}),
           ...(config.copilot ? { copilot: structuredClone(config.copilot) } : {}),
+          ...(config.antigravity ? { antigravity: structuredClone(config.antigravity) } : {}),
           gateway: () => original.gateway.status().connected ? 'connected' : 'disconnected',
           changed: key => { if (!closed) context.deck.append('interaction.updated', {}, { sessionKey: key }); },
         },

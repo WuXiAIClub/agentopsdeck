@@ -11,7 +11,7 @@ type NativeFileSessions = {
     isSessionListReady(): boolean;
     refreshSessions(): Promise<unknown>;
   };
-  sdk: { readonly claude?: { readonly ready: boolean } | undefined; readonly copilot?: { readonly ready: boolean } | undefined };
+  sdk: { readonly claude?: { readonly ready: boolean } | undefined; readonly copilot?: { readonly ready: boolean } | undefined; readonly antigravity?: { readonly ready: boolean } | undefined };
 };
 
 /** Original journal facts live in the sole worker; native readiness remains at
@@ -25,8 +25,8 @@ export function createAsyncFileSessions(owner: Pick<AsyncConnectorOwner, 'comman
       || value && value.runtime !== sessionRuntimeId(sessionKey)) throw new ConnectorOwnerUnavailable();
     return value;
   };
-  const sdkReady = (runtime: 'claude-code' | 'ghcp') =>
-    (runtime === 'claude-code' ? native.sdk.claude : native.sdk.copilot)?.ready === true;
+  const sdkReady = (runtime: 'claude-code' | 'ghcp' | 'antigravity') =>
+    (runtime === 'claude-code' ? native.sdk.claude : runtime === 'ghcp' ? native.sdk.copilot : native.sdk.antigravity)?.ready === true;
   const boardBindingSession: BoardBindingSessionRead = async key => {
     const current = await observe(key);
     if (!current || current.deleted) return;

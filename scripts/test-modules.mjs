@@ -11,11 +11,12 @@ export const TEST_TAXONOMY = [
     id: 'agent',
     target: 'server',
     title: 'Agent 适配器与运行时 (Agent Runtimes)',
-    description: 'Codex、Claude Code、GitHub Copilot、OpenClaw Gateway 与 Hermes 运行时适配器',
+    description: 'Codex、Claude Code、GitHub Copilot、Antigravity、OpenClaw Gateway 与 Hermes 运行时适配器',
     subcategories: [
       { id: 'agent:codex', title: 'Codex 运行时与 App Server', description: 'apps/server/src/codex/**' },
       { id: 'agent:claude', title: 'Claude Code 适配器与 Worker', description: 'apps/server/src/claude/**' },
       { id: 'agent:copilot', title: 'GitHub Copilot 适配器与环境', description: 'apps/server/src/copilot/**' },
+      { id: 'agent:antigravity', title: 'Google Antigravity CLI 协议与隔离环境', description: 'apps/server/src/antigravity/**' },
       { id: 'agent:gateway', title: 'OpenClaw Gateway 与 Hermes', description: 'apps/server/src/{openclaw,gateway,hermes}/**' },
     ],
   },
@@ -74,6 +75,7 @@ export function classifyServerTest(relativePath) {
   if (normalized.startsWith('codex/')) return 'agent:codex';
   if (normalized.startsWith('claude/')) return 'agent:claude';
   if (normalized.startsWith('copilot/')) return 'agent:copilot';
+  if (normalized.startsWith('antigravity/')) return 'agent:antigravity';
   if (normalized.startsWith('openclaw/') || normalized.startsWith('gateway/') || normalized.startsWith('hermes/') || normalized.startsWith('execution/')) return 'agent:gateway';
 
   if (normalized.startsWith('hub/')) return 'core:hub';

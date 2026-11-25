@@ -41,6 +41,7 @@ function resolveCreationAgentId(session: SessionSummary): string {
     session.source === 'codex' ||
     session.source === 'claude-code' ||
     session.source === 'ghcp' ||
+    session.source === 'antigravity' ||
     session.source === 'hermes'
   ) {
     return session.source;

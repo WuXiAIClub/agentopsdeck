@@ -15,12 +15,12 @@ type Wait = { timeoutMs: number; signal?: AbortSignal };
  * a late successful original commit still wakes its existing dispatch owner. */
 export class AsyncSdkMessages {
   private readonly command: Owner['command'];
-  private readonly admitted: (runtime: 'claude-code' | 'ghcp', key: string) => void | Promise<void>;
+  private readonly admitted: (runtime: 'claude-code' | 'ghcp' | 'antigravity', key: string) => void | Promise<void>;
   private readonly tasks = new Set<Promise<unknown>>();
   private bytes = 0;
   private frozen = false;
   private closing: Promise<void> | undefined;
-  constructor(owner: Owner, admitted: (runtime: 'claude-code' | 'ghcp', key: string) => void | Promise<void>,
+  constructor(owner: Owner, admitted: (runtime: 'claude-code' | 'ghcp' | 'antigravity', key: string) => void | Promise<void>,
     private readonly diagnostics: PerformanceDiagnostics = performanceDiagnostics) {
     // Retain the original participants, not a caller-owned mutable options
     // object. Later method replacement cannot redirect an accepted command.

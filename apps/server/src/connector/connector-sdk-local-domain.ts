@@ -25,7 +25,7 @@ export const isConnectorSdkLocalKind = (kind: string): kind is ConnectorSdkLocal
 const fields = (v: unknown, required: string[], optional: string[] = []): v is Record<string, unknown> => !!v
   && typeof v === 'object' && !Array.isArray(v) && required.every(k => Object.hasOwn(v, k))
   && Object.keys(v).every(k => required.includes(k) || optional.includes(k));
-const runtime = (v: unknown): v is SdkAgentId => v === 'claude-code' || v === 'ghcp';
+const runtime = (v: unknown): v is SdkAgentId => v === 'claude-code' || v === 'ghcp' || v === 'antigravity';
 const key = (v: unknown, r?: unknown): v is string => typeof v === 'string' && v.length <= 512
   && !/[\u0000-\u001f\u007f]/.test(v) && runtime(sessionRuntimeId(v)) && v !== `${sessionRuntimeId(v)}:`
   && (r === undefined || sessionRuntimeId(v) === r);
@@ -36,9 +36,9 @@ const title = (v: unknown): v is string => typeof v === 'string' && !!v.trim() &
  * caller-supplied catalog. Snapshot before the first admission await. */
 export function copySdkOwnerCatalogs(value: unknown): SdkOwnerCatalogs {
   if (value === undefined) return {};
-  if (!fields(value, [], ['claude-code', 'ghcp'])) throw Error('Invalid SDK owner catalogs');
+  if (!fields(value, [], ['claude-code', 'ghcp', 'antigravity'])) throw Error('Invalid SDK owner catalogs');
   const result: SdkOwnerCatalogs = {};
-  for (const r of ['claude-code', 'ghcp'] as const) {
+  for (const r of ['claude-code', 'ghcp', 'antigravity'] as const) {
     if (!Object.hasOwn(value, r)) continue;
     const c = value[r];
     if (!fields(c, ['model'], ['modelChoices']) || typeof c.model !== 'string'
@@ -108,7 +108,7 @@ export async function executeConnectorSdkLocal<K extends ConnectorSdkLocalKind>(
   if (!actorId) return { error: 401 };
   if (!allowed()) return { error: 403 };
   if (!catalog) return { error: 503 };
-  const journal = input.runtime === 'claude-code' ? owner.claudeJournal : owner.copilotJournal;
+  const journal = input.runtime === 'claude-code' ? owner.claudeJournal : input.runtime === 'ghcp' ? owner.copilotJournal : owner.antigravityJournal;
   const sessionKey = 'key' in input ? input.key : null;
   const scope = JSON.stringify([kind === 'sdkSessionCreate' ? 'create' : 'settings', JSON.stringify([actorId, sessionKey ?? input.runtime])]);
   const wrap = (receipt: CommandReceipt): Result => ({ runtime: input.runtime,
@@ -147,6 +147,7 @@ export async function executeConnectorSdkLocal<K extends ConnectorSdkLocalKind>(
           return wrap(owner.commands.get(scope, input.commandKey)!);
         }
       } else {
+        if (input.runtime === 'antigravity') return reject(409);
         const model = p.model === null ? null : typeof p.model === 'string' ? p.model.trim() : undefined;
         if (model === undefined || model !== null && !sdkModelChoices(catalog.model, catalog.modelChoices).includes(model)
           || Object.hasOwn(p, 'thinking') && p.thinking !== null || Object.hasOwn(p, 'goal')) return reject(400);

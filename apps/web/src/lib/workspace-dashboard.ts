@@ -58,7 +58,7 @@ function resolveEnvironmentLabel(session: SessionSummary): string {
   const idx = session.sessionKey.indexOf(':');
   if (idx > 0) {
     const prefix = session.sessionKey.slice(0, idx);
-    if (prefix && prefix !== 'agent' && prefix !== 'codex' && prefix !== 'claude-code' && prefix !== 'ghcp') {
+    if (prefix && prefix !== 'agent' && prefix !== 'codex' && prefix !== 'claude-code' && prefix !== 'ghcp' && prefix !== 'antigravity') {
       return prefix;
     }
   }

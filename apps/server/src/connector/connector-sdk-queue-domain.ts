@@ -25,7 +25,7 @@ const fields = (v: unknown, required: string[], optional: string[] = []): v is R
   && Object.keys(v).every(k => required.includes(k) || optional.includes(k));
 const id = (v: unknown): v is string => typeof v === 'string' && !!v && Buffer.byteLength(v) <= 512 && !/[\u0000-\u001f\u007f]/.test(v);
 const commandKey = (v: unknown): v is string => typeof v === 'string' && /^[A-Za-z0-9._:-]{1,200}$/.test(v);
-const sdkRuntime = (v: unknown): v is SdkAgentId => v === 'claude-code' || v === 'ghcp';
+const sdkRuntime = (v: unknown): v is SdkAgentId => v === 'claude-code' || v === 'ghcp' || v === 'antigravity';
 export function validConnectorSdkQueueInput(kind: ConnectorSdkQueueKind, v: unknown): boolean {
   return fields(v, ['runtime', 'key', 'target', 'mutationKey', 'authorization', ...(kind !== 'sdkQueueReceiptRead' ? ['version'] : []),
     ...(kind === 'sdkQueuedEdit' ? ['text'] : [])], kind === 'sdkQueueReceiptRead' ? ['purpose'] : ['rejectFresh', 'application'])
@@ -123,7 +123,7 @@ export async function executeConnectorSdkQueue<K extends ConnectorSdkQueueKind>(
             check();
             const reject = (status: number) => ({ receipt: owner.commands.settle(scope, input.mutationKey,
               { status, body: { error: 'Queue mutation rejected' } }), changed: false });
-            const journal = input.runtime === 'claude-code' ? owner.claudeJournal : owner.copilotJournal;
+            const journal = input.runtime === 'claude-code' ? owner.claudeJournal : input.runtime === 'ghcp' ? owner.copilotJournal : owner.antigravityJournal;
             const available = () => owner.sdkCommandAdmissionOpen && !!journal.session(input.key)
               && !owner.commands.sessionDeletion(input.key) && !journal.deletion(input.key) && !owner.commands.sessionSettingsPending(input.key);
             const row = owner.turns.ownedEntry(input.runtime, input.key, targetId, actorId);

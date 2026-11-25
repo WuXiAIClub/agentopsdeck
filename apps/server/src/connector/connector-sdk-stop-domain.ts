@@ -65,7 +65,7 @@ export async function executeConnectorSdkStop<K extends ConnectorSdkStopKind>(k:
   request: ConnectorSdkStopCommands[K]['input'], owner: ConnectorUserStore, tokens?: ConnectorTokenStore,
   applicationTransactions?: ApplicationTransactionClient): Promise<ConnectorSdkStopCommands[K]['output']> {
   if (!validConnectorSdkStopInput(k, request)) throw Error('connector_storage_unavailable');
-  const p = structuredClone(request), journal = p.runtime === 'claude-code' ? owner.claudeJournal : owner.copilotJournal;
+  const p = structuredClone(request), journal = p.runtime === 'claude-code' ? owner.claudeJournal : p.runtime === 'ghcp' ? owner.copilotJournal : owner.antigravityJournal;
   const map = bindings.get(owner) ?? new Map<string, Binding>();
   bindings.set(owner, map);
   const authorized = (authorization: string, actorId?: string) => {

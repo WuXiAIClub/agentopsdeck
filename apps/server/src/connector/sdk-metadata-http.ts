@@ -15,7 +15,7 @@ export type SdkMetadataHttp = {
 export function registerSdkMetadataHttp(app: Hono, base: string, deps: SdkMetadataHttp) {
   for (const state of [true, false]) app.get(`${base}/${state ? 'sessions/:sessionKey/state' : 'models/:runtime'}`, async (c, next) => {
     const key = c.req.param('sessionKey'), runtime = state ? sessionRuntimeId(key!) : c.req.param('runtime');
-    if (runtime !== 'claude-code' && runtime !== 'ghcp') return next();
+    if (runtime !== 'claude-code' && runtime !== 'ghcp' && runtime !== 'antigravity') return next();
     const work = async () => {
       c.header('Cache-Control', 'no-store');
       if (c.req.header('x-agentopsdeck-execution-grant') !== undefined) return c.json({ error: 'SDK metadata requires owner authority' }, 403);

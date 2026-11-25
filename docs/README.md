@@ -13,6 +13,8 @@ its permissions. No public image, installer or GitHub repository is assumed here
 | Log in and use the workspace | [User guide](user-guide.md) |
 | Configure an independent instance | [Configuration](configuration.md) |
 | Enable agents or separate Hub/Connector | [Integrations](integrations.md) |
+| Review the unfinished Antigravity CLI connector | [Antigravity CLI development](antigravity-cli.md) |
+| Review Antigravity CLI development and outstanding integration | [Antigravity CLI](antigravity-cli.md) |
 | Review native isolation and installer gates | [Native security](native-security.md) |
 | Plan remote access, backup and upgrades | [Operations](operations.md) |
 | Diagnose installation or session problems | [Troubleshooting](troubleshooting.md) |

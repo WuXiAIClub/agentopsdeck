@@ -11,7 +11,7 @@ export type ConnectorMaintenanceCommands = {
     nodeId: string; pendingExecutions: number; queuedMessages: number; recoveryRuns?: StoppedCodexRun[];
   } };
   runtimeMaintenanceHistory: { input: Record<string, never>; output: string[] };
-  runtimeMaintenanceSdkSession: { input: { key: string; runtime: 'claude-code' | 'ghcp' }; output: boolean };
+  runtimeMaintenanceSdkSession: { input: { key: string; runtime: 'claude-code' | 'ghcp' | 'antigravity' }; output: boolean };
   runtimeMaintenanceInteractions: { input: Record<string, never>; output: string[] };
   runtimeMaintenancePreservation: { input: { key: string; codex: boolean }; output: Preservation };
 };
@@ -29,10 +29,10 @@ export function validConnectorMaintenanceInput(kind: ConnectorMaintenanceKind, v
   switch (kind) {
     case 'runtimeMaintenanceObserve': return record(v, ['historyRecovery']) && typeof v.historyRecovery === 'boolean';
     case 'runtimeMaintenanceHistory': case 'runtimeMaintenanceInteractions': return record(v, []);
-    case 'runtimeMaintenanceSdkSession': return record(v, ['key', 'runtime']) && ['claude-code', 'ghcp'].includes(v.runtime as string)
+    case 'runtimeMaintenanceSdkSession': return record(v, ['key', 'runtime']) && ['claude-code', 'ghcp', 'antigravity'].includes(v.runtime as string)
       && text(v.key) && v.key.startsWith(`${v.runtime}:`);
     case 'runtimeMaintenancePreservation': return record(v, ['key', 'codex']) && text(v.key) && typeof v.codex === 'boolean'
-      && (v.codex ? v.key.startsWith('codex:') : /^(claude-code|ghcp):/.test(v.key));
+      && (v.codex ? v.key.startsWith('codex:') : /^(claude-code|ghcp|antigravity):/.test(v.key));
   }
 }
 export function validConnectorMaintenanceOutput(kind: ConnectorMaintenanceKind, v: unknown): boolean {
@@ -73,14 +73,14 @@ export function createConnectorMaintenanceCommands(owner: ConnectorUserStore) {
         value = { nodeId: owner.nodeId,
           pendingExecutions: owner.codexExecutions.maintenancePending({ historyRecovery })
             + owner.openClawExecutions.maintenancePending() + owner.hermesJournal.maintenancePending()
-            + owner.claudeJournal.pendingCount() + owner.copilotJournal.pendingCount() + owner.interactions.unresolvedCount(),
+            + owner.claudeJournal.pendingCount() + owner.copilotJournal.pendingCount() + owner.antigravityJournal.pendingCount() + owner.interactions.unresolvedCount(),
           queuedMessages: owner.turns.maintenanceCount() + owner.mirrorOutbox.maintenancePending(),
           ...(recoveryRuns ? { recoveryRuns } : {}) }; break;
       }
       case 'runtimeMaintenanceHistory': value = owner.codexExecutions.maintenanceHistorySessions(); break;
       case 'runtimeMaintenanceSdkSession': {
         const { key, runtime } = input as ConnectorMaintenanceCommands['runtimeMaintenanceSdkSession']['input'];
-        value = !!(runtime === 'claude-code' ? owner.claudeJournal : owner.copilotJournal).session(key); break;
+        value = !!(runtime === 'claude-code' ? owner.claudeJournal : runtime === 'ghcp' ? owner.copilotJournal : owner.antigravityJournal).session(key); break;
       }
       case 'runtimeMaintenanceInteractions': value = owner.reconcileEndedInteractions(); break;
       case 'runtimeMaintenancePreservation': {

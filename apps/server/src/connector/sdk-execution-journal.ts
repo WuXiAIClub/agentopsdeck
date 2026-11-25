@@ -10,7 +10,7 @@ import { validateSdkMetricSample, type SdkMetrics } from './sdk-metrics.js';
 import type { NativeTokenUsageStore } from './native-token-usage.js';
 import { performanceDiagnostics, type PerformanceDiagnostics } from '../diagnostics/performance.js';
 
-export type SdkAgentId = 'claude-code' | 'ghcp';
+export type SdkAgentId = 'claude-code' | 'ghcp' | 'antigravity';
 export type SdkDeletion = { id: string; key: string; nativeSessionId: string; phase: 'pending' | 'unknown' | 'deleted'; createdAt: number };
 export type SdkNativeState = 'allocated' | 'starting' | 'ready' | 'unknown';
 export type SdkSession = { key: string; nativeSessionId: string; title: string; createdAt: number; nativeState: SdkNativeState; model?: string; metrics?: SdkMetrics };
@@ -62,7 +62,7 @@ export class SdkExecutionJournal {
     private readonly beforeCreate: () => void = () => {}, private readonly compactPolicy?: CompactPolicy,
     private readonly sessionAvailable: (key: string) => boolean = () => true, private readonly tokenUsage?: NativeTokenUsageStore,
     private readonly diagnostics: PerformanceDiagnostics = performanceDiagnostics) {
-    if (runtime !== 'claude-code' && runtime !== 'ghcp') throw new Error('Unsupported SDK runtime');
+    if (runtime !== 'claude-code' && runtime !== 'ghcp' && runtime !== 'antigravity') throw new Error('Unsupported SDK runtime');
     db.exec(`CREATE TABLE IF NOT EXISTS sdk_agent_sessions (
       runtime TEXT NOT NULL, session_key TEXT NOT NULL, native_session_id TEXT NOT NULL, data TEXT NOT NULL,
       PRIMARY KEY(runtime, session_key), UNIQUE(runtime, native_session_id)

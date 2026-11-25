@@ -24,6 +24,8 @@ admission timeouts proof of execution termination.
 
 | Source module | Responsibility and boundary |
 | --- | --- |
+| [`apps/server/src/antigravity`](../apps/server/src/antigravity) | Experimental Linux ACP transport, private HOME ownership and journal/cleanup-gated execution contracts. Not connected to production or the agent picker; see [CLI development](antigravity-cli.md). |
+| [`apps/server/src/antigravity`](../apps/server/src/antigravity) | Linux Antigravity CLI ACP transport, isolated configuration and synthetic protocol tests; production lifecycle, durable identity binding and UI integration are not yet implemented. |
 | [`apps/server/src/auth`](../apps/server/src/auth) | Access keys, sessions/cookies, passkeys, audit/rate limits, trusted request sources and original request scopes; never log authentication material. |
 | [`apps/server/src/claude`](../apps/server/src/claude) | Claude adapter, worker turns, permissions, transcript reading and owned execution. Requires an independently configured runtime. |
 | [`apps/server/src/codex`](../apps/server/src/codex) | App-server RPC, turn identity, history/rollout readers, projection, tool details and background work; history failures and execution failures are separate. |

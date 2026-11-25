@@ -80,7 +80,7 @@ export function registerApplicationMessagesHttp(app: Hono, deps: {
   };
   const readPhysical = (runtime: Runtime, scope: Scope, forSend: boolean) => {
     const method = forSend ? 'readSendReceiptPhysical' : 'readReceiptPhysical';
-    if (runtime === 'claude-code' || runtime === 'ghcp') {
+    if (runtime === 'claude-code' || runtime === 'ghcp' || runtime === 'antigravity') {
       if (!deps.ports.sdk) throw new ConnectorOwnerUnavailable();
       return deps.ports.sdk[method]({ ...scope, runtime });
     }
@@ -108,15 +108,15 @@ export function registerApplicationMessagesHttp(app: Hono, deps: {
     }
     if (control === 'status') {
       if (!deps.statusIngress || runtime === 'codex') throw new ConnectorOwnerUnavailable();
-      if (runtime === 'claude-code' || runtime === 'ghcp') return deps.statusIngress.sdk(request, { ...input, runtime }, wait);
+      if (runtime === 'claude-code' || runtime === 'ghcp' || runtime === 'antigravity') return deps.statusIngress.sdk(request, { ...input, runtime }, wait);
       return deps.statusIngress[runtime](request, input, wait);
     }
     if (control === 'stop') {
       if (!deps.stopIngress) throw new ConnectorOwnerUnavailable();
-      if (runtime === 'claude-code' || runtime === 'ghcp') return deps.stopIngress.sdk(request, { ...input, runtime }, wait);
+      if (runtime === 'claude-code' || runtime === 'ghcp' || runtime === 'antigravity') return deps.stopIngress.sdk(request, { ...input, runtime }, wait);
       return deps.stopIngress[runtime](request, input, wait);
     }
-    if (runtime === 'claude-code' || runtime === 'ghcp') return deps.ingress.sdk(request, { ...input, runtime }, wait);
+    if (runtime === 'claude-code' || runtime === 'ghcp' || runtime === 'antigravity') return deps.ingress.sdk(request, { ...input, runtime }, wait);
     return deps.ingress[runtime](request, input, wait);
   };
   const path = '/api/sessions/:sessionKey';
@@ -140,7 +140,7 @@ export function registerApplicationMessagesHttp(app: Hono, deps: {
         try {
         trace.add('step', 1);
         const bytes = runtime === 'hermes' ? HERMES_MESSAGE_PAYLOAD_BYTES
-          : runtime === 'claude-code' || runtime === 'ghcp' ? SDK_MESSAGE_PAYLOAD_BYTES
+          : runtime === 'claude-code' || runtime === 'ghcp' || runtime === 'antigravity' ? SDK_MESSAGE_PAYLOAD_BYTES
           : runtime === 'codex' ? CODEX_MESSAGE_PAYLOAD_BYTES : OPENCLAW_MESSAGE_PAYLOAD_BYTES;
         const raw = await readJsonBody(c.req.raw, bytes, timeoutMs);
         if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return c.json({ error: 'JSON object required' }, 400);
@@ -152,7 +152,7 @@ export function registerApplicationMessagesHttp(app: Hono, deps: {
         const control = runtime === 'codex' ? text === '/stop'
           : runtime === 'openclaw' ? text === '/stop'
             || (text === '/status' || text === '/compact') && (!media || payload.deliveryMode === 'mirror')
-          : runtime === 'claude-code' || runtime === 'ghcp' ? text === '/stop' || text === '/status' || isSdkCompactCommand(text)
+          : runtime === 'claude-code' || runtime === 'ghcp' || runtime === 'antigravity' ? text === '/stop' || text === '/status' || isSdkCompactCommand(text)
           : text === '/stop' || text === '/status' || text === '/compact';
         const localControl = text === '/stop' && deps.stopIngress ? 'stop'
           : control && text === '/status' && runtime !== 'codex' && deps.statusIngress ? 'status'

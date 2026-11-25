@@ -15,11 +15,12 @@ export async function deleteConnectorSession(deps: {
   hermes?: Pick<HermesRuntime, 'remove'>;
   claude?: { ready: boolean; remove(key: string, authorize: () => void, acknowledge: () => void): Promise<void> };
   copilot?: { ready: boolean; remove(key: string, authorize: () => void, acknowledge: () => void): Promise<void> };
+  antigravity?: { ready: boolean; remove(key: string, authorize: () => void, acknowledge: () => void): Promise<void> };
 }, sessionKey: string, authorize: () => void, acknowledged: (result: Record<string, unknown>) => void) {
   const guard = () => synchronousEffectAuthority(authorize);
   guard();
-  if (sessionKey.startsWith('claude-code:') || sessionKey.startsWith('ghcp:')) {
-    const runtime = sessionKey.startsWith('claude-code:') ? deps.claude : deps.copilot;
+  if (sessionKey.startsWith('claude-code:') || sessionKey.startsWith('ghcp:') || sessionKey.startsWith('antigravity:')) {
+    const runtime = sessionKey.startsWith('claude-code:') ? deps.claude : sessionKey.startsWith('ghcp:') ? deps.copilot : deps.antigravity;
     if (!runtime?.ready) throw new SessionDeletionConflict('SDK runtime is not ready for deletion');
     await runtime.remove(sessionKey, guard, () => acknowledged({ ok: true, status: 'delete_accepted' }));
     return { ok: true };

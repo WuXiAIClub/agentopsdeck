@@ -15,10 +15,10 @@ export const isConnectorSdkQueueReadKind = (kind: string): kind is ConnectorSdkQ
 const fields = (v: unknown, names: string[]): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v)
   && names.every(k => Object.hasOwn(v, k)) && Object.keys(v).length === names.length;
 const id = (v: unknown): v is string => typeof v === 'string' && !!v && Buffer.byteLength(v) <= 512 && !/[\u0000-\u001f\u007f]/.test(v);
-const key = (v: unknown): v is string => id(v) && ['claude-code', 'ghcp'].includes(sessionRuntimeId(v)) && v !== `${sessionRuntimeId(v)}:`;
+const key = (v: unknown): v is string => id(v) && ['claude-code', 'ghcp', 'antigravity'].includes(sessionRuntimeId(v)) && v !== `${sessionRuntimeId(v)}:`;
 const count = (v: unknown): v is number => Number.isSafeInteger(v) && Number(v) >= 0;
 export function validConnectorSdkQueueReadInput(_kind: ConnectorSdkQueueReadKind, v: unknown): boolean {
-  return fields(v, ['runtime', 'key', 'authorization', 'after']) && ['claude-code', 'ghcp'].includes(String(v.runtime))
+  return fields(v, ['runtime', 'key', 'authorization', 'after']) && ['claude-code', 'ghcp', 'antigravity'].includes(String(v.runtime))
     && key(v.key) && sessionRuntimeId(v.key) === v.runtime && count(v.after)
     && typeof v.authorization === 'string' && !!v.authorization.trim() && Buffer.byteLength(v.authorization) <= 4096
     && !/[\r\n\u0000]/.test(v.authorization);

@@ -3,8 +3,8 @@ import type { HistoryRefreshOptions } from '../refresh/history.js';
 
 // Internal lifecycle boundary, NOT a grant/runtime expansion. SDK runtimes
 // are explicitly configured and owner-only; discovery never grants execution.
-export type ConnectorAgentId = 'codex' | 'hermes' | 'claude-code' | 'ghcp';
-const agentIds = new Set<string>(['codex', 'hermes', 'claude-code', 'ghcp']);
+export type ConnectorAgentId = 'codex' | 'hermes' | 'claude-code' | 'ghcp' | 'antigravity';
+const agentIds = new Set<string>(['codex', 'hermes', 'claude-code', 'ghcp', 'antigravity']);
 
 export interface ConnectorAgentLifecycle {
   id: ConnectorAgentId;

@@ -24,7 +24,7 @@ export class NativeTokenSnapshotLimit extends Error { constructor() { super('Tok
 const hash = (value: string) => createHash('sha256').update(value).digest('hex');
 const integer = (value: unknown): value is number => Number.isSafeInteger(value) && Number(value) >= 0;
 function identity(runtime: Runtime, key: string, requestId: string) {
-  if (!['codex', 'claude-code', 'ghcp'].includes(runtime) || typeof key !== 'string' || !key.startsWith(`${runtime}:`)
+  if (!['codex', 'claude-code', 'ghcp', 'antigravity'].includes(runtime) || typeof key !== 'string' || !key.startsWith(`${runtime}:`)
     || key.length <= runtime.length + 1 || key.length > 4096 || /[\u0000-\u001f\u007f]/.test(key)
     || typeof requestId !== 'string' || !/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(requestId)) throw Error('Invalid token snapshot identity');
 }

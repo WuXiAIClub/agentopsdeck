@@ -10,7 +10,7 @@ type Wait = { timeoutMs: number; signal?: AbortSignal };
  * Resolve uncertainty by reading the original actor-scoped receipt. Neither a
  * missing receipt nor a settings-start release marker authorizes replay. */
 export class AsyncSdkLocal {
-  constructor(private readonly owner: Owner, private readonly committed?: (runtime: 'claude-code' | 'ghcp', key: string) => void | Promise<void>) {}
+  constructor(private readonly owner: Owner, private readonly committed?: (runtime: 'claude-code' | 'ghcp' | 'antigravity', key: string) => void | Promise<void>) {}
   private async writePhysical<K extends 'sdkSessionCreate' | 'sdkModelUpdate'>(kind: K, input: ConnectorSdkLocalCommands[K]['input']) {
     const request = structuredClone(input);
     const result = await this.owner.command(kind, request);

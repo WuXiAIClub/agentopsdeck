@@ -2043,7 +2043,7 @@ export default function WorkspaceOsDesktop({
       const idx = s.sessionKey.indexOf(':');
       const prefix = idx > 0 ? s.sessionKey.slice(0, idx) : '';
       const connId =
-        prefix && prefix !== 'agent' && prefix !== 'codex' && prefix !== 'claude-code' && prefix !== 'ghcp'
+        prefix && prefix !== 'agent' && prefix !== 'codex' && prefix !== 'claude-code' && prefix !== 'ghcp' && prefix !== 'antigravity'
           ? prefix
           : s.sessionRef?.nodeId ?? 'local-hub';
       const existing = map.get(connId);

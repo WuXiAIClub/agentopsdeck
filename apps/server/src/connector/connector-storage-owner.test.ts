@@ -18,7 +18,7 @@ const kinds: ConnectorStorageKind[] = ['authorizedStorageRecovery', 'authorizedS
 const evidence = { authorization: 'Bearer synthetic', expectedNode: 'synthetic-node', protocol: '1', originPresent: false };
 const timing = () => ({ sqlSteps: 0, sqlMs: 0, sqlMaxMs: 0, jsonCalls: 0, jsonMs: 0, jsonBytes: 0 });
 const stats = () => ({ databaseBytes: 1, walBytes: 2, availableBytes: 3, lowSpace: true, walPressure: false,
-  connection: { state: 'ready' as const, attempts: 0 }, reads: { claude: timing(), copilot: timing() } });
+  connection: { state: 'ready' as const, attempts: 0 }, reads: { claude: timing(), copilot: timing(), antigravity: timing() } });
 const checkpoint = { deferred: false as const, busy: 0, logFrames: 0, checkpointedFrames: 0 };
 async function fixture(t: TestContext, worker: boolean) {
   const root = mkdtempSync(join(tmpdir(), 'connector-storage-owner-'));

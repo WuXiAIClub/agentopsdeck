@@ -18,6 +18,7 @@ import { fileURLToPath } from 'node:url';
 import { hermesConfig, type HermesConfig } from './hermes/config.js';
 import { claudeConfig, type ClaudeConfig } from './claude/config.js';
 import { copilotConfig, type CopilotConfig } from './copilot/config.js';
+import { antigravityConfig, type AntigravityConfig } from './antigravity/config.js';
 import { AGENTOPSDECK_VERSION } from '@agentopsdeck/shared';
 import { parseLifecycleEndpoints, type LifecycleEndpoint } from './hub/lifecycle-client.js';
 import { rolloutCachePolicyFromEnv, type RolloutCachePolicy } from './codex/rollout-cache-policy.js';
@@ -31,6 +32,7 @@ export type ServerConfig = {
   hermes?: HermesConfig;
   claude?: ClaudeConfig;
   copilot?: CopilotConfig;
+  antigravity?: AntigravityConfig;
   port: number;
   listenHost?: string;
   serverRole: ServerRole;
@@ -213,6 +215,7 @@ export function loadConfig(env = process.env): ServerConfig {
   const hermes = hermesConfig(env);
   const claude = claudeConfig(env);
   const copilot = copilotConfig(env);
+  const antigravity = antigravityConfig(env);
   const websiteGateway = parseWebsiteGateway(env);
   if (websiteGateway && (websiteGateway.port === Number(env.AOD_PORT ?? env.PORT ?? 8890)
     || parseServerRole(env.AOD_SERVER_ROLE) === 'connector' || env.AOD_HUB_ENABLED === 'false')) {
@@ -225,6 +228,7 @@ export function loadConfig(env = process.env): ServerConfig {
     ...(hermes ? { hermes } : {}),
     ...(claude ? { claude } : {}),
     ...(copilot ? { copilot } : {}),
+    ...(antigravity ? { antigravity } : {}),
     port: Number(env.AOD_PORT ?? env.PORT ?? 8890),
     ...(listenHost !== undefined ? { listenHost } : {}),
     serverRole: parseServerRole(env.AOD_SERVER_ROLE),

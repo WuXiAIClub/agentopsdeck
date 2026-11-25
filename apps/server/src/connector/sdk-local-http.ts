@@ -22,7 +22,7 @@ export type SdkLocalHttp = {
   diagnostics?: PerformanceDiagnostics;
 };
 type Target = { operation: 'create'; runtime: SdkAgentId } | { operation: 'settings'; runtime: SdkAgentId; key: string };
-const sdk = (v: string): v is SdkAgentId => v === 'claude-code' || v === 'ghcp';
+const sdk = (v: string): v is SdkAgentId => v === 'claude-code' || v === 'ghcp' || v === 'antigravity';
 const validKey = (v: unknown): v is string => typeof v === 'string' && /^[A-Za-z0-9._:-]{1,200}$/.test(v);
 const unavailable = (c: Context, commandKey: string) => c.json({ error: 'Command outcome unavailable; read the original command key, do not resend',
   status: 'outcome_unknown', commandKey }, 503);

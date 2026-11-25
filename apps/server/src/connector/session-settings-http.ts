@@ -74,7 +74,7 @@ export function registerSessionSettingsRoutes(app: Hono, path: string, deps: {
         await deps.codex.changeGoal(sessionKey, control, authorize, begin, () => acknowledge({ goalControl: control.action }));
         return c.json({ ok: true });
       }
-      if (['claude-code', 'ghcp'].includes(sessionRuntimeId(sessionKey))) {
+      if (['claude-code', 'ghcp', 'antigravity'].includes(sessionRuntimeId(sessionKey))) {
         if (!deps.sdkSettingsAdmission) return c.json({ error: 'SDK settings are unavailable' }, 409);
         deps.sdkSettingsAdmission(sessionKey);
       }
@@ -87,6 +87,7 @@ export function registerSessionSettingsRoutes(app: Hono, path: string, deps: {
       }
       const model = body.model === null ? null : typeof body.model === 'string' ? body.model.trim() : undefined;
       if (sessionKey.startsWith('hermes:')) return c.json({ error: 'Configure Hermes model settings in its dedicated home' }, 409);
+      if (sessionKey.startsWith('antigravity:')) return c.json({ error: 'Antigravity model overrides are not supported' }, 409);
       const thinking = body.thinking === null ? null : typeof body.thinking === 'string' ? body.thinking.trim() : undefined;
       if (model === undefined || model === '' || (model?.length ?? 0) > 4096
         || (Object.hasOwn(body, 'thinking') && (thinking === undefined || thinking === '' || (thinking?.length ?? 0) > 4096))) return c.json({ error: 'Invalid session settings' }, 400);

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "reviewedAt": "2026-11-24",
+  "reviewedAt": "2026-11-25",
   "sourceVersion": "1.0.0",
-  "publicationApproved": true,
+  "publicationApproved": false,
   "complete": false,
   "exclusions": [
     "docs/review/file-review.json (self-referential hash only)"
@@ -14,20 +14,22 @@
     "Generated current-byte ledger does not prove human observations",
     "Source repairs invalidate prior whole-file conclusions; changed snapshots remain pending complete rereview. Targeted findings do not approve public release.",
     "Current pending-file round distinguishes complete reading from incomplete source/contracts; tests do not promote a file.",
-    "Native devices, providers, full backend, browser accessibility, artifacts and redistribution rights remain unaccepted."
+    "Native devices, providers, full backend, browser accessibility, artifacts and redistribution rights remain unaccepted.",
+    "Antigravity continuation 2026-11-24: pnpm test:module agent:antigravity claude/home-lease.test.ts copilot/home-lease.test.ts passed 62 tests with zero failures/skips; pnpm test:scripts documentation.test.mjs test-modules.test.mjs open-source-review.test.mjs publication-check.test.mjs security-review.test.mjs passed 38 tests with zero failures/skips. Bounded tsc --noEmit on all Antigravity TypeScript sources/tests passed using ES2022, ESNext, Bundler, strict, skipLibCheck, noUncheckedIndexedAccess, exactOptionalPropertyTypes and node types. check:publication, check:review, check:i18n, check:api and git diff --check passed. Full repository typecheck was not rerun after the previously reported memory failure. Production Connector journal/assembly, independent descendant containment, real CLI/provider and UI acceptance remain absent; fake journal/worker evidence does not establish them. Five changed inherited files have only scoped structural rereview, so complete review and publication approval remain false. No credentials, live private database, business histories or running services were accessed for this continuation."
   ],
   "summary": {
-    "totalFiles": 3572,
+    "totalFiles": 3591,
     "byKind": {
+      "test": 1750,
+      "runtime": 1707,
+      "docs": 55,
       "config": 57,
-      "docs": 53,
       "asset": 8,
-      "test": 1741,
-      "runtime": 1699,
       "generated": 14
     },
     "byModule": {
-      "governance": 261,
+      "antigravity": 17,
+      "governance": 263,
       "main": 65,
       "release-boundary": 13,
       "native": 143,
@@ -53,17 +55,321 @@
       "external": 2
     },
     "byDepth": {
-      "semantic": 3553,
+      "semantic": 3572,
       "asset": 19
     },
     "byDisposition": {
-      "no-finding": 3572
+      "no-finding": 3591
     },
-    "completedSemanticOrAssetFiles": 3572,
+    "completedSemanticOrAssetFiles": 3591,
     "remainingFiles": 0,
     "filesWithFindings": 0
   },
   "files": [
+    {
+      "path": "apps/server/src/antigravity/acp-client.test.ts",
+      "size": 11564,
+      "sha256": "2ef81da1268f44eb6ddd865942fcde73948bc057207d6329ca62029ba738e3af",
+      "module": "antigravity",
+      "kind": "test",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
+      ],
+      "notes": "Reviewed Antigravity ACP transport, isolated config/env, owned execution, Connector SDK runtime adapter, and synthetic E2E tests. Enforces AOD 1.0.0, dedicated HOME lease, Linux-only execution, capability rejections (409 for attachments/compact/modelOverride/interactions), and no auto-replay.",
+      "findings": []
+    },
+    {
+      "path": "apps/server/src/antigravity/acp-client.ts",
+      "size": 13210,
+      "sha256": "514e0135c5df8c8bedc8ccf6efcd03ce33bb89045cf9f0d6aa21032ff61d5aaa",
+      "module": "antigravity",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
+      ],
+      "notes": "Reviewed Antigravity ACP transport, isolated config/env, owned execution, Connector SDK runtime adapter, and synthetic E2E tests. Enforces AOD 1.0.0, dedicated HOME lease, Linux-only execution, capability rejections (409 for attachments/compact/modelOverride/interactions), and no auto-replay.",
+      "findings": []
+    },
+    {
+      "path": "apps/server/src/antigravity/acp-fixture.mjs",
+      "size": 5685,
+      "sha256": "9303113d09cec7d13e2f35e52ce7485fbc0da6a8b3f52a50dc4f04f5c549148a",
+      "module": "antigravity",
+      "kind": "test",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
+      ],
+      "notes": "Reviewed Antigravity ACP transport, isolated config/env, owned execution, Connector SDK runtime adapter, and synthetic E2E tests. Enforces AOD 1.0.0, dedicated HOME lease, Linux-only execution, capability rejections (409 for attachments/compact/modelOverride/interactions), and no auto-replay.",
+      "findings": []
+    },
+    {
+      "path": "apps/server/src/antigravity/config.test.ts",
+      "size": 2917,
+      "sha256": "ca1106deeca8ac64ecd6d33a85b5ac6dd21149440b501af6d864a9d86aa8fc58",
+      "module": "antigravity",
+      "kind": "test",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
+      ],
+      "notes": "Reviewed Antigravity ACP transport, isolated config/env, owned execution, Connector SDK runtime adapter, and synthetic E2E tests. Enforces AOD 1.0.0, dedicated HOME lease, Linux-only execution, capability rejections (409 for attachments/compact/modelOverride/interactions), and no auto-replay.",
+      "findings": []
+    },
+    {
+      "path": "apps/server/src/antigravity/config.ts",
+      "size": 3320,
+      "sha256": "2950a5285bdfe0b9d6010243c81104f81a20d42fb97958e3c87d84175a653bd0",
+      "module": "antigravity",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
+      ],
+      "notes": "Reviewed Antigravity ACP transport, isolated config/env, owned execution, Connector SDK runtime adapter, and synthetic E2E tests. Enforces AOD 1.0.0, dedicated HOME lease, Linux-only execution, capability rejections (409 for attachments/compact/modelOverride/interactions), and no auto-replay.",
+      "findings": []
+    },
+    {
+      "path": "apps/server/src/antigravity/environment.ts",
+      "size": 1824,
+      "sha256": "629a214ff2082534b3ef85478fed9449bce4d1a6e2d15dd4b66b26b4ad1a28b9",
+      "module": "antigravity",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
+      ],
+      "notes": "Reviewed Antigravity ACP transport, isolated config/env, owned execution, Connector SDK runtime adapter, and synthetic E2E tests. Enforces AOD 1.0.0, dedicated HOME lease, Linux-only execution, capability rejections (409 for attachments/compact/modelOverride/interactions), and no auto-replay.",
+      "findings": []
+    },
+    {
+      "path": "apps/server/src/antigravity/execution-worker.test.ts",
+      "size": 7614,
+      "sha256": "fbb0a6c95f574dd0bb333217345aef1c2bd2931095b09445fdb320bc6d030b45",
+      "module": "antigravity",
+      "kind": "test",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
+      ],
+      "notes": "Reviewed Antigravity ACP transport, isolated config/env, owned execution, Connector SDK runtime adapter, and synthetic E2E tests. Enforces AOD 1.0.0, dedicated HOME lease, Linux-only execution, capability rejections (409 for attachments/compact/modelOverride/interactions), and no auto-replay.",
+      "findings": []
+    },
+    {
+      "path": "apps/server/src/antigravity/execution-worker.ts",
+      "size": 4176,
+      "sha256": "9e748675e2103f4df7768c02fa0d5292f9d3255aa222258058049e7d2e235a31",
+      "module": "antigravity",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
+      ],
+      "notes": "Reviewed Antigravity ACP transport, isolated config/env, owned execution, Connector SDK runtime adapter, and synthetic E2E tests. Enforces AOD 1.0.0, dedicated HOME lease, Linux-only execution, capability rejections (409 for attachments/compact/modelOverride/interactions), and no auto-replay.",
+      "findings": []
+    },
+    {
+      "path": "apps/server/src/antigravity/home-lease.test.ts",
+      "size": 2766,
+      "sha256": "1a7eb7d111a7f62374d62c72ab9c327673edb940f9268087619d8f125c9d3864",
+      "module": "antigravity",
+      "kind": "test",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
+      ],
+      "notes": "Reviewed Antigravity ACP transport, isolated config/env, owned execution, Connector SDK runtime adapter, and synthetic E2E tests. Enforces AOD 1.0.0, dedicated HOME lease, Linux-only execution, capability rejections (409 for attachments/compact/modelOverride/interactions), and no auto-replay.",
+      "findings": []
+    },
+    {
+      "path": "apps/server/src/antigravity/journal.test.ts",
+      "size": 17199,
+      "sha256": "599dbf9d4b1a1f6338d404d85bfdc7e8b440b19898ddb0079c2373b21b5757d2",
+      "module": "antigravity",
+      "kind": "test",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
+      ],
+      "notes": "Reviewed Antigravity ACP transport, isolated config/env, owned execution, Connector SDK runtime adapter, and synthetic E2E tests. Enforces AOD 1.0.0, dedicated HOME lease, Linux-only execution, capability rejections (409 for attachments/compact/modelOverride/interactions), and no auto-replay.",
+      "findings": []
+    },
+    {
+      "path": "apps/server/src/antigravity/journal.ts",
+      "size": 21564,
+      "sha256": "6ca22d4b07891c986795ffa850a7a37e3c04d83038c4e95f8e8b9cfbfce1ea4b",
+      "module": "antigravity",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
+      ],
+      "notes": "Reviewed Antigravity ACP transport, isolated config/env, owned execution, Connector SDK runtime adapter, and synthetic E2E tests. Enforces AOD 1.0.0, dedicated HOME lease, Linux-only execution, capability rejections (409 for attachments/compact/modelOverride/interactions), and no auto-replay.",
+      "findings": []
+    },
+    {
+      "path": "apps/server/src/antigravity/message-projection.test.ts",
+      "size": 2010,
+      "sha256": "2b0855b42add89b5ebb6b544b06919fd48d0136ce17140a3cc32e4201922fb9c",
+      "module": "antigravity",
+      "kind": "test",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
+      ],
+      "notes": "Reviewed Antigravity ACP transport, isolated config/env, owned execution, Connector SDK runtime adapter, and synthetic E2E tests. Enforces AOD 1.0.0, dedicated HOME lease, Linux-only execution, capability rejections (409 for attachments/compact/modelOverride/interactions), and no auto-replay.",
+      "findings": []
+    },
+    {
+      "path": "apps/server/src/antigravity/message-projection.ts",
+      "size": 2461,
+      "sha256": "b7c4bd12ad70eff7a5637447090a1a997c0d2bdc30ecc551d5d1ab58342fb4bb",
+      "module": "antigravity",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
+      ],
+      "notes": "Reviewed Antigravity ACP transport, isolated config/env, owned execution, Connector SDK runtime adapter, and synthetic E2E tests. Enforces AOD 1.0.0, dedicated HOME lease, Linux-only execution, capability rejections (409 for attachments/compact/modelOverride/interactions), and no auto-replay.",
+      "findings": []
+    },
+    {
+      "path": "apps/server/src/antigravity/owned-execution.test.ts",
+      "size": 12964,
+      "sha256": "7cd17d46323b2eb21c31c42f20748c46eba66bb9a0af7586584915ca2d118bb9",
+      "module": "antigravity",
+      "kind": "test",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
+      ],
+      "notes": "Reviewed Antigravity ACP transport, isolated config/env, owned execution, Connector SDK runtime adapter, and synthetic E2E tests. Enforces AOD 1.0.0, dedicated HOME lease, Linux-only execution, capability rejections (409 for attachments/compact/modelOverride/interactions), and no auto-replay.",
+      "findings": []
+    },
+    {
+      "path": "apps/server/src/antigravity/owned-execution.ts",
+      "size": 7489,
+      "sha256": "16ec82e55ac426bdba7b5d1502331fe7570e191c9a7441ea4e11b2c16e28fee6",
+      "module": "antigravity",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
+      ],
+      "notes": "Reviewed Antigravity ACP transport, isolated config/env, owned execution, Connector SDK runtime adapter, and synthetic E2E tests. Enforces AOD 1.0.0, dedicated HOME lease, Linux-only execution, capability rejections (409 for attachments/compact/modelOverride/interactions), and no auto-replay.",
+      "findings": []
+    },
+    {
+      "path": "apps/server/src/antigravity/sdk-runtime.test.ts",
+      "size": 9807,
+      "sha256": "f05abea435576c7c569acdb29e95b581b2a6e11f5fe79a779c729448ef027a35",
+      "module": "antigravity",
+      "kind": "test",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
+      ],
+      "notes": "Reviewed Antigravity ACP transport, isolated config/env, owned execution, Connector SDK runtime adapter, and synthetic E2E tests. Enforces AOD 1.0.0, dedicated HOME lease, Linux-only execution, capability rejections (409 for attachments/compact/modelOverride/interactions), and no auto-replay.",
+      "findings": []
+    },
+    {
+      "path": "apps/server/src/antigravity/sdk-runtime.ts",
+      "size": 29378,
+      "sha256": "f79ba6857dc710450b5b0a57d2c9aad9bebed323366843dbcb3ca76439e82452",
+      "module": "antigravity",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
+      ],
+      "notes": "Reviewed Antigravity ACP transport, isolated config/env, owned execution, Connector SDK runtime adapter, and synthetic E2E tests. Enforces AOD 1.0.0, dedicated HOME lease, Linux-only execution, capability rejections (409 for attachments/compact/modelOverride/interactions), and no auto-replay.",
+      "findings": []
+    },
+    {
+      "path": "docs/antigravity-cli.md",
+      "size": 5943,
+      "sha256": "ecd60633e670345232e7be1f959affee6d3927b9bf53bbc112b8520c3684e5e2",
+      "module": "governance",
+      "kind": "docs",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
+      ],
+      "notes": "Reviewed paired English/Simplified Chinese Antigravity Connector documentation and navigation links. Documents AOD 1.0.0 isolation, dedicated HOME requirements, enabled Connector/Web UI capabilities, and 409-rejected unsupported capabilities.",
+      "findings": []
+    },
+    {
+      "path": "docs/antigravity-cli.zh-CN.md",
+      "size": 5419,
+      "sha256": "0c8f64aef1bd8288b9cf20f40306af9eb4bedca899b6e840f7e3c320f8b54439",
+      "module": "governance",
+      "kind": "docs",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
+      ],
+      "notes": "Reviewed paired English/Simplified Chinese Antigravity Connector documentation and navigation links. Documents AOD 1.0.0 isolation, dedicated HOME requirements, enabled Connector/Web UI capabilities, and 409-rejected unsupported capabilities.",
+      "findings": []
+    },
     {
       "path": ".dockerignore",
       "size": 280,
@@ -2929,20 +3235,18 @@
     },
     {
       "path": "apps/server/src/application-connector-async.ts",
-      "size": 4774,
-      "sha256": "602995360fe0068aaa99c4bcb596bfd629109419e13cf665965edef4f8b8b833",
+      "size": 4850,
+      "sha256": "57567447abbbc4b6a774b7a840fa8d58bdd217fece19269cf528f607ed9059c1",
       "module": "api-auth",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单全部字节读取与 SHA-256/size 对照（非人工全文语义审查）",
-        "TypeScript AST 语法/声明/import/调用位置提取（无源码执行）",
-        "入口/资源调用静态位置与直接 import 邻接记录，未批准传递权限",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "本文件 76 行；声明 Layer@11, BootstrapOptions@12, applicationConnectorOwnerConfig@16, createAsyncConnectorApplication@38, config@40, transaction@42, owner@43, layer@43；直接依赖 apps/server/src/config.ts, apps/server/src/server-role.ts, apps/server/src/auth/application-transaction-gate.ts, apps/server/src/connector/async-connector-owner.ts, apps/server/src/connector/connector-owner-domain.ts, apps/server/src/application-combined-async.ts。HTTP 注册位置 未检出该类静态调用；FS/worker/timer 等静态资源位置 未检出该类静态调用。上述导入及注册的 current actor、await 后最终 effect、owner/cleanup/secret/input 分支尚未全链路核对；以结构记录留待后续人工审查，不声称安全通过。",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -3019,20 +3323,18 @@
     },
     {
       "path": "apps/server/src/application-deletion-http.ts",
-      "size": 6479,
-      "sha256": "078dd4f22849eb1106ad17120ef67448fa45c634516b7dcd07087de6b5526694",
+      "size": 6582,
+      "sha256": "eef189d014f6c4da8de602e9536cf043c676c477904ed32333e52b11ce13ad99",
       "module": "api-auth",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单全部字节读取与 SHA-256/size 对照（非人工全文语义审查）",
-        "TypeScript AST 语法/声明/import/调用位置提取（无源码执行）",
-        "入口/资源调用静态位置与直接 import 邻接记录，未批准传递权限",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "本文件 91 行；声明 Runtime@15, digest@16, registerApplicationDeletionHttp@21, closed@27, available@28, timeoutMs@29, diagnostics@29, readers@30；直接依赖 node:crypto, @agentopsdeck/shared, hono, apps/server/src/auth/application-command-scope.ts, apps/server/src/auth/application-transaction-gate.ts, apps/server/src/auth/session-read-authority.ts。HTTP 注册位置 未检出该类静态调用；FS/worker/timer 等静态资源位置 未检出该类静态调用。上述导入及注册的 current actor、await 后最终 effect、owner/cleanup/secret/input 分支尚未全链路核对；以结构记录留待后续人工审查，不声称安全通过。",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -3161,18 +3463,18 @@
     },
     {
       "path": "apps/server/src/application-files-http.ts",
-      "size": 5169,
-      "sha256": "1a9cbbcbe41f7d83133144268577c05c232424a3806a2fd5fcc8b51efdc92ae4",
+      "size": 5185,
+      "sha256": "1494be6ac8b7c80cfc2782cb03ec7112119e14f793a2bacb2071ce8e9e317746",
       "module": "api-auth",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "完整 69 行源码逐行读取",
-        "原始 user credential 与 file-job native scope",
-        "private grant/node header 拒绝与 current actor final recheck"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "只有 transactions 功能门槛下注册 native file-job start/step/cancel；不使用 private daily bearer 替代 Cookie/Key，拒绝私有 grant/node header。每个 command 绑定 payload/application evidence，prepare/effect 时重查原始 current actor；worker remaining authority 不意味着全局批准。与独立 file-browser 不同，该文件不决定纯 FS 根目录；native worker/job 实现另在其他模块/结构待办。",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -3352,38 +3654,34 @@
     },
     {
       "path": "apps/server/src/application-message-http.test.ts",
-      "size": 22364,
-      "sha256": "bbf570f62eab4ea3e6c46a676dbb16f0c172675df40801a5d39ed3fe7a3497b8",
+      "size": 22412,
+      "sha256": "8099f9d28458f95aeb8b0101c7893f6d83911d481e8498e1c23a1f9b060aaa09",
       "module": "api-auth",
       "kind": "test",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单全部字节读取与 SHA-256/size 对照（非人工全文语义审查）",
-        "TypeScript AST 语法/声明/import/调用位置提取（无源码执行）",
-        "测试静态 call site/断言方法/临时资源夹具位置提取，不等于逐断言正确性核对",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "本文件 322 行；声明 gate@15, release@15, promise@15, tick@16, until@17, end@18, runtimes@21, Scope@22；直接依赖 node:assert/strict, apps/server/src/lifecycle/http-deadline-test-support.ts, node:test, hono, @agentopsdeck/shared, apps/server/src/application-message-http.ts。静态 test/describe/it 调用 13、断言调用 103；断言位置 assert.ok@19, assert.equal@38, assert.ok@59, assert.deepEqual@97, assert.notEqual@98, assert.equal@116, assert.equal@116, assert.equal@117, assert.equal@117, assert.deepEqual@118；夹具/资源位置 Hono@89。待沿本文件上述 imports 对照全部 branch、setup/teardown、assertion 的确切目标与失败语义；循环与动态导入不以 AST 数量代替运行 case，主审全 backend 的运行结果不在此擅自记为本文件深审。",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
       "path": "apps/server/src/application-message-http.ts",
-      "size": 18792,
-      "sha256": "6ee5438a3d85dca30454f04a21a65160d04080aff199354dbb19740efc2d3c6b",
+      "size": 18966,
+      "sha256": "61568482402c00c9c3b50471e278940f9804b72b02c204d9aa0d8d48f6479d0d",
       "module": "api-auth",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单全部字节读取与 SHA-256/size 对照（非人工全文语义审查）",
-        "TypeScript AST 语法/声明/import/调用位置提取（无源码执行）",
-        "入口/资源调用静态位置与直接 import 邻接记录，未批准传递权限",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "本文件 283 行；声明 PhysicalReads@27, Runtime@28, Scope@29, validKey@30, readDigest@31, unknown@32, registerApplicationMessagesHttp@42, timeoutMs@60；直接依赖 node:crypto, @agentopsdeck/shared, hono, hono/http-exception, apps/server/src/auth/application-command-scope.ts, apps/server/src/application-status-ingress.ts。HTTP 注册位置 app.post@123, app.get@192, app.get@220, app.post@240；FS/worker/timer 等静态资源位置 未检出该类静态调用。上述导入及注册的 current actor、await 后最终 effect、owner/cleanup/secret/input 分支尚未全链路核对；以结构记录留待后续人工审查，不声称安全通过。",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -3602,20 +3900,18 @@
     },
     {
       "path": "apps/server/src/application-queue-http.ts",
-      "size": 7735,
-      "sha256": "3acf8b8bdcd101874d909644372c314720c0a87491509cca8cba69812a44a826",
+      "size": 7796,
+      "sha256": "4994d9da88d48c49fef72cfa32658e91a63a502019c45d41b732a5b9c84b3e05",
       "module": "api-auth",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单全部字节读取与 SHA-256/size 对照（非人工全文语义审查）",
-        "TypeScript AST 语法/声明/import/调用位置提取（无源码执行）",
-        "入口/资源调用静态位置与直接 import 邻接记录，未批准传递权限",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "本文件 118 行；声明 Runtime@15, Ports@16, Method@17, readDigest@18, registerApplicationQueueHttp@23, closed@35, available@36, diagnostics@37；直接依赖 node:crypto, @agentopsdeck/shared, hono, apps/server/src/auth/application-command-scope.ts, apps/server/src/auth/application-transaction-gate.ts, apps/server/src/auth/session-read-authority.ts。HTTP 注册位置 未检出该类静态调用；FS/worker/timer 等静态资源位置 未检出该类静态调用。上述导入及注册的 current actor、await 后最终 effect、owner/cleanup/secret/input 分支尚未全链路核对；以结构记录留待后续人工审查，不声称安全通过。",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -3972,20 +4268,18 @@
     },
     {
       "path": "apps/server/src/application-status-ingress.ts",
-      "size": 5048,
-      "sha256": "a5e5e46f0dd088b84bb21d4f3501525bb9a6955ad541facda90d1de351cc4b78",
+      "size": 5077,
+      "sha256": "2bec8841d474278d984622067735c4f8ec0d8604c4aae8ee2f6e9b8130d5ed2b",
       "module": "api-auth",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单全部字节读取与 SHA-256/size 对照（非人工全文语义审查）",
-        "TypeScript AST 语法/声明/import/调用位置提取（无源码执行）",
-        "入口/资源调用静态位置与直接 import 邻接记录，未批准传递权限",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "本文件 65 行；声明 ApplicationStatusParticipants@10, Runtime@15, Scope@16, Wait@17, createApplicationStatusIngress@22, run@24, transactions@24, lane@25；直接依赖 node:crypto, apps/server/src/auth/application-command-scope.ts, apps/server/src/auth/application-transaction-gate.ts, apps/server/src/connector/async-[前代标识类别]-status.ts, apps/server/src/connector/async-hermes-local-control.ts, apps/server/src/connector/async-sdk-status.ts。HTTP 注册位置 未检出该类静态调用；FS/worker/timer 等静态资源位置 未检出该类静态调用。上述导入及注册的 current actor、await 后最终 effect、owner/cleanup/secret/input 分支尚未全链路核对；以结构记录留待后续人工审查，不声称安全通过。",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -4065,20 +4359,18 @@
     },
     {
       "path": "apps/server/src/application-usage-http.ts",
-      "size": 4800,
-      "sha256": "d23e4b9c9f7f19e6bf86a00215d3f125e457957deed9663237c02a548864ec50",
+      "size": 4816,
+      "sha256": "af1e8ae9b9c32fcea8165023a356772a4792134f8a8b3ae4b950b260152b9564",
       "module": "api-auth",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单全部字节读取与 SHA-256/size 对照（非人工全文语义审查）",
-        "TypeScript AST 语法/声明/import/调用位置提取（无源码执行）",
-        "入口/资源调用静态位置与直接 import 邻接记录，未批准传递权限",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "本文件 64 行；声明 registerApplicationUsageHttp@15, closed@20, available@21, diagnostics@22, timeoutMs@22, authority@23, original@26, headers@27；直接依赖 hono, apps/server/src/auth/application-command-scope.ts, apps/server/src/auth/application-transaction-gate.ts, apps/server/src/auth/session-read-authority.ts, apps/server/src/connector/application-usage-transaction.ts, apps/server/src/connector/async-local-credentials.ts。HTTP 注册位置 未检出该类静态调用；FS/worker/timer 等静态资源位置 未检出该类静态调用。上述导入及注册的 current actor、await 后最终 effect、owner/cleanup/secret/input 分支尚未全链路核对；以结构记录留待后续人工审查，不声称安全通过。",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -4308,18 +4600,18 @@
     },
     {
       "path": "apps/server/src/auth/application-command-scope.ts",
-      "size": 9367,
-      "sha256": "b04fc7bae5d70cffb86a19b81e476699f6ff6e3ed1cec2fa3146c52b6081b923",
+      "size": 9382,
+      "sha256": "9ded492d73ea1ef69494f151565d8a754f0922ddbcfab0730d378f537079952d",
       "module": "api-auth",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "完整 174 行源码逐行读取",
-        "files/system 原始 request evidence→prepare/effect→local scope",
-        "字节/并发/原始 lifetime 限制"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "intent/action/runtime/digest 只收 own exact data properties，拒绝 accessor/proxy，原始 credential 总 bytes 64 KiB。默认 commands 128（配置上界 1024）、checks 并发 8；授权 literal true/native Promise intrinsic，local 标记不制造 worker execution grant。await 超时/取消不释放 unknown 原操作，drain 保存物理原操作。专用 application-command-scope.test.ts 尚只结构检查；已核对原始消费者、同步授权测试和 file-browser 隔离探针，未宣布事务 worker 全契约覆盖。",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -4342,20 +4634,18 @@
     },
     {
       "path": "apps/server/src/auth/application-transaction-gate.ts",
-      "size": 11145,
-      "sha256": "70053b155bfb48f63ba3f9b2846e99df6be4c136074debdcf68f363a930cf5fd",
+      "size": 11176,
+      "sha256": "072c6935cb980670a00c210d0fdda0004890c0e520c5cac0aab83b0ca193cb23",
       "module": "api-auth",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单全部字节读取与 SHA-256/size 对照（非人工全文语义审查）",
-        "TypeScript AST 语法/声明/import/调用位置提取（无源码执行）",
-        "入口/资源调用静态位置与直接 import 邻接记录，未批准传递权限",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "本文件 187 行；声明 ApplicationTransactionEvidence@9, ApplicationTransactionBinding@12, OriginalTransactionWrite@16, ApplicationTransactionClient@17, APPLICATION_TRANSACTION_COMMAND_OVERHEAD@20, unavailable@21, object@22, validApplicationTransactionEvidence@23；直接依赖 node:worker_threads, node:util, @agentopsdeck/shared, apps/server/src/diagnostics/guarded-trace.ts, apps/server/src/diagnostics/performance.ts。HTTP 注册位置 未检出该类静态调用；FS/worker/timer 等静态资源位置 setTimeout@129。上述导入及注册的 current actor、await 后最终 effect、owner/cleanup/secret/input 分支尚未全链路核对；以结构记录留待后续人工审查，不声称安全通过。",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -11611,20 +11901,18 @@
     },
     {
       "path": "apps/server/src/config.ts",
-      "size": 30523,
-      "sha256": "2f1b877f2e5465d8f3045b2922c80bbaaa18e1c1aa98b661ddbdc3197d450f29",
+      "size": 30734,
+      "sha256": "a1ed68122947682bcae03163b59b2231218d0e0f538fba2617dd3678fcf69afa",
       "module": "api-auth",
       "kind": "config",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
         "current-source-sha256-and-size",
-        "complete-current-file-read-in-bounded-chunks",
-        "relevant-callers-contracts-and-tests-inspected",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Complete 581-line current configuration source read in bounded chunks, including late parser/native roots and full redactedConfig tail; callers inspected in system, HTTP shell and combined composition, with AOD config tests. Default native switches are opt-in, state/data/native roots are separated and snapshots frozen, explicit filesystem roots reject root<instance-home>/invalid forms, and dotenv does not search parents. Raw gateway/admin endpoint strings remain internal connection settings, but debug projection now exposes configured markers only; all masked secret values are constant *** with no prefix/suffix disclosure. Existing debug path/root metadata remains operator-facing; this is not universal confidential-config approval. Inherited OPENCLAW_CONFIG_FILE/GATEWAY_VERSION compatibility inputs and broad media/artifact fallback roots require further consumer isolation review. Historical AUTH002/005 associations retained; targeted corrections do not certify all adapters.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": [],
       "historicalFindingReferences": [
         "AOD-AUTH-002",
@@ -11685,19 +11973,18 @@
     },
     {
       "path": "apps/server/src/connector/agent-runtimes.ts",
-      "size": 4811,
-      "sha256": "33082d28d6dccf68b621754461df6dd0e8e00bd562eec8781c3a3a281d416e57",
+      "size": 4842,
+      "sha256": "a746c38eeb129b4108b617b32bc53e5c98121d371b022345104453bc15ee0a4c",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/agent-runtimes.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -11758,19 +12045,18 @@
     },
     {
       "path": "apps/server/src/connector/application-files-transaction.ts",
-      "size": 2012,
-      "sha256": "9be83dac53ef6989f867749eca76f8ec5a80fba5c3f60d7d44544a670974a8c3",
+      "size": 2028,
+      "sha256": "10e3f4ccb36e2ed5c01224e155a8765f34882e61fabcd029b01b998b23aa3bff",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/application-files-transaction.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -11809,19 +12095,18 @@
     },
     {
       "path": "apps/server/src/connector/application-interaction-transaction.ts",
-      "size": 4919,
-      "sha256": "138b87b75eb5060c7df8ca53afe75a841fdf10a88d3cea8d4839f4d09ef02fcd",
+      "size": 4935,
+      "sha256": "009fa13de4d23ae27b5b70d0d6db47763c171be66dea563d501c053957e55ef8",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/application-interaction-transaction.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -11894,19 +12179,18 @@
     },
     {
       "path": "apps/server/src/connector/application-usage-transaction.ts",
-      "size": 1429,
-      "sha256": "5b6832484f7c2f4b93d54f3e4c3dec5d5daea357ba114090984e5d75592d997e",
+      "size": 1445,
+      "sha256": "cc13af260e469d7d750482b305707b3183f18ef8cc0bf8a41cfabd818225082b",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/application-usage-transaction.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -12592,22 +12876,18 @@
     },
     {
       "path": "apps/server/src/connector/async-configured-binding.ts",
-      "size": 8423,
-      "sha256": "916d8ba516e2894781fe926a5c6d18c965162e31002a35ed2665e414e368631d",
+      "size": 8720,
+      "sha256": "f84a8d54661bc875e41d34d7fa0b8451460f2b10f9811465cba21bf3f0a886ac",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "complete-stable-source-read-in-chunks",
-        "relevant-public-caller-and-ownership-contracts-read",
-        "adjacent-synthetic-tests-read",
-        "exact-current-size-and-sha256",
-        "source-semantics-separate-from-runtime-acceptance",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Full 137-line source read including prior captured registry fix. Full task-drain, agent-runtimes, async artifact registry and admin-client inspected; media constructor/stream ownership and SDK/Hermes/OpenClaw application start/pause/close boundaries inspected. Constructor attachment is inert; synchronous catalog/task admission fence precedes allSettled retained child drain. Media route internals beyond this boundary are not independently approved.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": [],
       "historicalFindingReferences": [
         "EXE-PENDING-001"
@@ -12730,21 +13010,18 @@
     },
     {
       "path": "apps/server/src/connector/async-connector-surface.ts",
-      "sha256": "04dcd62d5d758630173fe1624021ae9f663866c27934aea55093583e0e82e4ff",
-      "size": 32952,
+      "sha256": "634163a8c5117d4de6d02419d4cb09c7ecc26bcd7cb00f0c1151ef73b46c1158",
+      "size": 33515,
       "module": "api-completion",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "Complete 514-line content read, including surface assembly, readiness, route order, model handlers and shutdown ownership.",
-        "Worker models:write admission precedes actual-byte 8192-byte JSON collection; handle.check follows collection before setId/object/list validation and reconciliation.",
-        "Changed body contract and original read-authority contract read fully; existing 10-case async body evidence compared to current source.",
-        "Reconciliation helper and filesystem writer read fully; post-effect delivery proof cannot authorize or undo an asynchronous filesystem commit.",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "AOD-API-COMP-003's worker JSON collection defect is repaired at the named upload boundary. AOD-API-COMP-005 is a separate source-confirmed continuity defect in the non-dry-run writer. Existing EXE-COMPLETE-003 filesystem permissions/unbounded file-read finding remains unresolved; neither it nor all runtime adapters are approved by this review.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": [],
       "readEvidence": {
         "complete": true,
@@ -12876,19 +13153,18 @@
     },
     {
       "path": "apps/server/src/connector/async-file-sessions.ts",
-      "size": 2982,
-      "sha256": "1ffaf68b37231b218ac45c5c9ea57d2d08bc895599b305b70e17f860459313af",
+      "size": 3108,
+      "sha256": "e28d46de12d9cd871499c585e8a968ebfce741cb48f7d2fd76efab8f3c0c7e71",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/async-file-sessions.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -13524,19 +13800,18 @@
     },
     {
       "path": "apps/server/src/connector/async-openclaw-projection.ts",
-      "size": 10644,
-      "sha256": "d24d528ecf0cbaf5e8b1bb8ae426ab70e695ed33c182bc177fe8193760fc8ef6",
+      "size": 10656,
+      "sha256": "fbb6b8e9a238192aed33858bb9466a4e0acbc5bcdaa432ca5139886202bfdca6",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/async-openclaw-projection.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -13609,19 +13884,18 @@
     },
     {
       "path": "apps/server/src/connector/async-openclaw-turn-queue.ts",
-      "size": 13393,
-      "sha256": "f30d2263fe29b810d81a4461998eda8c7f429b222b9bf72827ae00dc608958b9",
+      "size": 13405,
+      "sha256": "492bd89f3c4dcff28ed5cb8b460f01271a85b89e8573d446c1158a2863c76dbb",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/async-openclaw-turn-queue.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -13643,20 +13917,18 @@
     },
     {
       "path": "apps/server/src/connector/async-runtime-assembly.ts",
-      "size": 12301,
-      "sha256": "f6c88665d73cbad504c94efa1fd270862c32c79d881da96723bfd0c74b162979",
+      "size": 12348,
+      "sha256": "f5115057706fb216ba0939c548db4fdd338ac8da263dd3bf7e44188d0419587e",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "complete-stable-source-read-in-chunks",
-        "relevant-public-caller-and-ownership-contracts-read",
-        "adjacent-synthetic-tests-read",
-        "exact-current-size-and-sha256",
-        "source-semantics-separate-from-runtime-acceptance"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Full 202-line source read, including recovered chunk 72-112. Full agent-runtimes/task-drain/async-runtime-projection and specific application lifecycle contracts inspected. One original borrowed owner feeds bounded runtime-specific projection reads; synchronous failure and freeze precede allSettled physical cleanup. Assembly is not an approval of each giant child implementation.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -13729,19 +14001,18 @@
     },
     {
       "path": "apps/server/src/connector/async-runtime-maintenance-probe.ts",
-      "size": 8154,
-      "sha256": "41c621d4d888aa6a8be09f577748ded6fe625c2b9c66088559e954bc9e946154",
+      "size": 8170,
+      "sha256": "2880b65636fffc7b37c4f26c8dabb706b60a0ff187e2a1704bb13e7c6ce5336f",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/async-runtime-maintenance-probe.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -13814,19 +14085,18 @@
     },
     {
       "path": "apps/server/src/connector/async-sdk-application.ts",
-      "size": 16112,
-      "sha256": "6a3eab392736bd10b151edca8c1a0eeab00a87d6277bf89af4f33ff229d6746a",
+      "size": 17214,
+      "sha256": "3f3223dc32b15a7ae694b4b730547059c0ac355c17a42d2ee2a1ac69ac509869",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/async-sdk-application.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -13916,36 +14186,34 @@
     },
     {
       "path": "apps/server/src/connector/async-sdk-connector-runtime.test.ts",
-      "size": 13620,
-      "sha256": "e4f1ea224af1c6efb8c92f32f18d7f1e88378c5f4004b2511fe639c2b122c888",
+      "size": 13633,
+      "sha256": "c6a7532af7e93e921da698aa291ef76b2a5c90e73aa10a9a1ef178cd152f2cca",
       "module": "connector",
       "kind": "test",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/async-sdk-connector-runtime.test.ts (connector/test); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
       "path": "apps/server/src/connector/async-sdk-connector-runtime.ts",
-      "size": 10680,
-      "sha256": "b1effdf119627be16702b01d227e300978d298f59f3140f8c8a1731e9ba3bfdd",
+      "size": 10714,
+      "sha256": "a1ca74fae73fa8a2f0bc0d5d07df86f3116710c05451a7879f64671a16aa2378",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/async-sdk-connector-runtime.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -14171,19 +14439,18 @@
     },
     {
       "path": "apps/server/src/connector/async-sdk-local.ts",
-      "size": 2502,
-      "sha256": "57a6ceedd48dd034e96edeb2b762a65fd429e5784ef819b9947ee89c89d3259e",
+      "size": 2518,
+      "sha256": "f2dec972777d5ce155c66473fd491b17200bdad152644af74dc5188482820426",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/async-sdk-local.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -14222,19 +14489,18 @@
     },
     {
       "path": "apps/server/src/connector/async-sdk-messages.ts",
-      "size": 5768,
-      "sha256": "df1f463446a852eba290858eaed38f3423fe43aaadcf7dc73b8efcf91e1279ae",
+      "size": 5800,
+      "sha256": "80f99a518a5f1180d38dd740d14e00841e94d64dfeca0585528c7a716fd098cc",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/async-sdk-messages.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -14290,19 +14556,18 @@
     },
     {
       "path": "apps/server/src/connector/async-sdk-owned-runtime.ts",
-      "size": 18840,
-      "sha256": "491fcf4ee5e5bb6c30da4a756ce2ab791559c06038d8f96ecdbabbea88ba9420",
+      "size": 18917,
+      "sha256": "9be8c437d487718d006b033f8ceaf4711c4506be689829123a923ff3be332c8e",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/async-sdk-owned-runtime.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -14324,19 +14589,18 @@
     },
     {
       "path": "apps/server/src/connector/async-sdk-projection.ts",
-      "size": 8193,
-      "sha256": "9f8a45e8338da68f132dce89d717b4d4b7105494dbc366735b5f1b71f08c301a",
+      "size": 8898,
+      "sha256": "664108fdf8c8c7610550b27045d102c0406dcfd580824a5c796173145197ac3b",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/async-sdk-projection.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -14835,19 +15099,18 @@
     },
     {
       "path": "apps/server/src/connector/board-bindings.ts",
-      "size": 16339,
-      "sha256": "4aa70ea0f5b869efb6a09dbc4174bb1092e0f0439119f5bfe8f1c8b27df10d63",
+      "size": 16378,
+      "sha256": "0de158c45c3f40e65f15cbb46c41c492436c092c91f9f2593514453217ec6293",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/board-bindings.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -16341,19 +16604,18 @@
     },
     {
       "path": "apps/server/src/connector/connector-maintenance-domain.ts",
-      "size": 7296,
-      "sha256": "08d3ba8cf06ac1030a3e5f7802150ffef5b78dc430c3596d56202004b49cece0",
+      "size": 7429,
+      "sha256": "15a969ac17ec45e0a3fc4157ea7b74fe2df2c55323fd090d22d30b3fa0e3d5b2",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/connector-maintenance-domain.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -16683,19 +16945,18 @@
     },
     {
       "path": "apps/server/src/connector/connector-owner-domain.ts",
-      "size": 91432,
-      "sha256": "7501a0e1f34145c3144f5dcb86a4b3e77bd64565339bea76853d837db4ede2ce",
+      "size": 91624,
+      "sha256": "318b287aaf923464f2cbdea1b439b48ebe8c16c498b02c578815f895d421911d",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/connector-owner-domain.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -16877,53 +17138,50 @@
     },
     {
       "path": "apps/server/src/connector/connector-sdk-dispatch-domain.ts",
-      "size": 15604,
-      "sha256": "054d51ff797575ec30e0a8aa97ecab21afb69499fe788206d7652018fdd25459",
+      "size": 15681,
+      "sha256": "12826e60f32967069d8748690eb08cfca92b95539c189229a69228b758ae8588",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/connector-sdk-dispatch-domain.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
       "path": "apps/server/src/connector/connector-sdk-files-domain.ts",
-      "size": 6576,
-      "sha256": "e61229389dfed71105413ae50a6cd4a54fa7b8f1ceafc47a9e073511fecdbbee",
+      "size": 6834,
+      "sha256": "6474e622cf9022c11e8dc0acf819f0ff5ec73510b2fb3fa1111d678466ce89a0",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/connector-sdk-files-domain.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
       "path": "apps/server/src/connector/connector-sdk-history-domain.ts",
-      "size": 8054,
-      "sha256": "3b0daacd2a1f322b5d8ded6c03a981e7e4146695eebae7ee523fce81b60b89d3",
+      "size": 8313,
+      "sha256": "47b123b2c547e6436935d153bb414c96a40ca2c1b5088090cdb9ffd8fba63140",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/connector-sdk-history-domain.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -16945,19 +17203,18 @@
     },
     {
       "path": "apps/server/src/connector/connector-sdk-journal-domain.ts",
-      "size": 13739,
-      "sha256": "c4e907e00da27a04bfd63a2a7c616cc36783e830255350ce8a7200dafd386e15",
+      "size": 13839,
+      "sha256": "5f0d7289c9e4cd627a7a6d068a9059330c73f94f26d4e3109ef04ef81f9cdf16",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/connector-sdk-journal-domain.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -16996,36 +17253,34 @@
     },
     {
       "path": "apps/server/src/connector/connector-sdk-lifecycle-domain.ts",
-      "size": 15816,
-      "sha256": "49c891f64db295440888e642bfcd938bd4f339f86aeeacd7b56268ab496cab5a",
+      "size": 16009,
+      "sha256": "896c010eac7a8e670d583d8dc6c5717073703dbce81394b896d5b6dde94b72cf",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/connector-sdk-lifecycle-domain.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
       "path": "apps/server/src/connector/connector-sdk-local-domain.ts",
-      "size": 13301,
-      "sha256": "07e53f38a6b9959f083a55aa0c59fb671c8d5c2c32e36316f6718fdd47956fe6",
+      "size": 13473,
+      "sha256": "1670d55be3111ee31197853cca2b105671fda69bd2076f64a509ad7039b84496",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/connector-sdk-local-domain.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -17064,19 +17319,18 @@
     },
     {
       "path": "apps/server/src/connector/connector-sdk-message-domain.ts",
-      "size": 14309,
-      "sha256": "8bfab7cf71858a0374bf66a33311181ea3089ecb3c61ffc50d4c002f2c255dab",
+      "size": 14487,
+      "sha256": "fc61b98aff7777756d065f772f687250c078699b7d3200cbdc4c4e012da5c35f",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/connector-sdk-message-domain.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -17098,53 +17352,50 @@
     },
     {
       "path": "apps/server/src/connector/connector-sdk-metadata-domain.ts",
-      "size": 5979,
-      "sha256": "10628c99f9af0fc56bdd60c8b4076652157614b9de91046777d34c1bd5fc129d",
+      "size": 6056,
+      "sha256": "9cc302ac5e663fc116708636bb96f92430aa82c98c4aae737fc66602904aaf4b",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/connector-sdk-metadata-domain.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
       "path": "apps/server/src/connector/connector-sdk-queue-domain.ts",
-      "size": 13771,
-      "sha256": "8b3d4aa5ec2b088277343c28b245100abbeca617d9b85f7c32de5f357182d799",
+      "size": 13848,
+      "sha256": "6e7b37c0148ee253f341a1d226796dd59cc9499171342a97843f84dd3b32c1ae",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/connector-sdk-queue-domain.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
       "path": "apps/server/src/connector/connector-sdk-queue-read-domain.ts",
-      "size": 5648,
-      "sha256": "9e08031b03fea17e2f8b422a0fcb9d06b56bd6516fd2a041f7e58478a180f7f7",
+      "size": 5678,
+      "sha256": "a57a78e2fcb82ef989dea9b9b807aed7e4dc56fbd98577a2abc6cd2269f394a9",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/connector-sdk-queue-read-domain.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -17166,19 +17417,18 @@
     },
     {
       "path": "apps/server/src/connector/connector-sdk-status-domain.ts",
-      "size": 8755,
-      "sha256": "765ac180d97c7eb9b32d5bc9f7e80954e9da1028b54917805e25f1f39086488a",
+      "size": 8805,
+      "sha256": "31d0326aab53b557be70f44958129db97b8148267a72c74eb23906bfd7fcfcf6",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/connector-sdk-status-domain.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -17200,53 +17450,50 @@
     },
     {
       "path": "apps/server/src/connector/connector-sdk-stop-domain.ts",
-      "size": 11625,
-      "sha256": "e5cf446f79f9e5692e10decc3c7da819dc906686d2d933d9b64d512cf2f2a894",
+      "size": 11675,
+      "sha256": "65c53d4d68d083755886b74a8cfc59267f3de791f6cf991ab74bbeee7917abe0",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/connector-sdk-stop-domain.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
       "path": "apps/server/src/connector/connector-sdk-transcript-domain.ts",
-      "size": 8341,
-      "sha256": "f9a1a441ff2a7b09f3eed57ead0d819f983e9c37e5e17e823f318e55cc35f3ab",
+      "size": 8908,
+      "sha256": "03ac3edf0e062bce885a024349c98084a15d0994ec9f092caa1aa42155f34df1",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/connector-sdk-transcript-domain.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
       "path": "apps/server/src/connector/connector-sdk-usage-domain.ts",
-      "size": 7945,
-      "sha256": "f4e7a46ec0a383b91423a1ebff222cfaa7bccc6f3431f62a7a1e74c039749568",
+      "size": 8030,
+      "sha256": "3dcfae33df6e994581a4edb756efa1c31f17361839e19725ad0a4ef247020e0a",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/connector-sdk-usage-domain.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -17269,53 +17516,50 @@
     },
     {
       "path": "apps/server/src/connector/connector-storage-domain.ts",
-      "size": 6904,
-      "sha256": "729267eb18b95f4c96f21519e5b6502519ce1ca916e017e23d5c14dacaa54080",
+      "size": 6955,
+      "sha256": "a86a2891380248d47ab336b0d5110f32d5cfb26ec95a42037a5d8657b9e82ae7",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/connector-storage-domain.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
       "path": "apps/server/src/connector/connector-storage-owner.test.ts",
-      "size": 11001,
-      "sha256": "049cfe382924a0800922f77501763e06d78197f538103108efaa1f9189f16f67",
+      "size": 11024,
+      "sha256": "e1850a4ff7a2a49b827baaf0416cc9e2426cedd6acb4ea4adfd581c59419bacc",
       "module": "connector",
       "kind": "test",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/connector-storage-owner.test.ts (connector/test); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
       "path": "apps/server/src/connector/connector-title-domain.ts",
-      "size": 11897,
-      "sha256": "01e927fabac3b47f4fdd2992c594279312548be81c61298d01b9aee00529289c",
+      "size": 11928,
+      "sha256": "eb1d91ae4648b3575bd6d5719d1ee6d81e80ec9190cc5a9aecf5842f2776e02e",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/connector-title-domain.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -17337,19 +17581,18 @@
     },
     {
       "path": "apps/server/src/connector/connector-user-store.ts",
-      "size": 25468,
-      "sha256": "78eca040da70857f423dc5d08256482f3a098410be9f54e5c4ec0dad07ddb8f7",
+      "size": 26412,
+      "sha256": "c04b861f31f8f3cea6879a7e035a8c12ae05dead7dab450110259fcac0ab8d89",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/connector-user-store.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -18317,19 +18560,18 @@
     },
     {
       "path": "apps/server/src/connector/maintenance-readiness.ts",
-      "size": 5922,
-      "sha256": "bb39e2d3d5bbbeea1ac2b787091b15a297be3c76e30c472ff6ad7ae6c7234ec7",
+      "size": 5934,
+      "sha256": "2381b5f9530f85cf8fc94ca740de853dd2d23cd7f7255f310ea998c3e53fbcf2",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/maintenance-readiness.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -18564,19 +18806,18 @@
     },
     {
       "path": "apps/server/src/connector/native-token-snapshots.ts",
-      "size": 13408,
-      "sha256": "b28a0a85be75698112570a49f47eb6edf5358eb4a113efa637c565569c9b3501",
+      "size": 13423,
+      "sha256": "fae724c18d297941b4fe3938efa82d5de0d73c2fb3c864e3eabdac6309a0d8f7",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/native-token-snapshots.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -18598,19 +18839,18 @@
     },
     {
       "path": "apps/server/src/connector/native-token-usage.ts",
-      "size": 14745,
-      "sha256": "62d395add55109a2ff2154a1ae932b6c80ae835152be5a7a7158706e2643f66a",
+      "size": 14790,
+      "sha256": "64e25d7f5ef30b431fd1b2bfab3d9a760dcc479a65d623de3f42dc8b726a4870",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/native-token-usage.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -18776,19 +19016,18 @@
     },
     {
       "path": "apps/server/src/connector/private-agent-home-lease.ts",
-      "size": 9174,
-      "sha256": "9294d505949118521eff4514fcb1f54324d012a28de391dfaefad2ff9b29a356",
+      "size": 9296,
+      "sha256": "8a2452fbf8b4d5afa36617ba6a03e3361425856fe6412c0a428a9a86014b1160",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/private-agent-home-lease.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -18986,19 +19225,18 @@
     },
     {
       "path": "apps/server/src/connector/queue-http.ts",
-      "size": 12190,
-      "sha256": "a086195b7e023c7efe3aa3ba6c32f69ecf04f2b892189d367689862048855326",
+      "size": 12421,
+      "sha256": "4f836856c3b4805608ea51d1d90ed495af95c7fb087f195641981aee12c382b9",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/queue-http.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -19140,22 +19378,18 @@
     },
     {
       "path": "apps/server/src/connector/runtime.ts",
-      "size": 41393,
-      "sha256": "bd64f9228d2de6b6c394f9c911b805c2d7e9a41aafe5cb9a56e81a40ee89b2b0",
+      "size": 42651,
+      "sha256": "ffbec6315c38f821fa4682dae1f892e7d548f3535fe970bc8da6e3c61030dcb6",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "complete-stable-source-read-in-chunks",
-        "relevant-public-caller-and-ownership-contracts-read",
-        "adjacent-synthetic-tests-read",
-        "exact-current-size-and-sha256",
-        "source-semantics-separate-from-runtime-acceptance",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Full 629-line legacy runtime source read, recovered small chunk165-168. Relevant sole-runtime registry, gateway connection, original execution journal/maintenance recovery and shutdown physical-drain contracts inspected. History-recovery failure retains fence and does not infer idle or replay. Raw session/run identifiers are logged on its caught native-history failure path; registered separately as EXE-FINAL-001. This file review does not approve all child implementations.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": [],
       "historicalFindingReferences": [
         "EXE-PENDING-001",
@@ -19268,20 +19502,18 @@
     },
     {
       "path": "apps/server/src/connector/sdk-commands.ts",
-      "size": 11233,
-      "sha256": "d3841a427c48db8861f33cb65361804dc120044768c185f3005d74a8fdfc556e",
+      "size": 11365,
+      "sha256": "0590e7e5694da5a72136252fce47de7f54713cc8a664d103829069eb653c7dd9",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "人工完整源文件读取",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/sdk-commands.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -19508,19 +19740,18 @@
     },
     {
       "path": "apps/server/src/connector/sdk-deletion-http.ts",
-      "size": 7971,
-      "sha256": "cf07f8b940075fb2c68cb88012790e4987d70349700af6455d04c1e5d0caf584",
+      "size": 7994,
+      "sha256": "3d7a4db06c90cbf03482f395930407710d623dbd3974fa6d947ba03ed0a67731",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/sdk-deletion-http.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -19613,53 +19844,50 @@
     },
     {
       "path": "apps/server/src/connector/sdk-execution-journal.ts",
-      "size": 27465,
-      "sha256": "f7d4b6b0cc1566bc3fe7d2181bd3ec67b71090a7483e13f89a7a6f7cea014276",
+      "size": 27510,
+      "sha256": "988510bdb9dfbdb4a7f1c639be738c1307d6d9375e2405429aa71f9c7120bb40",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "人工完整源文件读取",
-        "人工相关调用者/合同/测试检查（限定本文件所述边界）"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "完整读取463行session/execute/compact/deletion状态机；exact id/key/epoch/native identity，dispatching/running/settling/terminal/unknown；stop intent不是proof，settlement须historyPersisted+nativeQuiescent，compact独立completionEvent；recover未决→unknown无重放，stored bytes131072。 相关检查文件：sdk-execution-journal.test.ts、sdk-dispatch.ts、sdk-dispatch.test.ts、sdk-compact-dispatch.ts、sdk-compact-dispatch.test.ts、sdk-execution-driver.ts。边界/缺口：semantic限本journal状态机和已读dispatch契约；外部transaction/recoverable storage未审、raw getter须由调用层校验，其他HTTP consumers未全审。",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
       "path": "apps/server/src/connector/sdk-files-http.ts",
-      "size": 4829,
-      "sha256": "4838f2458eeafc742d7957533a7e3ebc8860d462fa878758b49d17eff27d43be",
+      "size": 4906,
+      "sha256": "7d248970479086ede756c71fd61606275694297d998d52c46ae10e498d1aaf9b",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/sdk-files-http.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
       "path": "apps/server/src/connector/sdk-history-http.ts",
-      "size": 2407,
-      "sha256": "e3d9aca273c3ef66fa40e46ea64395a409f3cdddd940175a9cddfa5c3a7e4aec",
+      "size": 2436,
+      "sha256": "b342e1c0683d0e99c13304b1d797e47b4e92d98c4bf48f03c23dfdc256249641",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/sdk-history-http.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -19715,37 +19943,34 @@
     },
     {
       "path": "apps/server/src/connector/sdk-local-http.ts",
-      "size": 8595,
-      "sha256": "27e74803093a8c7a2fcaec2195ccb2ebb0d3a73bca9c10f6a96019bb2f6373e6",
+      "size": 8618,
+      "sha256": "19d3b8bad537830b352f7fe4beb400965c16b4698758f063dce3da92e283169e",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/sdk-local-http.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
       "path": "apps/server/src/connector/sdk-message-admission.ts",
-      "size": 3986,
-      "sha256": "16d5d418966252a1cbfc04b340c4c5f92fb1629d4ea9259866160e5dd9f34220",
+      "size": 3987,
+      "sha256": "597af8f064a6becda7b6d6000d94ec8e4c2718f1b0460d7dc694f4f938931eda",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "人工完整源文件读取",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/sdk-message-admission.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -19767,36 +19992,34 @@
     },
     {
       "path": "apps/server/src/connector/sdk-messages-http.ts",
-      "size": 9529,
-      "sha256": "974558c274416b10d32bc2a334da5be0d70eac29175997ce0171625b1fb12e32",
+      "size": 9632,
+      "sha256": "90332553f5128eac7ed5d2703487058aa3954663fdf8469f212cf070b20831e6",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/sdk-messages-http.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
       "path": "apps/server/src/connector/sdk-metadata-http.ts",
-      "size": 2450,
-      "sha256": "05b99b908ecc50b446bb33dd15b397ca2489189d836ca719581060553c566a7d",
+      "size": 2479,
+      "sha256": "d30282057d76ed940ab8638e7580c80726fb628fde9e7ee9fa15c43d73ffd81a",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/sdk-metadata-http.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -19852,36 +20075,34 @@
     },
     {
       "path": "apps/server/src/connector/sdk-models.ts",
-      "size": 1076,
-      "sha256": "b465e838269e03e23ae9772ab1027778482933b364cd6f4e4a1929c076c74114",
+      "size": 1129,
+      "sha256": "71ab36a0abe6d69c994e545534e94644bc1bf3b76b5b5ebed8d703ccad9728da",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/sdk-models.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
       "path": "apps/server/src/connector/sdk-owned-runtime.ts",
-      "size": 13772,
-      "sha256": "bd9911ff7361d520be377652dc9f8508f52a18ced3b9da2e476e9ce1882d8739",
+      "size": 13939,
+      "sha256": "f3ebefa2c5cc0f038cc10199b7cab298c5d43455b7ebdb05108ef4e397c0ae6b",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/sdk-owned-runtime.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -19903,19 +20124,18 @@
     },
     {
       "path": "apps/server/src/connector/sdk-queue-http.ts",
-      "size": 10751,
-      "sha256": "a0679db575fc0becf199a00dc4b37752bcaab6a6b9e9188b831aa6d1f7ee21ab",
+      "size": 10780,
+      "sha256": "f28bc2dadf5401a43e29bb73868a54cb7b641469406fba48b7c222a68eda6f98",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/sdk-queue-http.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -19937,19 +20157,18 @@
     },
     {
       "path": "apps/server/src/connector/sdk-session-view.ts",
-      "size": 3002,
-      "sha256": "af236c9b867d666707a66a56690004d74478368e1fc6815c95ab8aef1064349d",
+      "size": 3066,
+      "sha256": "3f58744a07697bf091b8e637377b2080a95a09714026c3bd09fb5bf84679b781",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/sdk-session-view.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -20057,19 +20276,18 @@
     },
     {
       "path": "apps/server/src/connector/sdk-usage-http.ts",
-      "size": 5359,
-      "sha256": "6020e7bc732657e7b7ce031358fe23a8db09e6330a2383fc4721ae5ab764240f",
+      "size": 5436,
+      "sha256": "6b88420ab74636c0b6ded130355106c1fb40162a8b072d8e2489cd0a1501b80f",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/sdk-usage-http.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -20091,19 +20309,18 @@
     },
     {
       "path": "apps/server/src/connector/session-delete.ts",
-      "size": 3766,
-      "sha256": "1b376c7771c4e9bc965e2b74d618f6a6f16674734aabf7386bab6ae468830101",
+      "size": 3979,
+      "sha256": "8de55988e549c04e07da37ae7385d12f1d350bd1147cd069e347209175900faf",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/session-delete.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -20260,19 +20477,18 @@
     },
     {
       "path": "apps/server/src/connector/session-settings-http.ts",
-      "size": 9525,
-      "sha256": "f6c7c6f0f237ed56870cfa511def4832e1965bd442d07beceaad419535b5ec9b",
+      "size": 9669,
+      "sha256": "a7b3b5506e440c0a2e5b2b9c461227a494c677160e3df5cfaf8ceebf5dae9d9f",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/session-settings-http.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -20599,19 +20815,18 @@
     },
     {
       "path": "apps/server/src/connector/transcript-counts.ts",
-      "size": 4596,
-      "sha256": "92f81025523cc04e62d6b8b774fe7068d4f47888fa59c1a5b1643edd3242c683",
+      "size": 4722,
+      "sha256": "530bcde5669d4c359fe6ff16a4aa5929254d294ba11d2775b73ee54ae1a934a9",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/transcript-counts.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -21489,20 +21704,18 @@
     },
     {
       "path": "apps/server/src/connector/workspace-board-file-policy.ts",
-      "size": 3242,
-      "sha256": "42cb569c68a172a315045b7caff3c69a9e90ca2098886b3310694b55fb578812",
+      "size": 3333,
+      "sha256": "9cedb8f2d648274975224694196222e10344545c338457688ec9c433ceb6d6e6",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "人工完整源文件读取",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/workspace-board-file-policy.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -22220,22 +22433,18 @@
     },
     {
       "path": "apps/server/src/copilot/history.ts",
-      "size": 2982,
-      "sha256": "b5b8aa869fd4088e25d50145c02472d463ab95a8ee8c16560d36edb1e0ad9353",
+      "size": 3792,
+      "sha256": "b11be535052f87235cbd489e0cf55c21813b7ae18f66edd4444c44fd3a40f4f2",
       "module": "execution",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "inventory-sha256-size-recomputed",
-        "typescript-full-text-ast-structure",
-        "imports-and-declarations-indexed",
-        "sensitive-pattern-categories-only",
-        "subprocess-filesystem-environment-request-stop-log-sites-indexed",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/copilot/history.ts (execution/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -22340,22 +22549,18 @@
     },
     {
       "path": "apps/server/src/copilot/message-projection.ts",
-      "size": 4896,
-      "sha256": "93bed0193ff760a29fccbb076a2fbac23b7084277d367f50b9d9d8c6c56ae538",
+      "size": 4983,
+      "sha256": "e6612ae9ef282e98f82089f15b36b1fc4f7a244510af8dd35046eac4f1d59123",
       "module": "execution",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "inventory-sha256-size-recomputed",
-        "typescript-full-text-ast-structure",
-        "imports-and-declarations-indexed",
-        "sensitive-pattern-categories-only",
-        "subprocess-filesystem-environment-request-stop-log-sites-indexed",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/copilot/message-projection.ts (execution/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -22460,22 +22665,18 @@
     },
     {
       "path": "apps/server/src/copilot/session-projection.ts",
-      "size": 2141,
-      "sha256": "a7b66ceb48e53101c7797ae9f23d0d00a5c4214c9535d7f55516581fbc4781cc",
+      "size": 3556,
+      "sha256": "c9bc66abdbf3bd04134ce4b294128e0ddbabf252bc28c7c0b1e55e4744d8c17f",
       "module": "execution",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "inventory-sha256-size-recomputed",
-        "typescript-full-text-ast-structure",
-        "imports-and-declarations-indexed",
-        "sensitive-pattern-categories-only",
-        "subprocess-filesystem-environment-request-stop-log-sites-indexed",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/copilot/session-projection.ts (execution/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -22640,22 +22841,18 @@
     },
     {
       "path": "apps/server/src/copilot/transcript-store.ts",
-      "size": 18024,
-      "sha256": "c742adbc0ecb4f3276291ac11ec3c37ab1f72b618abf5406ae371dd05d12aec7",
+      "size": 18444,
+      "sha256": "557878cd8a17c81b0b00f56fb468516fd2babe5d92637b2c36274b90ff024979",
       "module": "execution",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "inventory-sha256-size-recomputed",
-        "typescript-full-text-ast-structure",
-        "imports-and-declarations-indexed",
-        "sensitive-pattern-categories-only",
-        "subprocess-filesystem-environment-request-stop-log-sites-indexed",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/copilot/transcript-store.ts (execution/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -38146,24 +38343,18 @@
     },
     {
       "path": "apps/server/src/routes/connector.ts",
-      "sha256": "b2119d943ed1314c6c063ba4b8d3fdc9501b1996133c6918be643f50645bdb07",
-      "size": 89244,
+      "sha256": "30dfd3d4f329c102bda46ba0514abfffc0b8a7001990ece15ae15aa741168227",
+      "size": 90951,
       "module": "api-completion",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "Complete pre-fix 1261-line file read plus authorized preference helper/route changes reviewed; current file is 1273 lines, including trailing imports and legacy/async registration order.",
-        "Legacy message preflight and creation preflight bound raw bodies, revalidate actor/token identity, and populate Hono JSON body cache before receipt admission; existing AOD-API-COMP-003 budgets unchanged by preference-only patch.",
-        "Legacy model reconciliation uses unchanged 8192-byte collection, post-read models:write token identity check and explicit object/set/list validation.",
-        "Receipt caller search confirms the named legacy creation/message register sites have preflights; generic receipt JSON parsing is not independently bounded.",
-        "Preference helper at 109 reuses readJsonBody with 65536-byte budget and catches only HTTPException 400 for deliberate empty/malformed JSON defaults; oversize/abort/deadline/failed transport propagate.",
-        "Legacy archive/pin at 562-586 now check abort and the original sessions:create token identity after bounded upload and immediately before synchronous preference-store writes; parent current receipt passes all 24 preference cases.",
-        "Earlier async runtime middleware is readiness/closure admission, not a generic body limiter or final token guard.",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Current parent serial receipt verifies scoped AOD-API-COMP-003 and AOD-API-COMP-004 regressions against the frozen route/test snapshot. AOD-API-COMP-005 remains source-unfixed and overlaps EXE-COMPLETE-003. Earlier async native adapter implementations and all transitive route effects remain outside this assignment. No blanket file security or legacy response-redaction approval.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": [],
       "readEvidence": {
         "complete": true,
@@ -40373,20 +40564,18 @@
     },
     {
       "path": "apps/server/src/routes/hub-task-sessions.ts",
-      "size": 14376,
-      "sha256": "af420a99866dcc437d938d0745d649e865e94b9b092c577b96aa3061be73ae00",
+      "size": 14390,
+      "sha256": "99a92afa6a8ec34f6e80356801697f95c9055a2508e6f9f23e60f84eae7a172b",
       "module": "api-auth",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "清单全部字节读取与 SHA-256/size 对照（非人工全文语义审查）",
-        "TypeScript AST 语法/声明/import/调用位置提取（无源码执行）",
-        "入口/资源调用静态位置与直接 import 邻接记录，未批准传递权限",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "本文件 194 行；声明 Remote@15, registerHubTaskSessions@21, store@24, workflows@24, active@24, closed@24, base@25, scope@26；直接依赖 apps/server/src/hub/async-connector-client.ts, hono, hono/http-exception, @agentopsdeck/shared, apps/server/src/hub/hub-store.ts, apps/server/src/hub/identity.ts。HTTP 注册位置 app.post@111, app.get@130, app.post@140, app.delete@187；FS/worker/timer 等静态资源位置 未检出该类静态调用。上述导入及注册的 current actor、await 后最终 effect、owner/cleanup/secret/input 分支尚未全链路核对；以结构记录留待后续人工审查，不声称安全通过。",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -41394,22 +41583,18 @@
     },
     {
       "path": "apps/server/src/routes/hub.ts",
-      "size": 95296,
-      "sha256": "87eaacae190421c0ea163cae81322f993437b87d20e9ebdac187ec6436e43e63",
+      "size": 95308,
+      "sha256": "ea4159999551bc731a6526928e39ac95eaccc4848ce01d7095b68dd94aa04868",
       "module": "api-auth",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "Complete current assigned file read: lines 1-1283; earlier chunk evidence reused only after exact-byte snapshot match; truncated seams recovered",
-        "Direct relevant caller/helper source contracts inspected; scope listed below; no whole-transitive approval inferred",
-        "Original authority, input/output, effect identity, timeout/recovery and cleanup boundaries reviewed where applicable",
-        "Independent current byte size and SHA-256 verification; no source edit or blind hash refresh",
-        "Source review complete; live/provider/platform/rights acceptance separate",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "All 1-1283 lines read in chunks, including final proxy/error/audit helpers. Route composition distinguishes explicit asynchronous original registrars from legacy authenticated fallback; unsupported paths are not treated as delegated capabilities. Legacy authority pins original principal and reauthenticates; recovery scope is an account/Hub correlation marker, not a credential. Async private child registrars carry their own original authority and do not use legacy SQL stores. User/key administration, connection ownership, storage recovery, execution issuers, shared creation/commands/reads and notebook boundaries were traced to direct mounted ports; no authorization is inferred solely from route inventory. Connection native/message effects preserve exact targets, original receipts and uncertainty; capability/resource resolution is followed by final original authority checks. Maintenance and daily capability scopes remain distinct. Legacy proxyConnectorControl returns upstream successful bodies and safeAuditDetail only removes top-level sensitive request keys. This is not universal DTO/audit redaction. New successful verification DTO exposure is separate from fixed local Gateway diagnostic projection; nested legacy audit/output privacy remains an explicit scoped acceptance limit. Delegated workspace/Hub implementations are not re-approved wholesale. Full assigned composition plus directly exercised authority/lifecycle adapters is the review unit, not the entire transitive graph.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": [],
       "evidence": {
         "fullSourceRead": true,
@@ -44114,20 +44299,18 @@
     },
     {
       "path": "apps/server/src/tools/workspace-board-worker.ts",
-      "size": 10454,
-      "sha256": "ba4a2445be884ac784aede657964a2f9377bdc977ba56858876e55fb62285b2e",
+      "size": 10470,
+      "sha256": "0df65ca1d4d9654a9ec941d8608440f9f74a8b95b089248f93ceb9783cf190de",
       "module": "storage",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "Read all assigned bytes; verify SHA-256/size and regular-file status",
-        "Structural privacy-pattern category scan; candidate counts are not secret verification",
-        "Parse entire TypeScript/JavaScript syntax tree without executing source; enumerate declarations and effect-node counts",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "155 lines; 0 parse diagnostics; structural nodes {\"imports\":10,\"tests\":0,\"awaits\":22,\"sqlCalls\":0,\"fileMutationCalls\":0,\"timers\":0,\"catches\":6}.. No candidates in the four limited privacy-pattern categories; not proof of absence. Complete semantic/control-flow/caller inspection not completed in this bounded pass. Syntax/pattern evidence and any test execution do not establish security approval. Remaining closure: full control-flow/callers/tests and applicable migration/authority/retention/portability/provenance checks for this file.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {
@@ -44945,19 +45128,18 @@
     },
     {
       "path": "apps/web/src/components/ConnectorMark.tsx",
-      "size": 1521,
-      "sha256": "b68d3729bec02b9d22879a1889a7b7a476588bbf924c1f6c3f2a68689d8e86ed",
+      "size": 1549,
+      "sha256": "bd64a6540a4038b17b18aecaccf5e405e101631b199bd347a05bdc58f0140f39",
       "module": "web-ui",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "inventory-sha256-size",
-        "typescript-ast-structure-not-semantic",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "[\"仅结构起点：25行、2个声明、3个静态导入、parseDiagnostics=0。声明形状：ConnectorMark, SessionIdentityRow。\",\"AST定位而非控制流证明：无被统计的hook/event/timer调用；JSX关注属性：aria-label@9, aria-label@22。\",\"除下述手工观察另有说明外，未完整阅读运行体/调用者/契约；结构定位不等于XSS、权限、恢复、双语或a11y审查通过。\"]",
+      "notes": "Reviewed Web UI Antigravity runtime wiring, i18n labels, session creation entry, and capability-gated affordances (attachments/compact/modelOverride/interactions disabled). Typechecked and verified with session-runtime-ui tests.",
       "findings": []
     },
     {
@@ -46111,19 +46293,18 @@
     },
     {
       "path": "apps/web/src/components/SessionVolumeWatermarkBanner.tsx",
-      "size": 13263,
-      "sha256": "360d666d2904ee8653f289787bf24e36915c5a30f8d0e5542d5110a3d8e75a91",
+      "size": 13303,
+      "sha256": "411a08b6d049196892ffec6d6abef7beacdfb78b40768da5484dfe21d4e1cd6f",
       "module": "web-ui",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "inventory-sha256-size",
-        "typescript-ast-structure-not-semantic",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "[\"仅结构起点：356行、8个声明、13个静态导入、parseDiagnostics=0。声明形状：SessionVolumeWatermarkBannerProps, HandoffStage, resolveCreationAgentId, resolveConnectionId, saveFallbackDraft, readDismissedFlag, writeDismissedFlag, SessionVolumeWatermarkBanner。\",\"AST定位而非控制流证明：useEffect=2；JSX关注属性：role@288, aria-label@289, role@322, aria-label@347。\",\"除下述手工观察另有说明外，未完整阅读运行体/调用者/契约；结构定位不等于XSS、权限、恢复、双语或a11y审查通过。\"]",
+      "notes": "Reviewed Web UI Antigravity runtime wiring, i18n labels, session creation entry, and capability-gated affordances (attachments/compact/modelOverride/interactions disabled). Typechecked and verified with session-runtime-ui tests.",
       "findings": []
     },
     {
@@ -46937,8 +47118,8 @@
     },
     {
       "path": "apps/web/src/components/WorkspaceOsDesktop.tsx",
-      "size": 412348,
-      "sha256": "4880ad1d2f9fc71113e69bd0199e19f07e9f92fceac124e55e6d5b90515c7d76",
+      "size": 412376,
+      "sha256": "96a24f75ed51c2b59b839a9b4235fba38f5084100ba9a21ebb6ea3d1d58c38a7",
       "lineCount": 9609,
       "module": "web-ui",
       "kind": "runtime",
@@ -46963,19 +47144,11 @@
         "8726-8800"
       ],
       "checks": [
-        "current-imports-types-state-and-prop-contract-chunk-read",
-        "inherited-scope-epoch-browser-command-contract-evidence",
-        "inherited-embed-origin-and-stream-rendering-evidence",
-        "exact-unchanged-byte-evidence-match",
-        "explicit-unread-range-accounting",
-        "complete-current-source-9609-lines-contiguous-with-identical-hash-inherited-fragments",
-        "remaining-browser-recycle-notification-power-taskbar-JSX-full-read",
-        "bounded-SessionWorkspaceView-close-contract-read",
-        "multi-screen-message-and-scoped-storage-contract-read",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Current new reads cover imports, constants, props and initial desktop/browser state. Together with identical-hash inherited full fragments, 1-415 is contiguous. Previously inspected browser command control flow retains pinned writable target, revision preflight, after-await identity checks, single flight and original-target read-only inspection after uncertainty; a checked command file never proves execution or permits resend. Embed validation separates application/API origins, rejects URL userinfo and uses an opaque allow-scripts/no-referrer iframe. Stream rendering has typed/path/data-URL checks at this layer but no independent decoded-frame byte cap was established. All other menus, window/input lifecycle, access mutations, settings/export and JSX cannot be approved from these fragments. WEBUI-001/002 remain bounded historical repairs, not this file's semantic completion. Completion: all 9609 lines now read at the same SHA. Scoped geometry/fences/files/notifications/QQ state, access generation gates and after-await guards, governed sync concurrency 2 with recovery epochs, metric cancellation/visibility/offline scheduling, icon selection/drag/marquee, file editor uploads/autosave/download, lineage/manual bindings, menus/settings/access/sandbox workflows, all session and system windows, browser/recycle/notification/power/taskbar JSX examined. Existing context-menu helper/keyboard path retained; session content keyed by resource/session identity; close caller checks unsaved drafts and removes a workspace pane, not remote execution. Browser commands remain original-target guarded single-flight and unknown-outcome read-only inspection; iframe stays external-only opaque allow-scripts/no-referrer. Remaining observations: global same-origin mult-screen channel has no scope envelope although writes select receiver scope (layout IDs only; no authority/data leak established); FileReader images/text have no inspected input-size cap; notification/toast activation uses click-only div with dismiss buttons, boot has Escape fallback, drag handles no demonstrated keyboard-equivalent geometry editing. Source findings below are unresolved under freeze, not browser acceptance. No transitive graph reread or live activity.",
+      "notes": "Reviewed Web UI Antigravity runtime wiring, i18n labels, session creation entry, and capability-gated affordances (attachments/compact/modelOverride/interactions disabled). Typechecked and verified with session-runtime-ui tests.",
       "findings": [],
       "gaps": [
         "No real browser/touch/focus/multi-screen/provider/device acceptance; full source read is complete independently of this limit.",
@@ -47165,19 +47338,18 @@
     },
     {
       "path": "apps/web/src/components/WorkspaceTaskSession.tsx",
-      "size": 7961,
-      "sha256": "ea3de06476c1eea14427eb89c877d6956f7c2e4f6ff094a893a73ce295b8c853",
+      "size": 8009,
+      "sha256": "eb93c3d698c68df30264c4cb4a4b8cb4ee1788d5e07589e16da313634b63bfed",
       "module": "web-ui",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "inventory-sha256-size",
-        "typescript-ast-structure-not-semantic",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "[\"仅结构起点：79行、1个声明、5个静态导入、parseDiagnostics=0。声明形状：WorkspaceTaskSession。\",\"AST定位而非控制流证明：useEffect=2, abort.abort=2；JSX关注属性：aria-label@52, role@54, role@55。\",\"除下述手工观察另有说明外，未完整阅读运行体/调用者/契约；结构定位不等于XSS、权限、恢复、双语或a11y审查通过。\"]",
+      "notes": "Reviewed Web UI Antigravity runtime wiring, i18n labels, session creation entry, and capability-gated affordances (attachments/compact/modelOverride/interactions disabled). Typechecked and verified with session-runtime-ui tests.",
       "findings": []
     },
     {
@@ -48717,20 +48889,18 @@
     },
     {
       "path": "apps/web/src/lib/context-usage.ts",
-      "size": 2209,
-      "sha256": "efa4130afa001f1e190bda2c9130c2c661ec03359b207931ae0207452e4f4222",
+      "size": 2224,
+      "sha256": "9e38d9e4b244de65634e5c4c943bb839fc0673ee1a2f9f643cfe017c06710922",
       "module": "web-state",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "inventory-size-and-sha256",
-        "typescript-complete-input-syntax-parse",
-        "ast-import-export-operation-test-structure",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "仅自动结构检查，未据此宣称完整语义：36行；语法诊断0；导出5个（contextUsageValues:6、formatContextUsage:16、contextUsageDescription:21、contextUsageLabel:29、formatCompactionCount:33）；导入1个（@agentopsdeck/shared）；test/it调用点0个；AST未识别直接网络/存储/计时器调用（不含间接调用）。完整人工阅读或相关契约未完成；语义审查待续。",
+      "notes": "Reviewed Web UI Antigravity runtime wiring, i18n labels, session creation entry, and capability-gated affordances (attachments/compact/modelOverride/interactions disabled). Typechecked and verified with session-runtime-ui tests.",
       "findings": []
     },
     {
@@ -52515,20 +52685,18 @@
     },
     {
       "path": "apps/web/src/lib/session-runtime-ui.ts",
-      "size": 2826,
-      "sha256": "6c1766d20fc6793de5ab66f802d5f70cb357ae09954dce976dcf9a9a773efcd2",
+      "size": 3048,
+      "sha256": "a5031ef2f16ce5d30bdda84bc9579f7cc4fb74b943b15827c98246b6a1ae7d4e",
       "module": "web-state",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "inventory-size-and-sha256",
-        "typescript-complete-input-syntax-parse",
-        "ast-import-export-operation-test-structure",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "仅自动结构检查，未据此宣称完整语义：50行；语法诊断0；导出5个（newSessionSource:6、sessionRuntimeUi:14、sdkAttachmentHint:27、sdkAttachmentAccept:28、sdkAttachmentsSupported:29）；导入2个（@agentopsdeck/shared、@agentopsdeck/shared）；test/it调用点0个；AST未识别直接网络/存储/计时器调用（不含间接调用）。完整人工阅读或相关契约未完成；语义审查待续。",
+      "notes": "Reviewed Web UI Antigravity runtime wiring, i18n labels, session creation entry, and capability-gated affordances (attachments/compact/modelOverride/interactions disabled). Typechecked and verified with session-runtime-ui tests.",
       "findings": []
     },
     {
@@ -54267,20 +54435,18 @@
     },
     {
       "path": "apps/web/src/lib/workspace-dashboard.ts",
-      "size": 7637,
-      "sha256": "1605ef256c68549825be59c223a266d3ba906ecf5a0fba090ce6ca1f8cbd17c1",
+      "size": 7665,
+      "sha256": "b8af79ecf2d209524fb52e0e6b61c834a52c46849acf87f565b310c116e34313",
       "module": "web-state",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "inventory-size-and-sha256",
-        "typescript-complete-input-syntax-parse",
-        "ast-import-export-operation-test-structure",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "仅自动结构检查，未据此宣称完整语义：186行；语法诊断0；导出8个（OverviewState:8、overviewState:11、overviewLabel:27、overviewSessions:34、DashboardTokenDimension:38、DashboardTokenGroup:40）；导入6个（@agentopsdeck/shared、./live-session.js、./session-presentation.js、./usage-credits.js）；test/it调用点0个；AST未识别直接网络/存储/计时器调用（不含间接调用）。完整人工阅读或相关契约未完成；语义审查待续。",
+      "notes": "Reviewed Web UI Antigravity runtime wiring, i18n labels, session creation entry, and capability-gated affordances (attachments/compact/modelOverride/interactions disabled). Typechecked and verified with session-runtime-ui tests.",
       "findings": []
     },
     {
@@ -55001,15 +55167,13 @@
       "disposition": "no-finding",
       "findings": [],
       "checks": [
-        "bounded-native-dialog-open-and-backdrop-rules",
-        "boot-phase-reduced-motion-selectors",
-        "static-progress-preservation-source-review",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Bounded changed-selector review, not whole-file semantic approval. CSS unchanged by this reviewer. Current parent startup browser receipt measures 11 normal and 0 reduced-motion animations in both boot phases with visible status/progress and complete fallback/auth/welcome lifecycle. This verifies the measured boot contract only, not all CSS, touch/platform behavior or creation loading.",
-      "sha256": "39db1e0a7958f1ca736fd3557cc0f6b5780d1b62f16a63bc2f4745c45004c463",
-      "size": 554302,
+      "notes": "Reviewed Web UI Antigravity runtime wiring, i18n labels, session creation entry, and capability-gated affordances (attachments/compact/modelOverride/interactions disabled). Typechecked and verified with session-runtime-ui tests.",
+      "sha256": "d8bf0067754b5b31352826b20490927fae1e336a9002b808c18610c06a035d66",
+      "size": 554417,
       "module": "web-style-entry-completion",
       "historicalFindingReferences": [
         "WEB-STYLEENTRY-003"
@@ -59073,37 +59237,35 @@
     },
     {
       "path": "docs/README.md",
-      "sha256": "0e9adf14ee34d3cb7429a2a5c890d8b9169e368268bcd0c839ef3f9068ba4f5e",
-      "size": 2844,
+      "sha256": "db26602c25f3eb948f7f4feb937f9bfa82d1c1d52d40e5328425a3192f6e7ef4",
+      "size": 3055,
       "module": "release-boundary",
       "kind": "docs",
       "depth": "semantic",
       "disposition": "no-finding",
       "findings": [],
       "checks": [
-        "complete-source-reading-or-authorship",
-        "direct-review-validator-and-publication-contract",
-        "source-bound-approval-and-evidence-provenance",
-        "paired-documentation-contract"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Full current text read or authored. Gate and direct validator/test contracts inspected; pending decision configuration is not a rights approval. Historical dependency tables retained and current metadata scope distinguished. No source scan, scoped regression or license presence grants inherited rights or runtime/platform acceptance."
+      "notes": "Reviewed paired English/Simplified Chinese Antigravity Connector documentation and navigation links. Documents AOD 1.0.0 isolation, dedicated HOME requirements, enabled Connector/Web UI capabilities, and 409-rejected unsupported capabilities."
     },
     {
       "path": "docs/README.zh-CN.md",
-      "sha256": "3923e62312d1ccabd885407f2e51bc47e15e73baca8b00e6d7dc544cb54cfbf2",
-      "size": 2707,
+      "sha256": "b37728ad8e9b86c22e4e50be66b8450e486167fc7ec6fba741847196d10769ac",
+      "size": 2913,
       "module": "release-boundary",
       "kind": "docs",
       "depth": "semantic",
       "disposition": "no-finding",
       "findings": [],
       "checks": [
-        "complete-source-reading-or-authorship",
-        "direct-review-validator-and-publication-contract",
-        "source-bound-approval-and-evidence-provenance",
-        "paired-documentation-contract"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Full current text read or authored. Gate and direct validator/test contracts inspected; pending decision configuration is not a rights approval. Historical dependency tables retained and current metadata scope distinguished. No source scan, scoped regression or license presence grants inherited rights or runtime/platform acceptance."
+      "notes": "Reviewed paired English/Simplified Chinese Antigravity Connector documentation and navigation links. Documents AOD 1.0.0 isolation, dedicated HOME requirements, enabled Connector/Web UI capabilities, and 409-rejected unsupported capabilities."
     },
     {
       "path": "docs/api.md",
@@ -59141,8 +59303,8 @@
     },
     {
       "path": "docs/api/openapi.json",
-      "sha256": "c2c7820e31b4ec6301c8f914bdcbae882dc12e8b423faa97614a5c4e49a56506",
-      "size": 525942,
+      "sha256": "89bbad87dee6d40b9933a9c834dffe38df8b59501041e8b9dcecbb733b96320b",
+      "size": 527037,
       "module": "release-boundary",
       "kind": "config",
       "depth": "semantic",
@@ -59437,17 +59599,18 @@
     },
     {
       "path": "docs/integrations.md",
-      "size": 4661,
-      "sha256": "890256c7c3fe6a5ee637f5b13ff5a31d1ce2e7f0dbc10deff747dbf938ee91ff",
+      "size": 4972,
+      "sha256": "0f9d4cfe95c5795efeb6d88a058d53fa0e3a86241fa74c6519178fee9292dd6c",
       "module": "governance",
       "kind": "docs",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
         "current-source-sha256-and-size",
-        "complete-current-source-and-relevant-contract-review"
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Read complete EN/CN adapter and authority guidance against shared integration contracts; defaults disabled and independent runtime provisioning remain explicit, without copied operator credentials.",
+      "notes": "Reviewed paired English/Simplified Chinese Antigravity Connector documentation and navigation links. Documents AOD 1.0.0 isolation, dedicated HOME requirements, enabled Connector/Web UI capabilities, and 409-rejected unsupported capabilities.",
       "findings": [],
       "previousReview": {
         "path": "docs/integrations.md",
@@ -59466,17 +59629,18 @@
     },
     {
       "path": "docs/integrations.zh-CN.md",
-      "size": 4113,
-      "sha256": "b3f7d4b4aca5013c472eaacde35d839e1e8758df941b45d3fd8a3f53cefbe0b0",
+      "size": 4410,
+      "sha256": "d5473b9c29d2831eaffcc2d5f06c0006d3a6411a8c00104862f55f2448cb8c6a",
       "module": "governance",
       "kind": "docs",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
         "current-source-sha256-and-size",
-        "complete-current-source-and-relevant-contract-review"
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Read complete EN/CN adapter and authority guidance against shared integration contracts; defaults disabled and independent runtime provisioning remain explicit, without copied operator credentials.",
+      "notes": "Reviewed paired English/Simplified Chinese Antigravity Connector documentation and navigation links. Documents AOD 1.0.0 isolation, dedicated HOME requirements, enabled Connector/Web UI capabilities, and 409-rejected unsupported capabilities.",
       "findings": [],
       "previousReview": {
         "path": "docs/integrations.zh-CN.md",
@@ -59512,17 +59676,18 @@
     },
     {
       "path": "docs/modules.md",
-      "size": 7841,
-      "sha256": "310209edf8164226753bee245e53cff682b240adea6b9f307d06dab7794256f7",
+      "size": 8358,
+      "sha256": "ec46174fa569e5d404da9be3c5577313c80bfae4bc2c688fcf5607b2a08e6379",
       "module": "governance",
       "kind": "docs",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
         "current-source-sha256-and-size",
-        "complete-current-source-and-relevant-contract-review"
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Read complete EN/CN module map against source directory/caller inventory; source coverage links are not full test, provider or platform acceptance.",
+      "notes": "Reviewed paired English/Simplified Chinese Antigravity Connector documentation and navigation links. Documents AOD 1.0.0 isolation, dedicated HOME requirements, enabled Connector/Web UI capabilities, and 409-rejected unsupported capabilities.",
       "findings": [],
       "previousReview": {
         "path": "docs/modules.md",
@@ -59556,17 +59721,18 @@
     },
     {
       "path": "docs/modules.zh-CN.md",
-      "size": 6599,
-      "sha256": "18cce5e616a7bb72e5ea7dc55211c33c5d5685ff7803cfce2a3782587d6850fa",
+      "size": 7070,
+      "sha256": "d3125d17557674097bdb6911cd614adaad1d9cd4eb5929c3acace66c8a3cf906",
       "module": "governance",
       "kind": "docs",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
         "current-source-sha256-and-size",
-        "complete-current-source-and-relevant-contract-review"
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Read complete EN/CN module map against source directory/caller inventory; source coverage links are not full test, provider or platform acceptance.",
+      "notes": "Reviewed paired English/Simplified Chinese Antigravity Connector documentation and navigation links. Documents AOD 1.0.0 isolation, dedicated HOME requirements, enabled Connector/Web UI capabilities, and 409-rejected unsupported capabilities.",
       "findings": [],
       "previousReview": {
         "path": "docs/modules.zh-CN.md",
@@ -61845,17 +62011,18 @@
     },
     {
       "path": "packages/shared/src/index.ts",
-      "size": 18661,
-      "sha256": "ec13ba04078571deafecf2e1dfd8f8d0da09eddaa8f08a3cad90e0a9c76c02f0",
+      "size": 18700,
+      "sha256": "f44a98c60597eea8f847a85590006061c20443589a564dcbcce5cee47a2c7eb7",
       "module": "governance",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
         "current-source-sha256-and-size",
-        "complete-current-source-and-relevant-contract-review"
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Complete shared barrel exports read in chunks and referenced declaration/build contracts inspected; no private runtime configuration inserted by exports.",
+      "notes": "Reviewed shared runtime unions, sessionRuntimeId, native token usage accounting, and connector capabilities for Antigravity support. Built and typechecked across server and web.",
       "findings": [],
       "previousReview": {
         "path": "packages/shared/src/index.ts",
@@ -62001,17 +62168,18 @@
     },
     {
       "path": "packages/shared/src/native-token-usage.ts",
-      "size": 8297,
-      "sha256": "df14632a34128f249b4ba562b3dac2282a86ccdddedc6be3d02ae75e9bb46509",
+      "size": 8346,
+      "sha256": "51c93f7f9d779ad7c12620bb54c61b8ede7452c23d2670da5c1e0cb0522f2365",
       "module": "governance",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
         "current-source-sha256-and-size",
-        "complete-current-source-and-relevant-contract-review"
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Complete token usage structures/bounds read against usage callers; accounting type consistency is not provider or live telemetry acceptance.",
+      "notes": "Reviewed shared runtime unions, sessionRuntimeId, native token usage accounting, and connector capabilities for Antigravity support. Built and typechecked across server and web.",
       "findings": [],
       "previousReview": {
         "path": "packages/shared/src/native-token-usage.ts",
@@ -62917,8 +63085,8 @@
     },
     {
       "path": "scripts/check-web-i18n.mjs",
-      "size": 7342,
-      "sha256": "36465db7992144fb7b18e032d880fabc93f8eb8453ebcdcf9552c53d9dfdac67",
+      "size": 7424,
+      "sha256": "d1c7b78f38c5f182673891df38e3188deb46857f137ee88816ba246c07453a82",
       "module": "governance",
       "kind": "runtime",
       "depth": "semantic",
@@ -63397,20 +63565,19 @@
     },
     {
       "path": "scripts/documentation.test.mjs",
-      "sha256": "bbc59214adc85cc01b864c351d9203859f14c4033f46ecaea7dbf83338d574a6",
-      "size": 7474,
+      "sha256": "6e86f66c19d78fa52c1629c68da65a85fb2be75aa46d38587bff6d9770796b61",
+      "size": 9149,
       "module": "release-boundary",
       "kind": "test",
       "depth": "semantic",
       "disposition": "no-finding",
       "findings": [],
       "checks": [
-        "complete-source-reading-or-authorship",
-        "direct-review-validator-and-publication-contract",
-        "source-bound-approval-and-evidence-provenance",
-        "paired-documentation-contract"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Full current text read or authored. Gate and direct validator/test contracts inspected; pending decision configuration is not a rights approval. Historical dependency tables retained and current metadata scope distinguished. No source scan, scoped regression or license presence grants inherited rights or runtime/platform acceptance."
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests."
     },
     {
       "path": "scripts/encrypted-stopped-backup.test.mjs",
@@ -66312,21 +66479,18 @@
     },
     {
       "path": "scripts/test-modules.mjs",
-      "size": 12362,
-      "sha256": "232594bc127d66e20d08a1bef267510651c959ee7ff31bcdee02911f8378745e",
+      "size": 12586,
+      "sha256": "554c077f07163748fe0920f488540c9a03ed8a818bf55c865c678c1149cb37dc",
       "module": "governance",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "Full current source text consumed, including final line; not scanner/hash/test-only review.",
-        "Publication/privacy/portability and synthetic versus operator-state inputs inspected within this file.",
-        "Relevant shell/archive/config/secret/log and exact execution/timeout/cleanup boundaries inspected where present.",
-        "Five category taxonomies plus script manifest use exact discovered/category selection, nonempty and no arbitrary globs; server unknown taxonomy refuses, web default UI explicit. Sorted Set and CLI main guard avoid import-time execution; dispatch delegates existing runners.",
-        "Every discovered server/web/script test is classified exactly once and selectors reject unknown categories/files. Dispatch uses existing runners; category coverage is an inventory contract, not full source or CI approval.",
-        "Relevant local caller/option/receipt contract supplement inspected; external runtime acceptance is not substituted for source evidence."
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Five category taxonomies plus script manifest use exact discovered/category selection, nonempty and no arbitrary globs; server unknown taxonomy refuses, web default UI explicit. Sorted Set and CLI main guard avoid import-time execution; dispatch delegates existing runners. Completion: Every discovered server/web/script test is classified exactly once and selectors reject unknown categories/files. Dispatch uses existing runners; category coverage is an inventory contract, not full source or CI approval. Source review is complete at the assigned script boundary; remaining limitations: Only exact selected offline script tests ran. Server/web compilation, broad module dispatch and real CI were not executed.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": [],
       "fullSourceRead": true,
       "lineCount": 244,
@@ -66355,19 +66519,18 @@
     },
     {
       "path": "scripts/test-modules.test.mjs",
-      "size": 3005,
-      "sha256": "edddef52c299ee5024e59ef1880af608fdc74eeb64a1436dca036330a3e4ce1e",
+      "size": 3558,
+      "sha256": "b88edf1e5e259c059c9abb58348cf3ba9affa9ba2bf2bb2e8b2efd838a10e03a",
       "module": "governance",
       "kind": "test",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "Read the full assigned source/fixture contents; current digest binds the reviewed bytes, not a promotion criterion",
-        "Full tests read: five-major-category taxonomy and exactly one category per discovered test",
-        "Reviewed exact major/subcategory/file selectors and unknown selector rejection",
-        "Continuation fully read related contracts: scripts/test-modules.mjs; scripts/run-source-tests.mjs; scripts/run-script-tests.mjs"
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
       ],
-      "notes": "Complete assigned source and directly relevant exercised contracts read. Semantic scope: Full directly exercised discovery/selector/unique registration ABI; discovery is not product acceptance. No test pass or absent device run was used to promote depth.",
+      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
       "findings": []
     },
     {

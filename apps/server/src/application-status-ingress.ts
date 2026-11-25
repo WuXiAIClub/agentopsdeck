@@ -55,7 +55,7 @@ export function createApplicationStatusIngress(commands: Pick<ReturnType<typeof 
     async recoverPhysical(runtime: Runtime, input: Scope, authority: ApplicationCommandScope): Promise<void> {
       // Codex /status is an ordinary model message. Other absent runtimes have
       // no report to project; the original receipt reader still checks them.
-      const result = runtime === 'claude-code' || runtime === 'ghcp'
+      const result = runtime === 'claude-code' || runtime === 'ghcp' || runtime === 'antigravity'
         ? await participants.sdk?.readPhysical({ ...input, runtime }, authority)
         : runtime === 'openclaw' ? await participants.openclaw?.readPhysical(input, authority)
         : runtime === 'hermes' ? await participants.hermes?.readPhysical(input, authority) : undefined;

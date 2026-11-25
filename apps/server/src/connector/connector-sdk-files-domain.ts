@@ -22,7 +22,7 @@ const fields = (v: unknown, required: string[], optional: string[] = []): v is R
   && typeof v === 'object' && !Array.isArray(v) && required.every(k => Object.hasOwn(v, k))
   && Object.keys(v).every(k => required.includes(k) || optional.includes(k));
 const text = (v: unknown, max: number): v is string => typeof v === 'string' && !!v.length && v.length <= max && !/[\u0000-\u001f\u007f]/.test(v);
-const scope = (v: Record<string, unknown>) => (v.runtime === 'claude-code' || v.runtime === 'ghcp')
+const scope = (v: Record<string, unknown>) => (v.runtime === 'claude-code' || v.runtime === 'ghcp' || v.runtime === 'antigravity')
   && text(v.key, 512) && sessionRuntimeId(v.key) === v.runtime && v.key !== `${v.runtime}:`;
 export function validConnectorSdkFilesInput(kind: ConnectorSdkFilesKind, value: unknown): boolean {
   return fields(value, ['runtime', 'key', 'authorization', ...(kind === 'sdkFilesStep' || kind === 'sdkFilesCancel' ? ['jobId'] : []),
@@ -49,11 +49,16 @@ export function validConnectorSdkFilesOutput(kind: ConnectorSdkFilesKind, value:
  * Losing the worker loses only these derived jobs, never the persisted index. */
 export function createConnectorSdkFiles(owner: ConnectorUserStore, tokens?: ConnectorTokenStore) {
   const binding = (key: string) => {
-    const journal = sessionRuntimeId(key) === 'ghcp' ? owner.copilotJournal : owner.claudeJournal;
+    const runtime = sessionRuntimeId(key);
+    const journal = runtime === 'ghcp' ? owner.copilotJournal : runtime === 'antigravity' ? owner.antigravityJournal : owner.claudeJournal;
     return journal.deletion(key) || owner.commands.sessionDeletion(key) ? undefined : journal.session(key)?.nativeSessionId;
   };
-  const rebuilds = new SessionFileRebuilds(owner.fileIndex, binding, (key, before) => sessionRuntimeId(key) === 'ghcp'
-    ? owner.copilotTranscript.fileEvidencePage(key, before) : owner.claudeTranscript.fileEvidencePage(key, before));
+  const rebuilds = new SessionFileRebuilds(owner.fileIndex, binding, (key, before) => {
+    const runtime = sessionRuntimeId(key);
+    return runtime === 'ghcp' ? owner.copilotTranscript.fileEvidencePage(key, before)
+      : runtime === 'antigravity' ? owner.antigravityTranscript.fileEvidencePage(key, before)
+      : owner.claudeTranscript.fileEvidencePage(key, before);
+  });
   return <K extends ConnectorSdkFilesKind>(kind: K, input: ConnectorSdkFilesCommands[K]['input']): ConnectorSdkFilesCommands[K]['output'] => {
     if (!validConnectorSdkFilesInput(kind, input)) throw Error('connector_storage_unavailable');
     const actor = tokens?.authenticateAuthorization(input.authorization);

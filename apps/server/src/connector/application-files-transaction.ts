@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import type { ApplicationTransactionClient, ApplicationTransactionEvidence } from '../auth/application-transaction-gate.js';
 import { applicationControlTransaction } from './application-stop-transaction.js';
 
-type Runtime = 'codex' | 'claude-code' | 'ghcp';
+type Runtime = 'codex' | 'claude-code' | 'ghcp' | 'antigravity';
 type Operation = 'start' | 'step' | 'cancel';
 type Input = { key: string; jobId?: string; step?: number; application?: ApplicationTransactionEvidence };
 const payload = (operation: Operation, input: Input) => JSON.stringify({ operation,

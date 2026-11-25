@@ -223,7 +223,7 @@ export type ConnectorOwnerConfig = { file: string; tokenFile?: string; bootstrap
 type Empty = Record<string, never>;
 export type ConnectorFileSessionObservation = null
   | { runtime: 'codex'; deleted: boolean; boardTools: boolean }
-  | { runtime: 'claude-code' | 'ghcp'; deleted: boolean; sessionId: string | null };
+  | { runtime: 'claude-code' | 'ghcp' | 'antigravity'; deleted: boolean; sessionId: string | null };
 export type ConnectorOwnerCommands = ConnectorTitleCommands & ConnectorNativeQueueCommands & ConnectorMirrorDeliveryCommands & ConnectorSessionMediaCommands & ConnectorContentReplicaCommands & ConnectorWorkspaceFileCommands & ConnectorOpenClawReadCommands & ConnectorOpenClawCompactCommands & ConnectorOpenClawStatusCommands & ConnectorOpenClawStopCommands & ConnectorOpenClawMessageCommands & ConnectorOpenClawDispatchCommands & ConnectorHermesReadCommands & ConnectorHermesLocalControlCommands & ConnectorHermesStopCommands & ConnectorHermesCreationCommands & ConnectorHermesLifecycleCommands & ConnectorHermesQueueCommands & ConnectorHermesDeletionCommands & ConnectorHermesHistoryCommands & ConnectorHermesDispatchCommands & ConnectorHermesMessageCommands & ConnectorHermesExecutionCommands & LocalCredentialsCommands & ConnectorSdkMetadataCommands & ConnectorSdkFilesCommands & ConnectorSdkUsageCommands & ConnectorSdkHistoryCommands & ConnectorSdkInteractionCommands & ConnectorSdkStatusCommands & ConnectorSdkStopCommands & ConnectorSdkLifecycleCommands & ConnectorSdkTranscriptCommands & ConnectorSdkMessageCommands & ConnectorEventCommands & ConnectorSdkLocalRecoveryCommands & ConnectorSdkLocalCommands & ConnectorSdkCompactCommands & ConnectorSdkAttachmentCommands & ConnectorSdkQueueReadCommands & ConnectorSdkQueueCommands & ConnectorSdkDispatchCommands & ConnectorSdkJournalCommands & ConnectorAuthorityCommands & ConnectorGrantCommands & ConnectorStorageCommands & ConnectorRecoveryCommands & ConnectorExecutionCommands & ConnectorExecutionObservationCommands & ConnectorExecutionSettlementCommands & ConnectorNativeReplyCommands & {
   codexDispatchClaim: ConnectorCodexDispatchCommands['codexDispatchClaim'];
   codexCreationClaim: ConnectorCodexCreationCommands['codexCreationClaim'];
@@ -719,7 +719,7 @@ export function validConnectorOwnerOutput(kind: ConnectorOwnerKind, v: unknown):
       const row = v as Record<string, unknown>;
       return record(v, ['runtime', 'deleted', 'boardTools']) && row.runtime === 'codex'
         && typeof row.deleted === 'boolean' && typeof row.boardTools === 'boolean'
-        || record(v, ['runtime', 'deleted', 'sessionId']) && (row.runtime === 'claude-code' || row.runtime === 'ghcp')
+        || record(v, ['runtime', 'deleted', 'sessionId']) && (row.runtime === 'claude-code' || row.runtime === 'ghcp' || row.runtime === 'antigravity')
         && typeof row.deleted === 'boolean' && (row.sessionId === null || text(row.sessionId));
     }
     case 'receiptSettingsPending': case 'interactionPending': case 'maintenanceResume': return typeof v === 'boolean';
@@ -964,9 +964,9 @@ export function createConnectorOwnerCommands(owner: ConnectorUserStore, tokens?:
         if (key.startsWith('codex:') && key.length > 6) {
           value = { runtime: 'codex', deleted: deleted || owner.codexExecutions.isDeletedTerminal(key),
             boardTools: owner.codexExecutions.hasBoardTools(key.slice(6)) };
-        } else if (key.startsWith('claude-code:') && key.length > 12 || key.startsWith('ghcp:') && key.length > 5) {
-          const runtime = key.startsWith('claude-code:') ? 'claude-code' : 'ghcp';
-          const journal = runtime === 'claude-code' ? owner.claudeJournal : owner.copilotJournal;
+        } else if (key.startsWith('claude-code:') && key.length > 12 || key.startsWith('ghcp:') && key.length > 5 || key.startsWith('antigravity:') && key.length > 12) {
+          const runtime = key.startsWith('claude-code:') ? 'claude-code' : key.startsWith('ghcp:') ? 'ghcp' : 'antigravity';
+          const journal = runtime === 'claude-code' ? owner.claudeJournal : runtime === 'ghcp' ? owner.copilotJournal : owner.antigravityJournal;
           value = { runtime, deleted: deleted || !!journal.deletion(key), sessionId: journal.session(key)?.nativeSessionId ?? null };
         } else value = null;
         break;

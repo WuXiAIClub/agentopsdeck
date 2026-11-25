@@ -19,7 +19,7 @@ import type { ApplicationCommandScope } from '../auth/application-command-scope.
 import type { ApplicationTransactionEvidence } from '../auth/application-transaction-gate.js';
 
 type Owner = Pick<AsyncConnectorOwner, 'command' | 'runtimeOwnerFile'>;
-type Config = { homeDirectory: string; model: string };
+type Config = { homeDirectory: string; model?: string };
 type Driver = Pick<AsyncSdkExecutionDriver<SdkOwnedTurn>, 'inspect' | 'wake' | 'pauseQueueWorker' | 'close'>;
 export type AsyncSdkOwnedOptions<R extends SdkAgentId, C extends Config, D extends Driver> = {
   owner: Owner; runtime: R; config: C; diagnostics?: PerformanceDiagnostics;
@@ -201,7 +201,8 @@ export class AsyncSdkOwnedRuntime<R extends SdkAgentId, C extends Config, D exte
       }
       const session = { ...snapshot.session, ...(snapshot.deletion ? { nativeState: 'unknown' as const } : {}) };
       const summary = sdkSessionView(this.id, session, snapshot.execution ?? undefined, this.startupState === 'ready' && this.canExecute());
-      summary.model = session.model ?? this.config.model;
+      const resolvedModel = session.model ?? this.config.model;
+      if (resolvedModel !== undefined) summary.model = resolvedModel;
       const fingerprint = JSON.stringify(summary);
       if (this.fingerprints.get(key) !== fingerprint) target?.upsertSession(summary);
       this.fingerprints.set(key, fingerprint);

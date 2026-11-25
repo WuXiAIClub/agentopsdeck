@@ -11,7 +11,7 @@ export function registerSdkHistoryHttp(app: Hono, base: string, deps: SdkHistory
   const conditional = createConditionalHistory();
   for (const detail of [false, true]) app.get(`${base}/messages${detail ? '/:messageId' : ''}`, async (c, next) => {
     const key = c.req.param('sessionKey')!, runtime = sessionRuntimeId(key);
-    if (runtime !== 'claude-code' && runtime !== 'ghcp') return next();
+    if (runtime !== 'claude-code' && runtime !== 'ghcp' && runtime !== 'antigravity') return next();
     c.header('Cache-Control', 'no-store');
     if (c.req.header('x-agentopsdeck-execution-grant') !== undefined) return c.json({ error: 'History requires owner authority' }, 403);
     const authorization = c.req.header('authorization') ?? '';

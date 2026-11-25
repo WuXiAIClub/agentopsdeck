@@ -2,10 +2,11 @@ import type { DatabaseSync } from 'node:sqlite';
 import { observedSavepoint } from '../storage/observed-savepoint.js';
 
 const BUCKET = 1024;
-type Runtime = 'claude-code' | 'ghcp';
+type Runtime = 'claude-code' | 'ghcp' | 'antigravity';
 const config = {
   'claude-code': { table: 'claude_transcript_messages', index: 'claude_transcript_block_counts', size: 'json_array_length(data)' },
   ghcp: { table: 'copilot_transcript_messages', index: 'copilot_transcript_page', size: '1' },
+  antigravity: { table: 'antigravity_transcript_messages', index: 'antigravity_transcript_page', size: '1' },
 } as const;
 
 /** Transactional display counts, NOT execution/readiness facts. One small row

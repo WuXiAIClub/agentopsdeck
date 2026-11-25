@@ -84,7 +84,7 @@ export async function executeConnectorSdkStatus<K extends ConnectorSdkStatusKind
           complete: { status, body: { error: 'Command rejected' } } });
         if ('error' in normalized || normalized.message !== '/status' || normalized.media.length) return reject(400);
         if (normalized.deliveryMode === 'mirror') return reject(409);
-        const journal = p.runtime === 'claude-code' ? owner.claudeJournal : owner.copilotJournal;
+        const journal = p.runtime === 'claude-code' ? owner.claudeJournal : p.runtime === 'ghcp' ? owner.copilotJournal : owner.antigravityJournal;
         const snapshot = journal.readSnapshot(p.key);
         if (!validSdkJournalSnapshot(snapshot)) throw Error('connector_storage_unavailable');
         if (!snapshot.session) return reject(404);

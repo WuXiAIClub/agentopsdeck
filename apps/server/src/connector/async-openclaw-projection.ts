@@ -18,7 +18,7 @@ type Options = {
 };
 const MAX_BYTES = 16 * 1024 * 1024, MAX_EVENTS = 8 * 1024 * 1024, MAX_PENDING = 128;
 const validKey = (key: unknown): key is string => typeof key === 'string' && key.trim().length > 0
-  && Buffer.byteLength(key) <= 4096 && !/^(?:codex|hermes|claude-code|ghcp):/.test(key);
+  && Buffer.byteLength(key) <= 4096 && !/^(?:codex|hermes|claude-code|ghcp|antigravity):/.test(key);
 
 /** Bounded DISPLAY observations from the original worker, not a grant cache,
  * execution journal or idle proof. Bind before discovery; open under the root's

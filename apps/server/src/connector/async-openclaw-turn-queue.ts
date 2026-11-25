@@ -145,7 +145,7 @@ export class AsyncOpenClawTurnQueue {
       const payload = raw?.payload ?? raw?.data ?? raw;
       const candidate = payload?.sessionKey ?? payload?.session?.key ?? payload?.session?.sessionKey ?? raw?.sessionKey;
       if (typeof candidate !== 'string' || !candidate.trim() || Buffer.byteLength(candidate) > 4096
-        || /^(?:codex|hermes|claude-code|ghcp):/.test(candidate)) return Promise.resolve(false);
+        || /^(?:codex|hermes|claude-code|ghcp|antigravity):/.test(candidate)) return Promise.resolve(false);
       key = candidate;
       const runState = gatewayEventRunState(name, payload);
       const chatState = name === 'chat' || name.startsWith('chat.') ? payload?.state : undefined;

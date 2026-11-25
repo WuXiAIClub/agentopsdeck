@@ -13,10 +13,12 @@ import { validSdkJournalSnapshot } from './connector-sdk-journal-domain.js';
 type Scope = { runtime: SdkAgentId; ref: SdkCompactRef };
 export type SdkTranscriptAppend =
   | { runtime: 'claude-code'; ref: SdkCompactRef; rows: ClaudeProjectedMessage[]; final?: ClaudeStreamFinal; details?: ClaudeToolDetail[] }
-  | { runtime: 'ghcp'; ref: SdkCompactRef; row: CopilotProjectedMessage; submittedText: string; detail?: CopilotToolDetail };
+  | { runtime: 'ghcp'; ref: SdkCompactRef; row: CopilotProjectedMessage; submittedText: string; detail?: CopilotToolDetail }
+  | { runtime: 'antigravity'; ref: SdkCompactRef; row: CopilotProjectedMessage; submittedText: string; detail?: CopilotToolDetail };
 export type SdkTranscriptStream =
   | { runtime: 'claude-code'; ref: SdkCompactRef; snapshot: ClaudeTextStream }
-  | { runtime: 'ghcp'; ref: SdkCompactRef; snapshot: CopilotTextStream };
+  | { runtime: 'ghcp'; ref: SdkCompactRef; snapshot: CopilotTextStream }
+  | { runtime: 'antigravity'; ref: SdkCompactRef; snapshot: CopilotTextStream };
 export type SdkTranscriptAck = Scope & { applied: boolean };
 export type ConnectorSdkTranscriptCommands = {
   sdkTranscriptAppend: { input: SdkTranscriptAppend; output: SdkTranscriptAck };
@@ -37,7 +39,7 @@ const ref = (v: unknown): v is SdkCompactRef => fields(v, ['key', 'id', 'epoch',
   && id(v.key) && id(v.id) && id(v.epoch) && id(v.nativeSessionId);
 export const sameSdkTranscriptRef = (a: SdkCompactRef, b: SdkCompactRef) =>
   a.key === b.key && a.id === b.id && a.epoch === b.epoch && a.nativeSessionId === b.nativeSessionId;
-const scope = (v: Record<string, unknown>) => ref(v.ref) && (v.runtime === 'claude-code' || v.runtime === 'ghcp')
+const scope = (v: Record<string, unknown>) => ref(v.ref) && (v.runtime === 'claude-code' || v.runtime === 'ghcp' || v.runtime === 'antigravity')
   && sessionRuntimeId(v.ref.key) === v.runtime && v.ref.key !== `${v.runtime}:`;
 const claudeRows = (rows: unknown): rows is ClaudeProjectedMessage[] => Array.isArray(rows) && rows.length <= 256
   && rows.every(row => fields(row, ['nativeMessageId', 'blockIndex', 'parentToolUseId', 'role', 'text', 'truncated', 'detailAvailable'],
@@ -91,22 +93,26 @@ export function validConnectorSdkTranscriptOutput(v: unknown): v is SdkTranscrip
 export function executeConnectorSdkTranscript<K extends ConnectorSdkTranscriptKind>(k: K,
   input: ConnectorSdkTranscriptCommands[K]['input'], owner: ConnectorUserStore): SdkTranscriptAck {
   if (!validConnectorSdkTranscriptInput(k, input)) throw Error('connector_storage_unavailable');
-  const journal = input.runtime === 'claude-code' ? owner.claudeJournal : owner.copilotJournal;
+  const journal = input.runtime === 'claude-code' ? owner.claudeJournal : input.runtime === 'ghcp' ? owner.copilotJournal : owner.antigravityJournal;
   const snapshot = journal.readSnapshot(input.ref.key), execution = snapshot.execution;
   const ack = (applied: boolean): SdkTranscriptAck => ({ runtime: input.runtime, ref: { ...input.ref }, applied });
   if (!validSdkJournalSnapshot(snapshot)) throw Error('connector_storage_unavailable');
   if (snapshot.deletion || !snapshot.session || snapshot.session.nativeSessionId !== input.ref.nativeSessionId
     || !execution || execution.kind === 'compact' || !sameSdkTranscriptRef(execution, input.ref)) return ack(false);
-  const transcript = input.runtime === 'claude-code' ? owner.claudeTranscript : owner.copilotTranscript;
+  const transcript = input.runtime === 'claude-code' ? owner.claudeTranscript : input.runtime === 'ghcp' ? owner.copilotTranscript : owner.antigravityTranscript;
   if (k === 'sdkTranscriptEnd') { transcript.endStreams(input.ref); return ack(true); }
   if (!(k === 'sdkTranscriptStream' ? ['dispatching', 'running'] : ['dispatching', 'running', 'settling']).includes(execution.phase)) return ack(false);
   if (k === 'sdkTranscriptAppend') {
     const p = input as SdkTranscriptAppend;
     if (p.runtime === 'claude-code') owner.claudeTranscript.append(p.ref, p.rows, p.final, p.details);
-    else owner.copilotTranscript.append(p.ref, p.row, p.submittedText, p.detail);
+    else if (p.runtime === 'ghcp') owner.copilotTranscript.append(p.ref, p.row, p.submittedText, p.detail);
+    else owner.antigravityTranscript.append(p.ref, p.row, p.submittedText, p.detail);
     return ack(true);
   }
   const p = input as SdkTranscriptStream;
-  return ack(p.runtime === 'claude-code' ? owner.claudeTranscript.updateStream(p.ref, p.snapshot)
-    : owner.copilotTranscript.updateStream(p.ref, p.snapshot));
+  return ack(p.runtime === 'claude-code'
+    ? owner.claudeTranscript.updateStream(p.ref, p.snapshot)
+    : p.runtime === 'ghcp'
+      ? owner.copilotTranscript.updateStream(p.ref, p.snapshot)
+      : owner.antigravityTranscript.updateStream(p.ref, p.snapshot));
 }

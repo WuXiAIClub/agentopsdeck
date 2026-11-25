@@ -63,6 +63,17 @@ export class AsyncSdkProjection {
       metrics: (sample: SdkMetricSample) => { this.enqueue(lane, 'sdkMetricsObserve', { ...scope, sample }); },
     };
   }
+  antigravity(ref: SdkCompactRef, submittedText: string) {
+    if (this.options.runtime !== 'antigravity') throw Error('connector_storage_unavailable');
+    const lane = this.lane(ref), scope = { runtime: 'antigravity' as const, ref: lane.ref };
+    return {
+      project: (row: CopilotProjectedMessage, detail?: CopilotToolDetail) => {
+        this.enqueue(lane, 'sdkTranscriptAppend', { ...scope, row, submittedText, ...(detail ? { detail } : {}) });
+      },
+      stream: (snapshot: CopilotTextStream) => { this.enqueue(lane, 'sdkTranscriptStream', { ...scope, snapshot }); },
+      metrics: (sample: SdkMetricSample) => { this.enqueue(lane, 'sdkMetricsObserve', { ...scope, sample }); },
+    };
+  }
   private fail(lane: Lane, step: number) {
     if (lane.failed) return;
     lane.failed = true;

@@ -292,16 +292,17 @@ export async function createAsyncConnectorSurface(options: AsyncConnectorSurface
       const gateway = deck.getGateway();
       const cliAvailable = config.localOpenClawCli && isOpenClawCliAvailable();
       const codexReady = assembly!.codex.enabled === true && assembly!.codex.isSessionListReady();
-      const claude = assembly!.sdk.claude, copilot = assembly!.sdk.copilot, hermes = assembly!.hermes;
+      const claude = assembly!.sdk.claude, copilot = assembly!.sdk.copilot, antigravity = assembly!.sdk.antigravity, hermes = assembly!.hermes;
       const hermesEnabled = !!config.hermes?.enabled || hermes.agents.length > 0;
       return c.json({
         ok: true,
-        status: gateway.ok || cliAvailable || codexReady || hermes.ready || claude?.ready || copilot?.ready ? 'online' : 'degraded',
+        status: gateway.ok || cliAvailable || codexReady || hermes.ready || claude?.ready || copilot?.ready || antigravity?.ready ? 'online' : 'degraded',
         gateway,
         codex: { enabled: assembly!.codex.enabled === true, sessionListReady: codexReady },
         hermes: { enabled: hermesEnabled, ready: hermes.ready === true, status: hermesEnabled ? hermes.status : 'disabled' },
         claude: { enabled: !!claude, ready: claude?.ready === true, status: claude?.status ?? 'disabled' },
         copilot: { enabled: !!copilot, ready: copilot?.ready === true, status: copilot?.status ?? 'disabled' },
+        antigravity: { enabled: !!antigravity, ready: antigravity?.ready === true, status: antigravity?.status ?? 'disabled' },
         fallback: { openclawCli: cliAvailable },
         updatedAt: Date.now(),
       });
@@ -313,7 +314,7 @@ export async function createAsyncConnectorSurface(options: AsyncConnectorSurface
           const handle = await authority!.begin(c.req.raw, 'sessions:read');
           const update = await maintenance!.status(c.req.raw);
           await handle.check();
-          const claude = assembly!.sdk.claude, copilot = assembly!.sdk.copilot, hermes = assembly!.hermes;
+          const claude = assembly!.sdk.claude, copilot = assembly!.sdk.copilot, antigravity = assembly!.sdk.antigravity, hermes = assembly!.hermes;
           const hermesEnabled = !!config.hermes?.enabled || hermes.agents.length > 0;
           const capabilities: ConnectorCapabilities & { principal: { tokenId: string; label: string }; limits: { maxRequestsPerMinute: number; maxSseConnections: number } } = {
             principal: { tokenId: handle.principal.tokenId, label: handle.principal.label },
@@ -332,6 +333,8 @@ export async function createAsyncConnectorSurface(options: AsyncConnectorSurface
                 features: { text: true, queue: true, interrupt: true, history: true, attachments: true, compact: true, delete: true, modelOverride: true, interactions: claude?.ready === true } },
               ghcp: { enabled: !!copilot, ready: copilot?.ready === true, status: copilot?.status ?? 'disabled', ownerOnly: true,
                 features: { text: true, queue: true, interrupt: true, history: true, attachments: true, compact: true, delete: true, modelOverride: true, interactions: copilot?.ready === true } },
+              antigravity: { enabled: !!antigravity, ready: antigravity?.ready === true, status: antigravity?.status ?? 'disabled', ownerOnly: true,
+                features: { text: true, queue: true, interrupt: true, history: true, attachments: false, compact: false, delete: true, modelOverride: false, interactions: false } },
             },
             scopes: handle.principal.scopes,
             limits: { maxMessageChars: MAX_MESSAGE_CHARS, maxRequestsPerMinute: 120, maxSseConnections: 2 },

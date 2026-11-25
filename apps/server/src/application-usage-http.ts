@@ -41,7 +41,7 @@ export function registerApplicationUsageHttp(app: Hono, deps: {
       return Promise.resolve(c.json({ error: 'Invalid local usage authority' }, 403));
     return authority.run(original(c.req.raw).request, async check => { const response = await work(); await check(); return response; });
   };
-  const requestUsage = <R extends 'codex' | 'claude-code' | 'ghcp'>(c: Context, port: OwnedUsageHttp<R>['usage']): OwnedUsageHttp<R>['usage'] => ({
+  const requestUsage = <R extends 'codex' | 'claude-code' | 'ghcp' | 'antigravity'>(c: Context, port: OwnedUsageHttp<R>['usage']): OwnedUsageHttp<R>['usage'] => ({
     range: (input, request) => port.range({ ...input }, request),
     export: (input, request) => port.export({ ...input }, request),
     readSnapshot: (input, request) => port.readSnapshot({ ...input }, request),
