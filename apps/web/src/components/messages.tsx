@@ -894,9 +894,9 @@ export function readableText(value: unknown): string {
 }
 
 function isInternalOutput(message: ChatMessage) {
+  if (message.role === 'tool') return true;
   const text = stripThinkingLines(readableText(message.text));
   if (!text || text === '(empty)') return false;
-  if (message.role === 'tool') return true;
   // Assistant turns stay chat bubbles so interim step-by-step replies remain visible,
   // except normalized tool transcripts. Those are execution records and must stay collapsed.
   if (message.role === 'assistant') return isNormalizedToolTranscript(text);
