@@ -6466,15 +6466,20 @@ const unfinishedAssistantStreamReason = 'Stream ended without a completed native
  * native ownership, goals or admission: those checks remain with the caller.
  */
 function preserveUnfinishedAssistantStreams(turns: any[], live: ChatMessage[], snapshot: ChatMessage[]): ChatMessage[] {
-  const completed = new Set(turns.filter(turn => turn.status === 'completed').map(turn => turn.id));
+  const terminal = new Map(turns.filter(turn => ['completed', 'failed', 'interrupted'].includes(turn.status)).map(turn => [turn.id, turn.status]));
   const ids = new Set(snapshot.map(message => message.id));
-  const retained = live.filter(message => message.role === 'assistant' && !!message.turnId && completed.has(message.turnId)
-    && !ids.has(message.id) && !message.phase && !message.media?.length && !message.parentToolUseId && message.text.trim()
-    && (!message.status || message.status === 'failed' && message.failureReason === unfinishedAssistantStreamReason)
-    && !snapshotCoversAssistantDelta(message, snapshot, live)
-    && snapshot.some(candidate => candidate.sessionKey === message.sessionKey && candidate.turnId === message.turnId
-      && candidate.role === 'assistant' && candidate.status === 'sent' && !candidate.parentToolUseId && candidate.text.trim()))
-    .map(message => ({ ...message, status: 'failed' as const, failureReason: unfinishedAssistantStreamReason }));
+  const retained = live.filter(message => {
+    const turnStatus = message.turnId ? terminal.get(message.turnId) : undefined;
+    if (message.role !== 'assistant' || !turnStatus || ids.has(message.id)
+      || message.phase || message.media?.length || message.parentToolUseId || !message.text.trim()) return false;
+    if (message.status && !(message.status === 'failed' && message.failureReason === unfinishedAssistantStreamReason)) return false;
+    if (snapshotCoversAssistantDelta(message, snapshot, live)) return false;
+    if (turnStatus === 'completed') {
+      return snapshot.some(candidate => candidate.sessionKey === message.sessionKey && candidate.turnId === message.turnId
+        && candidate.role === 'assistant' && candidate.status === 'sent' && !candidate.parentToolUseId && candidate.text.trim());
+    }
+    return true;
+  }).map(message => ({ ...message, status: 'failed' as const, failureReason: unfinishedAssistantStreamReason }));
   return retained.length ? [...snapshot, ...retained] : snapshot;
 }
 

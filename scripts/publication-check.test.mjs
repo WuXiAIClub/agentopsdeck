@@ -158,6 +158,7 @@ test('product version drift and unexpected initial author/committer are rejected
   writeFileSync(join(root, 'apps/web/package.json'), '{"version":"2.5.0"}');
   assert.ok(checkPublication(root).errors.some(error => error.category === 'product-version-mismatch'));
   assert.equal(checkIdentityHistory('WuXiAIClub\thi@wuxiaiclub.com\tWuXiAIClub\thi@wuxiaiclub.com\n'), true);
+  assert.equal(checkIdentityHistory('WuXiAIClub\thi@wuxiaiclub.com\tGitHub\tnoreply@github.com\n'), true);
   assert.equal(checkIdentityHistory('Fixture\tfixture@example.invalid\tWuXiAIClub\thi@wuxiaiclub.com\n'), false);
 });
 
