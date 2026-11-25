@@ -16,6 +16,7 @@ import { requiredSynchronousEffectAuthority as synchronousEffectAuthority } from
 import { nanoid } from 'nanoid';
 import { readModelCatalog, type ModelChoice } from './model-catalog.js';
 import { configuredModelProvider, ProviderModelCatalog } from './provider-model-catalog.js';
+import { resolveCodexReasoningParams } from './reasoning-compat.js';
 import { createToolImageCompatibilityRelay, toolImageCompatibilityArguments, type ToolImageCompatibilityOptions } from './tool-image-compat.js';
 import { goalSnapshot, goalMutation, goalAcknowledged, GoalControlConflict } from './goal-control.js';
 import { GoalDiagnostics, type GoalDiagnosticTrace } from './goal-diagnostics.js';
@@ -342,6 +343,7 @@ export class CodexAppServer {
   private threadModels = new Map<string, string>();
   private threadModelOverrides = new Map<string, string>();
   private threadEfforts = new Map<string, string>();
+  private threadsWithStickyEffort = new Set<string>();
   private compactWaiters = new Map<string, { resolve: () => void; reject: (error: Error) => void; timeout: NodeJS.Timeout;
     check: () => void; evidence: CompactionEvidence; accepting: boolean; previousRunId?: string }>();
   private activeSecretFiles = new Map<string, { commandId: string; connectionId?: string; directory: string; dispatched: boolean }>();
@@ -1407,7 +1409,12 @@ export class CodexAppServer {
         authority();
         const nativeStarted = performance.now();
         result = await this.request('thread/read', { threadId, includeTurns: true });
-        if (!options.readOnly) result = await this.reloadErroredTerminal(sessionKey, result);
+        if (!options.readOnly) {
+          const hasResumeJournal = Boolean(this.maintenanceRecovery.getStore()?.resumes ?? this.options.nativeJournal?.prepareResume);
+          result = hasResumeJournal
+            ? await this.reloadJournaledErroredTerminal(sessionKey, result)
+            : await this.reloadErroredTerminal(sessionKey, result);
+        }
         historyTrace.add('bodyMs', performance.now() - nativeStarted);
         this.unmaterializedThreadIds.delete(threadId);
       } catch (error) {
@@ -1981,7 +1988,10 @@ export class CodexAppServer {
     const updated = this.options.store.persistSessionThinkingOverride(sessionKey, params.thinking, session => {
       // This callback is after durable thinking persistence and before ACK or
       // projection. Preserve durable values if either later observer fails.
-      if (params.thinking === null) this.threadEfforts.delete(threadId);
+      if (params.thinking === null) {
+        this.threadEfforts.delete(threadId);
+        this.threadsWithStickyEffort.add(threadId);
+      }
       else if (params.thinking?.trim()) this.threadEfforts.set(threadId, params.thinking.trim());
       acknowledged?.(this.session(sessionKey, { ...(session ?? current), model }));
     });
@@ -2000,7 +2010,10 @@ export class CodexAppServer {
     this.threadModelOverrides = this.changeRuntimeOverride(threadId, model, params.model);
     this.threadModels.set(threadId, model);
     const updated = this.options.store.persistSessionThinkingEffect(sessionKey, params.thinking);
-    if (params.thinking === null) this.threadEfforts.delete(threadId);
+    if (params.thinking === null) {
+      this.threadEfforts.delete(threadId);
+      this.threadsWithStickyEffort.add(threadId);
+    }
     else if (params.thinking?.trim()) this.threadEfforts.set(threadId, params.thinking.trim());
     await acknowledge(this.session(sessionKey, { ...(updated ?? current), model }));
     const latest = this.options.store.getSession(sessionKey);
@@ -2258,11 +2271,42 @@ export class CodexAppServer {
   }
 
   private turnStartParams(threadId: string, clientUserMessageId: string, input: unknown[], interactive: boolean) {
+    const model = (this.threadModels.get(threadId) ?? this.options.defaultModel) || null;
+    const rawEffort = this.effectiveRawEffort(threadId);
+    const reasoning = resolveCodexReasoningParams({
+      model,
+      rawEffort,
+      hadActiveEffort: this.threadsWithStickyEffort.has(threadId),
+    });
+    if (reasoning.effort) this.threadsWithStickyEffort.add(threadId);
+    else if (reasoning.clearStickyEffort && model && !rawEffort) this.threadsWithStickyEffort.delete(threadId);
     return { threadId, clientUserMessageId, input, cwd: this.options.defaultCwd,
       approvalPolicy: interactive ? 'untrusted' : this.options.approvalPolicy,
       sandboxPolicy: { type: 'dangerFullAccess' },
-      model: (this.threadModels.get(threadId) ?? this.options.defaultModel) || null,
-      ...(this.threadEfforts.get(threadId) ? { effort: this.threadEfforts.get(threadId) } : {}) };
+      model,
+      ...(reasoning.effort ? { effort: reasoning.effort } : {}),
+      ...(reasoning.summary ? { summary: reasoning.summary } : {}),
+      ...(reasoning.clearStickyEffort && model ? {
+        collaborationMode: {
+          mode: 'default',
+          settings: { model, reasoning_effort: null, developer_instructions: null },
+        },
+      } : {}) };
+  }
+
+  private effectiveRawEffort(threadId: string): string | undefined {
+    return this.threadEfforts.get(threadId) ?? this.options.store.localSessionThinkingLevel(this.sessionKey(threadId));
+  }
+
+  private threadResumeEffort(threadId: string): string | undefined {
+    const model = (this.threadModels.get(threadId) ?? this.options.defaultModel) || null;
+    const reasoning = resolveCodexReasoningParams({
+      model,
+      rawEffort: this.effectiveRawEffort(threadId),
+      hadActiveEffort: this.threadsWithStickyEffort.has(threadId),
+    });
+    if (reasoning.effort) this.threadsWithStickyEffort.add(threadId);
+    return reasoning.effort;
   }
 
   /** Install the original native task bridge using worker-owned authority.
@@ -2315,7 +2359,7 @@ export class CodexAppServer {
         threadId, ...(this.options.modelProvider ? { modelProvider: this.options.modelProvider } : {}),
         cwd: this.options.defaultCwd,
         ...(this.threadModels.get(threadId) ? { model: this.threadModels.get(threadId) } : {}),
-        ...(this.threadEfforts.get(threadId) ? { effort: this.threadEfforts.get(threadId) } : {}),
+        ...(this.threadResumeEffort(threadId) ? { effort: this.threadResumeEffort(threadId) } : {}),
         approvalPolicy: input.interactive ? 'untrusted' : this.options.approvalPolicy,
         sandbox: 'danger-full-access', developerInstructions: `${CODEX_MEDIA_BUDGET_INSTRUCTIONS} ${CODEX_AUTONOMY_INSTRUCTIONS}`,
       }, async () => {
@@ -3364,12 +3408,13 @@ export class CodexAppServer {
 
   private async ensureThreadLoaded(threadId: string) {
     if (this.loadedThreadIds.has(threadId)) return;
+    const resumeEffort = this.threadResumeEffort(threadId);
     await this.request('thread/resume', {
       threadId,
       ...(this.options.modelProvider ? { modelProvider: this.options.modelProvider } : {}),
       cwd: this.options.defaultCwd,
       ...(this.threadModels.get(threadId) ? { model: this.threadModels.get(threadId) } : {}),
-      ...(this.threadEfforts.get(threadId) ? { effort: this.threadEfforts.get(threadId) } : {}),
+      ...(resumeEffort ? { effort: resumeEffort } : {}),
       approvalPolicy: this.options.approvalPolicy,
       sandbox: 'danger-full-access',
       developerInstructions: `${CODEX_MEDIA_BUDGET_INSTRUCTIONS} ${CODEX_AUTONOMY_INSTRUCTIONS}`,
@@ -3512,6 +3557,176 @@ export class CodexAppServer {
       if (after.status?.type !== 'idle') throw new RunControlConflict();
       gate = 'confirm-history';
       if (nativeHistoryFingerprint(after) !== nativeHistoryFingerprint(before)) throw new RunControlConflict();
+      gate = 'confirm-goal';
+      const afterGoal = nativeGoalEvidence(await read('thread/goal/get', { threadId }), threadId);
+      if (nativeGoalProtection(afterGoal.status) || afterGoal.version !== goal.version) throw new RunControlConflict();
+      check(true);
+      this.loadedThreadIds.add(threadId);
+      gate = 'recovered';
+      report('recovered');
+      return refreshed;
+    } catch (error) {
+      report(error instanceof RunControlConflict ? 'authority-changed' : 'unavailable');
+      throw error;
+    } finally {
+      reservation.reloading = false;
+      if (!reservation.effectStarted && this.erroredThreadReloads.get(sessionKey) === reservation) {
+        this.erroredThreadReloads.delete(sessionKey);
+      }
+    }
+  }
+
+  /** Journaled systemError reload for owned-journal mode: persists the durable
+   * resume intent BEFORE thread/unsubscribe or thread/resume so a crash or
+   * lost ACK can never leave an unjournaled native mutation. */
+  private async reloadJournaledErroredTerminal(sessionKey: string, result: any,
+    nativeRead: (method: string, params: unknown, timeoutMs?: number) => Promise<any> = this.request.bind(this),
+    authorityCheck: () => void = () => {},
+    continuation: NativeResumeInput['continuation'] = null) {
+    if (result?.thread?.status?.type !== 'systemError') return result;
+    const journal = this.maintenanceRecovery.getStore()?.resumes ?? this.options.nativeJournal;
+    let observed = await this.readHistoryFact(sessionKey);
+    const expected = observed.execution, connectionId = this.connectionId;
+    const child = this.child, generation = this.nativeConnectionGeneration;
+    let gate = 'eligibility';
+    const report = (fault: string) => this.historyDiagnostics.failure('recovery', sessionKey, connectionId, expected?.runId,
+      { stage: 'terminal-reload', fault, gate });
+    if (!journal?.prepareResume || observed.deleted || observed.outcomeUnknown || !expected?.runId || !connectionId
+      || expected.connectionId !== connectionId || expected.phase !== 'failed'
+      || expected.preparation || expected.reason || !expected.completedAt || this.authorizingEffects.size >= 128) {
+      report('protected'); return result;
+    }
+    const identity = `${connectionId}:${expected.runId}`;
+    gate = 'single-attempt';
+    if (this.erroredThreadReloads.get(sessionKey)?.identity === identity) { report('protected'); return result; }
+    const reservation = { identity, effectStarted: false, reloading: true };
+    this.erroredThreadReloads.set(sessionKey, reservation);
+    try {
+      const version = this.projectionVersion(sessionKey), threadId = this.threadId(sessionKey);
+      const local = () => {
+        if (this.closed || this.executionUnavailable || connectionId !== this.connectionId
+          || child !== this.child || generation !== this.nativeConnectionGeneration) throw new RunControlConflict();
+      };
+      const check = (allowProtectionOnly = false) => {
+        authorityCheck();
+        local();
+        const current = this.options.nativeJournal ? observed.execution : this.legacyExecutions.get(sessionKey);
+        if ((this.options.nativeJournal ? observed.deleted || observed.outcomeUnknown : this.legacyExecutions.isDeletedTerminal(sessionKey))
+          || !current
+          || (current.revision !== expected.revision && !(allowProtectionOnly && resumeProtectionOnly(expected, current)))
+          || current.commandId !== expected.commandId
+          || current.runId !== expected.runId || this.projectionVersion(sessionKey) !== version) throw new RunControlConflict();
+      };
+      const read = async (method: string, params: unknown, timeoutMs?: number) => {
+        const response = await nativeRead(method, params, timeoutMs);
+        observed = await this.readHistoryFact(sessionKey);
+        return response;
+      };
+      check();
+      gate = 'native-schema';
+      const before = historyThread({ thread: { ...result.thread, status: { type: 'idle' } } }, threadId);
+      const head = before.turns.at(-1);
+      const skip = () => { report('protected'); return result; };
+      gate = 'path';
+      if (typeof before.path !== 'string' || !before.path.trim()) return skip();
+      gate = 'head';
+      if (head?.id !== expected.runId || head.status !== expected.phase) return skip();
+      gate = 'active-history';
+      if (before.turns.some((turn: any) => !['completed', 'failed', 'interrupted'].includes(turn.status))) return skip();
+      gate = 'child-work';
+      if (before.turns.some((turn: any) => hasNativeChildWork(turn.items, threadId))) return skip();
+      gate = 'goal';
+      const goal = nativeGoalEvidence(await read('thread/goal/get', { threadId }), threadId);
+      if (nativeGoalProtection(goal.status)) return skip();
+      check();
+      gate = 'background-work';
+      if ((await backgroundTerminals(read, threadId, check)).length) return skip();
+      gate = 'rollout';
+      await this.validateRolloutSnapshot(before.path);
+      observed = await this.readHistoryFact(sessionKey);
+      check();
+      const fingerprint = nativeHistoryFingerprint(before);
+      const resumeParams = { threadId, ...(this.options.modelProvider ? { modelProvider: this.options.modelProvider } : {}) };
+      const effect = Promise.resolve().then(async () => {
+        let receipt: NativeResumeReceipt | null = null, preparing = false, dispatched = false, finished = false;
+        try {
+          gate = 'journal-prepare';
+          local(); check();
+          preparing = true;
+          receipt = await journal.prepareResume({
+            expected: {
+              sessionKey: expected.sessionKey, commandId: expected.commandId,
+              connectionId: expected.connectionId, runId: expected.runId!, revision: expected.revision,
+            },
+            nativeConnectionId: connectionId, threadId, fingerprint, continuation,
+          });
+          preparing = false;
+          if (!receipt) throw new RunControlConflict();
+          gate = 'journal-begin';
+          local(); check();
+          if (!await journal.beginResume(receipt)) throw new RunControlConflict();
+          local(); check();
+          gate = 'unsubscribe';
+          reservation.effectStarted = true;
+          const unloaded = await this.request('thread/unsubscribe', { threadId }, undefined, undefined,
+            () => { local(); dispatched = true; });
+          if (unloaded?.status === 'unsubscribed' && connectionId === this.connectionId) this.loadedThreadIds.delete(threadId);
+          local(); authorityCheck();
+          if (unloaded?.status !== 'unsubscribed') throw new RunControlConflict();
+          gate = 'resume';
+          let resumed = await this.request('thread/resume', resumeParams, undefined, undefined,
+            () => { local(); dispatched = true; });
+          // codex-cli 0.147+ keeps systemError threads loaded across thread/unsubscribe;
+          // archive -> unarchive -> resume genuinely evicts the errored in-memory state
+          // while preserving turns, path, title, and goal.
+          if (resumed?.thread?.status?.type === 'systemError') {
+            local(); authorityCheck();
+            gate = 'archive';
+            await this.request('thread/archive', { threadId }, undefined, undefined,
+              () => { local(); dispatched = true; });
+            if (connectionId === this.connectionId) this.loadedThreadIds.delete(threadId);
+            local(); authorityCheck();
+            gate = 'unarchive';
+            await this.request('thread/unarchive', { threadId }, undefined, undefined,
+              () => { local(); dispatched = true; });
+            local(); authorityCheck();
+            gate = 'resume';
+            resumed = await this.request('thread/resume', resumeParams, undefined, undefined,
+              () => { local(); dispatched = true; });
+          }
+          let resumedError: unknown = null;
+          try {
+            historyThread(resumed, threadId);
+          } catch (error) {
+            resumedError = error;
+          }
+          if (!await journal.finishResume(receipt, 'acknowledged')) throw new RunControlConflict();
+          finished = true;
+          if (resumedError) throw resumedError;
+          local();
+        } catch (error) {
+          if (preparing) this.invalidateExecution();
+          else if (receipt && !dispatched) {
+            try { if (!await journal.finishResume(receipt, 'not_dispatched')) this.invalidateExecution(); }
+            catch { this.invalidateExecution(); }
+          } else if (dispatched && !finished) this.invalidateExecution();
+          throw error;
+        }
+      });
+      const physical = new Promise<void>(resolve => { void Promise.prototype.then.call(effect, () => resolve(), () => resolve()); });
+      this.authorizingEffects.add(physical);
+      void physical.then(() => { this.authorizingEffects.delete(physical); });
+      await effect;
+      observed = await this.readHistoryFact(sessionKey);
+      check(true);
+      gate = 'confirm';
+      const refreshed = await read('thread/read', { threadId, includeTurns: true });
+      check(true);
+      const after = historyThread(refreshed, threadId);
+      gate = 'confirm-status';
+      if (after.status?.type !== 'idle') throw new RunControlConflict();
+      gate = 'confirm-history';
+      if (nativeHistoryFingerprint(after) !== fingerprint) throw new RunControlConflict();
       gate = 'confirm-goal';
       const afterGoal = nativeGoalEvidence(await read('thread/goal/get', { threadId }), threadId);
       if (nativeGoalProtection(afterGoal.status) || afterGoal.version !== goal.version) throw new RunControlConflict();
@@ -4507,7 +4722,10 @@ export class CodexAppServer {
           incompleteReason = 'Codex final thread read unavailable';
           continue;
         }
-        result = await this.reloadErroredTerminal(sessionKey, result, nativeRead);
+        const hasResumeJournal = Boolean(this.maintenanceRecovery.getStore()?.resumes ?? this.options.nativeJournal?.prepareResume);
+        result = hasResumeJournal
+          ? await this.reloadJournaledErroredTerminal(sessionKey, result, nativeRead)
+          : await this.reloadErroredTerminal(sessionKey, result, nativeRead);
         if (!sameTurn()) return;
         if (revision !== (this.options.nativeJournal ? observed : this.legacyExecutions.get(sessionKey))?.revision) continue;
         let thread;
@@ -5056,7 +5274,11 @@ export class CodexAppServer {
     // The worker must perform fresh final reconciliation after loading.
     // Read-only refreshes remain pure.
     if (snapshot?.thread?.status?.type === 'systemError') {
-      historyThread(await this.reloadErroredTerminal(sessionKey, snapshot, nativeRead, authorityCheck), threadId);
+      const hasResumeJournal = Boolean(this.maintenanceRecovery.getStore()?.resumes ?? this.options.nativeJournal?.prepareResume);
+      const recovered = hasResumeJournal
+        ? await this.reloadJournaledErroredTerminal(sessionKey, snapshot, nativeRead, authorityCheck, continuation)
+        : await this.reloadErroredTerminal(sessionKey, snapshot, nativeRead, authorityCheck);
+      historyThread(recovered, threadId);
       authorityCheck();
       return;
     }
