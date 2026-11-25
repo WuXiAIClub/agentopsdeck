@@ -629,6 +629,35 @@ test('native catalog refresh reaches a fixed worker head without replaying uncha
   } finally { await projection.close(); await owner.close(); rmSync(directory, { recursive: true, force: true }); }
 });
 
+test('deckEvents coalesces synchronous runtime bursts into bounded worker batches without overflowing MAX_PENDING', async () => {
+  const directory = mkdtempSync(join(tmpdir(), 'async-deck-burst-'));
+  const owner = new AsyncConnectorOwner({ file: join(directory, 'connector.sqlite') }, silence);
+  await owner.open();
+  const batches: number[] = [];
+  const projection = new AsyncConnectorEventProjection({
+    command: (kind, input) => {
+      if (kind === 'eventProjectionAppend') batches.push((input as { events: DeckEvent[] }).events.length);
+      return owner.command(kind, input);
+    },
+  }, silence);
+  const store = new DeckStore({ projectionEvents: projection.deckEvents });
+  try {
+    const start = await projection.snapshot(cursor => cursor, refreshMemoryFixture);
+    // Emit 300 individual Deck mutations in one synchronous turn (> 64 MAX_PENDING).
+    for (let i = 0; i < 300; i++) {
+      store.upsertSession({ sessionKey: `codex:burst-${i}`, title: `Session ${i}`, status: 'idle', source: 'codex', lastActiveAt: i + 1 });
+    }
+    const snap = await projection.snapshot(cursor => ({ cursor, count: store.getSessionsState().groups.flatMap(g => g.sessions).length }), refreshMemoryFixture);
+    assert.equal(snap.count, 300);
+    assert.equal(projection.status().unavailable, false);
+    assert.ok(batches.length < 64, `expected coalesced batches under MAX_PENDING, got ${batches.length}`);
+    assert.equal(batches.reduce((a, b) => a + b, 0), 300);
+    const replay = await projection.replay(start);
+    assert.equal(replay.known, true);
+    assert.equal(replay.events.length, 64);
+  } finally { await projection.close(); await owner.close(); rmSync(directory, { recursive: true, force: true }); }
+});
+
 test('Deck producer commits to the original worker journal and survives owner reopen', async () => {
   const directory = mkdtempSync(join(tmpdir(), 'async-deck-events-'));
   const file = join(directory, 'connector.sqlite');
@@ -681,8 +710,10 @@ test('Deck sink absorbs unknown ACK but fences reads and never retries native ev
 test('Deck sink bounds queued callbacks and preserves the first physical operation under overflow', async () => {
   const gate = deferred<unknown>(); const { projection, calls } = setup(() => gate.promise);
   const store = new DeckStore({ projectionEvents: projection.deckEvents });
-  for (let index = 0; index < 65; index++) store.append('session.updated', { index });
-  assert.equal(projection.status().pending, 64); assert.equal(projection.status().unavailable, true);
+  const large = 'x'.repeat(200_000);
+  for (let index = 0; index < 45; index++) store.append('session.updated', { index, large });
+  assert.ok(projection.status().pending > 0 && projection.status().pending <= 64);
+  assert.equal(projection.status().unavailable, true);
   await tick(); gate.resolve({ cursor: epoch + '1' }); await projection.close();
   assert.ok(calls.length <= 1); assert.equal(projection.status().pending, 0);
   assert.equal(projection.status().inputBytes, 0);
