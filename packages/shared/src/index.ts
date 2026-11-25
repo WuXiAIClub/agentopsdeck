@@ -1,4 +1,5 @@
 export * from './agent-interaction.js';
+export type { AntigravityQuotaWindow, AntigravityUsage } from './antigravity-usage.js';
 export * from './shared-message-input.js';
 export { readCodexGoal, type CodexGoal } from './codex-goal.js';
 export { goalActions, readGoalControl, readGoalControlSnapshot, type GoalAction, type GoalControl, type GoalControlSnapshot } from './codex-goal-control.js';

@@ -6,6 +6,7 @@ import { ConnectorOwnerUnavailable } from './connector/connector-owner-domain.js
 import { EXPECTED_NODE_HEADER } from './connector/node-identity.js';
 import { ReadRequestError } from './lifecycle/read-request-owner.js';
 import { registerSystemRoutes, SystemRestartFenceError, type SystemReadDependencies } from './routes/system.js';
+import { createAntigravityUsageReader } from './antigravity/usage.js';
 
 /** Full original frontend read chain. Native work belongs to the original
  * system owner, even after the bounded Auth/HTTP waiter has ended. */
@@ -15,6 +16,7 @@ export function registerApplicationSystemReadsHttp(app: Hono, deps: SystemReadDe
   commands?: Pick<ReturnType<typeof createApplicationCommandScopes>, 'run'>;
 }) {
   let closed = false;
+  const readUsage = deps.config.antigravity && createAntigravityUsageReader(deps.config.antigravity);
   const available = () => !closed && deps.available();
   const authority = new SessionReadAuthority(request => {
     if (!available()) throw new ConnectorOwnerUnavailable();
@@ -67,7 +69,12 @@ export function registerApplicationSystemReadsHttp(app: Hono, deps: SystemReadDe
       const headersOut = new Headers(response.headers); headersOut.set('Cache-Control', 'no-store');
       return new Response(response.body, { status: response.status, statusText: response.statusText, headers: headersOut });
   };
-  for (const route of ['/api/health', '/api/config/debug', '/api/gateway/status']) app.get(route, dispatch);
+  original.get('/api/antigravity/usage', async context => {
+    if (!readUsage) return context.json({ usage: null });
+    try { return context.json({ usage: await readUsage() }); }
+    catch { return context.json({ error: 'antigravity_usage_unavailable' }, 503); }
+  });
+  for (const route of ['/api/health', '/api/config/debug', '/api/gateway/status', '/api/antigravity/usage']) app.get(route, dispatch);
   if (deps.commands) app.post('/api/gateway/restart', dispatch);
   let closing: Promise<void> | undefined;
   return Object.freeze({ close: () => {

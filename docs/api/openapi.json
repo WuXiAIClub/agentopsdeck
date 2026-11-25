@@ -78,6 +78,34 @@
         "x-aod-authorization": "Unspecified in inventory; route-specific authentication and grants are required where enforced by the implementation."
       }
     },
+    "/api/antigravity/usage": {
+      "get": {
+        "operationId": "route_f5ad7bc9f11beadd",
+        "summary": "GET /api/antigravity/usage",
+        "tags": [
+          "Application"
+        ],
+        "description": "Source route inventory, not a complete request/response or authorization contract. Read x-aod-sources and the bilingual API guide before calling. Role-specific and internal registrations can share this path.",
+        "parameters": [],
+        "responses": {
+          "default": {
+            "description": "Implementation-defined status, payload and streaming behavior; inspect the linked source and route tests."
+          }
+        },
+        "x-aod-sources": [
+          {
+            "file": "apps/server/src/application-system-reads-http.ts",
+            "line": 72
+          },
+          {
+            "file": "apps/server/src/application-system-reads-http.ts",
+            "line": 77
+          }
+        ],
+        "x-aod-raw-path": "/api/antigravity/usage",
+        "x-aod-authorization": "Unspecified in inventory; route-specific authentication and grants are required where enforced by the implementation."
+      }
+    },
     "/api/artifacts/{id}": {
       "get": {
         "operationId": "route_8245f8e441f3ca4f",
@@ -405,7 +433,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/application-system-reads-http.ts",
-            "line": 70
+            "line": 77
           },
           {
             "file": "apps/server/src/routes/system.ts",
@@ -566,7 +594,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/connector/async-connector-surface.ts",
-            "line": 310
+            "line": 330
           },
           {
             "file": "apps/server/src/routes/connector.ts",
@@ -840,7 +868,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/connector/async-connector-surface.ts",
-            "line": 351
+            "line": 371
           },
           {
             "file": "apps/server/src/routes/connector.ts",
@@ -868,7 +896,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/connector/async-connector-surface.ts",
-            "line": 365
+            "line": 385
           },
           {
             "file": "apps/server/src/routes/connector.ts",
@@ -896,7 +924,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/connector/async-connector-surface.ts",
-            "line": 290
+            "line": 310
           },
           {
             "file": "apps/server/src/routes/connector.ts",
@@ -952,7 +980,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/connector/async-connector-surface.ts",
-            "line": 270
+            "line": 290
           },
           {
             "file": "apps/server/src/routes/connector.ts",
@@ -1098,7 +1126,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/connector/async-connector-surface.ts",
-            "line": 410
+            "line": 430
           },
           {
             "file": "apps/server/src/routes/connector.ts",
@@ -3417,7 +3445,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/application-system-reads-http.ts",
-            "line": 71
+            "line": 78
           },
           {
             "file": "apps/server/src/routes/system.ts",
@@ -3445,7 +3473,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/application-system-reads-http.ts",
-            "line": 70
+            "line": 77
           },
           {
             "file": "apps/server/src/routes/system.ts",
@@ -3477,7 +3505,7 @@
           },
           {
             "file": "apps/server/src/application-system-reads-http.ts",
-            "line": 70
+            "line": 77
           },
           {
             "file": "apps/server/src/application.ts",
@@ -13155,7 +13183,7 @@
       }
     }
   },
-  "x-aod-static-registrations": 486,
+  "x-aod-static-registrations": 488,
   "x-aod-unresolved-registrations": [
     {
       "method": "patch",

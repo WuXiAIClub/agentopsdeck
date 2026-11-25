@@ -14,7 +14,7 @@ its permissions. No public image, installer or GitHub repository is assumed here
 | Configure an independent instance | [Configuration](configuration.md) |
 | Enable agents or separate Hub/Connector | [Integrations](integrations.md) |
 | Review the unfinished Antigravity CLI connector | [Antigravity CLI development](antigravity-cli.md) |
-| Review Antigravity CLI development and outstanding integration | [Antigravity CLI](antigravity-cli.md) |
+| Check Antigravity account quota in the workspace | [Antigravity account quota card](antigravity-cli.md#account-quota-card) |
 | Review native isolation and installer gates | [Native security](native-security.md) |
 | Plan remote access, backup and upgrades | [Operations](operations.md) |
 | Diagnose installation or session problems | [Troubleshooting](troubleshooting.md) |

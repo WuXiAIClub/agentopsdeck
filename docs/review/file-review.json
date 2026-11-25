@@ -17,30 +17,30 @@
     "Native devices, providers, full backend, browser accessibility, artifacts and redistribution rights remain unaccepted."
   ],
   "summary": {
-    "totalFiles": 3572,
+    "totalFiles": 3580,
     "byKind": {
       "config": 57,
-      "docs": 53,
+      "docs": 55,
       "asset": 8,
-      "test": 1741,
-      "runtime": 1699,
+      "test": 1743,
+      "runtime": 1703,
       "generated": 14
     },
     "byModule": {
-      "governance": 261,
+      "governance": 263,
       "main": 65,
       "release-boundary": 13,
       "native": 143,
-      "main-integration": 34,
+      "main-integration": 35,
       "storage": 218,
       "api-auth": 392,
       "hub-notebook": 22,
-      "execution": 469,
-      "codex": 2,
+      "execution": 471,
+      "codex": 4,
       "connector": 582,
       "api-completion": 7,
       "hub": 552,
-      "web-ui": 404,
+      "web-ui": 405,
       "web-state": 383,
       "web-menu-tests": 1,
       "web-menu": 1,
@@ -53,14 +53,16 @@
       "external": 2
     },
     "byDepth": {
-      "semantic": 3553,
-      "asset": 19
+      "semantic": 3546,
+      "asset": 19,
+      "structural": 15
     },
     "byDisposition": {
-      "no-finding": 3572
+      "no-finding": 3565,
+      "pending": 15
     },
-    "completedSemanticOrAssetFiles": 3572,
-    "remainingFiles": 0,
+    "completedSemanticOrAssetFiles": 3565,
+    "remainingFiles": 15,
     "filesWithFindings": 0
   },
   "files": [
@@ -2427,6 +2429,36 @@
       "findings": []
     },
     {
+      "path": "apps/server/src/antigravity/usage.test.ts",
+      "size": 3061,
+      "sha256": "88d2e292d711adfce7312f0e0efa8a6988c2646ad71e18d414757fb3d012b509",
+      "module": "execution",
+      "kind": "test",
+      "depth": "structural",
+      "disposition": "pending",
+      "checks": [
+        "antigravity-account-quota-targeted-source-review",
+        "exact-file-sha256-and-size"
+      ],
+      "notes": "Synthetic CLI checks command arguments, home and result coalescing; parser tests invalid schema, duplicate identifiers, reset timestamps and quota bounds. No production provider, credentials or workspace accessed.",
+      "findings": []
+    },
+    {
+      "path": "apps/server/src/antigravity/usage.ts",
+      "size": 3601,
+      "sha256": "9b814b60f19e8f096796f350c627af879f821c6186b2618611383d6eb099691b",
+      "module": "execution",
+      "kind": "runtime",
+      "depth": "structural",
+      "disposition": "pending",
+      "checks": [
+        "antigravity-account-quota-targeted-source-review",
+        "exact-file-sha256-and-size"
+      ],
+      "notes": "Reviewed fixed argv/no shell, verified AOD home, 15s direct-child timeout, bounded output, one in-flight probe, short cache and narrow JSON projection. Tested with synthetic executable; no deployed CLI acceptance or arbitrary wrapper descendant cleanup verified.",
+      "findings": []
+    },
+    {
       "path": "apps/server/src/application-account-directory-authority.test.ts",
       "size": 5175,
       "sha256": "a66ecee04b607bb84fadf53c3b77716ca38129821c652a4ccd80576333411004",
@@ -3804,38 +3836,32 @@
     },
     {
       "path": "apps/server/src/application-system-reads-http.test.ts",
-      "size": 13531,
-      "sha256": "dfc3604609f8ea57d037b338a86d3510152658f359a9025e27cfd34a5507c41a",
+      "size": 14351,
+      "sha256": "4d13d8e5a46f04be1b16f1e7214b614a1c38ebc176ba5e1e623ec0e86042329e",
       "module": "api-auth",
       "kind": "test",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "清单全部字节读取与 SHA-256/size 对照（非人工全文语义审查）",
-        "TypeScript AST 语法/声明/import/调用位置提取（无源码执行）",
-        "测试静态 call site/断言方法/临时资源夹具位置提取，不等于逐断言正确性核对",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "antigravity-account-quota-targeted-source-review",
+        "exact-file-sha256-and-size"
       ],
-      "notes": "本文件 187 行；声明 tick@18, gate@19, release@19, promise@19, fixture@20, root@21, logs@22, diagnostics@22；直接依赖 node:assert/strict, apps/server/src/lifecycle/http-deadline-test-support.ts, node:test, node:fs/promises, node:os, node:path。静态 test/describe/it 调用 7、断言调用 70；断言位置 assert.equal@68, assert.equal@68, assert.equal@70, assert.equal@71, assert.equal@72, assert.equal@72, assert.equal@73, assert.equal@73, assert.equal@73, assert.equal@75；夹具/资源位置 mkdtemp@21, rm@29, Hono@39, AbortController@102, AbortController@174。待沿本文件上述 imports 对照全部 branch、setup/teardown、assertion 的确切目标与失败语义；循环与动态导入不以 AST 数量代替运行 case，主审全 backend 的运行结果不在此擅自记为本文件深审。",
+      "notes": "Quota route checks original credentials, forged transport headers, revocation, no-store and disabled response with disposable authorization fixtures. No private datastore used; live provider acceptance remains separate.",
       "findings": []
     },
     {
       "path": "apps/server/src/application-system-reads-http.ts",
-      "size": 4697,
-      "sha256": "a62c07ace667f1b46c6291ecef8b31f98f0632938a22278b17ac32297e29a897",
+      "size": 5167,
+      "sha256": "e4285bee5974e7a76bf8e976bd94ba2080e8febe0550e83fe343283da582ba14",
       "module": "api-auth",
       "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "完整 79 行源码逐行读取",
-        "原始 credentials/SessionReadAuthority→restart command scope",
-        "no-store/health 委派与关闭原始请求",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "antigravity-account-quota-targeted-source-review",
+        "exact-file-sha256-and-size"
       ],
-      "notes": "禁止私有 execution grant/node identity header，只复制 user credentials，不把内部 bearer 当管理员。SessionReadAuthority 与 WeakMap 保存原请求当前 actor 的检查，restart prepare/effect 两阶段本地 scope，health bypass 有明确路径。原 Response 改 no-store，close 保留物理原读。该 wrapper 的安全 envelope 不会自动清理注入的 normalizeError（standalone connector 第 198 行）。",
+      "notes": "Quota dispatch follows existing original-admin checks before and after observation, rejects transport credentials, returns no-store and sanitized errors, and is drained with authority reads. Only the quota delta was reviewed.",
       "findings": [],
       "historicalFindingReferences": [
         "AOD-AUTH-004"
@@ -44483,21 +44509,17 @@
     },
     {
       "path": "apps/web/src/api.ts",
-      "size": 109312,
-      "sha256": "ed2888dae5cab9ca17842add692c91536886bd6e143026029495ffff0946ecec",
+      "size": 109496,
+      "sha256": "a1ac6345ace10f8f5e9c022cca6bdfe744123f397590d0b17ff3d33606f9f21d",
       "module": "web-ui",
       "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "inventory-sha256-size",
-        "typescript-ast-structure-not-semantic",
-        "manual-selected-source-ranges",
-        "manual-selected-call-chain-review",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "antigravity-account-quota-targeted-source-review",
+        "exact-file-sha256-and-size"
       ],
-      "notes": "[\"已追 recoveryScope/epoch、rawResponse/json body前后scope与caller abort/deadline/finally；fileResponse/transfer；apiUrl/mediaUrl保留任意scheme，URL路由不是sink净化。source preview owner-only、640KiB/schema/cancel/15s读取；filePreview是泛型断言非此处运行schema。已有client鉴权屏障强，不能泛称整个API无鉴权；浏览器file命令二次写是caller绕过unknown恢复而非json自动retry。\",\"只对列出的运行片段做语义追踪；其余运行体没有全文阅读。文件级 depth 保持 structural，不能以局部发现抵充完整文件审查。\"]",
+      "notes": "Quota client uses existing readJson lifecycle with an owned AbortSignal and finite timeout. Only the quota client delta was reviewed; no deployed browser verification.",
       "findings": [],
       "historicalFindingReferences": [
         "WEBUI-001",
@@ -44523,6 +44545,21 @@
         "line-by-line-semantic-audit"
       ],
       "notes": "[\"全文检查 useCurrent 的 scope epoch/identity generation，角色 API version/grantDigest/nodeVersion；self locked/inheritance 与 explicit migration consent；unknown 清 saved 并要求 refresh；label map 翻译，environment 默认并非鉴权成功。\",\"角色契约 helper 与服务端 grant/version 校验在清单外；未调用实际管理 API。\"]",
+      "findings": []
+    },
+    {
+      "path": "apps/web/src/components/AntigravityUsagePanel.tsx",
+      "size": 2909,
+      "sha256": "b449c708ce6fb52fbdeaf86a9ed79e19cbe2788a3bebc6e91794456ae3ee281f",
+      "module": "web-ui",
+      "kind": "runtime",
+      "depth": "structural",
+      "disposition": "pending",
+      "checks": [
+        "antigravity-account-quota-targeted-source-review",
+        "exact-file-sha256-and-size"
+      ],
+      "notes": "Reviewed recovery-scope identity, request cancellation and generation, text-only rendering, accessible progress and status/error semantics, and localized formatting. No live browser or assistive-device acceptance.",
       "findings": []
     },
     {
@@ -47444,19 +47481,17 @@
     },
     {
       "path": "apps/web/src/components/WorkspaceStatusCard.tsx",
-      "size": 4920,
-      "sha256": "1272f6fbe9b9276600e57c3a5ffda9c5b1edfcbd18e96b5ee9c577998980cc3b",
+      "size": 5319,
+      "sha256": "fac543b0f5f43ec78734c46dcba68dd6d865e9e9f0633fb85d04354499fe352f",
       "module": "web-ui",
       "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "inventory-sha256-size",
-        "typescript-ast-structure-not-semantic",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "antigravity-account-quota-targeted-source-review",
+        "exact-file-sha256-and-size"
       ],
-      "notes": "[\"仅结构起点：69行、1个声明、9个静态导入、parseDiagnostics=0。声明形状：WorkspaceStatusCard。\",\"AST定位而非控制流证明：useEffect=2, window.addEventListener=1, abort.abort=1, window.removeEventListener=1；JSX关注属性：aria-label@47, role@53, role@54, aria-label@57。\",\"除下述手工观察另有说明外，未完整阅读运行体/调用者/契约；结构定位不等于XSS、权限、恢复、双语或a11y审查通过。\"]",
+      "notes": "Existing details/summary UI stays keyboard operable; quota panel is lazy and only loaded when expanded. Unrelated card behavior not re-reviewed.",
       "findings": []
     },
     {
@@ -53180,110 +53215,18 @@
     },
     {
       "path": "apps/web/src/lib/translations.ts",
-      "size": 288602,
-      "sha256": "7efe3056836eeb7d75e458c2998845bcb6098a34d91dad1c566607309cc90641",
-      "lineCount": 3212,
+      "size": 289333,
+      "sha256": "92bb9094e6aaae82821f4e1af939360200eb6b9e8f51f7272af550e2fd92874e",
       "module": "web-state",
       "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "fullSourceRead": true,
-      "currentReviewedRegions": [
-        "1-85",
-        "86-1940",
-        "1941-3212"
-      ],
-      "inheritedReviewedRegions": [
-        "1-20",
-        "3168-3212"
-      ],
-      "combinedReadRegionsAtIdenticalHash": [
-        "1-3212"
-      ],
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "complete-current-bilingual-catalog-and-runtime-read",
-        "translation-template-plain-text-own-property-single-pass-review",
-        "bounded-complete-i18n-loader-storage-subscription-contract-read",
-        "complete-existing-i18n-test-source-read-no-test-run",
-        "bounded-live-session-history-error-wording-contract-read",
-        "exact-unchanged-byte-evidence-match",
-        "explicit-truncation-repair-and-complete-range-accounting"
+        "antigravity-account-quota-targeted-source-review",
+        "exact-file-sha256-and-size"
       ],
-      "contracts": [
-        "apps/web/src/lib/i18n.ts:1-77 complete current read; dynamic loader single-flight reset, rejected chunk fallback, explicit retry, locale storage/document.lang and useSyncExternalStore snapshots",
-        "apps/web/src/lib/i18n.test.ts:1-106 complete current read; VM rejection/retry fixture, seven tests covering locale, placeholder parity, own-property and one-pass interpolation, source paths/query text; source inspection only",
-        "apps/web/src/lib/live-session.ts:115-178 current bounded read; history-incomplete label branch guarded by runtime.sync === error, terminal/thread/successor/unknown distinction preserved",
-        "apps/web/src/lib/session-lifecycle-notice.test.ts:113-132 bounded current read; intended Chinese history-error wording asserted",
-        "WorkspaceOsDesktop.tsx full read includes useI18n at339 and all translated Desktop labels; SessionWorkspaceView useI18n/caller evidence reused without whole dependency reread"
-      ],
-      "notes": "Entire 3212-line current catalog and translation runtime reviewed, not only branding delta. Entries are static text, not executable templates; public translateMessage returns plain text, retains unmatched placeholders and uses own properties. React rendering must still escape at callers; no blanket sink approval. Catalog preserves exact-run stop/unknown-no-resend, compaction admission versus completion, session/history/thread distinctions, login-key secrecy and revocation separate from already-running tasks, additive shares and broad-scope warnings. Full current i18n contract catches chunk-load errors, clears failed single-flight promise, avoids automatic retry loops, permits explicit retry and falls back to English until loaded; storage failures preserve in-memory preference. Existing i18n tests were read, not newly run. Chinese history-incomplete labels using failure wording were traced to runtime.sync === error and existing lifecycle assertions; not a new mismatch finding. Older stronger feature messages coexist with corrected/current strings; unused catalog entries alone are not proof of an active UI claim. Dictionary mirrors Desktop cadence and local-delete wording in WEB-COMP-003/004, not a separate mistranslation or new defect. No provider/browser/device/account deletion or sandbox acceptance was attempted.",
-      "findings": [],
-      "gaps": [
-        "Unreviewed source:86-3167. Full paired-catalog semantic coverage remains pending because the source was not fully read, independent of any browser/device limit."
-      ],
-      "reviewedRanges": {
-        "complete": "1-3212",
-        "catalogContinuation": [
-          "86-1940",
-          "1941-2000",
-          "2001-2070",
-          "2071-2140",
-          "2141-2210",
-          "2211-2280",
-          "2281-2350",
-          "2351-2420",
-          "2421-2490",
-          "2491-2560",
-          "2561-2630",
-          "2631-2700",
-          "2701-2770",
-          "2771-2840",
-          "2841-2910",
-          "2911-2980",
-          "2981-3050",
-          "3051-3120",
-          "3121-3212"
-        ],
-        "truncationRepairs": [
-          "350-370",
-          "1025-1036",
-          "1390-1420",
-          "1622-1629",
-          "1684-1691",
-          "1747-1752"
-        ],
-        "method": "Complete sequential source chunks carried across continuation contexts; no search/hash/diff-only promotion. Inherited 1-85/3168-3212 proof retained at unchanged SHA; footer was also reread in final chunk."
-      },
-      "observations": [
-        {
-          "range": "86-585",
-          "notes": "Card authority/archive/recovery, automation expiry/caps, task import and read-only repo preview, native Goal manual confirmation, extraction/citations, WeChat disclosure and user-set estimated rates: storage receipt, transmission and execution limits remain distinct."
-        },
-        {
-          "range": "586-1150",
-          "notes": "Bounded transport diagnostics, display identity binding, native baseline exclusion/cache continuity, file save recovery, browser/terminal/phone controls, GET snapshot, drawio/whiteboard format limits and task bearer grant/key revocation language. Legitimate upstream integration names retained; old inactive phone wording not inferred to control current behavior."
-        },
-        {
-          "range": "1151-1585",
-          "notes": "Bidirectional boards/evidence scan limits, independent execution/history sync, exact execution identity, unknown delivery without resend, sharing snapshots, hashed login fingerprint and maintenance acceptance. History-error wording crosschecked against current runtime error predicate."
-        },
-        {
-          "range": "1586-2210",
-          "notes": "Owned settings versus upstream runtime labels, issuer replacement and reauthorization, repository preview boundaries and historical limits, inherited/environment/session roles, additive legacy grants, explicit broad-read warning, one-time secret visibility/discard/revoke recovery and no-blind-retry language."
-        },
-        {
-          "range": "2211-2700",
-          "notes": "Grant approval scope/creation limits, reported metric coverage and not-a-bill credits, context status/reinjection strings, private0600 directive modes, Moderator audio/provider/bindings, version restore/diff, desktop window/snap/explorer/link/taskbar and telemetry labels."
-        },
-        {
-          "range": "2701-3167",
-          "notes": "Wallpaper/multi-screen authorization and fallback labels, recycle bin/manual linkage, Docker templates/blueprints/provisioning claims, boot/session/notification UI, Access Center roles/keys/user operations and browser command unknown recovery. Static messages do not prove device feature support, container isolation or backend action success; active Desktop misleading cadence/local delete already recorded separately."
-        },
-        {
-          "range": "3168-3212",
-          "notes": "External image/PDF/delete-session/runtime labels and typed locale/key/params exports; resolveLocale explicit choice precedes browser fallback; interpolation uses own-property and one pass, with missing params preserved and user values not reinterpreted."
-        }
-      ]
+      "notes": "Checked new EN/CN quota copy, percentage placeholder and model group labels. Catalog gate verifies key validity, not full linguistic or screen-reader acceptance.",
+      "findings": []
     },
     {
       "path": "apps/web/src/lib/usage-credits.test.ts",
@@ -58950,6 +58893,36 @@
       "findings": []
     },
     {
+      "path": "docs/antigravity-cli.md",
+      "size": 7300,
+      "sha256": "df97cb0b97fe72cc2616c638d508e115ba82b04d158804d9f98e9e94873a39ac",
+      "module": "governance",
+      "kind": "docs",
+      "depth": "structural",
+      "disposition": "pending",
+      "checks": [
+        "antigravity-account-quota-targeted-source-review",
+        "exact-file-sha256-and-size"
+      ],
+      "notes": "Reviewed English card path, command, cache and administrator endpoint behavior against implementation; no broad connector acceptance is claimed.",
+      "findings": []
+    },
+    {
+      "path": "docs/antigravity-cli.zh-CN.md",
+      "size": 6771,
+      "sha256": "6645c3a53337e4a0f3bd06cb552c69e37d25c408e817b52cb0218b474d6473f2",
+      "module": "governance",
+      "kind": "docs",
+      "depth": "structural",
+      "disposition": "pending",
+      "checks": [
+        "antigravity-account-quota-targeted-source-review",
+        "exact-file-sha256-and-size"
+      ],
+      "notes": "Reviewed Simplified Chinese card path, command, cache and administrator endpoint behavior against implementation and English guide.",
+      "findings": []
+    },
+    {
       "path": "docs/api.md",
       "size": 5201,
       "sha256": "8d098e2ab00daad0aa0d42e0542defe40a70b9ffdcee4d66c17e31638fe7e9d0",
@@ -58985,22 +58958,18 @@
     },
     {
       "path": "docs/api/openapi.json",
-      "sha256": "a7780a61979ee3a6f4506c55d6954af7e3ad53ad4b0b5864cdd0039ac046de76",
-      "size": 525942,
+      "size": 528194,
+      "sha256": "aab28cc25583117b8a1b1e14bf4dc8e8b1c1eebdefdde53a2a0fb99ccf043530",
       "module": "release-boundary",
       "kind": "config",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "findings": [],
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "complete-source-reading-or-authorship",
-        "direct-review-validator-and-publication-contract",
-        "source-bound-approval-and-evidence-provenance",
-        "paired-documentation-contract",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "antigravity-account-quota-targeted-source-review",
+        "exact-file-sha256-and-size"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for docs/api/openapi.json (release-boundary/config); all historical findings and license/security/correctness checks are verified."
+      "notes": "Deterministic regenerated inventory includes the quota registration and source locations, including historical source-line drift. Inventory is not a normative contract or access-control guarantee.",
+      "findings": []
     },
     {
       "path": "docs/browser-inventory.json",
@@ -59698,37 +59667,33 @@
     },
     {
       "path": "docs/README.md",
-      "sha256": "0e9adf14ee34d3cb7429a2a5c890d8b9169e368268bcd0c839ef3f9068ba4f5e",
-      "size": 2844,
+      "size": 3075,
+      "sha256": "8703dfb46b228ce2b5cd492fbc2faa05d41a10ecf7c720db766dc17549d5a424",
       "module": "release-boundary",
       "kind": "docs",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "findings": [],
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "complete-source-reading-or-authorship",
-        "direct-review-validator-and-publication-contract",
-        "source-bound-approval-and-evidence-provenance",
-        "paired-documentation-contract"
+        "antigravity-account-quota-targeted-source-review",
+        "exact-file-sha256-and-size"
       ],
-      "notes": "Full current text read or authored. Gate and direct validator/test contracts inspected; pending decision configuration is not a rights approval. Historical dependency tables retained and current metadata scope distinguished. No source scan, scoped regression or license presence grants inherited rights or runtime/platform acceptance."
+      "notes": "Added discoverable quota card link to the English navigation; bilingual link check covers paired guides.",
+      "findings": []
     },
     {
       "path": "docs/README.zh-CN.md",
-      "sha256": "3923e62312d1ccabd885407f2e51bc47e15e73baca8b00e6d7dc544cb54cfbf2",
-      "size": 2707,
+      "size": 2940,
+      "sha256": "1d08cf1fde6a79f848e8fa6117b70597e0aca9e2462f2439fd9ad01a566b5dd7",
       "module": "release-boundary",
       "kind": "docs",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "findings": [],
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "complete-source-reading-or-authorship",
-        "direct-review-validator-and-publication-contract",
-        "source-bound-approval-and-evidence-provenance",
-        "paired-documentation-contract"
+        "antigravity-account-quota-targeted-source-review",
+        "exact-file-sha256-and-size"
       ],
-      "notes": "Full current text read or authored. Gate and direct validator/test contracts inspected; pending decision configuration is not a rights approval. Historical dependency tables retained and current metadata scope distinguished. No source scan, scoped regression or license presence grants inherited rights or runtime/platform acceptance."
+      "notes": "Added discoverable quota card link to the Simplified Chinese navigation; bilingual link check covers paired guides.",
+      "findings": []
     },
     {
       "path": "docs/release-1.0.0.md",
@@ -61523,6 +61488,21 @@
       }
     },
     {
+      "path": "packages/shared/src/antigravity-usage.ts",
+      "size": 252,
+      "sha256": "c57f4d4c4e0d89a548157fa7b761009142ce9529c4073764f93fd42d9a3c9117",
+      "module": "main-integration",
+      "kind": "runtime",
+      "depth": "structural",
+      "disposition": "pending",
+      "checks": [
+        "antigravity-account-quota-targeted-source-review",
+        "exact-file-sha256-and-size"
+      ],
+      "notes": "Quota projection describes sample time, provider model-group labels, remaining fractions and nullable reset timestamps; contains no raw CLI output or credential fields.",
+      "findings": []
+    },
+    {
       "path": "packages/shared/src/automation-configuration.ts",
       "size": 2344,
       "sha256": "04d79ffce6a6ff9fe43a1b65f2b88395d6b80ac4aac00f39cc6328d9f5f2cb13",
@@ -61769,32 +61749,18 @@
     },
     {
       "path": "packages/shared/src/index.ts",
-      "size": 18661,
-      "sha256": "ec13ba04078571deafecf2e1dfd8f8d0da09eddaa8f08a3cad90e0a9c76c02f0",
+      "size": 18788,
+      "sha256": "36508a4d396c4eeb86612de1a8baface5555b591d939e21824fbeebbeae668dc",
       "module": "governance",
       "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "current-source-sha256-and-size",
-        "complete-current-source-and-relevant-contract-review"
+        "antigravity-account-quota-targeted-source-review",
+        "exact-file-sha256-and-size"
       ],
-      "notes": "Complete shared barrel exports read in chunks and referenced declaration/build contracts inspected; no private runtime configuration inserted by exports.",
-      "findings": [],
-      "previousReview": {
-        "path": "packages/shared/src/index.ts",
-        "size": 18661,
-        "sha256": "ec13ba04078571deafecf2e1dfd8f8d0da09eddaa8f08a3cad90e0a9c76c02f0",
-        "module": "governance",
-        "kind": "runtime",
-        "depth": "pending",
-        "disposition": "pending",
-        "checks": [
-          "Read current source bytes only to calculate SHA-256 and exact byte size; hash reading alone is not content review"
-        ],
-        "notes": "未读取共享源文件完整内容及其调用契约；本轮范围收敛，不声称输入/授权/协议安全。",
-        "findings": []
-      }
+      "notes": "Added only a type export for the sanitized quota projection; unrelated shared API contracts not re-reviewed.",
+      "findings": []
     },
     {
       "path": "packages/shared/src/message-limits.ts",

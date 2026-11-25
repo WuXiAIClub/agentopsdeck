@@ -15,7 +15,19 @@ Connector 运行时接线与 Web UI 入口已在 `apps/server/src/antigravity/`�
 （`usage_update` / `session/prompt` `usage`）、模型目录与按会话切模型
 （`AOD_ANTIGRAVITY_MODEL` / `AOD_ANTIGRAVITY_MODEL_CHOICES` + `session/set_model`）
 以及看板上下文透传。尚未支持的能力（`compact`、`interactions`）保持禁用并明确返回 `409`。
-没有新增公共 HTTP 接口，也不分发原生可执行程序。
+不分发原生可执行程序。
+
+## 账号额度卡片
+
+在运行 CLI 的 AOD 实例中，打开工作区的 **任务状态卡 → Antigravity 账号额度**。
+卡片在配置好的 AOD Antigravity 独立目录中执行 `agy --output-format json -p '/usage'`，
+展示各模型组和额度周期的剩余百分比及 CLI 上报的重置时间。这里显示的是账号额度，
+不是单会话 token 用量或账单。展开卡片即可查询，也可点击 **刷新**；服务端最多复用
+30 秒内的成功快照。
+
+本机管理员接口 `GET /api/antigravity/usage` 不接受 Connector 传输授权，也不能指定远程
+Connector。未启用时返回 `{ "usage": null }`，无权访问时返回 `403`，无法查询额度时
+返回 `503`（例如需要登录或 CLI 未返回结构化 `/usage` JSON）。浏览器不缓存响应。
 
 ## 已实现的契约
 

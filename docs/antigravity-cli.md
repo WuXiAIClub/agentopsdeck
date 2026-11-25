@@ -17,7 +17,22 @@ metrics (`usage_update` / `session/prompt` `usage`), model catalog/selection
 (`AOD_ANTIGRAVITY_MODEL` / `AOD_ANTIGRAVITY_MODEL_CHOICES` + `session/set_model`),
 and workspace board context are supported. Unsupported capabilities (`compact`,
 `interactions`) remain disabled and are explicitly rejected with `409`.
-There are no new public HTTP endpoints or shipped native binaries.
+No native binaries are shipped.
+
+## Account quota card
+
+Open the workspace **Task status card → Antigravity account quota** on the
+AOD instance that runs the CLI. It reads `agy --output-format json -p '/usage'`
+using the configured AOD Antigravity home, and shows the remaining percentage
+and reported reset time for each model group and quota window. This is account
+quota, not per-session token usage or billing. Expand the card to check it or use
+**Refresh**; the server shares a successful snapshot for up to 30 seconds.
+
+The local administrator endpoint `GET /api/antigravity/usage` does not accept
+connector transport grants or a remote connector selector. It returns
+`{ "usage": null }` if disabled, `403` if unauthorized, and `503` when quota
+cannot be read (for example, sign-in is required or the CLI does not return
+structured `/usage` JSON). Responses are not cached by browsers.
 
 ## Implemented contracts
 
