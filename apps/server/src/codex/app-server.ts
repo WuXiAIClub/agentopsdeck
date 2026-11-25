@@ -16,6 +16,7 @@ import { requiredSynchronousEffectAuthority as synchronousEffectAuthority } from
 import { nanoid } from 'nanoid';
 import { readModelCatalog, type ModelChoice } from './model-catalog.js';
 import { configuredModelProvider, ProviderModelCatalog } from './provider-model-catalog.js';
+import { resolveCodexReasoningParams } from './reasoning-compat.js';
 import { createToolImageCompatibilityRelay, toolImageCompatibilityArguments, type ToolImageCompatibilityOptions } from './tool-image-compat.js';
 import { goalSnapshot, goalMutation, goalAcknowledged, GoalControlConflict } from './goal-control.js';
 import { GoalDiagnostics, type GoalDiagnosticTrace } from './goal-diagnostics.js';
@@ -342,6 +343,7 @@ export class CodexAppServer {
   private threadModels = new Map<string, string>();
   private threadModelOverrides = new Map<string, string>();
   private threadEfforts = new Map<string, string>();
+  private threadsWithStickyEffort = new Set<string>();
   private compactWaiters = new Map<string, { resolve: () => void; reject: (error: Error) => void; timeout: NodeJS.Timeout;
     check: () => void; evidence: CompactionEvidence; accepting: boolean; previousRunId?: string }>();
   private activeSecretFiles = new Map<string, { commandId: string; connectionId?: string; directory: string; dispatched: boolean }>();
@@ -1981,7 +1983,10 @@ export class CodexAppServer {
     const updated = this.options.store.persistSessionThinkingOverride(sessionKey, params.thinking, session => {
       // This callback is after durable thinking persistence and before ACK or
       // projection. Preserve durable values if either later observer fails.
-      if (params.thinking === null) this.threadEfforts.delete(threadId);
+      if (params.thinking === null) {
+        this.threadEfforts.delete(threadId);
+        this.threadsWithStickyEffort.add(threadId);
+      }
       else if (params.thinking?.trim()) this.threadEfforts.set(threadId, params.thinking.trim());
       acknowledged?.(this.session(sessionKey, { ...(session ?? current), model }));
     });
@@ -2000,7 +2005,10 @@ export class CodexAppServer {
     this.threadModelOverrides = this.changeRuntimeOverride(threadId, model, params.model);
     this.threadModels.set(threadId, model);
     const updated = this.options.store.persistSessionThinkingEffect(sessionKey, params.thinking);
-    if (params.thinking === null) this.threadEfforts.delete(threadId);
+    if (params.thinking === null) {
+      this.threadEfforts.delete(threadId);
+      this.threadsWithStickyEffort.add(threadId);
+    }
     else if (params.thinking?.trim()) this.threadEfforts.set(threadId, params.thinking.trim());
     await acknowledge(this.session(sessionKey, { ...(updated ?? current), model }));
     const latest = this.options.store.getSession(sessionKey);
@@ -2258,11 +2266,42 @@ export class CodexAppServer {
   }
 
   private turnStartParams(threadId: string, clientUserMessageId: string, input: unknown[], interactive: boolean) {
+    const model = (this.threadModels.get(threadId) ?? this.options.defaultModel) || null;
+    const rawEffort = this.effectiveRawEffort(threadId);
+    const reasoning = resolveCodexReasoningParams({
+      model,
+      rawEffort,
+      hadActiveEffort: this.threadsWithStickyEffort.has(threadId),
+    });
+    if (reasoning.effort) this.threadsWithStickyEffort.add(threadId);
+    else if (reasoning.clearStickyEffort && model && !rawEffort) this.threadsWithStickyEffort.delete(threadId);
     return { threadId, clientUserMessageId, input, cwd: this.options.defaultCwd,
       approvalPolicy: interactive ? 'untrusted' : this.options.approvalPolicy,
       sandboxPolicy: { type: 'dangerFullAccess' },
-      model: (this.threadModels.get(threadId) ?? this.options.defaultModel) || null,
-      ...(this.threadEfforts.get(threadId) ? { effort: this.threadEfforts.get(threadId) } : {}) };
+      model,
+      ...(reasoning.effort ? { effort: reasoning.effort } : {}),
+      ...(reasoning.summary ? { summary: reasoning.summary } : {}),
+      ...(reasoning.clearStickyEffort && model ? {
+        collaborationMode: {
+          mode: 'default',
+          settings: { model, reasoning_effort: null, developer_instructions: null },
+        },
+      } : {}) };
+  }
+
+  private effectiveRawEffort(threadId: string): string | undefined {
+    return this.threadEfforts.get(threadId) ?? this.options.store.getSession(this.sessionKey(threadId))?.thinkingLevel;
+  }
+
+  private threadResumeEffort(threadId: string): string | undefined {
+    const model = (this.threadModels.get(threadId) ?? this.options.defaultModel) || null;
+    const reasoning = resolveCodexReasoningParams({
+      model,
+      rawEffort: this.effectiveRawEffort(threadId),
+      hadActiveEffort: this.threadsWithStickyEffort.has(threadId),
+    });
+    if (reasoning.effort) this.threadsWithStickyEffort.add(threadId);
+    return reasoning.effort;
   }
 
   /** Install the original native task bridge using worker-owned authority.
@@ -2315,7 +2354,7 @@ export class CodexAppServer {
         threadId, ...(this.options.modelProvider ? { modelProvider: this.options.modelProvider } : {}),
         cwd: this.options.defaultCwd,
         ...(this.threadModels.get(threadId) ? { model: this.threadModels.get(threadId) } : {}),
-        ...(this.threadEfforts.get(threadId) ? { effort: this.threadEfforts.get(threadId) } : {}),
+        ...(this.threadResumeEffort(threadId) ? { effort: this.threadResumeEffort(threadId) } : {}),
         approvalPolicy: input.interactive ? 'untrusted' : this.options.approvalPolicy,
         sandbox: 'danger-full-access', developerInstructions: `${CODEX_MEDIA_BUDGET_INSTRUCTIONS} ${CODEX_AUTONOMY_INSTRUCTIONS}`,
       }, async () => {
@@ -3364,12 +3403,13 @@ export class CodexAppServer {
 
   private async ensureThreadLoaded(threadId: string) {
     if (this.loadedThreadIds.has(threadId)) return;
+    const resumeEffort = this.threadResumeEffort(threadId);
     await this.request('thread/resume', {
       threadId,
       ...(this.options.modelProvider ? { modelProvider: this.options.modelProvider } : {}),
       cwd: this.options.defaultCwd,
       ...(this.threadModels.get(threadId) ? { model: this.threadModels.get(threadId) } : {}),
-      ...(this.threadEfforts.get(threadId) ? { effort: this.threadEfforts.get(threadId) } : {}),
+      ...(resumeEffort ? { effort: resumeEffort } : {}),
       approvalPolicy: this.options.approvalPolicy,
       sandbox: 'danger-full-access',
       developerInstructions: `${CODEX_MEDIA_BUDGET_INSTRUCTIONS} ${CODEX_AUTONOMY_INSTRUCTIONS}`,
