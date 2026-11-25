@@ -506,7 +506,15 @@ export async function createAsyncConnectorSurface(options: AsyncConnectorSurface
         startupStage = 7;
         await runtimes.start(); assertLive();
         startupStage = 8;
-        await fullRefresh(); assertLive();
+        for (let attempt = 0; ; attempt++) {
+          try { await fullRefresh(); break; }
+          catch (error) {
+            if (!(error instanceof ExecutionProjectionChanged) || attempt >= 8) throw error;
+            await new Promise(resolve => setTimeout(resolve, Math.min(250, 25 * 2 ** Math.min(attempt, 4))));
+            assertLive();
+          }
+        }
+        assertLive();
         // Prove the shared catalog against the original journal/facts head.
         startupStage = 9;
         await events.startupSnapshot(fullRefresh); assertLive();

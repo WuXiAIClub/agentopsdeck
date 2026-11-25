@@ -12532,8 +12532,8 @@
     },
     {
       "path": "apps/server/src/connector/async-connector-surface.test.ts",
-      "size": 62278,
-      "sha256": "643de76cb995a88eca6bf9e44c2aff6ee4ccd278d80790c7beec3744b73dac0f",
+      "size": 63085,
+      "sha256": "8eb776a69ab04afda4d6770f05638152f155fcb2d4057cb0a41e773c5ab0787e",
       "module": "connector",
       "kind": "test",
       "depth": "semantic",
@@ -12559,8 +12559,8 @@
     },
     {
       "path": "apps/server/src/connector/async-connector-surface.ts",
-      "sha256": "c7a71ca0fc15b674044877b4ac5539d1f82d8c8503145b26d4c186929b27a91f",
-      "size": 33674,
+      "sha256": "994b99e1a415a3926f80514f511e500becc3a30bcb6ae8c6366733fea540df7f",
+      "size": 34021,
       "module": "api-completion",
       "kind": "runtime",
       "depth": "semantic",
