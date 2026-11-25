@@ -13,6 +13,7 @@ import type { SdkDispatchAdapter, SdkSettlement } from '../connector/sdk-dispatc
 import { SdkExecutionDriver, type SdkDriverOptions, type SdkOwnedTurn } from '../connector/sdk-execution-driver.js';
 import type { SdkExecution, SdkExecutionRef, SdkTerminalOutcome } from '../connector/sdk-execution-journal.js';
 import { SdkOwnedRuntime, type SdkPreflight } from '../connector/sdk-owned-runtime.js';
+import { sdkModelAllowed } from '../connector/sdk-models.js';
 import type { SdkTurnContext } from '../connector/sdk-turn-context.js';
 import { AsyncSdkConnectorRuntime } from '../connector/async-sdk-connector-runtime.js';
 import { AsyncSdkExecutionDriver, type AsyncSdkDriverOptions } from '../connector/async-sdk-execution-driver.js';
@@ -614,19 +615,22 @@ export class AntigravityOwnedRuntime extends SdkOwnedRuntime<'antigravity', Anti
     check: (config: AntigravityConfig) => SdkPreflight = value => new AntigravityWorkerPreflight(value),
     deleteNative: (config: AntigravityConfig, request: PrivateWorkerDeletion) => SdkPreflight = (value, request) => new AntigravityWorkerDeletion(value, request)) {
     const config = structuredClone(options.config);
+    const ownedConfig = { ...config, model: config.model ?? 'default' };
     super({
       ...options,
-      config,
+      config: ownedConfig,
       runtime: 'antigravity',
       journal: options.store.antigravityJournal,
       check,
       deleteNative,
-      projection: options.projection ? new AntigravitySessionProjection(options.store, options.projection) : undefined,
+      projection: options.projection ? new AntigravitySessionProjection(options.store, options.projection, config.model) : undefined,
       driver: hooks => new AntigravityExecutionDriver({
         store: options.store,
         deadlineMs: config.startupTimeoutMs,
         ...(options.turnContext ? { turnContext: options.turnContext } : {}),
-        authorize: (key, actor, action) => action !== 'runs:compact' && options.authorize(key, actor, action),
+        authorize: (key, actor, action) => action !== 'runs:compact'
+          && (action === 'runs:interrupt' || sdkModelAllowed(ownedConfig, options.store.antigravityJournal.session(key)?.model))
+          && options.authorize(key, actor, action),
         admissionReady: hooks.admissionReady,
         changed: hooks.changed,
         start: (execution, text, projection) => {

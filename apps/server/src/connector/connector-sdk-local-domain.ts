@@ -147,7 +147,6 @@ export async function executeConnectorSdkLocal<K extends ConnectorSdkLocalKind>(
           return wrap(owner.commands.get(scope, input.commandKey)!);
         }
       } else {
-        if (input.runtime === 'antigravity') return reject(409);
         const model = p.model === null ? null : typeof p.model === 'string' ? p.model.trim() : undefined;
         if (model === undefined || model !== null && !sdkModelChoices(catalog.model, catalog.modelChoices).includes(model)
           || Object.hasOwn(p, 'thinking') && p.thinking !== null || Object.hasOwn(p, 'goal')) return reject(400);

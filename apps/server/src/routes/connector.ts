@@ -443,7 +443,7 @@ export function registerConnectorRoutes(app: Hono, deps: {
         ghcp: { enabled: !!deps.copilot, ready: deps.copilot?.ready === true, status: deps.copilot?.status ?? 'disabled', ownerOnly: true,
           features: { text: true, queue: true, interrupt: true, history: true, attachments: true, compact: true, delete: true, modelOverride: true, interactions: sdkHttp.sdkInteractions ? sdkHttp.sdkInteractions.ready('ghcp') === true : !!deps.interactions && deps.copilot?.ready === true } },
         antigravity: { enabled: !!deps.antigravity, ready: deps.antigravity?.ready === true, status: deps.antigravity?.status ?? 'disabled', ownerOnly: true,
-          features: { text: true, queue: true, interrupt: true, history: true, attachments: false, compact: false, delete: true, modelOverride: false, interactions: false } } },
+          features: { text: true, queue: true, interrupt: true, history: true, attachments: false, compact: false, delete: true, modelOverride: true, interactions: false } } },
       scopes: principal.scopes,
       limits: { maxMessageChars: MAX_MESSAGE_CHARS, maxRequestsPerMinute: 120, maxSseConnections: 2 },
       // Capabilities must not depend on an optional OpenClaw model lookup.
@@ -509,14 +509,14 @@ export function registerConnectorRoutes(app: Hono, deps: {
         models = configured.length || deps.config.codex.modelProvider
           ? ids.map(id => ({ id, label: id })) : await deps.codex.listModels();
         for (const id of ids) if (!models.some(model => model.id === id)) models = [...models, { id, label: id }];
-      } else if (runtime === 'claude-code' || runtime === 'ghcp') {
+      } else if (runtime === 'claude-code' || runtime === 'ghcp' || runtime === 'antigravity') {
         if (principal.scopes.includes('execution:delegate') || c.req.header('x-agentopsdeck-execution-grant')) {
           return c.json({ error: 'SDK model discovery requires owner authority' }, 403);
         }
-        const settings = runtime === 'claude-code' ? deps.config.claude : deps.config.copilot;
+        const settings = runtime === 'claude-code' ? deps.config.claude : runtime === 'ghcp' ? deps.config.copilot : deps.config.antigravity;
         if (!settings || !sdk(runtime)) return c.json({ error: 'Model catalog unavailable for this runtime' }, 404);
         // Configured choices are not a claim of provider authentication.
-        models = sdkModelChoices(settings.model, settings.modelChoices).map(id => ({ id, label: id }));
+        models = sdkModelChoices(settings.model ?? 'default', settings.modelChoices).map(id => ({ id, label: id }));
       } else if (runtime === 'openclaw') {
         models = (await readGatewayModelSetStatus(deps.config)).observed.map(model => ({ id: model.alias, label: model.alias }));
       } else return c.json({ error: 'Model selection is unavailable for this runtime' }, 404);
@@ -652,9 +652,9 @@ export function registerConnectorRoutes(app: Hono, deps: {
     },
     sdkModelUpdate: (key, model, authorize, acknowledge) => {
       const runtime = sessionRuntimeId(key), owned = sdk(runtime);
-      const settings = runtime === 'claude-code' ? deps.config.claude : deps.config.copilot;
+      const settings = runtime === 'claude-code' ? deps.config.claude : runtime === 'ghcp' ? deps.config.copilot : deps.config.antigravity;
       if (!owned?.ready || !settings) throw new HTTPException(409, { message: 'Agent is not ready; settings were not changed' });
-      if (model !== null && !sdkModelChoices(settings.model, settings.modelChoices).includes(model)) {
+      if (model !== null && !sdkModelChoices(settings.model ?? 'default', settings.modelChoices).includes(model)) {
         throw new HTTPException(400, { message: 'Model is not in this Connector catalog' });
       }
       owned.commands.updateModel(key, model, authorize, acknowledge);
@@ -1209,8 +1209,8 @@ export function registerConnectorRoutes(app: Hono, deps: {
       if (!deps.tokens.hasScope(principal.tokenId, 'sessions:create')) throw new TurnAuthorizationError();
     };
     if (agentId === 'claude-code' || agentId === 'ghcp' || agentId === 'antigravity') {
-      const config = agentId === 'claude-code' ? deps.config.claude : agentId === 'ghcp' ? deps.config.copilot : undefined;
-      const expectedModel = agentId === 'antigravity' ? 'default' : config?.model;
+      const config = agentId === 'claude-code' ? deps.config.claude : agentId === 'ghcp' ? deps.config.copilot : deps.config.antigravity;
+      const expectedModel = agentId === 'antigravity' ? (config?.model ?? 'default') : config?.model;
       if (body.model && body.model !== expectedModel) return c.json({ error: 'Use the configured Agent model' }, 409);
       if (title.length > 120 || /[\x00-\x1f\x7f]/.test(title)) return c.json({ error: 'Invalid SDK session title' }, 400);
       try {

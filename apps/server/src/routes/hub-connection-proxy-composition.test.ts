@@ -68,3 +68,38 @@ for (const register of [registerHubTerminals, registerHubWebsiteActions, registe
     release(); await closing; assert.equal(closes, 1);
   });
 }
+
+test('registerHubConnectionFiles forwards antigravity model catalog requests and rejects unknown runtimes', async () => {
+  const seen: string[] = [];
+  const app = new Hono();
+  const routes = registerHubConnectionFiles(app, {
+    mode: 'async',
+    access: {
+      begin: async () => ({
+        principal: { userId: 'owner' },
+        connection: { id: 'conn-1', status: 'enabled' },
+        check: async () => {},
+      }),
+      close: async () => {},
+    } as never,
+    asyncConnectorClient: async () => ({
+      jsonResponseOriginal: async (path: string) => {
+        seen.push(path);
+        return { status: 200, body: { models: [{ id: 'gemini-4-neon-high', label: 'gemini-4-neon-high' }] } };
+      },
+    }) as never,
+    error: (c, error) => c.json({ error: String(error) }, 500),
+  });
+  try {
+    const allowed = await app.request('/api/hub/v1/connections/conn-1/models/antigravity');
+    assert.equal(allowed.status, 200);
+    assert.deepEqual(await allowed.json(), { models: [{ id: 'gemini-4-neon-high', label: 'gemini-4-neon-high' }] });
+    assert.deepEqual(seen, ['/models/antigravity']);
+
+    const rejected = await app.request('/api/hub/v1/connections/conn-1/models/unknown-runtime');
+    assert.equal(rejected.status, 400);
+    assert.deepEqual(seen, ['/models/antigravity']);
+  } finally {
+    await routes.close();
+  }
+});

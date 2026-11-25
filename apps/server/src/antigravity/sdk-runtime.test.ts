@@ -32,7 +32,7 @@ async function waitFor<T>(check: () => Promise<T | undefined>, timeoutMs = 8_000
   throw new Error('Timed out waiting for Antigravity connector state');
 }
 
-async function createConnectorFixture() {
+async function createConnectorFixture(extraEnv: Record<string, string> = {}) {
   const root = realpathSync(mkdtempSync(join(tmpdir(), 'agentopsdeck-antigravity-connector-')));
   const homeDirectory = join(root, 'private');
   const workspace = join(root, 'workspace');
@@ -52,6 +52,7 @@ async function createConnectorFixture() {
     AOD_ANTIGRAVITY_WORKSPACE: workspace,
     AOD_ANTIGRAVITY_COMMAND: command,
     AOD_ANTIGRAVITY_STARTUP_TIMEOUT_MS: '5000',
+    ...extraEnv,
   });
   assert.ok(config.antigravity);
   const users = new ConnectorUserStore(config.connector.usersDatabaseFile, () => true, { runtimeOwner: true });
@@ -220,6 +221,62 @@ test('Antigravity Connector interrupts an active turn via /stop and rejects unsu
 
     const rpcLog = readFileSync(join(fixture.workspace, 'requests.ndjson'), 'utf8');
     assert.match(rpcLog, /"method":"session\/cancel"/);
+  } finally {
+    await fixture.close();
+  }
+});
+
+test('Antigravity Connector exposes configured model catalog and applies per-session model overrides via session/set_model', async () => {
+  const fixture = await createConnectorFixture({
+    AOD_ANTIGRAVITY_MODEL: 'gemini-4-neon-high',
+    AOD_ANTIGRAVITY_MODEL_CHOICES: 'gemini-4-neon-high,gemini-4-neon-xhigh',
+  });
+  try {
+    const modelsResponse = await fixture.request('/models/antigravity');
+    assert.equal(modelsResponse.status, 200);
+    assert.deepEqual(await modelsResponse.json(), {
+      models: [
+        { id: 'gemini-4-neon-high', label: 'gemini-4-neon-high' },
+        { id: 'gemini-4-neon-xhigh', label: 'gemini-4-neon-xhigh' },
+      ],
+    });
+
+    const created = await fixture.request('/agents/antigravity/sessions', 'POST', { title: 'ACP Model Override' }, { 'idempotency-key': 'agy-create-model' });
+    assert.equal(created.status, 201);
+    const { key } = await created.json() as { key: string };
+    const encodedKey = encodeURIComponent(key);
+
+    const invalidModel = await fixture.request(`/sessions/${encodedKey}`, 'PATCH', { model: 'unconfigured-model', idempotencyKey: 'agy-model-invalid' });
+    assert.equal(invalidModel.status, 400);
+
+    const unsupportedThinking = await fixture.request(`/sessions/${encodedKey}`, 'PATCH', { model: 'gemini-4-neon-xhigh', thinking: 'high', idempotencyKey: 'agy-thinking-invalid' });
+    assert.equal(unsupportedThinking.status, 400);
+
+    const updated = await fixture.request(`/sessions/${encodedKey}`, 'PATCH', { model: 'gemini-4-neon-xhigh', idempotencyKey: 'agy-model-set' });
+    assert.equal(updated.status, 200);
+    assert.deepEqual((await updated.json()).settings, { model: 'gemini-4-neon-xhigh', modelProvider: null });
+    assert.equal(fixture.users.antigravityJournal.session(key)?.model, 'gemini-4-neon-xhigh');
+
+    const sent = await fixture.request(`/sessions/${encodedKey}/messages`, 'POST', {
+      message: 'hello model override',
+      idempotencyKey: 'agy-model-msg-1',
+    });
+    assert.equal(sent.status, 200);
+    await waitFor(async () => {
+      const response = await fixture.request(`/sessions/${encodedKey}/messages`);
+      if (response.status !== 200) return undefined;
+      const payload = await response.json() as { messages: Array<{ role: string; text: string }> };
+      return payload.messages.some(item => item.role === 'assistant' && item.text.includes('你好，ACP')) ? true : undefined;
+    });
+    await waitFor(async () => (fixture.users.antigravityJournal.canStart(key) ? true : undefined));
+
+    const rpcLog = readFileSync(join(fixture.workspace, 'requests.ndjson'), 'utf8');
+    assert.match(rpcLog, /"method":"session\/set_model".*"modelId":"gemini-4-neon-xhigh"/);
+
+    const reset = await fixture.request(`/sessions/${encodedKey}`, 'PATCH', { model: null, idempotencyKey: 'agy-model-reset' });
+    assert.equal(reset.status, 200);
+    assert.deepEqual((await reset.json()).settings, { model: 'gemini-4-neon-high', modelProvider: null });
+    assert.equal(fixture.users.antigravityJournal.session(key)?.model, undefined);
   } finally {
     await fixture.close();
   }

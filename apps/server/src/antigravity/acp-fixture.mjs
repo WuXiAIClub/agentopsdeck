@@ -30,6 +30,8 @@ inputs.on('line', line => {
   } else if (input.method === 'session/resume') {
     update('historical synthetic text');
     response(input.id, {});
+  } else if (input.method === 'session/set_model') {
+    response(input.id, {});
   } else if (input.method === 'session/prompt') {
     const text = input.params.prompt[0].text;
     promptId = input.id;

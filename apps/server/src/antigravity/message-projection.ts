@@ -72,17 +72,20 @@ export function projectAntigravityUpdate(value: unknown): AntigravityProjectedUp
     return { sessionUpdate: 'usage_update', used: value.used, size: value.size };
   }
   if (value.sessionUpdate !== 'tool_call' && value.sessionUpdate !== 'tool_call_update') return;
+  const rawTitle = value.title === null ? undefined : value.title;
+  const rawStatus = value.status === null ? undefined : value.status;
+  const rawKind = value.kind === null ? undefined : value.kind;
   if (!metadataText(value.toolCallId)
-    || value.title !== undefined && typeof value.title !== 'string'
-    || value.status !== undefined && (typeof value.status !== 'string' || !statuses.has(value.status))
-    || value.kind !== undefined && (typeof value.kind !== 'string' || !kinds.has(value.kind))) throw failure();
-  const title = value.title !== undefined ? normalizeToolTitle(value.title) : undefined;
-  const output = value.status === 'completed' || value.status === 'failed' ? extractToolOutput(value) : undefined;
+    || rawTitle !== undefined && typeof rawTitle !== 'string'
+    || rawStatus !== undefined && (typeof rawStatus !== 'string' || !statuses.has(rawStatus))
+    || rawKind !== undefined && (typeof rawKind !== 'string' || !kinds.has(rawKind))) throw failure();
+  const title = rawTitle !== undefined ? normalizeToolTitle(rawTitle) : undefined;
+  const output = rawStatus === 'completed' || rawStatus === 'failed' ? extractToolOutput(value) : undefined;
   return {
     sessionUpdate: value.sessionUpdate, toolCallId: value.toolCallId,
     ...(title !== undefined ? { title } : {}),
-    ...(value.status !== undefined ? { status: value.status as 'pending' | 'in_progress' | 'completed' | 'failed' } : {}),
-    ...(value.kind !== undefined ? { kind: value.kind as 'read' | 'edit' | 'delete' | 'move' | 'search' | 'execute' | 'think' | 'fetch' | 'switch_mode' | 'other' } : {}),
+    ...(rawStatus !== undefined ? { status: rawStatus as 'pending' | 'in_progress' | 'completed' | 'failed' } : {}),
+    ...(rawKind !== undefined ? { kind: rawKind as 'read' | 'edit' | 'delete' | 'move' | 'search' | 'execute' | 'think' | 'fetch' | 'switch_mode' | 'other' } : {}),
     ...(output ? { outputText: output.text, outputTruncated: output.truncated } : {}),
   };
 }

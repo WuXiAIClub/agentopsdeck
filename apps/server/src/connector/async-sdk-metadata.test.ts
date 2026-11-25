@@ -21,7 +21,7 @@ function fixture(runtime: SdkAgentId, timeoutMs = 5_000) {
   const tokens = new ConnectorTokenStore(join(root, 'tokens.json'), authorization.slice(7));
   const ownerAuthorization = `Bearer ${tokens.create({ label: 'metadata owner', scopes: [...DEFAULT_SCOPES, 'models:read'] }).token}`;
   const store = new ConnectorUserStore(':memory:', undefined, { runtimeOwner: true }), key = `${runtime}:original`;
-  const journal = runtime === 'ghcp' ? store.copilotJournal : store.claudeJournal;
+  const journal = runtime === 'ghcp' ? store.copilotJournal : runtime === 'antigravity' ? store.antigravityJournal : store.claudeJournal;
   journal.create({ key, nativeSessionId: 'original-native', title: 'Private title', createdAt: 1 });
   const catalogs = { [runtime]: { model: 'default', modelChoices: ['alternate'] } };
   const command = createConnectorOwnerCommands(store, tokens, catalogs);
@@ -38,7 +38,7 @@ function fixture(runtime: SdkAgentId, timeoutMs = 5_000) {
     async close() { await metadata.close(); store.close(); rmSync(root, { recursive: true, force: true }); } };
 }
 
-for (const runtime of ['claude-code', 'ghcp'] as const) {
+for (const runtime of ['claude-code', 'ghcp', 'antigravity'] as const) {
   test(`${runtime}: HTTP state observes original journal, never turns settling/offline into completion`, async () => {
     const f = fixture(runtime);
     try {
@@ -167,12 +167,12 @@ test('metadata wire rejects authority overrides, unknown status fields, missing 
 test('metadata real sole worker reads durable unknown execution after reopen, without native effects', { timeout: 20_000 }, async () => {
   const root = mkdtempSync(join(tmpdir(), 'agentopsdeck-metadata-worker-'));
   const config = { file: join(root, 'connector.sqlite'), tokenFile: join(root, 'tokens.json'), bootstrapToken: authorization.slice(7),
-    sdkModels: { 'claude-code': { model: 'original' }, ghcp: { model: 'original' } } };
+    sdkModels: { 'claude-code': { model: 'original' }, ghcp: { model: 'original' }, antigravity: { model: 'original' } } };
   let owner = new AsyncConnectorOwner(config, silence);
   try {
     await owner.open();
     const ownerAuthorization = `Bearer ${(await owner.command('tokenCreate', { label: 'metadata owner', scopes: [...DEFAULT_SCOPES, 'models:read'] })).token}`;
-    for (const runtime of ['claude-code', 'ghcp'] as const) {
+    for (const runtime of ['claude-code', 'ghcp', 'antigravity'] as const) {
       const created = await owner.command('sdkSessionCreate', { runtime, authorization, commandKey: `create-${runtime}`, payloadJson: '{}' });
       assert.ok('key' in created && created.key); const key = created.key;
       const admitted = await owner.command('sdkMessageSend', { runtime, key, authorization, commandKey: 'input', payloadJson: JSON.stringify({ message: 'Input' }) }); assert.ok(!('error' in admitted));
