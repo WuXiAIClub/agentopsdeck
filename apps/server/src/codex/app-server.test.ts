@@ -1440,6 +1440,37 @@ test('Codex completion preserves a distinct unfinished stream as failed instead 
   assert.deepEqual(store.getMessages(sessionKey), before, 'late deltas cannot reopen a retired stream');
 });
 
+for (const terminalStatus of ['failed', 'interrupted'] as const) {
+  test(`Codex ${terminalStatus} turn preserves unfinished stream drafts as failed without blocking history sync`, async () => {
+    const { store, codex, threadId, sessionKey, notify } = fixture();
+    notify('item/agentMessage/delta', { threadId, turnId: 'turn-aborted', itemId: 'stream-1', delta: 'Partial retry 1' });
+    notify('item/agentMessage/delta', { threadId, turnId: 'turn-aborted', itemId: 'stream-2', delta: 'Partial retry 2' });
+    const turnPayload = terminalStatus === 'failed'
+      ? { id: 'turn-aborted', status: 'failed', error: { message: 'stream disconnected before completion: stream closed before response.completed' }, items: [] }
+      : { id: 'turn-aborted', status: 'interrupted', items: [] };
+    (codex as any).request = async (method: string) => method === 'thread/backgroundTerminals/list'
+      ? { data: [] }
+      : ({ thread: { id: threadId, status: { type: 'idle' }, turns: [turnPayload] } });
+    notify('turn/completed', { threadId, turn: turnPayload });
+    await (codex as any).completingTurns.get(sessionKey);
+
+    assert.equal(store.getSession(sessionKey)?.runtime?.sync, 'current');
+    assert.equal(store.getSession(sessionKey)?.runtime?.phase, terminalStatus);
+    assert.equal(store.getSession(sessionKey)?.status, terminalStatus === 'failed' ? 'failed' : 'idle');
+    assert.equal(store.getSession(sessionKey)?.hasActiveRun, false);
+    for (const text of ['Partial retry 1', 'Partial retry 2']) {
+      const partial = store.getMessages(sessionKey).find(message => message.text === text);
+      assert.equal(partial?.status, 'failed');
+      assert.match(partial?.failureReason ?? '', /partial text preserved, not a completed reply/);
+    }
+    if (terminalStatus === 'failed') {
+      const failure = store.getMessages(sessionKey).find(message => message.id.endsWith(':codex-turn-failure-turn-aborted'));
+      assert.equal(failure?.status, 'failed');
+      assert.match(failure?.text ?? '', /stream disconnected before completion/);
+    }
+  });
+}
+
 for (const evidence of [
   { status: 'sent' as const },
   { phase: 'commentary' as const },

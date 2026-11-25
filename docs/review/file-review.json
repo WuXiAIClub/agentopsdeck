@@ -6879,8 +6879,8 @@
     },
     {
       "path": "apps/server/src/codex/app-server.test.ts",
-      "size": 142661,
-      "sha256": "be35f01d4f1c40188c679665c4f19bd3b8fdee8f0a88400b49f1a8497aaf839e",
+      "size": 144729,
+      "sha256": "3c444ce65fca1834ecc45d66956fe83708a106c76430a6e4bb431c0f90359fb1",
       "module": "execution",
       "kind": "test",
       "depth": "semantic",
@@ -6899,8 +6899,8 @@
     },
     {
       "path": "apps/server/src/codex/app-server.ts",
-      "sha256": "61325c57c1b24722fcf194c65accbd0fc7ab34a4eff4090c9ffbf143b2822cc1",
-      "size": 407897,
+      "sha256": "7665f1695a65435f3b683ad825a4f37434d771778d1c675d03efc5307a621734",
+      "size": 408112,
       "module": "codex",
       "kind": "runtime",
       "depth": "semantic",
@@ -65732,8 +65732,8 @@
     },
     {
       "path": "scripts/publication-check.mjs",
-      "sha256": "92b7aaa3916056bda73a93a1daa86b9bfbe982f32332c0e39e23d59b4c8309eb",
-      "size": 12288,
+      "sha256": "f5b5eb202e43d5c947c8a8b4753b82e078d6db8b34725d42542db5f2480601fc",
+      "size": 12414,
       "module": "release-boundary",
       "kind": "runtime",
       "depth": "semantic",
@@ -65749,8 +65749,8 @@
     },
     {
       "path": "scripts/publication-check.test.mjs",
-      "sha256": "0eb6e58751d6b88ae6c6b2a33dbefc59a026efc3346cd752d1e5dcbed6013edd",
-      "size": 14068,
+      "sha256": "c3818061184eb6058d7c381a3cc4955b24604afd4be9454d81b3584323726075",
+      "size": 14175,
       "module": "release-boundary",
       "kind": "test",
       "depth": "semantic",
