@@ -45,7 +45,8 @@ export class CopilotSessionProjection {
 export class AntigravitySessionProjection {
   private readonly projected = new Map<string, string>();
   constructor(private readonly source: Pick<ConnectorUserStore, 'antigravityJournal' | 'antigravityTranscript'>,
-    private readonly target: Pick<DeckStore, 'upsertSession' | 'replaceMessages' | 'removeSession'>) {}
+    private readonly target: Pick<DeckStore, 'upsertSession' | 'replaceMessages' | 'removeSession'>,
+    private readonly configuredModel?: string) {}
 
   publishSummary(key: string, ready: boolean) {
     const deletion = this.source.antigravityJournal.deletion(key);
@@ -54,6 +55,8 @@ export class AntigravitySessionProjection {
     if (!session) throw new Error('Antigravity session does not exist');
     if (deletion) session.nativeState = 'unknown';
     const summary = sdkSessionView('antigravity', session, this.source.antigravityJournal.current(key), ready);
+    const model = session.model ?? this.configuredModel;
+    if (model) summary.model = model;
     const fingerprint = JSON.stringify(summary);
     if (this.projected.get(key) !== fingerprint) this.target.upsertSession(summary);
     this.projected.set(key, fingerprint);

@@ -14,10 +14,10 @@ export function newSessionSource(agentId: string): NonNullable<SessionSummary['s
 export function sessionRuntimeUi(session: Pick<SessionSummary, 'source' | 'controlCapabilities'>) {
   const source = session.source;
   const sdk = source === 'claude-code' || source === 'ghcp' || source === 'antigravity';
-  const configuredModel = source === 'hermes' || source === 'antigravity';
+  const configuredModel = source === 'hermes';
   return {
     sdk, configuredModel,
-    attachments: source === 'antigravity' ? false : sdk ? session.controlCapabilities?.attachments === true : !configuredModel,
+    attachments: sdk ? session.controlCapabilities?.attachments === true : !configuredModel,
     compact: source === 'antigravity' ? false : sdk ? session.controlCapabilities?.compact === true : !configuredModel,
     deleteSession: true,
     modelCatalog: configuredModel ? undefined : sdk ? source : source === 'codex' ? 'codex' : 'openclaw',
@@ -27,8 +27,7 @@ export function sessionRuntimeUi(session: Pick<SessionSummary, 'source' | 'contr
 export const sdkAttachmentHint = 'SDK attachments: images or UTF-8 text/data; 5 MiB each, 20 MiB total, 100,000 text characters total.';
 export const sdkAttachmentAccept = '.png,.jpg,.jpeg,.gif,.webp,.txt,.md,.csv,.json,.yaml,.yml,.xml';
 export function sdkAttachmentsSupported(session: Pick<SessionSummary, 'source'>, media: SendMessageUpload[]) {
-  if (session.source === 'antigravity') return media.length === 0;
-  if (session.source !== 'claude-code' && session.source !== 'ghcp') return true;
+  if (session.source !== 'claude-code' && session.source !== 'ghcp' && session.source !== 'antigravity') return true;
   let total = 0, textChars = 0;
   return media.length <= 8 && media.every(item => {
     const match = /^data:([^;,]+);base64,([A-Za-z0-9+/=]+)$/.exec(item.dataUrl);

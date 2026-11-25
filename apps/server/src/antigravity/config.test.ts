@@ -36,6 +36,19 @@ test('Antigravity validates startup bounds without printing supplied values', ()
     });
   }
   assert.equal(antigravityConfig({ ...valid(), AOD_ANTIGRAVITY_STARTUP_TIMEOUT_MS: '120000' })?.startupTimeoutMs, 120000);
+  assert.equal(antigravityConfig(valid())?.permissionMode, 'allow');
+  assert.equal(antigravityConfig({ ...valid(), AOD_ANTIGRAVITY_PERMISSION_MODE: 'deny' })?.permissionMode, 'deny');
+  assert.throws(() => antigravityConfig({ ...valid(), AOD_ANTIGRAVITY_PERMISSION_MODE: 'invalid' }),
+    /AOD_ANTIGRAVITY_PERMISSION_MODE must be allow or deny/);
+  const withModels = antigravityConfig({
+    ...valid(),
+    AOD_ANTIGRAVITY_MODEL: 'gemini-4-neon-high',
+    AOD_ANTIGRAVITY_MODEL_CHOICES: 'gemini-4-neon-high,gemini-4-neon-xhigh,gemini-4-hydrogen-high',
+  });
+  assert.equal(withModels?.model, 'gemini-4-neon-high');
+  assert.deepEqual(withModels?.modelChoices, ['gemini-4-neon-high', 'gemini-4-neon-xhigh', 'gemini-4-hydrogen-high']);
+  assert.throws(() => antigravityConfig({ ...valid(), AOD_ANTIGRAVITY_MODEL: 'bad model' }),
+    /AOD_ANTIGRAVITY_MODEL must be a valid model identifier/);
 });
 
 test('Antigravity environment does not inherit host authentication or settings', { skip: process.platform !== 'linux' }, () => {

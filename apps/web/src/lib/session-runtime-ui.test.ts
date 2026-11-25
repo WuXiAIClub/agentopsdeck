@@ -4,9 +4,9 @@ import { newSessionSource, sessionRuntimeUi, sdkAttachmentsSupported } from './s
 import type { SendMessageUpload } from '@agentopsdeck/shared';
 
 test('creation fallback preserves runtime capabilities before directory refresh', () => {
-  for (const agentId of ['claude-code', 'ghcp', 'codex', 'hermes'] as const) assert.equal(newSessionSource(agentId), agentId);
+  for (const agentId of ['claude-code', 'ghcp', 'antigravity', 'codex', 'hermes'] as const) assert.equal(newSessionSource(agentId), agentId);
   assert.equal(newSessionSource('my-openclaw-agent'), 'web');
-  for (const agentId of ['claude-code', 'ghcp']) {
+  for (const agentId of ['claude-code', 'ghcp', 'antigravity']) {
     const ui = sessionRuntimeUi({ source: newSessionSource(agentId) });
     assert.equal(ui.attachments, false);
     assert.equal(ui.deleteSession, true);
@@ -15,7 +15,7 @@ test('creation fallback preserves runtime capabilities before directory refresh'
 });
 
 test('SDK sessions cannot offer unsupported mutations or fall back to the OpenClaw catalog', () => {
-  for (const source of ['claude-code', 'ghcp'] as const) {
+  for (const source of ['claude-code', 'ghcp', 'antigravity'] as const) {
     assert.deepEqual(sessionRuntimeUi({ source }), { sdk: true, configuredModel: false,
       attachments: false, compact: false, deleteSession: true, modelCatalog: source });
   }
@@ -32,7 +32,7 @@ test('existing Codex/OpenClaw and Hermes affordances remain unchanged', () => {
 });
 
 test('SDK attachment controls require explicit current Connector capability', () => {
-  for (const source of ['claude-code', 'ghcp'] as const) {
+  for (const source of ['claude-code', 'ghcp', 'antigravity'] as const) {
     assert.equal(sessionRuntimeUi({ source }).attachments, false);
     assert.equal(sessionRuntimeUi({ source, controlCapabilities: { compact: false, attachments: true } }).attachments, true);
     assert.equal(sessionRuntimeUi({ source, controlCapabilities: { compact: false, attachments: false } }).attachments, false);

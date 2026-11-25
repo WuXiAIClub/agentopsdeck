@@ -6,6 +6,7 @@ import { projectAntigravityUpdate, type AntigravityProjectedUpdate } from './mes
 
 export const ANTIGRAVITY_ACP_PROTOCOL_VERSION = 1;
 export const ANTIGRAVITY_ACP_FRAME_BYTES = 1_048_576;
+export const ANTIGRAVITY_ACP_WRITE_BYTES = 32 * 1024 * 1024;
 export const ANTIGRAVITY_ACP_PENDING_LIMIT = 64;
 export const ANTIGRAVITY_ACP_UPDATE_LIMIT = 4096;
 export const ANTIGRAVITY_ACP_UPDATE_BYTES = 4_194_304;
@@ -17,6 +18,21 @@ const identity = (value: unknown): value is string => typeof value === 'string' 
 type Pending = { resolve: (value: unknown) => void; reject: (error: Error) => void };
 export type AntigravitySessionUpdate = { sessionId: string; update: AntigravityProjectedUpdate };
 export type AntigravityHandshake = { protocolVersion: 1; agentCapabilities: Record<string, unknown> };
+export type AntigravityPromptBlock =
+  | { type: 'text'; text: string }
+  | { type: 'image'; mimeType: string; data: string };
+export type AntigravityPromptUsage = {
+  inputTokens: number;
+  outputTokens: number;
+  cachedReadTokens?: number;
+  cachedWriteTokens?: number;
+  thoughtTokens?: number;
+  totalTokens?: number;
+};
+export type AntigravityPromptResult = {
+  stopReason: string;
+  usage?: AntigravityPromptUsage;
+};
 
 function synchronousAssertion(assert: () => void) {
   const result: unknown = assert();
@@ -30,6 +46,15 @@ export class AntigravityAcpError extends Error {
   constructor(readonly code: number) {
     super(code === -32000 ? 'Antigravity authentication required in its dedicated home' : 'Antigravity ACP request failed');
   }
+}
+
+function selectAllowOptionId(options: unknown[]): string | undefined {
+  const candidates = options.filter((item): item is Record<string, unknown> => record(item) && typeof item.optionId === 'string' && identity(item.optionId));
+  const preferred = candidates.find(item => item.kind === 'allow_always')
+    ?? candidates.find(item => item.kind === 'allow_once')
+    ?? candidates.find(item => typeof item.kind === 'string' && item.kind.startsWith('allow'))
+    ?? candidates[0];
+  return preferred ? (preferred.optionId as string) : undefined;
 }
 
 export class AntigravityAcpClient {
@@ -64,7 +89,10 @@ export class AntigravityAcpClient {
   }) {
     synchronousAssertion(options.assertOwnership);
     verifyAntigravityEnvironment(options.config);
-    this.child = spawn(options.config.command, ['acp', '--sandbox', '--disable-telemetry'], {
+    const args = options.config.permissionMode === 'deny'
+      ? ['acp', '--sandbox', '--disable-telemetry']
+      : ['acp', '--disable-telemetry'];
+    this.child = spawn(options.config.command, args, {
       cwd: options.config.workspace,
       env: antigravityEnvironment(options.config),
       shell: false,
@@ -129,20 +157,52 @@ export class AntigravityAcpClient {
     finally { this.openingSession = false; }
   }
 
-  async prompt(text: string, persistIntent: (sessionId: string) => Promise<void>): Promise<{ stopReason: string }> {
-    if (!this.negotiated || !this.sessionId || this.prompting || this.hasPrompted || typeof text !== 'string' || !text.trim()
-      || Buffer.byteLength(text) > ANTIGRAVITY_ACP_FRAME_BYTES / 2) throw failure();
+  async setModel(modelId: string): Promise<void> {
+    if (!this.negotiated || !this.sessionId || this.prompting || !identity(modelId)) throw failure();
+    try {
+      await this.setupRequest('session/set_model', { sessionId: this.sessionId, modelId });
+    } catch (error) { this.fail(); throw error; }
+  }
+
+  async prompt(
+    input: string | AntigravityPromptBlock[],
+    persistIntent: (sessionId: string) => Promise<void>,
+  ): Promise<AntigravityPromptResult> {
+    const blocks: AntigravityPromptBlock[] = typeof input === 'string' ? [{ type: 'text', text: input }] : input;
+    const hasValidContent = blocks.length > 0 && blocks.every(block =>
+      block.type === 'text' ? typeof block.text === 'string' && block.text.length > 0
+        : block.type === 'image' && typeof block.mimeType === 'string' && block.mimeType.startsWith('image/') && typeof block.data === 'string' && block.data.length > 0);
+    if (!this.negotiated || !this.sessionId || this.prompting || this.hasPrompted || !hasValidContent
+      || (typeof input === 'string' && !input.trim())
+      || Buffer.byteLength(JSON.stringify(blocks)) > ANTIGRAVITY_ACP_WRITE_BYTES) throw failure();
     const sessionId = this.sessionId;
     this.prompting = true; this.hasPrompted = true; this.requestedStop = false; this.permissionCount = 0;
     try {
       await persistIntent(sessionId);
       if (this.failed || this.requestedStop) throw failure();
       this.promptSent = true;
-      const value = await this.request('session/prompt', { sessionId, prompt: [{ type: 'text', text }] });
+      const value = await this.request('session/prompt', { sessionId, prompt: blocks });
       if (!record(value) || typeof value.stopReason !== 'string'
         || !['end_turn', 'max_tokens', 'max_turn_requests', 'refusal', 'cancelled'].includes(value.stopReason)
-        || value.stopReason === 'cancelled' && !this.requestedStop) { this.fail(); throw failure(); }
-      return { stopReason: value.stopReason };
+        || value.stopReason === 'cancelled' && !this.requestedStop && this.permissionCount === 0) { this.fail(); throw failure(); }
+      const rawUsage = record(value.usage) ? value.usage : undefined;
+      const count = (candidate: unknown): number | undefined =>
+        typeof candidate === 'number' && Number.isSafeInteger(candidate) && candidate >= 0 ? candidate : undefined;
+      const inputTokens = count(rawUsage?.inputTokens);
+      const outputTokens = count(rawUsage?.outputTokens);
+      const cachedReadTokens = count(rawUsage?.cachedReadTokens);
+      const cachedWriteTokens = count(rawUsage?.cachedWriteTokens);
+      const thoughtTokens = count(rawUsage?.thoughtTokens);
+      const totalTokens = count(rawUsage?.totalTokens);
+      const usage: AntigravityPromptUsage | undefined = inputTokens !== undefined && outputTokens !== undefined ? {
+        inputTokens,
+        outputTokens,
+        ...(cachedReadTokens !== undefined ? { cachedReadTokens } : {}),
+        ...(cachedWriteTokens !== undefined ? { cachedWriteTokens } : {}),
+        ...(thoughtTokens !== undefined ? { thoughtTokens } : {}),
+        ...(totalTokens !== undefined ? { totalTokens } : {}),
+      } : undefined;
+      return { stopReason: value.stopReason, ...(usage ? { usage } : {}) };
     } catch (error) { this.fail(); throw error; }
     finally { this.prompting = false; this.promptSent = false; }
   }
@@ -176,7 +236,7 @@ export class AntigravityAcpClient {
     synchronousAssertion(this.options.assertOwnership);
     if (this.failed || this.exited || !this.child.stdin.writable) throw failure();
     const bytes = Buffer.from(`${JSON.stringify(value)}\n`);
-    if (bytes.length > ANTIGRAVITY_ACP_FRAME_BYTES || this.child.stdin.writableLength + bytes.length > 2 * ANTIGRAVITY_ACP_FRAME_BYTES) throw failure();
+    if (bytes.length > ANTIGRAVITY_ACP_WRITE_BYTES || this.child.stdin.writableLength + bytes.length > 2 * ANTIGRAVITY_ACP_WRITE_BYTES) throw failure();
     this.child.stdin.write(bytes, error => { if (error) this.fail(); });
   }
 
@@ -223,7 +283,14 @@ export class AntigravityAcpClient {
       if (value.method === 'session/request_permission') {
         if (!this.promptSent || value.params.sessionId !== this.sessionId || !record(value.params.toolCall)
           || !Array.isArray(value.params.options) || value.params.options.length > 64 || ++this.permissionCount > 1024) throw failure();
-        this.write({ jsonrpc: '2.0', id: value.id, result: { outcome: { outcome: 'cancelled' } } });
+        const optionId = this.options.config.permissionMode === 'deny' ? undefined : selectAllowOptionId(value.params.options);
+        this.write({
+          jsonrpc: '2.0',
+          id: value.id,
+          result: optionId
+            ? { outcome: { outcome: 'selected', optionId } }
+            : { outcome: { outcome: 'cancelled' } },
+        });
       } else this.write({ jsonrpc: '2.0', id: value.id, error: { code: -32601, message: 'Method not supported by AgentOpsDeck' } });
       return;
     }

@@ -9,14 +9,14 @@ import type { AntigravityConfig } from './config.js';
 
 const supported = { skip: process.platform !== 'linux' };
 
-function fixture(context: TestContext, mode = 'normal') {
+function fixture(context: TestContext, mode = 'normal', permissionMode?: 'allow' | 'deny') {
   const root = mkdtempSync(join(tmpdir(), 'aod-antigravity-'));
   const homeDirectory = join(root, 'home'), workspace = join(root, mode), command = join(root, 'bin', 'agy');
   for (const directory of [homeDirectory, workspace, join(root, 'bin')]) mkdirSync(directory, { mode: 0o700 });
   for (const name of ['config', 'cache', 'data', 'tmp']) mkdirSync(join(homeDirectory, name), { mode: 0o700 });
   copyFileSync(fileURLToPath(new URL('./acp-fixture.mjs', import.meta.url)), command);
   chmodSync(command, 0o700);
-  const config: AntigravityConfig = { command, homeDirectory, workspace, startupTimeoutMs: 1000 };
+  const config: AntigravityConfig = { command, homeDirectory, workspace, startupTimeoutMs: 1000, ...(permissionMode ? { permissionMode } : {}) };
   const updates: AntigravitySessionUpdate[] = [];
   let received: () => void = () => {};
   const updateReceived = new Promise<void>(resolve => { received = resolve; });
@@ -54,16 +54,22 @@ test('Antigravity negotiates ACP, preserves fragmented UTF-8 and persists intent
   assert.equal(original.client.inspectTransportClosed(), true);
 });
 
-test('Antigravity denies permission requests and unsupported client tools', supported, async context => {
+test('Antigravity approves permission requests by default, denies in deny mode, and rejects unsupported client tools', supported, async context => {
   for (const prompt of ['permission', 'unsupported-client-tool']) {
     const original = fixture(context);
     await original.client.initialize(); await original.client.newSession();
     assert.equal((await original.client.prompt(prompt, async () => {})).stopReason, 'end_turn');
     const reply = original.requests().find(request => request.id === (prompt === 'permission' ? 'permission-1' : 'terminal-1'));
-    if (prompt === 'permission') assert.deepEqual(reply.result, { outcome: { outcome: 'cancelled' } });
+    if (prompt === 'permission') assert.deepEqual(reply.result, { outcome: { outcome: 'selected', optionId: 'allow' } });
     else assert.equal(reply.error.code, -32601);
     original.client.close(); await original.client.finished;
   }
+  const denied = fixture(context, 'normal', 'deny');
+  await denied.client.initialize(); await denied.client.newSession();
+  assert.equal((await denied.client.prompt('permission', async () => {})).stopReason, 'end_turn');
+  const deniedReply = denied.requests().find(request => request.id === 'permission-1');
+  assert.deepEqual(deniedReply.result, { outcome: { outcome: 'cancelled' } });
+  denied.client.close(); await denied.client.finished;
 });
 
 test('Antigravity resumes only verified owned identity and suppresses historical updates', supported, async context => {
@@ -138,13 +144,14 @@ test('Antigravity authentication errors never include provider error bodies', su
   await original.client.finished;
 });
 
-test('Antigravity projects only bounded text and tool metadata, never native bodies', supported, async context => {
+test('Antigravity projects bounded text, tool metadata and bounded tool output, never private metadata', supported, async context => {
   const original = fixture(context);
   await original.client.initialize(); await original.client.newSession();
   assert.deepEqual(await original.client.prompt('private-update', async () => {}), { stopReason: 'end_turn' });
   assert.deepEqual(original.updates, [
     { sessionId: 'synthetic-native-session', update: {
       sessionUpdate: 'tool_call', toolCallId: 'synthetic-tool', title: 'Read', status: 'completed', kind: 'read',
+      outputText: 'synthetic-native-tool-body', outputTruncated: false,
     } },
     { sessionId: 'synthetic-native-session', update: {
       sessionUpdate: 'agent_message_chunk', content: { type: 'text', text: 'synthetic-visible-text' },

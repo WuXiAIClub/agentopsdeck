@@ -24,7 +24,14 @@ test('Antigravity tool projection whitelists metadata, not executable input or n
   });
   for (const invalid of [{ toolCallId: '' }, { title: ['Read'] }, { title: '好'.repeat(171) }, { title: 'synthetic\nprivate' },
     { status: ['completed'] }, { status: 'unknown' }, { kind: 'native-exec' }]) {
-    assert.throws(() => projectAntigravityUpdate({ sessionUpdate: 'tool_call', toolCallId: 'synthetic-tool', ...invalid }));
+    if ('title' in invalid && typeof invalid.title === 'string') {
+      const projected = projectAntigravityUpdate({ sessionUpdate: 'tool_call', toolCallId: 'synthetic-tool', ...invalid });
+      assert.equal(projected?.sessionUpdate, 'tool_call');
+      assert.ok(projected && 'title' in projected && typeof projected.title === 'string' && !/[\x00-\x1f\x7f]/.test(projected.title));
+      assert.ok(projected && 'title' in projected && Buffer.byteLength(projected.title!) <= 512);
+    } else {
+      assert.throws(() => projectAntigravityUpdate({ sessionUpdate: 'tool_call', toolCallId: 'synthetic-tool', ...invalid }));
+    }
   }
   for (const invalid of [[], null, { sessionUpdate: [] }]) assert.throws(() => projectAntigravityUpdate(invalid));
 });

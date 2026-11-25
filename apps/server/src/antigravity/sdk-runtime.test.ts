@@ -89,10 +89,8 @@ async function createConnectorFixture() {
   const token = tokens.createTransient([
     'sessions:create',
     'sessions:read',
-    'sessions:delete',
     'messages:read',
     'messages:send',
-    'runs:interrupt',
     'queue:manage',
     'models:read',
   ]);

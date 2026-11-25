@@ -87,11 +87,10 @@ export function registerSessionSettingsRoutes(app: Hono, path: string, deps: {
       }
       const model = body.model === null ? null : typeof body.model === 'string' ? body.model.trim() : undefined;
       if (sessionKey.startsWith('hermes:')) return c.json({ error: 'Configure Hermes model settings in its dedicated home' }, 409);
-      if (sessionKey.startsWith('antigravity:')) return c.json({ error: 'Antigravity model overrides are not supported' }, 409);
       const thinking = body.thinking === null ? null : typeof body.thinking === 'string' ? body.thinking.trim() : undefined;
       if (model === undefined || model === '' || (model?.length ?? 0) > 4096
         || (Object.hasOwn(body, 'thinking') && (thinking === undefined || thinking === '' || (thinking?.length ?? 0) > 4096))) return c.json({ error: 'Invalid session settings' }, 400);
-      if (['claude-code', 'ghcp'].includes(sessionRuntimeId(sessionKey))) {
+      if (['claude-code', 'ghcp', 'antigravity'].includes(sessionRuntimeId(sessionKey))) {
         if (!deps.sdkModelUpdate) return c.json({ error: 'SDK model settings are unavailable' }, 409);
         if (thinking !== undefined && thinking !== null) return c.json({ error: 'SDK thinking overrides are not supported' }, 400);
         // The SDK callback currently reports a transactional ACK, not the

@@ -23,7 +23,8 @@ import { COPILOT_MESSAGE_TEXT_LIMIT, type CopilotProjectedMessage } from '../cop
 import { AntigravitySessionProjection } from '../copilot/session-projection.js';
 import type { CopilotTextStream } from '../copilot/stream-projection.js';
 import type { CopilotToolDetail } from '../copilot/tool-details.js';
-import type { AntigravitySessionUpdate } from './acp-client.js';
+import type { SdkMetricSample } from '../connector/sdk-metrics.js';
+import type { AntigravityPromptBlock, AntigravitySessionUpdate } from './acp-client.js';
 import type { AntigravityConfig } from './config.js';
 import { verifyAntigravityEnvironment } from './environment.js';
 import { AntigravityProcessWorker } from './execution-worker.js';
@@ -47,13 +48,14 @@ const sanitizeToolName = (value: string) => {
 export type AntigravityProjection = {
   project: (row: CopilotProjectedMessage, detail?: CopilotToolDetail) => void;
   stream: (snapshot: CopilotTextStream) => void;
+  metrics?: (sample: SdkMetricSample) => void;
 };
 
 export type AntigravityWorkerFactory = (options: {
   config: AntigravityConfig;
   assertOwnership: () => void;
   update: (update: AntigravitySessionUpdate) => void;
-}) => Pick<AntigravityProcessWorker, 'initialize' | 'newSession' | 'resumeOwnedSession' | 'prompt' | 'cancel' | 'stopAndDrain'>;
+}) => Pick<AntigravityProcessWorker, 'initialize' | 'newSession' | 'resumeOwnedSession' | 'setModel' | 'prompt' | 'cancel' | 'stopAndDrain'>;
 
 const defaultWorkerFactory: AntigravityWorkerFactory = options => new AntigravityProcessWorker(options);
 
@@ -193,11 +195,14 @@ export class AntigravitySdkTurn implements SdkOwnedTurn {
   private assistantText = '';
   private assistantTruncated = false;
   private readonly seenTools = new Set<string>();
+  private readonly completedTools = new Set<string>();
 
   constructor(private readonly options: {
     config: AntigravityConfig;
     execution: SdkExecution;
     text: string;
+    context?: SdkTurnContext;
+    attachments?: SdkInputAttachment[];
     projection: AntigravityProjection;
     assertOwnership: () => void;
     createWorker?: AntigravityWorkerFactory;
@@ -206,7 +211,7 @@ export class AntigravitySdkTurn implements SdkOwnedTurn {
     const { execution, text } = options;
     if (execution.kind === 'compact' || !execution.key.startsWith('antigravity:') || execution.key.length <= 12
       || !uuid.test(execution.nativeSessionId) || !['create', 'resume'].includes(execution.nativeMode)
-      || !text.trim() || text.length > COPILOT_MESSAGE_TEXT_LIMIT) throw failure();
+      || (!text.trim() && !options.attachments?.length) || text.length > COPILOT_MESSAGE_TEXT_LIMIT) throw failure();
     let resolveAdmitted!: (value: { nativeRequestId: string }) => void;
     let rejectAdmitted!: (error: Error) => void;
     this.admitted = new Promise((resolve, reject) => {
@@ -250,11 +255,23 @@ export class AntigravitySdkTurn implements SdkOwnedTurn {
         });
         return;
       }
+      if (update.sessionUpdate === 'usage_update') {
+        const metricSequence = ++this.sequence;
+        projection.metrics?.({
+          sequence: metricSequence,
+          eventId: sanitizeId(`evt_${execution.id}_usage_${metricSequence}`),
+          context: { used: update.used, limit: update.size, basis: 'native-context' },
+        });
+        return;
+      }
       const toolCallId = sanitizeId(update.toolCallId);
       const eventIndex = ++this.sequence;
-      if (update.sessionUpdate === 'tool_call' || !this.seenTools.has(toolCallId)) {
+      if (!this.seenTools.has(toolCallId)) {
         this.seenTools.add(toolCallId);
-        const toolName = sanitizeToolName(update.title ?? update.kind ?? 'antigravity_tool');
+        const toolName = sanitizeToolName(update.kind ?? 'antigravity_tool');
+        const detail = update.title
+          ? { text: update.title, truncated: false }
+          : undefined;
         projection.project({
           nativeEventId: sanitizeId(`evt_${execution.id}_call_${eventIndex}`),
           role: 'tool',
@@ -264,10 +281,14 @@ export class AntigravitySdkTurn implements SdkOwnedTurn {
           text: toolName,
           truncated: false,
           createdAt: this.now(),
-        });
+        }, detail);
       }
-      if (update.status === 'completed' || update.status === 'failed') {
+      if ((update.status === 'completed' || update.status === 'failed') && !this.completedTools.has(toolCallId)) {
+        this.completedTools.add(toolCallId);
         const resultIndex = ++this.sequence;
+        const resultDetail = update.outputText !== undefined
+          ? { text: update.outputText, truncated: Boolean(update.outputTruncated) }
+          : undefined;
         projection.project({
           nativeEventId: sanitizeId(`evt_${execution.id}_result_${resultIndex}`),
           role: 'tool',
@@ -277,11 +298,33 @@ export class AntigravitySdkTurn implements SdkOwnedTurn {
           truncated: false,
           toolError: update.status === 'failed',
           createdAt: this.now(),
-        });
+        }, resultDetail);
       }
     } catch {
       this.failed = true;
     }
+  }
+
+  private buildPromptBlocks(): AntigravityPromptBlock[] {
+    const blocks: AntigravityPromptBlock[] = [];
+    const contextText = typeof this.options.context === 'string'
+      ? this.options.context.trim()
+      : this.options.context?.text?.trim() ?? '';
+    const textParts: string[] = [];
+    if (contextText) textParts.push(contextText);
+    if (this.options.text.trim()) textParts.push(this.options.text);
+    for (const attachment of this.options.attachments ?? []) {
+      if (attachment.mimeType.startsWith('image/')) {
+        blocks.push({ type: 'image', mimeType: attachment.mimeType, data: attachment.data });
+      } else {
+        const decoded = Buffer.from(attachment.data, 'base64').toString('utf8');
+        textParts.push(`[Attachment: ${attachment.name} (${attachment.mimeType})]\n${decoded}`);
+      }
+    }
+    const combinedText = textParts.join('\n\n').trim();
+    if (combinedText) blocks.unshift({ type: 'text', text: combinedText });
+    if (blocks.length === 0) blocks.push({ type: 'text', text: 'Please inspect the attached content.' });
+    return blocks;
   }
 
   private async run(): Promise<void> {
@@ -302,7 +345,16 @@ export class AntigravitySdkTurn implements SdkOwnedTurn {
         });
         this.agySessionId = bound;
       }
-      const result = await this.worker.prompt(text, async sessionId => {
+      const targetModel = execution.model && execution.model !== 'default'
+        ? execution.model
+        : config.model && config.model !== 'default'
+          ? config.model
+          : undefined;
+      if (targetModel) {
+        await this.worker.setModel(targetModel);
+      }
+      const blocks = this.buildPromptBlocks();
+      const result = await this.worker.prompt(blocks, async sessionId => {
         assertOwnership();
         if (!this.agySessionId || sessionId !== this.agySessionId) throw failure();
         writeAntigravitySessionBinding(config, execution.nativeSessionId, sessionId);
@@ -317,18 +369,35 @@ export class AntigravitySdkTurn implements SdkOwnedTurn {
         this.admitResolve({ nativeRequestId: userMessageId });
       });
       if (this.failed) throw failure();
-      if (result.stopReason !== 'end_turn' && result.stopReason !== 'cancelled') throw failure();
-      if (this.assistantText.length > 0 || result.stopReason === 'end_turn') {
+      if (!['end_turn', 'cancelled', 'refusal', 'max_tokens', 'max_turn_requests'].includes(result.stopReason)) throw failure();
+      if (result.usage) {
+        const metricSequence = ++this.sequence;
+        projection.metrics?.({
+          sequence: metricSequence,
+          eventId: sanitizeId(`evt_${execution.id}_turn_usage`),
+          usage: {
+            scope: 'last-turn',
+            inputTokens: result.usage.inputTokens,
+            outputTokens: result.usage.outputTokens,
+            ...(result.usage.cachedReadTokens !== undefined ? { cacheReadTokens: result.usage.cachedReadTokens } : {}),
+            ...(result.usage.cachedWriteTokens !== undefined ? { cacheWriteTokens: result.usage.cachedWriteTokens } : {}),
+          },
+        });
+      }
+      const fallbackText = this.assistantText.length === 0 && result.stopReason === 'cancelled' && !this.stopRequested
+        ? 'Antigravity requested a tool permission that is disabled in this sandboxed connector.'
+        : this.assistantText;
+      if (fallbackText.length > 0 || result.stopReason === 'end_turn') {
         projection.project({
           nativeEventId: sanitizeId(`evt_${execution.id}_assistant`),
           role: 'assistant',
           messageId: assistantMessageId,
-          text: this.assistantText,
+          text: fallbackText,
           truncated: this.assistantTruncated,
           createdAt: this.now(),
         });
       }
-      this.outcome = result.stopReason === 'cancelled' || this.stopRequested ? 'interrupted' : 'completed';
+      this.outcome = this.stopRequested ? 'interrupted' : 'completed';
     } catch (error) {
       this.failed = true;
       this.admitReject(error instanceof Error ? error : failure());
@@ -409,7 +478,7 @@ export class AntigravityDispatchAdapter implements SdkDispatchAdapter {
   async send(execution: SdkExecution, text: string, context?: SdkTurnContext,
     attachments?: SdkInputAttachment[], interaction?: WorkerInteractionContext): Promise<{ nativeRequestId: string }> {
     if (!this.available || execution.kind === 'compact' || execution.epoch !== this.options.epoch
-      || !execution.key.startsWith('antigravity:') || attachments?.length || interaction
+      || !execution.key.startsWith('antigravity:') || interaction
       || this.active.has(execution.key)) throw failure();
     const turn = this.options.start(execution, text, context, attachments, interaction);
     const slot: ActiveSlot = { execution: { ...execution }, turn, failed: false };
@@ -705,6 +774,8 @@ export async function createAsyncAntigravityOwnedRuntime(options: AsyncAntigravi
           config: structuredClone(config),
           execution,
           text,
+          ...(context ? { context } : {}),
+          ...(attachments?.length ? { attachments } : {}),
           projection,
           assertOwnership: hooks.assertOwnership,
         });

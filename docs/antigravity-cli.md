@@ -12,22 +12,29 @@ integration and Web UI entry are implemented in `apps/server/src/antigravity/`,
 Setting `AOD_ANTIGRAVITY_ENABLED=true`, `AOD_ANTIGRAVITY_DEDICATED=true`,
 `AOD_ANTIGRAVITY_COMMAND`, `AOD_ANTIGRAVITY_HOME`, and `AOD_ANTIGRAVITY_WORKSPACE`
 enables the owner-only `antigravity` runtime in the Connector and Web UI.
-Unsupported capabilities (`attachments`, `compact`, `modelOverride`, `interactions`)
-remain disabled and are explicitly rejected with `409`.
+Image/text `attachments`, bounded tool output details, context and token usage
+metrics (`usage_update` / `session/prompt` `usage`), model catalog/selection
+(`AOD_ANTIGRAVITY_MODEL` / `AOD_ANTIGRAVITY_MODEL_CHOICES` + `session/set_model`),
+and workspace board context are supported. Unsupported capabilities (`compact`,
+`interactions`) remain disabled and are explicitly rejected with `409`.
 There are no new public HTTP endpoints or shipped native binaries.
 
 ## Implemented contracts
 
 - Launch an explicitly configured absolute executable with
-  `agy acp --sandbox --disable-telemetry`, without a shell.
+  `agy acp --disable-telemetry` (adding `--sandbox` when
+  `AOD_ANTIGRAVITY_PERMISSION_MODE=deny`), without a shell.
 - Negotiate ACP version 1, then create a session or resume an independently
   verified owned session. Never list or load foreign sessions to recover a turn.
 - Require the caller to persist intent before transmitting a prompt. Use only
   one prompt per subprocess; a failed or disconnected delivery is never retried.
 - Decode fragmented UTF-8 and newline-delimited JSON-RPC with bounded frames.
   Reject invalid responses, foreign session updates and incompatible versions.
-- Deny client-side permission requests. Do not advertise filesystem or terminal
-  capabilities and never pass the permission-bypass flag.
+- Control tool permissions via `AOD_ANTIGRAVITY_PERMISSION_MODE` (defaults to
+  `allow`, approving ACP `session/request_permission` requests for local file
+  and command tools; set `deny` to enable `--sandbox` and cancel permission
+  requests). Do not advertise client-side filesystem or terminal capabilities
+  and never pass `--dangerously-skip-permissions`.
 - Use an allowlisted environment with a dedicated HOME, XDG directories and
   temporary directory. Do not inherit API keys, ADC, provider settings or proxy
   variables. Credentials must be provisioned independently in the dedicated home.

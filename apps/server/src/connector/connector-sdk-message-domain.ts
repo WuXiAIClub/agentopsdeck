@@ -150,7 +150,6 @@ export async function executeConnectorSdkMessage<K extends ConnectorSdkMessageKi
       else if ((input as ConnectorSdkMessageCommands['sdkMessageSend']['input']).rejectFresh || !owner.sdkCommandAdmissionOpen || !catalog) result = reject(409);
       else if (!journal.session(input.key)) result = reject(404);
       else if (normalized.deliveryMode === 'mirror' || ['/stop', '/status'].includes(normalized.message) || isSdkCompactCommand(normalized.message)) result = reject(409);
-      else if (input.runtime === 'antigravity' && normalized.media.length > 0) result = reject(409);
       else {
         let attachments;
         try { attachments = prepareSdkAttachments(normalized.media); }

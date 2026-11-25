@@ -1,5 +1,5 @@
 import { setTimeout as delay } from 'node:timers/promises';
-import { AntigravityAcpClient, type AntigravityHandshake, type AntigravitySessionUpdate } from './acp-client.js';
+import { AntigravityAcpClient, type AntigravityHandshake, type AntigravityPromptBlock, type AntigravityPromptResult, type AntigravitySessionUpdate } from './acp-client.js';
 import type { AntigravityConfig } from './config.js';
 import type { AntigravityExecutionWorker } from './owned-execution.js';
 
@@ -50,9 +50,14 @@ export class AntigravityProcessWorker implements AntigravityExecutionWorker {
     return this.client.resumeOwnedSession(sessionId, assertOwnedSession);
   }
 
-  prompt(text: string, persistIntent: (sessionId: string) => Promise<void>): Promise<{ stopReason: string }> {
+  setModel(modelId: string): Promise<void> {
     if (this.draining) return Promise.reject(failure());
-    return this.client.prompt(text, persistIntent);
+    return this.client.setModel(modelId);
+  }
+
+  prompt(input: string | AntigravityPromptBlock[], persistIntent: (sessionId: string) => Promise<void>): Promise<AntigravityPromptResult> {
+    if (this.draining) return Promise.reject(failure());
+    return this.client.prompt(input, persistIntent);
   }
 
   cancel(): void {

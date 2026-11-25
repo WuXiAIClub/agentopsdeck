@@ -1,10 +1,14 @@
 import { posix, win32 } from 'node:path';
+import { parseSdkModelChoices, validSdkModel } from '../connector/sdk-models.js';
 
 export type AntigravityConfig = {
   command: string;
   homeDirectory: string;
   workspace: string;
   startupTimeoutMs: number;
+  permissionMode?: 'deny' | 'allow';
+  model?: string;
+  modelChoices?: string[];
 };
 
 const prefix = 'AOD_ANTIGRAVITY_';
@@ -57,5 +61,26 @@ export function antigravityConfig(env: NodeJS.ProcessEnv, platform: NodeJS.Platf
     || startupTimeoutMs < 1000 || startupTimeoutMs > 120000) {
     throw Error('AOD_ANTIGRAVITY_STARTUP_TIMEOUT_MS must be between 1000 and 120000');
   }
-  return { command, homeDirectory, workspace, startupTimeoutMs };
+  const rawPermissionMode = env[`${prefix}PERMISSION_MODE`] ?? 'allow';
+  if (rawPermissionMode !== 'allow' && rawPermissionMode !== 'deny') {
+    throw Error('AOD_ANTIGRAVITY_PERMISSION_MODE must be allow or deny');
+  }
+  const rawModel = env[`${prefix}MODEL`]?.trim();
+  if (rawModel !== undefined && rawModel !== '' && !validSdkModel(rawModel)) {
+    throw Error('AOD_ANTIGRAVITY_MODEL must be a valid model identifier');
+  }
+  const model = rawModel || undefined;
+  const rawModelChoices = env[`${prefix}MODEL_CHOICES`]?.trim();
+  const modelChoices = model
+    ? parseSdkModelChoices(model, rawModelChoices)
+    : rawModelChoices ? parseSdkModelChoices('default', rawModelChoices).filter(item => item !== 'default') : undefined;
+  return {
+    command,
+    homeDirectory,
+    workspace,
+    startupTimeoutMs,
+    permissionMode: rawPermissionMode,
+    ...(model ? { model } : {}),
+    ...(modelChoices?.length ? { modelChoices } : {}),
+  };
 }

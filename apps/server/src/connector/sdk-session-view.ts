@@ -22,7 +22,7 @@ export function sdkSessionView(runtime: SdkAgentId, session: SdkSession, executi
       : !phase && !ready ? 'unknown' : 'idle',
     hasActiveRun: busy, lastActiveAt: execution?.updatedAt ?? session.createdAt,
     controlCapabilities: { compact: runtime !== 'antigravity' && ready && session.nativeState === 'ready',
-      attachments: runtime !== 'antigravity' && ready },
+      attachments: ready },
   };
   // A newly allocated session has no finished run. Omitting runtime is better
   // than manufacturing a green Done notification before its first message.

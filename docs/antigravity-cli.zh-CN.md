@@ -11,21 +11,26 @@ Connector 运行时接线与 Web UI 入口已在 `apps/server/src/antigravity/`�
 配置 `AOD_ANTIGRAVITY_ENABLED=true`、`AOD_ANTIGRAVITY_DEDICATED=true`、
 `AOD_ANTIGRAVITY_COMMAND`、`AOD_ANTIGRAVITY_HOME` 与 `AOD_ANTIGRAVITY_WORKSPACE`
 即可在 Connector 与界面中启用 owner-only 的 `antigravity` 运行时。
-尚未支持的能力（`attachments`、`compact`、`modelOverride`、`interactions`）
-保持禁用并明确返回 `409`。
+已支持图片/文本附件（`attachments`）、有界工具输出详情、上下文与 token 用量统计
+（`usage_update` / `session/prompt` `usage`）、模型目录与按会话切模型
+（`AOD_ANTIGRAVITY_MODEL` / `AOD_ANTIGRAVITY_MODEL_CHOICES` + `session/set_model`）
+以及看板上下文透传。尚未支持的能力（`compact`、`interactions`）保持禁用并明确返回 `409`。
 没有新增公共 HTTP 接口，也不分发原生可执行程序。
 
 ## 已实现的契约
 
-- 使用明确配置的绝对路径启动 `agy acp --sandbox --disable-telemetry`，
-  不经过 shell。
+- 使用明确配置的绝对路径启动 `agy acp --disable-telemetry`（当设置
+  `AOD_ANTIGRAVITY_PERMISSION_MODE=deny` 时附加 `--sandbox`），不经过 shell。
 - 协商 ACP 版本 1，然后新建会话，或恢复经过独立归属校验的会话。
   不通过列举或加载其他会话来恢复执行。
 - 发送提示前要求调用方持久化执行意图。每个子进程只发送一次提示；
   失败或断连后不自动重试未知投递。
 - 在帧大小限制内解码分片 UTF-8 和逐行 JSON-RPC；拒绝无效响应、
   其他会话的更新以及不兼容的协议版本。
-- 拒绝客户端权限请求，不声明文件系统或终端能力，绝不传入绕过权限的标志。
+- 通过 `AOD_ANTIGRAVITY_PERMISSION_MODE` 控制工具权限（默认 `allow`，响应
+  ACP `session/request_permission` 选择允许项以支持本地读写与命令执行；设为
+  `deny` 时启用 `--sandbox` 并拒绝权限请求）。不声明客户端侧文件系统或终端能力，
+  绝不传入 `--dangerously-skip-permissions`。
 - 使用环境变量白名单，以及专属 HOME、XDG 目录和临时目录；不继承 API Key、
   ADC、供应商配置或代理变量。认证必须在专属 HOME 中独立准备。
 - 要求规范路径、服务账号持有的 `0700` HOME 和私有子目录。解析器默认关闭，
