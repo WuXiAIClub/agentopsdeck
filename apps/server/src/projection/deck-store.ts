@@ -828,6 +828,13 @@ export class DeckStore {
     return session ? { codexGoal: structuredClone(session.codexGoal) } : undefined;
   }
 
+  /** Non-SQL local thinking level lookup for owned native Codex turn/resume
+   * requests. Bypasses durable deletion and execution decorators so owned
+   * dispatch stays off main-thread SQL. */
+  localSessionThinkingLevel(sessionKey: string): SessionSummary['thinkingLevel'] | undefined {
+    return this.sessions.get(sessionKey)?.thinkingLevel ?? this.sessionThinkingOverrides.get(sessionKey);
+  }
+
   getSessionDirectory(query: SessionDirectoryQuery = {}, sourceCursor = this.latestEventId() ?? '') {
     const keys = query.sessionKey === undefined ? this.sessions.keys()
       : this.sessions.has(query.sessionKey) ? [query.sessionKey] : [];

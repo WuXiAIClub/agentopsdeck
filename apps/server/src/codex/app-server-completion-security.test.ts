@@ -297,6 +297,24 @@ test('item cardinality is bounded even when completed assistant text is tiny', a
   assert.equal(setup.store.getMessages(setup.sessionKey).filter(message => message.role === 'assistant').length, 128);
 });
 
+test('empty commentary completions release placeholder retention without consuming item cardinality', async context => {
+  const setup = fixture(context);
+  for (let index = 0; index < 200; index++) {
+    if (index % 2 === 0) setup.delta(`empty-${index}`, '   ');
+    setup.completed(`empty-${index}`, '');
+  }
+  await tick();
+  assert.equal(setup.runtime.executionUnavailable, false);
+  assert.equal(setup.runtime.assistantRetainedItems, 0);
+  assert.equal(setup.runtime.assistantRetainedBytes, 0);
+  assert.equal(setup.store.getMessages(setup.sessionKey).filter(message => message.role === 'assistant').length, 0);
+  setup.completed('final-reply', 'done');
+  await tick();
+  assert.equal(setup.runtime.executionUnavailable, false);
+  assert.equal(setup.runtime.assistantRetainedItems, 1);
+  assert.equal(setup.store.getMessages(setup.sessionKey).filter(message => message.role === 'assistant').length, 1);
+});
+
 test('live retention is bounded across sessions and release resets accounting only through buffer cleanup', context => {
   const setup = fixture(context);
   const text = 'x'.repeat(1024 * 1024);

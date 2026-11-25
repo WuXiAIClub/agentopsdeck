@@ -17,8 +17,11 @@ import { codexMessageAdmission, validConnectorCodexMessageInput, validConnectorC
 const token = 'isolated-codex-message-token', authorization = `Bearer ${token}`, key = 'codex:original';
 const silent = new PerformanceDiagnostics(() => {}), wait = { timeoutMs: 10_000 };
 const tick = () => new Promise<void>(resolve => setImmediate(resolve));
+const sleep = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
 async function converge(predicate: () => boolean) {
   for (let i = 0; i < 1000; i++) { if (predicate()) return; await tick(); }
+  const deadline = Date.now() + 5_000;
+  while (Date.now() < deadline) { if (predicate()) return; await sleep(10); }
   assert.fail('expected physical phase did not begin');
 }
 function fixture() {

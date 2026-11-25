@@ -185,16 +185,20 @@ export class AsyncOpenClawApplication {
     if (!this.activated || this.closed || this.failed) return Promise.reject(new ConnectorOwnerUnavailable());
     return this.retain(this.projection.refreshProjection());
   };
-  start(): Promise<void> {
+  start(startQueue = true): Promise<void> {
     if (this.closed || this.failed) return Promise.reject(new ConnectorOwnerUnavailable());
     return this.starting ??= this.retain(Promise.resolve().then(async () => {
       try {
         if (this.closed) throw new ConnectorOwnerUnavailable();
         await this.projection.open();
         if (this.closed) throw new ConnectorOwnerUnavailable();
-        this.activated = true; this.queue.start();
+        this.activated = true; if (startQueue) this.queue.start();
       } catch { this.fail(1); throw new ConnectorOwnerUnavailable(); }
     }));
+  }
+  startQueue(): void {
+    if (!this.activated || this.closed || this.failed) throw new ConnectorOwnerUnavailable();
+    this.queue.start();
   }
   observe(raw: unknown, connectionId: string | undefined): Promise<boolean> {
     if (!this.activated || this.closed || this.failed) return Promise.reject(new ConnectorOwnerUnavailable());

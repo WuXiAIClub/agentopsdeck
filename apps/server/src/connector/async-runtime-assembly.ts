@@ -120,7 +120,7 @@ export async function createAsyncRuntimeAssembly(options: AsyncRuntimeAssemblyOp
         // still closed: this does not authorize effects or publish readiness.
         // Starting all producers concurrently can exhaust the bounded read
         // barrier on a healthy restart, even when OpenClaw has no facts.
-        await openclaw.start();
+        await openclaw.start(false);
         if (state !== 'starting') throw new ConnectorOwnerUnavailable();
         // Once the inventory is established, retain every sibling preflight
         // even if another throws; cleanup must drain their physical work.
@@ -139,6 +139,7 @@ export async function createAsyncRuntimeAssembly(options: AsyncRuntimeAssemblyOp
         }
         await projection.refresh();
         if (state !== 'starting') throw new ConnectorOwnerUnavailable();
+        openclaw.startQueue();
         state = 'ready'; report(1, false);
       }).catch(async () => {
         if (state === 'starting') { state = 'failed'; report(1, true); await cleanup(); }
