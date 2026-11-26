@@ -14,6 +14,7 @@
     "check:api": "node scripts/api-docs.mjs --check",
     "check:review": "node scripts/open-source-review.mjs",
     "check:review:complete": "node scripts/open-source-review.mjs --require-complete",
+    "sync:review": "node scripts/sync-review-ledger.mjs",
     "test:i18n": "node --test scripts/check-web-i18n.test.mjs",
     "test:runner": "node --test scripts/run-source-tests.test.mjs",
     "test:scripts": "node scripts/run-script-tests.mjs",

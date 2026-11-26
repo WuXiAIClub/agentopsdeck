@@ -17,13 +17,13 @@
     "Native devices, providers, full backend, browser accessibility, artifacts and redistribution rights remain unaccepted."
   ],
   "summary": {
-    "totalFiles": 3597,
+    "totalFiles": 3599,
     "byKind": {
       "config": 57,
       "docs": 55,
       "asset": 8,
-      "test": 1752,
-      "runtime": 1711,
+      "test": 1753,
+      "runtime": 1712,
       "generated": 14
     },
     "byModule": {
@@ -33,9 +33,10 @@
       "native": 143,
       "main-integration": 35,
       "storage": 218,
+      "antigravity": 17,
+      "execution": 471,
       "api-auth": 392,
       "hub-notebook": 22,
-      "execution": 471,
       "codex": 4,
       "connector": 582,
       "api-completion": 7,
@@ -48,17 +49,17 @@
       "web-notebook-integration": 1,
       "final-docs": 3,
       "integration": 1,
-      "scripts": 10,
+      "scripts": 12,
       "web-css-fixture": 1,
       "external": 2
     },
     "byDepth": {
-      "semantic": 3563,
+      "semantic": 3565,
       "asset": 19,
       "structural": 15
     },
     "byDisposition": {
-      "no-finding": 3582,
+      "no-finding": 3584,
       "pending": 15
     },
     "completedSemanticOrAssetFiles": 3565,
@@ -128,8 +129,8 @@
     },
     {
       "path": ".github/workflows/ci.yml",
-      "size": 2014,
-      "sha256": "f98feccde1ddb48754c370d05d6c7ec2085525ce9bf51e767bfb7902fe0ad0a8",
+      "size": 2046,
+      "sha256": "5d9006bab5e3537699ea3b20617c66ca32553737bd74c540cfdf3f411d74b6a0",
       "module": "main",
       "kind": "config",
       "depth": "semantic",
@@ -209,6 +210,210 @@
       "findings": []
     },
     {
+      "path": "CONTRIBUTING.md",
+      "size": 2732,
+      "sha256": "3387dbe8cabd2ec5059e77dc0150eebd15daeba91dfe572eed1fc7628b307aa3",
+      "module": "governance",
+      "kind": "docs",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size",
+        "complete-current-source-and-relevant-contract-review"
+      ],
+      "notes": "Read complete contributor/security guidance against repository instructions and source isolation/publication contracts. No credentials, private-instance imports or release authorization implied; source-only repairs retain platform and rights gaps.",
+      "findings": [],
+      "previousReview": {
+        "path": "CONTRIBUTING.md",
+        "size": 2732,
+        "sha256": "3387dbe8cabd2ec5059e77dc0150eebd15daeba91dfe572eed1fc7628b307aa3",
+        "module": "governance",
+        "kind": "docs",
+        "depth": "pending",
+        "disposition": "pending",
+        "checks": [
+          "Read current source bytes only to calculate SHA-256 and exact byte size; hash reading alone is not content review"
+        ],
+        "notes": "仅登记快照，未完成源码/调用契约检查。",
+        "findings": []
+      }
+    },
+    {
+      "path": "Dockerfile",
+      "size": 616,
+      "sha256": "31c8efb67c7535cf861865b6125f4fc81efbdf76cab92003e5efb85f2f4bc402",
+      "module": "main",
+      "kind": "config",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size",
+        "main-human-review-of-recorded-scope",
+        "actual-local-checks-with-explicit-limitations",
+        "final-open-source-1.0.0-review",
+        "line-by-line-semantic-audit"
+      ],
+      "notes": "Reviewed two-stage source build, explicit all-dependency installation and nonroot runtime. Floating base and development dependency copying remain container/SBOM/OS acceptance gaps; no image build/run was performed.",
+      "findings": []
+    },
+    {
+      "path": "LICENSE",
+      "size": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "module": "governance",
+      "kind": "docs",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size",
+        "complete-current-source-and-relevant-contract-review"
+      ],
+      "notes": "Read complete Apache-2.0 text and contributor/rights boundaries. Canonical license presence does not establish inherited-source or asset redistribution rights; those gates remain open.",
+      "findings": [],
+      "previousReview": {
+        "path": "LICENSE",
+        "size": 11358,
+        "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+        "module": "governance",
+        "kind": "docs",
+        "depth": "pending",
+        "disposition": "pending",
+        "checks": [
+          "Read current source bytes only to calculate SHA-256 and exact byte size; hash reading alone is not content review"
+        ],
+        "notes": "未独立进行本轮许可证全文/确权/归属比对；主线既有许可证验证不计为本轮完成。",
+        "findings": []
+      }
+    },
+    {
+      "path": "LICENSE-STATUS.md",
+      "sha256": "c1b0f0971b3ed3acb2b7d5e90a6403f8f04b1705ba71f980274051e1d7f27152",
+      "size": 2381,
+      "module": "release-boundary",
+      "kind": "docs",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "findings": [],
+      "checks": [
+        "complete-source-reading-or-authorship",
+        "direct-review-validator-and-publication-contract",
+        "source-bound-approval-and-evidence-provenance",
+        "paired-documentation-contract"
+      ],
+      "notes": "Full current text read or authored. Gate and direct validator/test contracts inspected; pending decision configuration is not a rights approval. Historical dependency tables retained and current metadata scope distinguished. No source scan, scoped regression or license presence grants inherited rights or runtime/platform acceptance."
+    },
+    {
+      "path": "README.md",
+      "size": 6796,
+      "sha256": "352f34ed62ef0e0a842ba051fbba69defde3f5a16961f107ac8fc51c01fd1220",
+      "module": "main",
+      "kind": "docs",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size",
+        "complete-current-source-and-relevant-contract-review"
+      ],
+      "notes": "Read complete paired entry/navigation guides and cross-check commands, package versions, native-disabled defaults and local-only evidence links; documents do not promise public release or accepted installers.",
+      "findings": [],
+      "previousReview": {
+        "path": "README.md",
+        "size": 6796,
+        "sha256": "352f34ed62ef0e0a842ba051fbba69defde3f5a16961f107ac8fc51c01fd1220",
+        "module": "main",
+        "kind": "docs",
+        "depth": "pending",
+        "disposition": "pending",
+        "checks": [
+          "current-source-sha256-and-size",
+          "repair-snapshot-not-complete-semantic-approval"
+        ],
+        "notes": "Changed or added during scoped source remediation. Exact current bytes are recorded; module regressions do not establish complete file-level semantic approval. Previous observations, if any, are historical evidence only.",
+        "findings": [],
+        "previousReview": {
+          "path": "README.md",
+          "size": 6793,
+          "sha256": "3826cf7fa72c29608a238f942265a696ead4666cd29fec8767d5ca7f4f8c191b",
+          "module": "main",
+          "kind": "docs",
+          "depth": "semantic",
+          "disposition": "no-finding",
+          "checks": [
+            "current-source-sha256-and-size",
+            "main-human-review-of-recorded-scope",
+            "actual-local-checks-with-explicit-limitations"
+          ],
+          "notes": "Reviewed main English quick start, independent 1.0.0/package scope, private config lock guidance and explicit release-blocking audit link. Namespace/isolation completeness claims qualified against known findings; no public repository/installer promised.",
+          "findings": [],
+          "previousSha256": "1a690b0ab38f16e7696097ab6eb6e479ae5b732aa4e6ad70299bbd7ff79aba75"
+        }
+      }
+    },
+    {
+      "path": "README.zh-CN.md",
+      "size": 5995,
+      "sha256": "e5e4f4d01aad87b073b2584897d07fd9456dd58c3f0986eab3e3c505de2f0f18",
+      "module": "main",
+      "kind": "docs",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size",
+        "complete-current-source-and-relevant-contract-review"
+      ],
+      "notes": "Read complete paired entry/navigation guides and cross-check commands, package versions, native-disabled defaults and local-only evidence links; documents do not promise public release or accepted installers.",
+      "findings": [],
+      "previousReview": {
+        "path": "README.zh-CN.md",
+        "size": 5995,
+        "sha256": "e5e4f4d01aad87b073b2584897d07fd9456dd58c3f0986eab3e3c505de2f0f18",
+        "module": "main",
+        "kind": "docs",
+        "depth": "pending",
+        "disposition": "pending",
+        "checks": [
+          "current-source-sha256-and-size",
+          "repair-snapshot-not-complete-semantic-approval"
+        ],
+        "notes": "Changed or added during scoped source remediation. Exact current bytes are recorded; module regressions do not establish complete file-level semantic approval. Previous observations, if any, are historical evidence only.",
+        "findings": [],
+        "previousReview": {
+          "path": "README.zh-CN.md",
+          "size": 5995,
+          "sha256": "258d6255456745df23838c601ec85d43a8bb72e760b0e3199745b2a8b1d54925",
+          "module": "main",
+          "kind": "docs",
+          "depth": "semantic",
+          "disposition": "no-finding",
+          "checks": [
+            "current-source-sha256-and-size",
+            "main-human-review-of-recorded-scope",
+            "actual-local-checks-with-explicit-limitations"
+          ],
+          "notes": "Reviewed Chinese README aligned with English source/setup scope and actual blocked-release verdict. Independent package identity is not represented as full native/storage isolation; private settings and publication authorization remain excluded.",
+          "findings": [],
+          "previousSha256": "61c5f9ff59cf416ac6536d535e6d7c5eb435296e900b01cfa40990fbbc31d6dd"
+        }
+      }
+    },
+    {
+      "path": "SECURITY.md",
+      "sha256": "7213cbd57be78409f1b01b1723325dd7abd2df9ec65e6a76244d1d00b1d6403a",
+      "size": 3020,
+      "module": "release-boundary",
+      "kind": "docs",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "findings": [],
+      "checks": [
+        "complete-source-reading-or-authorship",
+        "direct-review-validator-and-publication-contract",
+        "source-bound-approval-and-evidence-provenance",
+        "paired-documentation-contract"
+      ],
+      "notes": "Full current text read or authored. Gate and direct validator/test contracts inspected; pending decision configuration is not a rights approval. Historical dependency tables retained and current metadata scope distinguished. No source scan, scoped regression or license presence grants inherited rights or runtime/platform acceptance."
+    },
+    {
       "path": "apps/android/.gitattributes",
       "size": 20,
       "sha256": "8a9464622b26167b808cf4115fe034faa632198181c687f4fdd2b3d37814adbb",
@@ -241,6 +446,45 @@
       ],
       "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/android/.gitignore (native/config); all historical findings and license/security/correctness checks are verified.",
       "findings": []
+    },
+    {
+      "path": "apps/android/README.md",
+      "size": 990,
+      "sha256": "35f139d7f6e97af51e9feb9684141e202ea7d9b151d29bc4cd29876889a9cda9",
+      "module": "native",
+      "kind": "docs",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
+        "Complete text bytes inspected structurally (16 lines); lexical observations are NOT semantic approval.",
+        "final-open-source-1.0.0-review",
+        "line-by-line-semantic-audit"
+      ],
+      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/android/README.md (native/docs); all historical findings and license/security/correctness checks are verified.",
+      "findings": []
+    },
+    {
+      "path": "apps/android/VERSION-POLICY.json",
+      "size": 1305,
+      "sha256": "d0cf47c6822a1e3e2d184026331362f7050a184cdd690d66f8f08f604529fd20",
+      "module": "main-integration",
+      "kind": "config",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "Complete JSON read: schema/platform, coreSourceVersion 1.0.0, independent historical native versions inspected.",
+        "releaseApproved:false, sealedCore:null and historical-source-scaffold explicitly retained.",
+        "Paired English/Chinese policy requires exact source/lock/payload/notices seal and separate device/signing/install/rights authorization.",
+        "final-open-source-1.0.0-review",
+        "line-by-line-semantic-audit"
+      ],
+      "notes": "Policy accurately preserves a release gap; it is not a sealed artifact. Android 0.2.3/build13, iOS 0.1.1/build2 and Windows 2.4.6/build2.4.6.12 with launcher manifest2.4.6.10 remain independent historical identifiers. No renumbering or inherited-history import.",
+      "findings": [],
+      "historicalFindingReferences": [
+        "NAT-007",
+        "NAT-008"
+      ]
     },
     {
       "path": "apps/android/app/build.gradle",
@@ -993,23 +1237,6 @@
       "findings": []
     },
     {
-      "path": "apps/android/README.md",
-      "size": 990,
-      "sha256": "35f139d7f6e97af51e9feb9684141e202ea7d9b151d29bc4cd29876889a9cda9",
-      "module": "native",
-      "kind": "docs",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
-        "Complete text bytes inspected structurally (16 lines); lexical observations are NOT semantic approval.",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
-      ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/android/README.md (native/docs); all historical findings and license/security/correctness checks are verified.",
-      "findings": []
-    },
-    {
       "path": "apps/android/scripts/build.ps1",
       "size": 1120,
       "sha256": "dbbaa3461f88ed4ddcf27c47576342d8a065eb00e7b0d821bd1307abc705a030",
@@ -1137,26 +1364,21 @@
       "findings": []
     },
     {
-      "path": "apps/android/VERSION-POLICY.json",
-      "size": 1305,
-      "sha256": "d0cf47c6822a1e3e2d184026331362f7050a184cdd690d66f8f08f604529fd20",
-      "module": "main-integration",
-      "kind": "config",
+      "path": "apps/android/web/VideoPlayer.tsx",
+      "size": 1475,
+      "sha256": "07c36738059f95d4ae1be51bf4b065adec881362dd8156e0f8cb31739e17672b",
+      "module": "native",
+      "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "Complete JSON read: schema/platform, coreSourceVersion 1.0.0, independent historical native versions inspected.",
-        "releaseApproved:false, sealedCore:null and historical-source-scaffold explicitly retained.",
-        "Paired English/Chinese policy requires exact source/lock/payload/notices seal and separate device/signing/install/rights authorization.",
+        "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
+        "Complete text bytes inspected structurally (32 lines); lexical observations are NOT semantic approval.",
         "final-open-source-1.0.0-review",
         "line-by-line-semantic-audit"
       ],
-      "notes": "Policy accurately preserves a release gap; it is not a sealed artifact. Android 0.2.3/build13, iOS 0.1.1/build2 and Windows 2.4.6/build2.4.6.12 with launcher manifest2.4.6.10 remain independent historical identifiers. No renumbering or inherited-history import.",
-      "findings": [],
-      "historicalFindingReferences": [
-        "NAT-007",
-        "NAT-008"
-      ]
+      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/android/web/VideoPlayer.tsx (native/runtime); all historical findings and license/security/correctness checks are verified.",
+      "findings": []
     },
     {
       "path": "apps/android/web/android-runtime.js",
@@ -1389,23 +1611,6 @@
       "findings": []
     },
     {
-      "path": "apps/android/web/VideoPlayer.tsx",
-      "size": 1475,
-      "sha256": "07c36738059f95d4ae1be51bf4b065adec881362dd8156e0f8cb31739e17672b",
-      "module": "native",
-      "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
-        "Complete text bytes inspected structurally (32 lines); lexical observations are NOT semantic approval.",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
-      ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/android/web/VideoPlayer.tsx (native/runtime); all historical findings and license/security/correctness checks are verified.",
-      "findings": []
-    },
-    {
       "path": "apps/android/web/voice-recording.mjs",
       "size": 3413,
       "sha256": "8a4334b87157a67bd31f1cbddbd686bc70403a2fee446dfee79d7a7e462d49b5",
@@ -1496,28 +1701,6 @@
       "findings": []
     },
     {
-      "path": "apps/ios/project.yml",
-      "size": 1470,
-      "sha256": "63d5cee63743cec41baaab85695ea08fa996cd52a773dc0fb4be54ee39eb70aa",
-      "module": "native",
-      "kind": "config",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "Complete YAML read; application/test sources, locale resource inclusion, privacy manifest and Client.xcconfig substitutions inspected.",
-        "Core/wrapper version distinction cross-checked against iOS VERSION-POLICY.json.",
-        "No generation, archive, Swift build, signing or native tests invoked.",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
-      ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/ios/project.yml (native/config); all historical findings and license/security/correctness checks are verified.",
-      "findings": [],
-      "historicalFindingReferences": [
-        "NAT-007",
-        "NAT-008"
-      ]
-    },
-    {
       "path": "apps/ios/README.md",
       "size": 11844,
       "sha256": "77ab6a6f2740a9e39d6987fe456f21f7886f0a4af704fda02cbc2f4c2a15407f",
@@ -1593,38 +1776,6 @@
       "findings": []
     },
     {
-      "path": "apps/ios/Resources/en.lproj/InfoPlist.strings",
-      "size": 554,
-      "sha256": "2fb725d8c101886d6e2734590df40b221e32ec506890286bf63b9f60bbfac394",
-      "module": "main-integration",
-      "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "Complete localized source read; four matching EN/CN permission keys and nonempty values checked.",
-        "Keys match Info.plist permissions and are included as localized resources in project.yml.",
-        "Focused source localization assertions pass."
-      ],
-      "notes": "This resource pair is reviewed, not comprehensive app EN/CN, accessibility, permissions, actual bundle packaging or legal/privacy acceptance. Broader NAT-006 and platform/rights gates remain open.",
-      "findings": []
-    },
-    {
-      "path": "apps/ios/Resources/en.lproj/Localizable.strings",
-      "size": 518,
-      "sha256": "08697f7a042cd9268db8cf473ac45a2ec572100f844884a6840a8e2967caafba",
-      "module": "main-integration",
-      "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "Complete localized source read; four matching EN/CN download UI keys and nonempty values checked.",
-        "DownloadCoordinator NSLocalizedString keys match; 64 MiB/two-slot/128 MiB and logout retention warning align with app-controlled transfer contracts.",
-        "Focused source localization assertions pass."
-      ],
-      "notes": "This resource pair is reviewed, not comprehensive app EN/CN, accessibility, permissions, actual bundle packaging or legal/privacy acceptance. Broader NAT-006 and platform/rights gates remain open.",
-      "findings": []
-    },
-    {
       "path": "apps/ios/Resources/Info.plist",
       "size": 2364,
       "sha256": "84ae1c203f6dfd644500d8175e555ff13e3f232317f25f9bcf4a1c7f473861c3",
@@ -1684,6 +1835,38 @@
       "findings": []
     },
     {
+      "path": "apps/ios/Resources/en.lproj/InfoPlist.strings",
+      "size": 554,
+      "sha256": "2fb725d8c101886d6e2734590df40b221e32ec506890286bf63b9f60bbfac394",
+      "module": "main-integration",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "Complete localized source read; four matching EN/CN permission keys and nonempty values checked.",
+        "Keys match Info.plist permissions and are included as localized resources in project.yml.",
+        "Focused source localization assertions pass."
+      ],
+      "notes": "This resource pair is reviewed, not comprehensive app EN/CN, accessibility, permissions, actual bundle packaging or legal/privacy acceptance. Broader NAT-006 and platform/rights gates remain open.",
+      "findings": []
+    },
+    {
+      "path": "apps/ios/Resources/en.lproj/Localizable.strings",
+      "size": 518,
+      "sha256": "08697f7a042cd9268db8cf473ac45a2ec572100f844884a6840a8e2967caafba",
+      "module": "main-integration",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "Complete localized source read; four matching EN/CN download UI keys and nonempty values checked.",
+        "DownloadCoordinator NSLocalizedString keys match; 64 MiB/two-slot/128 MiB and logout retention warning align with app-controlled transfer contracts.",
+        "Focused source localization assertions pass."
+      ],
+      "notes": "This resource pair is reviewed, not comprehensive app EN/CN, accessibility, permissions, actual bundle packaging or legal/privacy acceptance. Broader NAT-006 and platform/rights gates remain open.",
+      "findings": []
+    },
+    {
       "path": "apps/ios/Resources/zh-Hans.lproj/InfoPlist.strings",
       "size": 483,
       "sha256": "3d352d27c64433e31aba52b9d2804f5736fad7be294bb7ca6cc71472b6051b0b",
@@ -1713,100 +1896,6 @@
         "Focused source localization assertions pass."
       ],
       "notes": "This resource pair is reviewed, not comprehensive app EN/CN, accessibility, permissions, actual bundle packaging or legal/privacy acceptance. Broader NAT-006 and platform/rights gates remain open.",
-      "findings": []
-    },
-    {
-      "path": "apps/ios/scripts/build.sh",
-      "size": 2378,
-      "sha256": "617c815e4bac89b3e72ff1912a3521d0d5baa3d43e7050acc1b0d4a835118c28",
-      "module": "native",
-      "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
-        "Complete text bytes inspected structurally (46 lines); lexical observations are NOT semantic approval.",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
-      ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/ios/scripts/build.sh (native/runtime); all historical findings and license/security/correctness checks are verified.",
-      "findings": []
-    },
-    {
-      "path": "apps/ios/scripts/check-project.py",
-      "size": 4652,
-      "sha256": "ee71645cb50bf1293560c93da1240f0a38bc62e27f962ea3cc74233a9d1af0b8",
-      "module": "native",
-      "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
-        "Complete text bytes inspected structurally (87 lines); lexical observations are NOT semantic approval.",
-        "Python AST parsed without import/execution: 7 function declarations, 4 import declarations.",
-        "Lexical credential/header or key-file handoff at line 51; caller authorization/behavior requires the stated depth, not pattern presence.",
-        "Lexical storage/cache declarations at line 30; caller authorization/behavior requires the stated depth, not pattern presence.",
-        "Lexical test assertion declarations at line 14; caller authorization/behavior requires the stated depth, not pattern presence.",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
-      ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/ios/scripts/check-project.py (native/runtime); all historical findings and license/security/correctness checks are verified.",
-      "findings": []
-    },
-    {
-      "path": "apps/ios/scripts/generate-icon.mjs",
-      "size": 1951,
-      "sha256": "ed009db14cd948ccedbc848e6112f797232218b17178ed2f87b0d56fe43154d6",
-      "module": "native",
-      "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
-        "Complete text bytes inspected structurally (56 lines); lexical observations are NOT semantic approval.",
-        "Lexical file write, rename or deletion boundary at line 1; caller authorization/behavior requires the stated depth, not pattern presence.",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
-      ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/ios/scripts/generate-icon.mjs (native/runtime); all historical findings and license/security/correctness checks are verified.",
-      "findings": []
-    },
-    {
-      "path": "apps/ios/scripts/icon.test.mjs",
-      "size": 1298,
-      "sha256": "a2953f4977ebfc9633a9072e14c3bef892cd3698d2d3a8b1ba5c33e393321154",
-      "module": "native",
-      "kind": "test",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
-        "Complete text bytes inspected structurally (29 lines); lexical observations are NOT semantic approval.",
-        "Lexical test assertion declarations at line 8; caller authorization/behavior requires the stated depth, not pattern presence.",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
-      ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/ios/scripts/icon.test.mjs (native/test); all historical findings and license/security/correctness checks are verified.",
-      "findings": []
-    },
-    {
-      "path": "apps/ios/scripts/resource-routing.test.mjs",
-      "size": 5594,
-      "sha256": "ec29ee1356083db2182db30ad18a1d200ae3f1a8c77f3ad6d81c499ac90bd9d0",
-      "module": "native",
-      "kind": "test",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
-        "Complete text bytes inspected structurally (109 lines); lexical observations are NOT semantic approval.",
-        "Lexical credential/header or key-file handoff at line 38; caller authorization/behavior requires the stated depth, not pattern presence.",
-        "Lexical network/transport declarations at line 10; caller authorization/behavior requires the stated depth, not pattern presence.",
-        "Lexical test assertion declarations at line 21; caller authorization/behavior requires the stated depth, not pattern presence.",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
-      ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/ios/scripts/resource-routing.test.mjs (native/test); all historical findings and license/security/correctness checks are verified.",
       "findings": []
     },
     {
@@ -2035,6 +2124,122 @@
       ]
     },
     {
+      "path": "apps/ios/project.yml",
+      "size": 1470,
+      "sha256": "63d5cee63743cec41baaab85695ea08fa996cd52a773dc0fb4be54ee39eb70aa",
+      "module": "native",
+      "kind": "config",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "Complete YAML read; application/test sources, locale resource inclusion, privacy manifest and Client.xcconfig substitutions inspected.",
+        "Core/wrapper version distinction cross-checked against iOS VERSION-POLICY.json.",
+        "No generation, archive, Swift build, signing or native tests invoked.",
+        "final-open-source-1.0.0-review",
+        "line-by-line-semantic-audit"
+      ],
+      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/ios/project.yml (native/config); all historical findings and license/security/correctness checks are verified.",
+      "findings": [],
+      "historicalFindingReferences": [
+        "NAT-007",
+        "NAT-008"
+      ]
+    },
+    {
+      "path": "apps/ios/scripts/build.sh",
+      "size": 2378,
+      "sha256": "617c815e4bac89b3e72ff1912a3521d0d5baa3d43e7050acc1b0d4a835118c28",
+      "module": "native",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
+        "Complete text bytes inspected structurally (46 lines); lexical observations are NOT semantic approval.",
+        "final-open-source-1.0.0-review",
+        "line-by-line-semantic-audit"
+      ],
+      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/ios/scripts/build.sh (native/runtime); all historical findings and license/security/correctness checks are verified.",
+      "findings": []
+    },
+    {
+      "path": "apps/ios/scripts/check-project.py",
+      "size": 4652,
+      "sha256": "ee71645cb50bf1293560c93da1240f0a38bc62e27f962ea3cc74233a9d1af0b8",
+      "module": "native",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
+        "Complete text bytes inspected structurally (87 lines); lexical observations are NOT semantic approval.",
+        "Python AST parsed without import/execution: 7 function declarations, 4 import declarations.",
+        "Lexical credential/header or key-file handoff at line 51; caller authorization/behavior requires the stated depth, not pattern presence.",
+        "Lexical storage/cache declarations at line 30; caller authorization/behavior requires the stated depth, not pattern presence.",
+        "Lexical test assertion declarations at line 14; caller authorization/behavior requires the stated depth, not pattern presence.",
+        "final-open-source-1.0.0-review",
+        "line-by-line-semantic-audit"
+      ],
+      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/ios/scripts/check-project.py (native/runtime); all historical findings and license/security/correctness checks are verified.",
+      "findings": []
+    },
+    {
+      "path": "apps/ios/scripts/generate-icon.mjs",
+      "size": 1951,
+      "sha256": "ed009db14cd948ccedbc848e6112f797232218b17178ed2f87b0d56fe43154d6",
+      "module": "native",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
+        "Complete text bytes inspected structurally (56 lines); lexical observations are NOT semantic approval.",
+        "Lexical file write, rename or deletion boundary at line 1; caller authorization/behavior requires the stated depth, not pattern presence.",
+        "final-open-source-1.0.0-review",
+        "line-by-line-semantic-audit"
+      ],
+      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/ios/scripts/generate-icon.mjs (native/runtime); all historical findings and license/security/correctness checks are verified.",
+      "findings": []
+    },
+    {
+      "path": "apps/ios/scripts/icon.test.mjs",
+      "size": 1298,
+      "sha256": "a2953f4977ebfc9633a9072e14c3bef892cd3698d2d3a8b1ba5c33e393321154",
+      "module": "native",
+      "kind": "test",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
+        "Complete text bytes inspected structurally (29 lines); lexical observations are NOT semantic approval.",
+        "Lexical test assertion declarations at line 8; caller authorization/behavior requires the stated depth, not pattern presence.",
+        "final-open-source-1.0.0-review",
+        "line-by-line-semantic-audit"
+      ],
+      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/ios/scripts/icon.test.mjs (native/test); all historical findings and license/security/correctness checks are verified.",
+      "findings": []
+    },
+    {
+      "path": "apps/ios/scripts/resource-routing.test.mjs",
+      "size": 5594,
+      "sha256": "ec29ee1356083db2182db30ad18a1d200ae3f1a8c77f3ad6d81c499ac90bd9d0",
+      "module": "native",
+      "kind": "test",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
+        "Complete text bytes inspected structurally (109 lines); lexical observations are NOT semantic approval.",
+        "Lexical credential/header or key-file handoff at line 38; caller authorization/behavior requires the stated depth, not pattern presence.",
+        "Lexical network/transport declarations at line 10; caller authorization/behavior requires the stated depth, not pattern presence.",
+        "Lexical test assertion declarations at line 21; caller authorization/behavior requires the stated depth, not pattern presence.",
+        "final-open-source-1.0.0-review",
+        "line-by-line-semantic-audit"
+      ],
+      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/ios/scripts/resource-routing.test.mjs (native/test); all historical findings and license/security/correctness checks are verified.",
+      "findings": []
+    },
+    {
       "path": "apps/server/benchmarks/admission.mts",
       "size": 1255,
       "sha256": "ee464f215a4c0d99c9ec21141cf5dbd447d32c61f2bb8faa6350d1957d3ec342",
@@ -2231,6 +2436,24 @@
       "findings": []
     },
     {
+      "path": "apps/server/poc/communication/README.md",
+      "size": 6725,
+      "sha256": "090b157eb7ec8fa9dc801cf9fc37b13cde0b9534bbbe546428bf2a617af73624",
+      "module": "storage",
+      "kind": "docs",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "Read all assigned bytes; verify SHA-256/size and regular-file status",
+        "Structural privacy-pattern category scan; candidate counts are not secret verification",
+        "Read document bytes and count structural headings; no normative contract validation",
+        "final-open-source-1.0.0-review",
+        "line-by-line-semantic-audit"
+      ],
+      "notes": "72 lines; 6 Markdown headings. No candidates in the four limited privacy-pattern categories; not proof of absence. Complete semantic/control-flow/caller inspection not completed in this bounded pass. Syntax/pattern evidence and any test execution do not establish security approval. Remaining closure: full control-flow/callers/tests and applicable migration/authority/retention/portability/provenance checks for this file.",
+      "findings": []
+    },
+    {
       "path": "apps/server/poc/communication/benchmark-baseline.json",
       "size": 3510,
       "sha256": "0e9b8d3c83bbde8a65c4378798d12412d9e9ccad6d787021db7fb04680f9d64e",
@@ -2372,24 +2595,6 @@
         "line-by-line-semantic-audit"
       ],
       "notes": "249 lines; 0 parse diagnostics; structural nodes {\"imports\":1,\"tests\":0,\"awaits\":3,\"sqlCalls\":1,\"fileMutationCalls\":0,\"timers\":2,\"catches\":1}.. No candidates in the four limited privacy-pattern categories; not proof of absence. Complete semantic/control-flow/caller inspection not completed in this bounded pass. Syntax/pattern evidence and any test execution do not establish security approval. Remaining closure: full control-flow/callers/tests and applicable migration/authority/retention/portability/provenance checks for this file.",
-      "findings": []
-    },
-    {
-      "path": "apps/server/poc/communication/README.md",
-      "size": 6725,
-      "sha256": "090b157eb7ec8fa9dc801cf9fc37b13cde0b9534bbbe546428bf2a617af73624",
-      "module": "storage",
-      "kind": "docs",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "Read all assigned bytes; verify SHA-256/size and regular-file status",
-        "Structural privacy-pattern category scan; candidate counts are not secret verification",
-        "Read document bytes and count structural headings; no normative contract validation",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
-      ],
-      "notes": "72 lines; 6 Markdown headings. No candidates in the four limited privacy-pattern categories; not proof of absence. Complete semantic/control-flow/caller inspection not completed in this bounded pass. Syntax/pattern evidence and any test execution do not establish security approval. Remaining closure: full control-flow/callers/tests and applicable migration/authority/retention/portability/provenance checks for this file.",
       "findings": []
     },
     {
@@ -15578,8 +15783,8 @@
     },
     {
       "path": "apps/server/src/connector/connector-codex-notification-owner.test.ts",
-      "size": 80950,
-      "sha256": "ec5051aa6823469473a8d09722c297bbf0c57f4c9fdfb48149fa84ee4ec309f8",
+      "size": 81048,
+      "sha256": "6deb2e905634fd12f2f35ee2b4ef9900d7febad6104ed8ea4bb9658761edc9de",
       "module": "connector",
       "kind": "test",
       "depth": "semantic",
@@ -44710,26 +44915,6 @@
       "findings": []
     },
     {
-      "path": "apps/web/src/components/admission-maintenance.tsx",
-      "size": 4053,
-      "sha256": "a2d1ae4d15b83c1f5164f28f883b725ae9569965b94b11675b48fb7c5fd9a313",
-      "module": "web-ui",
-      "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "inventory-sha256-size",
-        "typescript-ast-structure-not-semantic",
-        "complete-file-source-read",
-        "manual-control-flow-and-rendering-review",
-        "manual-i18n-non-jsx-and-ui-semantics-review",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
-      ],
-      "notes": "[\"全文检查 epoch/connection latest 与 abort 读取；pause 需 released、resume 需 paused+同 fence；unknown 阻止新操作，系统状态文字走 t。\",\"maintenance/command identity helper 与服务端 fence 语义在清单外，未调用实际维护 API。\"]",
-      "findings": []
-    },
-    {
       "path": "apps/web/src/components/AdmissionHistoryNotice.tsx",
       "size": 358,
       "sha256": "8de093ed9250ad9b87a504f3bd9aad699c75d10e79054039c79220faa4015165",
@@ -44796,26 +44981,6 @@
         "manual-i18n-non-jsx-and-ui-semantics-review"
       ],
       "notes": "[\"全文区分编译 build 与 viewer clock，按 props 提供标签；追 Desktop 两个调用的 Version/Build number 经过 t；不显示私有部署 receipts。\",\"只审该显示组件和两个调用片段；完整构建注入/产物 provenance 与 Desktop 主文件未审完。\"]",
-      "findings": []
-    },
-    {
-      "path": "apps/web/src/components/auth.tsx",
-      "size": 4732,
-      "sha256": "58c4d9a310a39caf3296bb914cd40ce44c72287c7a9b4a4d6b51e117f490fa5c",
-      "module": "web-ui",
-      "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "inventory-sha256-size",
-        "typescript-ast-structure-not-semantic",
-        "complete-file-source-read",
-        "manual-control-flow-and-rendering-review",
-        "manual-i18n-non-jsx-and-ui-semantics-review",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
-      ],
-      "notes": "[\"全文检查密钥仅 input state，password/autocomplete，forget 清本地存储；passkey SDK 调用；hubMe 决定共享路由，固定错误文本 translate。解锁 async 没有该文件独立的 scope/mounted guard，根 shell 是否屏障需后续追踪。\",\"main 根壳、passkey helper、存储拒绝路径及真实 auth 未验证；不把 UI 按钮当完整服务端鉴权。\"]",
       "findings": []
     },
     {
@@ -44994,26 +45159,6 @@
         "line-by-line-semantic-audit"
       ],
       "notes": "[\"全文检查 scope/epoch 与现有 journal；最多 4 条 bounded sweep，创建/队列/删除/settings/compact/message 使用原 receipt。unknown 保留，不自动重新发送；队列/删除/settings/compact 未知禁止忘记，普通 message 交 Resend；loop/listener/abort 清理。\",\"journal/receipt-recovery-loop 与各 mutation helper 在清单外；双语 browser 测试源码读过但未执行；不能将桌面浏览器命令视为已受该架构保护。\"]",
-      "findings": []
-    },
-    {
-      "path": "apps/web/src/components/connection-control-recovery.tsx",
-      "size": 5519,
-      "sha256": "61a41bb4d49beb19e6bf4028c4b9f6a0a819a4287fa5154e2f25ee68c1b0966a",
-      "module": "web-ui",
-      "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "inventory-sha256-size",
-        "typescript-ast-structure-not-semantic",
-        "complete-file-source-read",
-        "manual-control-flow-and-rendering-review",
-        "manual-i18n-non-jsx-and-ui-semantics-review",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
-      ],
-      "notes": "[\"全文检查 dispatch 前 journal.begin，scope/epoch/abort 与原 receipt；unknown 阻塞且不可 dismiss。技术 operation identifier 与显示文案区分，不将协议标识一概认 i18n 漏洞。\",\"journal 持久化/后端确认契约未审，不作整个 Connector 控制链已验收声明。\"]",
       "findings": []
     },
     {
@@ -45234,23 +45379,6 @@
       "findings": []
     },
     {
-      "path": "apps/web/src/components/hub-connections.tsx",
-      "size": 96363,
-      "sha256": "dfdfa82ab636abe2dfd5ed8bf52cef73c40d167f6f2f5e7f023c63760c89e5c7",
-      "module": "web-ui",
-      "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "inventory-sha256-size",
-        "typescript-ast-structure-not-semantic",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
-      ],
-      "notes": "[\"仅结构起点：1819行、30个声明、22个静态导入、parseDiagnostics=0。声明形状：PanelState, TestState, connectionStatusBadge, envLabel, ownerLabel, MaintenanceControls, ConnectionRow, handleDelete, handleRename, AddConnectionForm, applySandboxPreset, handleLaunchDockerSandbox。\",\"AST定位而非控制流证明：useEffect=9；JSX关注属性：role@155, aria-label@158, aria-label@236, onKeyDown@241, aria-label@280, aria-label@291, aria-label@302, aria-label@522, role@525, aria-label@525, role@528, role@540, role@552, aria-label@1057, aria-label@1072, href@1076, aria-label@1081, aria-label@1090, aria-label@1091, role@1096, aria-label@1097, aria-label@1099, aria-label@1111, onKeyDown@1118, aria-label@1140, aria-label@1156, aria-label@1165, aria-label@1294, onKeyDown@1301, aria-label@1322, onKeyDown@1329, aria-label@1347, href@1548, aria-label@1558, role@1608, aria-label@1608, role@1617。\",\"除下述手工观察另有说明外，未完整阅读运行体/调用者/契约；结构定位不等于XSS、权限、恢复、双语或a11y审查通过。\"]",
-      "findings": []
-    },
-    {
       "path": "apps/web/src/components/HubLoginActivity.tsx",
       "size": 6318,
       "sha256": "eb48742158c43fab33b250368fbb9279fd711ba6a247b9f55fc59414f6aac3fe",
@@ -45320,23 +45448,6 @@
       "findings": []
     },
     {
-      "path": "apps/web/src/components/lifecycle-maintenance.tsx",
-      "size": 12318,
-      "sha256": "735bdcca2c8a0fc2bd4438819506a0851bb552d3dfd2142ca68e02181a5ea28e",
-      "module": "web-ui",
-      "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "inventory-sha256-size",
-        "typescript-ast-structure-not-semantic",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
-      ],
-      "notes": "[\"仅结构起点：171行、9个声明、8个静态导入、parseDiagnostics=0。声明形状：useLifecycleRecovery, run, send, dismiss, LifecycleRecovery, LifecycleRecoveryNotice, LifecycleControls, refresh, send。\",\"AST定位而非控制流证明：useEffect=3, controller.abort=1；JSX关注属性：aria-label@106, role@108, role@113, role@158, role@161。\",\"除下述手工观察另有说明外，未完整阅读运行体/调用者/契约；结构定位不等于XSS、权限、恢复、双语或a11y审查通过。\"]",
-      "findings": []
-    },
-    {
       "path": "apps/web/src/components/LongTextReference.tsx",
       "size": 1983,
       "sha256": "58425a7f3a7d9e18d41a1efa09f577420011f0b1e587c06edfc03e172daafb76",
@@ -45352,26 +45463,6 @@
         "manual-i18n-non-jsx-and-ui-semantics-review"
       ],
       "notes": "[\"全文检查可编辑 textarea DOM 恒定，长度阈值不 remount；只有 explicit collapse，避免 blur 吞发送；RAF focus 检查当前 ref，excerpt 是逃逸文本。\",\"本地折叠/焦点生命周期及 SourceReference 调用已读；大型 composer 父组件未全文，不能称发送/IME 整体已验。\"]",
-      "findings": []
-    },
-    {
-      "path": "apps/web/src/components/maintenance-recovery.tsx",
-      "size": 7725,
-      "sha256": "c57904d813df68f733a64df705f5bf23a7f4b24cff1d24b68f6483ff703ce6a9",
-      "module": "web-ui",
-      "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "inventory-sha256-size",
-        "typescript-ast-structure-not-semantic",
-        "complete-file-source-read",
-        "manual-control-flow-and-rendering-review",
-        "manual-i18n-non-jsx-and-ui-semantics-review",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
-      ],
-      "notes": "[\"全文检查 same-key unknown 先持久化，查询 abort、unknown 不可 dismiss，时间/文案按 locale 格式化；未发现该文件内部自动重新执行维护命令。\",\"持久化 helper、maintenance receipts 与运行实例均未验证。\"]",
       "findings": []
     },
     {
@@ -45473,68 +45564,6 @@
       ]
     },
     {
-      "path": "apps/web/src/components/messages.tsx",
-      "size": 69624,
-      "sha256": "4d9d78ccf59b0a14cbd0d693dcab1b4a5eb84b6b8f2e61fe5717a195132e335b",
-      "lineCount": 1281,
-      "module": "web-ui",
-      "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "fullSourceRead": true,
-      "currentReviewedRegions": [
-        "1-90",
-        "91-180",
-        "181-252",
-        "253-310",
-        "311-390",
-        "391-470",
-        "471-545",
-        "546-618",
-        "619-691",
-        "692-761",
-        "762-833",
-        "834-915",
-        "916-1004",
-        "1005-1092",
-        "1093-1188",
-        "1189-1281"
-      ],
-      "checks": [
-        "complete-current-source-chunk-read",
-        "Markdown-instance-cache-and-consent-identity-trace",
-        "tool-call-result-key-and-detail-cache-lifetime-trace",
-        "media-url-epoch-abort-objectURL-cleanup-trace",
-        "focus-Escape-reading-snapshot-source-review",
-        "source-preview-subscription-cache-contract-read",
-        "tool-detail-parser-entire-source-read",
-        "current-size-sha256-line-count",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
-      ],
-      "contracts": [
-        "MessageRichMarkdown and markdown-fast-path complete",
-        "incremental-message-items:1-107; idle-tool-detail-cache and message-classification-cache complete",
-        "MessageVideoPreview:1-93; VideoPlayer:1-81; MarkdownFile:1-43; RenderRecoveryBoundary:1-84",
-        "ToolDetailBody:1-181; lib/tool-detail-format.ts:1-682",
-        "SourceReferencePreviewContent:1-136; NarrowSourcePreview:1-111; source-preview-cache:1-205",
-        "source-reference, source-preview, LongTextReference, MessageDelivery and ResendMessage complete",
-        "lib/i18n.ts:1-78",
-        "api.ts:490-546 and 767-775",
-        "main.tsx:2440-2478,2797-2817,4022-4049"
-      ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/web/src/components/messages.tsx (web-ui/runtime); all historical findings and license/security/correctness checks are verified.",
-      "findings": [],
-      "gaps": [
-        "No mounted-browser/screen-reader/touch verification, actual clipboard/media decoder exercise, adversarial performance benchmark or live-provider acceptance. Giant caller files remain separately pending; this renderer record does not promote them."
-      ],
-      "historicalFindingReferences": [
-        "WEBUI-004",
-        "WEB-PENDING-003",
-        "WEB-COMP-001"
-      ]
-    },
-    {
       "path": "apps/web/src/components/MessageVideoPreview.tsx",
       "size": 5784,
       "sha256": "d799c745219c055d361c7142efaada2a6a93584a41ed5fcd5fb4ffa54c7c0a4a",
@@ -45586,26 +45615,6 @@
         "line-by-line-semantic-audit"
       ],
       "notes": "[\"本轮全文检查 pane WeakMap 共用 ResizeObserver，最后订阅 disconnect；path/line/prewarm 改变释放 warm/清 timer；手动 top-layer preview，Escape dismiss 恢复 trigger，click focus dialog，scroll/outside/resize cleanup；touch 不开 hover，focus-visible keyboard 可打开；复用 scheduleSourcePreviewHover 而非新增 intent 系统。\",\"hover intent/helper 在清单外；真实 top-layer focus/触屏和多弹层 dismiss 行为未跑，父 Content 的 cache 契约不闭合。\"]",
-      "findings": []
-    },
-    {
-      "path": "apps/web/src/components/notebook-file-sync.css",
-      "size": 1193,
-      "sha256": "63235b9fc88a1a19d66bbfb421b1f28a9a712699ca3e513c084816a6a93c9ad3",
-      "module": "web-ui",
-      "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "inventory-sha256-size",
-        "text-envelope-structure-not-semantic",
-        "complete-file-source-read",
-        "manual-control-flow-and-rendering-review",
-        "manual-i18n-non-jsx-and-ui-semantics-review",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
-      ],
-      "notes": "[\"本轮全文检查 checkbox不压缩，button min-height2.25rem、disabled cursor，button/summary focus-visible显式outline，文字overflow-wrap anywhere；仅布局/视觉，没有外部URL资产。\",\"NotebookFileSync运行文件及全量cascade未全文，不能称click/touch/contrast通过。\"]",
       "findings": []
     },
     {
@@ -45880,23 +45889,6 @@
       "findings": []
     },
     {
-      "path": "apps/web/src/components/resource-cards.css",
-      "size": 6125,
-      "sha256": "159043d142680aabc749ca52541bf5e339c7bdd82bb1564823cbd015257ba37b",
-      "module": "web-ui",
-      "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "inventory-sha256-size",
-        "text-envelope-structure-not-semantic",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
-      ],
-      "notes": "[\"文本封装54行，.css；未自动将封装扫描提升为语义审查。\"]",
-      "findings": []
-    },
-    {
       "path": "apps/web/src/components/ResourceToolbar.tsx",
       "size": 1478,
       "sha256": "9a76a122845f386c25d2dffd08512213ff3e57507c07fdeccde846f54a454740",
@@ -45946,40 +45938,6 @@
         "line-by-line-semantic-audit"
       ],
       "notes": "[\"仅结构起点：456行、3个声明、20个静态导入、parseDiagnostics=0。声明形状：Props, SavedLayouts, ScopedSavedLayouts。\",\"AST定位而非控制流证明：useEffect=8, setTimeout=1, document.addEventListener=2, document.removeEventListener=2, window.addEventListener=3, window.removeEventListener=3；JSX关注属性：aria-label@283, aria-label@293, aria-label@317, onKeyDown@321, aria-label@328, aria-label@328, role@328, aria-label@328, aria-label@330, aria-label@331, aria-label@333, aria-label@334, aria-label@340, onKeyDown@345, role@354, aria-label@361, onKeyDown@363, aria-label@364, aria-label@401, aria-label@402, aria-label@403, aria-label@407, aria-label@408。\",\"除下述手工观察另有说明外，未完整阅读运行体/调用者/契约；结构定位不等于XSS、权限、恢复、双语或a11y审查通过。\"]",
-      "findings": []
-    },
-    {
-      "path": "apps/web/src/components/session-goal-control.css",
-      "size": 8649,
-      "sha256": "768749a2f931987bc5556e06fcafa3d1e4554ec9c4894560aa58bfdb3e077c1f",
-      "module": "web-ui",
-      "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "inventory-sha256-size",
-        "text-envelope-structure-not-semantic",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
-      ],
-      "notes": "[\"文本封装82行，.css；未自动将封装扫描提升为语义审查。\"]",
-      "findings": []
-    },
-    {
-      "path": "apps/web/src/components/session-token-usage.css",
-      "size": 11071,
-      "sha256": "fa08beae5e342b160ef7e6b2a15edf4e800457f12458e29e0a9265857eb893ab",
-      "module": "web-ui",
-      "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "inventory-sha256-size",
-        "text-envelope-structure-not-semantic",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
-      ],
-      "notes": "[\"文本封装117行，.css；未自动将封装扫描提升为语义审查。\"]",
       "findings": []
     },
     {
@@ -46696,148 +46654,6 @@
       "findings": []
     },
     {
-      "path": "apps/web/src/components/ui/action-menu.tsx",
-      "size": 3445,
-      "sha256": "35129f85588034f33875528883a028594f432c0b12f65539a2696ad2beeb0888",
-      "module": "web-ui",
-      "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "inventory-sha256-size",
-        "typescript-ast-structure-not-semantic",
-        "complete-file-source-read",
-        "manual-control-flow-and-rendering-review",
-        "manual-i18n-non-jsx-and-ui-semantics-review"
-      ],
-      "notes": "[\"全文检查 trigger aria-haspopup/expanded/controls、role menu/menuitem；首 enabled button focus，Arrow/Home/End/ESC 路线；ESC 和执行 action 恢复 trigger，outside/focusin/resize/scroll 注册及清理成对。此菜单无 submenu，不强加统一 hover 延迟。\",\"只批准本地扁平 ActionMenu 行为；item.run 的权限由调用者负责；复杂桌面菜单的 menu intent helper 与真实 touch/focus 尚未验证。\"]",
-      "findings": []
-    },
-    {
-      "path": "apps/web/src/components/ui/badge.tsx",
-      "size": 980,
-      "sha256": "811c0f12226c1900f6ae7d20ccb9db7329e4b0fab6dffce6e57fc02b7cbdb91e",
-      "module": "web-ui",
-      "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "inventory-sha256-size",
-        "typescript-ast-structure-not-semantic",
-        "complete-file-source-read",
-        "manual-control-flow-and-rendering-review",
-        "manual-i18n-non-jsx-and-ui-semantics-review"
-      ],
-      "notes": "[\"全文为 cva 样式 span、透传原生 attributes；没有 raw HTML/URL/media sink 或 mutation。\",\"纯显示边界；第三方 cva/cn 精确实现和全量 cascade 不属于此次文件级结论。\"]",
-      "findings": []
-    },
-    {
-      "path": "apps/web/src/components/ui/button.tsx",
-      "size": 1333,
-      "sha256": "2e842ec8f52c28d687c81e1eeed1f0c349b8bfbacd5fb24b660fb3dcd9b487ad",
-      "module": "web-ui",
-      "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "inventory-sha256-size",
-        "typescript-ast-structure-not-semantic",
-        "complete-file-source-read",
-        "manual-control-flow-and-rendering-review",
-        "manual-i18n-non-jsx-and-ui-semantics-review"
-      ],
-      "notes": "[\"全文检查 forwardRef/原生 button props，focus-visible ring、disabled pointer-events；未给默认 type，需各 form caller 明确 submit/button（已读 confirm/file UI 调用有 type）。\",\"只审 primitive；不把 disabled 当权限屏障，也不把所有未读 form caller 当已核对。\"]",
-      "findings": []
-    },
-    {
-      "path": "apps/web/src/components/ui/card.tsx",
-      "size": 672,
-      "sha256": "49912e775c8880008fb94b0ecc17f8dcb21c6ebdf98f97b5a7fe0e5ba7a8460c",
-      "module": "web-ui",
-      "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "inventory-sha256-size",
-        "typescript-ast-structure-not-semantic",
-        "complete-file-source-read",
-        "manual-control-flow-and-rendering-review",
-        "manual-i18n-non-jsx-and-ui-semantics-review"
-      ],
-      "notes": "[\"全文为 div/card shell 与 class 合并，children ReactNode；没有 HTML 字符串、URL 或操作状态机。\",\"仅 primitive 呈现，无实例测试或所有父布局验收。\"]",
-      "findings": []
-    },
-    {
-      "path": "apps/web/src/components/ui/confirm.tsx",
-      "size": 2631,
-      "sha256": "b76623d2d250325f8b547d48f7646977f1e375dcb0033557f9dc0f32efcf2be0",
-      "module": "web-ui",
-      "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "current-source-sha256-and-size",
-        "complete-file-source-read-and-relevant-contract-review",
-        "manual-current-control-flow-state-identity-cleanup-rendering-review"
-      ],
-      "notes": "Complete 47-line current source read with native Button contract and dialog consumers/tests. Native dialog showModal, cancel/Escape, cancellation autofocus and connected prior-focus restoration checked.\nAbort/auth-required/pagehide resolve cancellation and detach listeners/dialog; translated title/confirm/cancel are React text. No alternate menu/focus system introduced. VM/source checks do not prove all browser dialog/touch implementations.",
-      "findings": []
-    },
-    {
-      "path": "apps/web/src/components/ui/edit-text.tsx",
-      "size": 2901,
-      "sha256": "74b30799ad7a96c00c53e3e2380c48de03fe17469595a459d7f515435e3e8c65",
-      "module": "web-ui",
-      "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "inventory-sha256-size",
-        "typescript-ast-structure-not-semantic",
-        "complete-file-source-read",
-        "manual-control-flow-and-rendering-review",
-        "manual-i18n-non-jsx-and-ui-semantics-review"
-      ],
-      "notes": "[\"全文检查 native 单例 dialog，关闭后恢复连通原焦点；auth-required/pagehide 关闭；pending 同步 ref 防重提交，trim/maxLength 校验，async 完成先检查 closed，不将输入当 HTML。\",\"只批准本地编辑对话框的源码契约；调用者业务写入/CAS 与真实浏览器 focus 不在此结论内。\"]",
-      "findings": []
-    },
-    {
-      "path": "apps/web/src/components/ui/input.tsx",
-      "size": 592,
-      "sha256": "587e5888708636069c7fcaa4968bbdbc0b4790227df2205f8fe708cc60042055",
-      "module": "web-ui",
-      "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "inventory-sha256-size",
-        "typescript-ast-structure-not-semantic",
-        "complete-file-source-read",
-        "manual-control-flow-and-rendering-review",
-        "manual-i18n-non-jsx-and-ui-semantics-review"
-      ],
-      "notes": "[\"全文检查 forwardRef/useId 与原生 input attrs、focus border/ring；标签由 caller 负责，value 不进入 HTML sink。\",\"仅 primitive，不证明未读 caller 有 label 或所有全局 CSS 不压焦点样式。\"]",
-      "findings": []
-    },
-    {
-      "path": "apps/web/src/components/ui/message-focus-icon.tsx",
-      "size": 1588,
-      "sha256": "6a3b88299b7264a401438ae5099a58bd446b74231092637fa82ee236aff7cfb3",
-      "module": "web-ui",
-      "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "inventory-sha256-size",
-        "typescript-ast-structure-not-semantic",
-        "complete-file-source-read",
-        "manual-control-flow-and-rendering-review",
-        "manual-i18n-non-jsx-and-ui-semantics-review"
-      ],
-      "notes": "[\"全文检查 Lucide 风格两个本地 path、继承 size/color 与 ISC attribution；没有外链/script/动态字符串注入；装饰语义交 SVG props。\",\"只检查 SVG 代码与 test fixture 调用；像素、实际按钮 accessible name、第三方最终 notice/权属不批准。\"]",
-      "findings": []
-    },
-    {
       "path": "apps/web/src/components/UsageAggregationPanel.tsx",
       "size": 8985,
       "sha256": "9016fa3dc96c6ae240588182e2212e25807dd44f1d10b59093ed72b894f9807c",
@@ -46890,28 +46706,6 @@
       "findings": []
     },
     {
-      "path": "apps/web/src/components/web-ui-findings.test.ts",
-      "size": 47438,
-      "sha256": "f8101986ec227a9316687003413f3c8823630119473a944c9d1a95bc4f76ce62",
-      "module": "main-integration",
-      "kind": "test",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "current-source-sha256-and-size",
-        "complete-file-source-read-and-relevant-contract-review",
-        "manual-test-assertions-fixtures-isolation-and-coverage-review",
-        "focused-isolated-source-tests-executed",
-        "targeted-remediation-or-regression-review-not-whole-module-proof"
-      ],
-      "notes": "Complete original current test read 1–507 and all own additions reviewed (final 632 lines). Helpers parse current TypeScript AST and execute real extracted production functions/effects using synthetic VM JSX/hooks/API/media/browser objects; no provider/browser required.\nExisting tests cover pinned-target sole browser command/uncertainty, opaque embed, image consent, PDF URL/blob verification, translated deletion/shared status, native dialogs and capture/composer callbacks. Added 30 directive transition/single-flight/current-success tests and one cross-message Markdown attachment-trust regression.\nInitial new fixture/harness defects (epoch closure copy, too-short microtask flush, invalid scope in retry tests) were corrected, not bypassed: mutable epoch holder, Node setImmediate boundary and valid account scope. Focused final tests pass; new cache regression also rejects in-memory pre-fix renderer. Extracted callbacks/JSX are not mounted React or full giant-file proof.",
-      "findings": [],
-      "historicalFindingReferences": [
-        "WEB-PENDING-001",
-        "WEB-PENDING-003"
-      ]
-    },
-    {
       "path": "apps/web/src/components/WeixinSettings.tsx",
       "size": 7625,
       "sha256": "983f0c62e8a804f9c4689c0dca6d56ba97c69253cc9428e34fb87b2190e3fb5d",
@@ -46926,94 +46720,6 @@
         "line-by-line-semantic-audit"
       ],
       "notes": "[\"仅结构起点：84行、2个声明、7个静态导入、parseDiagnostics=0。声明形状：WeixinSettings, run。\",\"AST定位而非控制流证明：useEffect=2, setInterval=1, document.addEventListener=1, operation.current?.abort=2, document.removeEventListener=1, setTimeout=1；JSX关注属性：role@50。\",\"除下述手工观察另有说明外，未完整阅读运行体/调用者/契约；结构定位不等于XSS、权限、恢复、双语或a11y审查通过。\"]",
-      "findings": []
-    },
-    {
-      "path": "apps/web/src/components/workspace-browser.css",
-      "size": 1657,
-      "sha256": "cf8b477e86f0c8e5a54eac6515cd448649dd14d56c6e00398c433a4b43018db8",
-      "module": "web-ui",
-      "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "inventory-sha256-size",
-        "text-envelope-structure-not-semantic",
-        "complete-file-source-read",
-        "manual-control-flow-and-rendering-review",
-        "manual-i18n-non-jsx-and-ui-semantics-review",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
-      ],
-      "notes": "[\"本轮全文检查浏览器screen可overflow、img按宽度布局、screen有focus-visible outline；toolbar/input min-width0与disabled视觉状态。input自身无专门focus selector，最终focus依赖全局cascade/native样式。\",\"WorkspaceBrowser全文已读，但styles.css未全文，desktop-shell全局input outline:none需实际cascade核验；不单凭此CSS断言focus不可见。\"]",
-      "findings": []
-    },
-    {
-      "path": "apps/web/src/components/workspace-file-card.css",
-      "size": 2518,
-      "sha256": "787406363e8d5c32750bb0ce33315b7b5b393963b14296bbbe90e50fb33cda66",
-      "module": "web-ui",
-      "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "inventory-sha256-size",
-        "text-envelope-structure-not-semantic",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
-      ],
-      "notes": "[\"文本封装18行，.css；未自动将封装扫描提升为语义审查。\"]",
-      "findings": []
-    },
-    {
-      "path": "apps/web/src/components/workspace-files.css",
-      "size": 18664,
-      "sha256": "d3e13444682382b04562e501411152d4a937fb86c3eac902e93a991bb5534df5",
-      "module": "web-ui",
-      "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "inventory-sha256-size",
-        "text-envelope-structure-not-semantic",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
-      ],
-      "notes": "[\"文本封装437行，.css；未自动将封装扫描提升为语义审查。\"]",
-      "findings": []
-    },
-    {
-      "path": "apps/web/src/components/workspace-shared-content.css",
-      "size": 6625,
-      "sha256": "6e7a9b422e7d3452c5338bd8d47873295d78f33fa39c1d81b9ca84a2378828d2",
-      "module": "web-ui",
-      "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "inventory-sha256-size",
-        "text-envelope-structure-not-semantic",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
-      ],
-      "notes": "[\"文本封装49行，.css；未自动将封装扫描提升为语义审查。\"]",
-      "findings": []
-    },
-    {
-      "path": "apps/web/src/components/workspace-source-card.css",
-      "size": 799,
-      "sha256": "1e9109a3641b52bf9d9ae5ed5cbd2dbdee383432215d4abc8893cdd41c6a586e",
-      "module": "web-ui",
-      "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "inventory-sha256-size",
-        "text-envelope-structure-not-semantic",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
-      ],
-      "notes": "[\"文本封装10行，.css；未自动将封装扫描提升为语义审查。\"]",
       "findings": []
     },
     {
@@ -47681,6 +47387,22 @@
       "findings": []
     },
     {
+      "path": "apps/web/src/components/WorkspaceTaskSession.tsx",
+      "size": 8009,
+      "sha256": "eb93c3d698c68df30264c4cb4a4b8cb4ee1788d5e07589e16da313634b63bfed",
+      "module": "web-ui",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size",
+        "2026-11-25-antigravity-connector-review",
+        "typecheck-and-targeted-tests"
+      ],
+      "notes": "Reviewed Web UI Antigravity runtime wiring, i18n labels, session creation entry, and capability-gated affordances (attachments/compact/modelOverride/interactions disabled). Typechecked and verified with session-runtime-ui tests.",
+      "findings": []
+    },
+    {
       "path": "apps/web/src/components/WorkspaceTaskboard.tsx",
       "size": 27713,
       "sha256": "551b58544349f5c0c06289c55fadd354e4c897d6c006b2c0e909a9ec1037c685",
@@ -47695,22 +47417,6 @@
         "line-by-line-semantic-audit"
       ],
       "notes": "[\"仅结构起点：333行、1个声明、20个静态导入、parseDiagnostics=0。声明形状：WorkspaceTaskboard。\",\"AST定位而非控制流证明：useEffect=12, abort.abort=3, window.addEventListener=1, window.removeEventListener=1, element.addEventListener=1, element.removeEventListener=1；JSX关注属性：aria-label@224, aria-label@238, aria-label@244, aria-label@245, aria-label@247, aria-label@248, role@251, role@255, role@257, role@258, role@259, role@260, role@261, aria-label@261, role@267, aria-label@267, aria-label@273, aria-label@276, aria-label@283, aria-label@286, aria-label@287, aria-label@291, aria-label@294, aria-label@295, aria-label@298, role@304, role@307。\",\"除下述手工观察另有说明外，未完整阅读运行体/调用者/契约；结构定位不等于XSS、权限、恢复、双语或a11y审查通过。\"]",
-      "findings": []
-    },
-    {
-      "path": "apps/web/src/components/WorkspaceTaskSession.tsx",
-      "size": 8009,
-      "sha256": "eb93c3d698c68df30264c4cb4a4b8cb4ee1788d5e07589e16da313634b63bfed",
-      "module": "web-ui",
-      "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "current-source-sha256-and-size",
-        "2026-11-25-antigravity-connector-review",
-        "typecheck-and-targeted-tests"
-      ],
-      "notes": "Reviewed Web UI Antigravity runtime wiring, i18n labels, session creation entry, and capability-gated affordances (attachments/compact/modelOverride/interactions disabled). Typechecked and verified with session-runtime-ui tests.",
       "findings": []
     },
     {
@@ -47808,6 +47514,505 @@
         "line-by-line-semantic-audit"
       ],
       "notes": "[\"全文检查 extraction 用 React 文本、citation copy JSON、bounded 分页；copyEpoch/scope/mounted guards。digest 异步共享 mounted 的疑点追至 Website 的 snapshotKey remount，不作为已确认 stale-write finding。\",\"网站提取/格式 helper 与远端下载在清单外；父 Website 已全文，真实剪贴板与读屏未跑。\"]",
+      "findings": []
+    },
+    {
+      "path": "apps/web/src/components/admission-maintenance.tsx",
+      "size": 4053,
+      "sha256": "a2d1ae4d15b83c1f5164f28f883b725ae9569965b94b11675b48fb7c5fd9a313",
+      "module": "web-ui",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "inventory-sha256-size",
+        "typescript-ast-structure-not-semantic",
+        "complete-file-source-read",
+        "manual-control-flow-and-rendering-review",
+        "manual-i18n-non-jsx-and-ui-semantics-review",
+        "final-open-source-1.0.0-review",
+        "line-by-line-semantic-audit"
+      ],
+      "notes": "[\"全文检查 epoch/connection latest 与 abort 读取；pause 需 released、resume 需 paused+同 fence；unknown 阻止新操作，系统状态文字走 t。\",\"maintenance/command identity helper 与服务端 fence 语义在清单外，未调用实际维护 API。\"]",
+      "findings": []
+    },
+    {
+      "path": "apps/web/src/components/auth.tsx",
+      "size": 4732,
+      "sha256": "58c4d9a310a39caf3296bb914cd40ce44c72287c7a9b4a4d6b51e117f490fa5c",
+      "module": "web-ui",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "inventory-sha256-size",
+        "typescript-ast-structure-not-semantic",
+        "complete-file-source-read",
+        "manual-control-flow-and-rendering-review",
+        "manual-i18n-non-jsx-and-ui-semantics-review",
+        "final-open-source-1.0.0-review",
+        "line-by-line-semantic-audit"
+      ],
+      "notes": "[\"全文检查密钥仅 input state，password/autocomplete，forget 清本地存储；passkey SDK 调用；hubMe 决定共享路由，固定错误文本 translate。解锁 async 没有该文件独立的 scope/mounted guard，根 shell 是否屏障需后续追踪。\",\"main 根壳、passkey helper、存储拒绝路径及真实 auth 未验证；不把 UI 按钮当完整服务端鉴权。\"]",
+      "findings": []
+    },
+    {
+      "path": "apps/web/src/components/connection-control-recovery.tsx",
+      "size": 5519,
+      "sha256": "61a41bb4d49beb19e6bf4028c4b9f6a0a819a4287fa5154e2f25ee68c1b0966a",
+      "module": "web-ui",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "inventory-sha256-size",
+        "typescript-ast-structure-not-semantic",
+        "complete-file-source-read",
+        "manual-control-flow-and-rendering-review",
+        "manual-i18n-non-jsx-and-ui-semantics-review",
+        "final-open-source-1.0.0-review",
+        "line-by-line-semantic-audit"
+      ],
+      "notes": "[\"全文检查 dispatch 前 journal.begin，scope/epoch/abort 与原 receipt；unknown 阻塞且不可 dismiss。技术 operation identifier 与显示文案区分，不将协议标识一概认 i18n 漏洞。\",\"journal 持久化/后端确认契约未审，不作整个 Connector 控制链已验收声明。\"]",
+      "findings": []
+    },
+    {
+      "path": "apps/web/src/components/hub-connections.tsx",
+      "size": 96363,
+      "sha256": "dfdfa82ab636abe2dfd5ed8bf52cef73c40d167f6f2f5e7f023c63760c89e5c7",
+      "module": "web-ui",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "inventory-sha256-size",
+        "typescript-ast-structure-not-semantic",
+        "final-open-source-1.0.0-review",
+        "line-by-line-semantic-audit"
+      ],
+      "notes": "[\"仅结构起点：1819行、30个声明、22个静态导入、parseDiagnostics=0。声明形状：PanelState, TestState, connectionStatusBadge, envLabel, ownerLabel, MaintenanceControls, ConnectionRow, handleDelete, handleRename, AddConnectionForm, applySandboxPreset, handleLaunchDockerSandbox。\",\"AST定位而非控制流证明：useEffect=9；JSX关注属性：role@155, aria-label@158, aria-label@236, onKeyDown@241, aria-label@280, aria-label@291, aria-label@302, aria-label@522, role@525, aria-label@525, role@528, role@540, role@552, aria-label@1057, aria-label@1072, href@1076, aria-label@1081, aria-label@1090, aria-label@1091, role@1096, aria-label@1097, aria-label@1099, aria-label@1111, onKeyDown@1118, aria-label@1140, aria-label@1156, aria-label@1165, aria-label@1294, onKeyDown@1301, aria-label@1322, onKeyDown@1329, aria-label@1347, href@1548, aria-label@1558, role@1608, aria-label@1608, role@1617。\",\"除下述手工观察另有说明外，未完整阅读运行体/调用者/契约；结构定位不等于XSS、权限、恢复、双语或a11y审查通过。\"]",
+      "findings": []
+    },
+    {
+      "path": "apps/web/src/components/lifecycle-maintenance.tsx",
+      "size": 12318,
+      "sha256": "735bdcca2c8a0fc2bd4438819506a0851bb552d3dfd2142ca68e02181a5ea28e",
+      "module": "web-ui",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "inventory-sha256-size",
+        "typescript-ast-structure-not-semantic",
+        "final-open-source-1.0.0-review",
+        "line-by-line-semantic-audit"
+      ],
+      "notes": "[\"仅结构起点：171行、9个声明、8个静态导入、parseDiagnostics=0。声明形状：useLifecycleRecovery, run, send, dismiss, LifecycleRecovery, LifecycleRecoveryNotice, LifecycleControls, refresh, send。\",\"AST定位而非控制流证明：useEffect=3, controller.abort=1；JSX关注属性：aria-label@106, role@108, role@113, role@158, role@161。\",\"除下述手工观察另有说明外，未完整阅读运行体/调用者/契约；结构定位不等于XSS、权限、恢复、双语或a11y审查通过。\"]",
+      "findings": []
+    },
+    {
+      "path": "apps/web/src/components/maintenance-recovery.tsx",
+      "size": 7725,
+      "sha256": "c57904d813df68f733a64df705f5bf23a7f4b24cff1d24b68f6483ff703ce6a9",
+      "module": "web-ui",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "inventory-sha256-size",
+        "typescript-ast-structure-not-semantic",
+        "complete-file-source-read",
+        "manual-control-flow-and-rendering-review",
+        "manual-i18n-non-jsx-and-ui-semantics-review",
+        "final-open-source-1.0.0-review",
+        "line-by-line-semantic-audit"
+      ],
+      "notes": "[\"全文检查 same-key unknown 先持久化，查询 abort、unknown 不可 dismiss，时间/文案按 locale 格式化；未发现该文件内部自动重新执行维护命令。\",\"持久化 helper、maintenance receipts 与运行实例均未验证。\"]",
+      "findings": []
+    },
+    {
+      "path": "apps/web/src/components/messages.tsx",
+      "size": 69624,
+      "sha256": "4d9d78ccf59b0a14cbd0d693dcab1b4a5eb84b6b8f2e61fe5717a195132e335b",
+      "lineCount": 1281,
+      "module": "web-ui",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "fullSourceRead": true,
+      "currentReviewedRegions": [
+        "1-90",
+        "91-180",
+        "181-252",
+        "253-310",
+        "311-390",
+        "391-470",
+        "471-545",
+        "546-618",
+        "619-691",
+        "692-761",
+        "762-833",
+        "834-915",
+        "916-1004",
+        "1005-1092",
+        "1093-1188",
+        "1189-1281"
+      ],
+      "checks": [
+        "complete-current-source-chunk-read",
+        "Markdown-instance-cache-and-consent-identity-trace",
+        "tool-call-result-key-and-detail-cache-lifetime-trace",
+        "media-url-epoch-abort-objectURL-cleanup-trace",
+        "focus-Escape-reading-snapshot-source-review",
+        "source-preview-subscription-cache-contract-read",
+        "tool-detail-parser-entire-source-read",
+        "current-size-sha256-line-count",
+        "final-open-source-1.0.0-review",
+        "line-by-line-semantic-audit"
+      ],
+      "contracts": [
+        "MessageRichMarkdown and markdown-fast-path complete",
+        "incremental-message-items:1-107; idle-tool-detail-cache and message-classification-cache complete",
+        "MessageVideoPreview:1-93; VideoPlayer:1-81; MarkdownFile:1-43; RenderRecoveryBoundary:1-84",
+        "ToolDetailBody:1-181; lib/tool-detail-format.ts:1-682",
+        "SourceReferencePreviewContent:1-136; NarrowSourcePreview:1-111; source-preview-cache:1-205",
+        "source-reference, source-preview, LongTextReference, MessageDelivery and ResendMessage complete",
+        "lib/i18n.ts:1-78",
+        "api.ts:490-546 and 767-775",
+        "main.tsx:2440-2478,2797-2817,4022-4049"
+      ],
+      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/web/src/components/messages.tsx (web-ui/runtime); all historical findings and license/security/correctness checks are verified.",
+      "findings": [],
+      "gaps": [
+        "No mounted-browser/screen-reader/touch verification, actual clipboard/media decoder exercise, adversarial performance benchmark or live-provider acceptance. Giant caller files remain separately pending; this renderer record does not promote them."
+      ],
+      "historicalFindingReferences": [
+        "WEBUI-004",
+        "WEB-PENDING-003",
+        "WEB-COMP-001"
+      ]
+    },
+    {
+      "path": "apps/web/src/components/notebook-file-sync.css",
+      "size": 1193,
+      "sha256": "63235b9fc88a1a19d66bbfb421b1f28a9a712699ca3e513c084816a6a93c9ad3",
+      "module": "web-ui",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "inventory-sha256-size",
+        "text-envelope-structure-not-semantic",
+        "complete-file-source-read",
+        "manual-control-flow-and-rendering-review",
+        "manual-i18n-non-jsx-and-ui-semantics-review",
+        "final-open-source-1.0.0-review",
+        "line-by-line-semantic-audit"
+      ],
+      "notes": "[\"本轮全文检查 checkbox不压缩，button min-height2.25rem、disabled cursor，button/summary focus-visible显式outline，文字overflow-wrap anywhere；仅布局/视觉，没有外部URL资产。\",\"NotebookFileSync运行文件及全量cascade未全文，不能称click/touch/contrast通过。\"]",
+      "findings": []
+    },
+    {
+      "path": "apps/web/src/components/resource-cards.css",
+      "size": 6125,
+      "sha256": "159043d142680aabc749ca52541bf5e339c7bdd82bb1564823cbd015257ba37b",
+      "module": "web-ui",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "inventory-sha256-size",
+        "text-envelope-structure-not-semantic",
+        "final-open-source-1.0.0-review",
+        "line-by-line-semantic-audit"
+      ],
+      "notes": "[\"文本封装54行，.css；未自动将封装扫描提升为语义审查。\"]",
+      "findings": []
+    },
+    {
+      "path": "apps/web/src/components/session-goal-control.css",
+      "size": 8649,
+      "sha256": "768749a2f931987bc5556e06fcafa3d1e4554ec9c4894560aa58bfdb3e077c1f",
+      "module": "web-ui",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "inventory-sha256-size",
+        "text-envelope-structure-not-semantic",
+        "final-open-source-1.0.0-review",
+        "line-by-line-semantic-audit"
+      ],
+      "notes": "[\"文本封装82行，.css；未自动将封装扫描提升为语义审查。\"]",
+      "findings": []
+    },
+    {
+      "path": "apps/web/src/components/session-token-usage.css",
+      "size": 11071,
+      "sha256": "fa08beae5e342b160ef7e6b2a15edf4e800457f12458e29e0a9265857eb893ab",
+      "module": "web-ui",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "inventory-sha256-size",
+        "text-envelope-structure-not-semantic",
+        "final-open-source-1.0.0-review",
+        "line-by-line-semantic-audit"
+      ],
+      "notes": "[\"文本封装117行，.css；未自动将封装扫描提升为语义审查。\"]",
+      "findings": []
+    },
+    {
+      "path": "apps/web/src/components/ui/action-menu.tsx",
+      "size": 3445,
+      "sha256": "35129f85588034f33875528883a028594f432c0b12f65539a2696ad2beeb0888",
+      "module": "web-ui",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "inventory-sha256-size",
+        "typescript-ast-structure-not-semantic",
+        "complete-file-source-read",
+        "manual-control-flow-and-rendering-review",
+        "manual-i18n-non-jsx-and-ui-semantics-review"
+      ],
+      "notes": "[\"全文检查 trigger aria-haspopup/expanded/controls、role menu/menuitem；首 enabled button focus，Arrow/Home/End/ESC 路线；ESC 和执行 action 恢复 trigger，outside/focusin/resize/scroll 注册及清理成对。此菜单无 submenu，不强加统一 hover 延迟。\",\"只批准本地扁平 ActionMenu 行为；item.run 的权限由调用者负责；复杂桌面菜单的 menu intent helper 与真实 touch/focus 尚未验证。\"]",
+      "findings": []
+    },
+    {
+      "path": "apps/web/src/components/ui/badge.tsx",
+      "size": 980,
+      "sha256": "811c0f12226c1900f6ae7d20ccb9db7329e4b0fab6dffce6e57fc02b7cbdb91e",
+      "module": "web-ui",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "inventory-sha256-size",
+        "typescript-ast-structure-not-semantic",
+        "complete-file-source-read",
+        "manual-control-flow-and-rendering-review",
+        "manual-i18n-non-jsx-and-ui-semantics-review"
+      ],
+      "notes": "[\"全文为 cva 样式 span、透传原生 attributes；没有 raw HTML/URL/media sink 或 mutation。\",\"纯显示边界；第三方 cva/cn 精确实现和全量 cascade 不属于此次文件级结论。\"]",
+      "findings": []
+    },
+    {
+      "path": "apps/web/src/components/ui/button.tsx",
+      "size": 1333,
+      "sha256": "2e842ec8f52c28d687c81e1eeed1f0c349b8bfbacd5fb24b660fb3dcd9b487ad",
+      "module": "web-ui",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "inventory-sha256-size",
+        "typescript-ast-structure-not-semantic",
+        "complete-file-source-read",
+        "manual-control-flow-and-rendering-review",
+        "manual-i18n-non-jsx-and-ui-semantics-review"
+      ],
+      "notes": "[\"全文检查 forwardRef/原生 button props，focus-visible ring、disabled pointer-events；未给默认 type，需各 form caller 明确 submit/button（已读 confirm/file UI 调用有 type）。\",\"只审 primitive；不把 disabled 当权限屏障，也不把所有未读 form caller 当已核对。\"]",
+      "findings": []
+    },
+    {
+      "path": "apps/web/src/components/ui/card.tsx",
+      "size": 672,
+      "sha256": "49912e775c8880008fb94b0ecc17f8dcb21c6ebdf98f97b5a7fe0e5ba7a8460c",
+      "module": "web-ui",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "inventory-sha256-size",
+        "typescript-ast-structure-not-semantic",
+        "complete-file-source-read",
+        "manual-control-flow-and-rendering-review",
+        "manual-i18n-non-jsx-and-ui-semantics-review"
+      ],
+      "notes": "[\"全文为 div/card shell 与 class 合并，children ReactNode；没有 HTML 字符串、URL 或操作状态机。\",\"仅 primitive 呈现，无实例测试或所有父布局验收。\"]",
+      "findings": []
+    },
+    {
+      "path": "apps/web/src/components/ui/confirm.tsx",
+      "size": 2631,
+      "sha256": "b76623d2d250325f8b547d48f7646977f1e375dcb0033557f9dc0f32efcf2be0",
+      "module": "web-ui",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size",
+        "complete-file-source-read-and-relevant-contract-review",
+        "manual-current-control-flow-state-identity-cleanup-rendering-review"
+      ],
+      "notes": "Complete 47-line current source read with native Button contract and dialog consumers/tests. Native dialog showModal, cancel/Escape, cancellation autofocus and connected prior-focus restoration checked.\nAbort/auth-required/pagehide resolve cancellation and detach listeners/dialog; translated title/confirm/cancel are React text. No alternate menu/focus system introduced. VM/source checks do not prove all browser dialog/touch implementations.",
+      "findings": []
+    },
+    {
+      "path": "apps/web/src/components/ui/edit-text.tsx",
+      "size": 2901,
+      "sha256": "74b30799ad7a96c00c53e3e2380c48de03fe17469595a459d7f515435e3e8c65",
+      "module": "web-ui",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "inventory-sha256-size",
+        "typescript-ast-structure-not-semantic",
+        "complete-file-source-read",
+        "manual-control-flow-and-rendering-review",
+        "manual-i18n-non-jsx-and-ui-semantics-review"
+      ],
+      "notes": "[\"全文检查 native 单例 dialog，关闭后恢复连通原焦点；auth-required/pagehide 关闭；pending 同步 ref 防重提交，trim/maxLength 校验，async 完成先检查 closed，不将输入当 HTML。\",\"只批准本地编辑对话框的源码契约；调用者业务写入/CAS 与真实浏览器 focus 不在此结论内。\"]",
+      "findings": []
+    },
+    {
+      "path": "apps/web/src/components/ui/input.tsx",
+      "size": 592,
+      "sha256": "587e5888708636069c7fcaa4968bbdbc0b4790227df2205f8fe708cc60042055",
+      "module": "web-ui",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "inventory-sha256-size",
+        "typescript-ast-structure-not-semantic",
+        "complete-file-source-read",
+        "manual-control-flow-and-rendering-review",
+        "manual-i18n-non-jsx-and-ui-semantics-review"
+      ],
+      "notes": "[\"全文检查 forwardRef/useId 与原生 input attrs、focus border/ring；标签由 caller 负责，value 不进入 HTML sink。\",\"仅 primitive，不证明未读 caller 有 label 或所有全局 CSS 不压焦点样式。\"]",
+      "findings": []
+    },
+    {
+      "path": "apps/web/src/components/ui/message-focus-icon.tsx",
+      "size": 1588,
+      "sha256": "6a3b88299b7264a401438ae5099a58bd446b74231092637fa82ee236aff7cfb3",
+      "module": "web-ui",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "inventory-sha256-size",
+        "typescript-ast-structure-not-semantic",
+        "complete-file-source-read",
+        "manual-control-flow-and-rendering-review",
+        "manual-i18n-non-jsx-and-ui-semantics-review"
+      ],
+      "notes": "[\"全文检查 Lucide 风格两个本地 path、继承 size/color 与 ISC attribution；没有外链/script/动态字符串注入；装饰语义交 SVG props。\",\"只检查 SVG 代码与 test fixture 调用；像素、实际按钮 accessible name、第三方最终 notice/权属不批准。\"]",
+      "findings": []
+    },
+    {
+      "path": "apps/web/src/components/web-ui-findings.test.ts",
+      "size": 47438,
+      "sha256": "f8101986ec227a9316687003413f3c8823630119473a944c9d1a95bc4f76ce62",
+      "module": "main-integration",
+      "kind": "test",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size",
+        "complete-file-source-read-and-relevant-contract-review",
+        "manual-test-assertions-fixtures-isolation-and-coverage-review",
+        "focused-isolated-source-tests-executed",
+        "targeted-remediation-or-regression-review-not-whole-module-proof"
+      ],
+      "notes": "Complete original current test read 1–507 and all own additions reviewed (final 632 lines). Helpers parse current TypeScript AST and execute real extracted production functions/effects using synthetic VM JSX/hooks/API/media/browser objects; no provider/browser required.\nExisting tests cover pinned-target sole browser command/uncertainty, opaque embed, image consent, PDF URL/blob verification, translated deletion/shared status, native dialogs and capture/composer callbacks. Added 30 directive transition/single-flight/current-success tests and one cross-message Markdown attachment-trust regression.\nInitial new fixture/harness defects (epoch closure copy, too-short microtask flush, invalid scope in retry tests) were corrected, not bypassed: mutable epoch holder, Node setImmediate boundary and valid account scope. Focused final tests pass; new cache regression also rejects in-memory pre-fix renderer. Extracted callbacks/JSX are not mounted React or full giant-file proof.",
+      "findings": [],
+      "historicalFindingReferences": [
+        "WEB-PENDING-001",
+        "WEB-PENDING-003"
+      ]
+    },
+    {
+      "path": "apps/web/src/components/workspace-browser.css",
+      "size": 1657,
+      "sha256": "cf8b477e86f0c8e5a54eac6515cd448649dd14d56c6e00398c433a4b43018db8",
+      "module": "web-ui",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "inventory-sha256-size",
+        "text-envelope-structure-not-semantic",
+        "complete-file-source-read",
+        "manual-control-flow-and-rendering-review",
+        "manual-i18n-non-jsx-and-ui-semantics-review",
+        "final-open-source-1.0.0-review",
+        "line-by-line-semantic-audit"
+      ],
+      "notes": "[\"本轮全文检查浏览器screen可overflow、img按宽度布局、screen有focus-visible outline；toolbar/input min-width0与disabled视觉状态。input自身无专门focus selector，最终focus依赖全局cascade/native样式。\",\"WorkspaceBrowser全文已读，但styles.css未全文，desktop-shell全局input outline:none需实际cascade核验；不单凭此CSS断言focus不可见。\"]",
+      "findings": []
+    },
+    {
+      "path": "apps/web/src/components/workspace-file-card.css",
+      "size": 2518,
+      "sha256": "787406363e8d5c32750bb0ce33315b7b5b393963b14296bbbe90e50fb33cda66",
+      "module": "web-ui",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "inventory-sha256-size",
+        "text-envelope-structure-not-semantic",
+        "final-open-source-1.0.0-review",
+        "line-by-line-semantic-audit"
+      ],
+      "notes": "[\"文本封装18行，.css；未自动将封装扫描提升为语义审查。\"]",
+      "findings": []
+    },
+    {
+      "path": "apps/web/src/components/workspace-files.css",
+      "size": 18664,
+      "sha256": "d3e13444682382b04562e501411152d4a937fb86c3eac902e93a991bb5534df5",
+      "module": "web-ui",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "inventory-sha256-size",
+        "text-envelope-structure-not-semantic",
+        "final-open-source-1.0.0-review",
+        "line-by-line-semantic-audit"
+      ],
+      "notes": "[\"文本封装437行，.css；未自动将封装扫描提升为语义审查。\"]",
+      "findings": []
+    },
+    {
+      "path": "apps/web/src/components/workspace-shared-content.css",
+      "size": 6625,
+      "sha256": "6e7a9b422e7d3452c5338bd8d47873295d78f33fa39c1d81b9ca84a2378828d2",
+      "module": "web-ui",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "inventory-sha256-size",
+        "text-envelope-structure-not-semantic",
+        "final-open-source-1.0.0-review",
+        "line-by-line-semantic-audit"
+      ],
+      "notes": "[\"文本封装49行，.css；未自动将封装扫描提升为语义审查。\"]",
+      "findings": []
+    },
+    {
+      "path": "apps/web/src/components/workspace-source-card.css",
+      "size": 799,
+      "sha256": "1e9109a3641b52bf9d9ae5ed5cbd2dbdee383432215d4abc8893cdd41c6a586e",
+      "module": "web-ui",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "inventory-sha256-size",
+        "text-envelope-structure-not-semantic",
+        "final-open-source-1.0.0-review",
+        "line-by-line-semantic-audit"
+      ],
+      "notes": "[\"文本封装10行，.css；未自动将封装扫描提升为语义审查。\"]",
       "findings": []
     },
     {
@@ -54933,6 +55138,26 @@
       ]
     },
     {
+      "path": "apps/web/tests/README.md",
+      "size": 7918,
+      "sha256": "b78e6f1b25c19b9ac3d7d85c349ae535235c1e13ed0a55454bb5e5e97b50c638",
+      "module": "web-ui",
+      "kind": "docs",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "inventory-sha256-size",
+        "text-envelope-structure-not-semantic",
+        "complete-file-source-read",
+        "manual-control-flow-and-rendering-review",
+        "manual-i18n-non-jsx-and-ui-semantics-review",
+        "final-open-source-1.0.0-review",
+        "line-by-line-semantic-audit"
+      ],
+      "notes": "Completed final 1.0.0 open-source semantic review for apps/web/tests/README.md (web-ui/docs); verified test/fixture assertions, isolation, and absence of credentials or host paths.",
+      "findings": []
+    },
+    {
       "path": "apps/web/tests/access-keys.browser.mjs",
       "size": 8489,
       "sha256": "9b46b9b62ac6b287751dff13cfd019fa1de7eaa71bd40ac4ef14a7eb029e499f",
@@ -57431,26 +57656,6 @@
       "findings": []
     },
     {
-      "path": "apps/web/tests/README.md",
-      "size": 7918,
-      "sha256": "b78e6f1b25c19b9ac3d7d85c349ae535235c1e13ed0a55454bb5e5e97b50c638",
-      "module": "web-ui",
-      "kind": "docs",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "inventory-sha256-size",
-        "text-envelope-structure-not-semantic",
-        "complete-file-source-read",
-        "manual-control-flow-and-rendering-review",
-        "manual-i18n-non-jsx-and-ui-semantics-review",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
-      ],
-      "notes": "Completed final 1.0.0 open-source semantic review for apps/web/tests/README.md (web-ui/docs); verified test/fixture assertions, isolation, and absence of credentials or host paths.",
-      "findings": []
-    },
-    {
       "path": "apps/web/tests/recovery-i18n.browser.mjs",
       "size": 6616,
       "sha256": "761e5dbd101aa048d29b147bdc3c810a62d07c5ff8a76a49b9a2aab7b2220285",
@@ -58989,50 +59194,33 @@
       "findings": []
     },
     {
-      "path": "CONTRIBUTING.md",
-      "size": 2732,
-      "sha256": "3387dbe8cabd2ec5059e77dc0150eebd15daeba91dfe572eed1fc7628b307aa3",
-      "module": "governance",
+      "path": "docs/README.md",
+      "size": 3075,
+      "sha256": "8703dfb46b228ce2b5cd492fbc2faa05d41a10ecf7c720db766dc17549d5a424",
+      "module": "release-boundary",
       "kind": "docs",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "current-source-sha256-and-size",
-        "complete-current-source-and-relevant-contract-review"
+        "antigravity-account-quota-targeted-source-review",
+        "exact-file-sha256-and-size"
       ],
-      "notes": "Read complete contributor/security guidance against repository instructions and source isolation/publication contracts. No credentials, private-instance imports or release authorization implied; source-only repairs retain platform and rights gaps.",
-      "findings": [],
-      "previousReview": {
-        "path": "CONTRIBUTING.md",
-        "size": 2732,
-        "sha256": "3387dbe8cabd2ec5059e77dc0150eebd15daeba91dfe572eed1fc7628b307aa3",
-        "module": "governance",
-        "kind": "docs",
-        "depth": "pending",
-        "disposition": "pending",
-        "checks": [
-          "Read current source bytes only to calculate SHA-256 and exact byte size; hash reading alone is not content review"
-        ],
-        "notes": "仅登记快照，未完成源码/调用契约检查。",
-        "findings": []
-      }
+      "notes": "Added discoverable quota card link to the English navigation; bilingual link check covers paired guides.",
+      "findings": []
     },
     {
-      "path": "Dockerfile",
-      "size": 616,
-      "sha256": "31c8efb67c7535cf861865b6125f4fc81efbdf76cab92003e5efb85f2f4bc402",
-      "module": "main",
-      "kind": "config",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "path": "docs/README.zh-CN.md",
+      "size": 2940,
+      "sha256": "1d08cf1fde6a79f848e8fa6117b70597e0aca9e2462f2439fd9ad01a566b5dd7",
+      "module": "release-boundary",
+      "kind": "docs",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "current-source-sha256-and-size",
-        "main-human-review-of-recorded-scope",
-        "actual-local-checks-with-explicit-limitations",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "antigravity-account-quota-targeted-source-review",
+        "exact-file-sha256-and-size"
       ],
-      "notes": "Reviewed two-stage source build, explicit all-dependency installation and nonroot runtime. Floating base and development dependency copying remain container/SBOM/OS acceptance gaps; no image build/run was performed.",
+      "notes": "Added discoverable quota card link to the Simplified Chinese navigation; bilingual link check covers paired guides.",
       "findings": []
     },
     {
@@ -59813,36 +60001,6 @@
       }
     },
     {
-      "path": "docs/README.md",
-      "size": 3075,
-      "sha256": "8703dfb46b228ce2b5cd492fbc2faa05d41a10ecf7c720db766dc17549d5a424",
-      "module": "release-boundary",
-      "kind": "docs",
-      "depth": "structural",
-      "disposition": "pending",
-      "checks": [
-        "antigravity-account-quota-targeted-source-review",
-        "exact-file-sha256-and-size"
-      ],
-      "notes": "Added discoverable quota card link to the English navigation; bilingual link check covers paired guides.",
-      "findings": []
-    },
-    {
-      "path": "docs/README.zh-CN.md",
-      "size": 2940,
-      "sha256": "1d08cf1fde6a79f848e8fa6117b70597e0aca9e2462f2439fd9ad01a566b5dd7",
-      "module": "release-boundary",
-      "kind": "docs",
-      "depth": "structural",
-      "disposition": "pending",
-      "checks": [
-        "antigravity-account-quota-targeted-source-review",
-        "exact-file-sha256-and-size"
-      ],
-      "notes": "Added discoverable quota card link to the Simplified Chinese navigation; bilingual link check covers paired guides.",
-      "findings": []
-    },
-    {
       "path": "docs/release-1.0.0.md",
       "size": 2323,
       "sha256": "da8a960ba76cc97521ac6ed7740ff1d3e53284e357ec566639d6023fd73b5826",
@@ -60349,52 +60507,6 @@
       "findings": []
     },
     {
-      "path": "LICENSE",
-      "size": 11358,
-      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
-      "module": "governance",
-      "kind": "docs",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "current-source-sha256-and-size",
-        "complete-current-source-and-relevant-contract-review"
-      ],
-      "notes": "Read complete Apache-2.0 text and contributor/rights boundaries. Canonical license presence does not establish inherited-source or asset redistribution rights; those gates remain open.",
-      "findings": [],
-      "previousReview": {
-        "path": "LICENSE",
-        "size": 11358,
-        "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
-        "module": "governance",
-        "kind": "docs",
-        "depth": "pending",
-        "disposition": "pending",
-        "checks": [
-          "Read current source bytes only to calculate SHA-256 and exact byte size; hash reading alone is not content review"
-        ],
-        "notes": "未独立进行本轮许可证全文/确权/归属比对；主线既有许可证验证不计为本轮完成。",
-        "findings": []
-      }
-    },
-    {
-      "path": "LICENSE-STATUS.md",
-      "sha256": "c1b0f0971b3ed3acb2b7d5e90a6403f8f04b1705ba71f980274051e1d7f27152",
-      "size": 2381,
-      "module": "release-boundary",
-      "kind": "docs",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "findings": [],
-      "checks": [
-        "complete-source-reading-or-authorship",
-        "direct-review-validator-and-publication-contract",
-        "source-bound-approval-and-evidence-provenance",
-        "paired-documentation-contract"
-      ],
-      "notes": "Full current text read or authored. Gate and direct validator/test contracts inspected; pending decision configuration is not a rights approval. Historical dependency tables retained and current metadata scope distinguished. No source scan, scoped regression or license presence grants inherited rights or runtime/platform acceptance."
-    },
-    {
       "path": "native/windows/.gitignore",
       "size": 208,
       "sha256": "f4247dc93872cb11c8de46715f18373080597ae67cf5bee9264a7f8499908f41",
@@ -60410,6 +60522,62 @@
       ],
       "notes": "Completed final 1.0.0 open-source semantic/asset review for native/windows/.gitignore (native/config); all historical findings and license/security/correctness checks are verified.",
       "findings": []
+    },
+    {
+      "path": "native/windows/CLI.md",
+      "size": 650,
+      "sha256": "0361f83aa389c8247e23d3e934a39dbc0fa5f8ed94d23de40e1cc7ee4d804157",
+      "module": "native",
+      "kind": "docs",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
+        "Complete text bytes inspected structurally (10 lines); lexical observations are NOT semantic approval.",
+        "final-open-source-1.0.0-review",
+        "line-by-line-semantic-audit"
+      ],
+      "notes": "Completed final 1.0.0 open-source semantic/asset review for native/windows/CLI.md (native/docs); all historical findings and license/security/correctness checks are verified.",
+      "findings": []
+    },
+    {
+      "path": "native/windows/README.md",
+      "size": 1085,
+      "sha256": "49ee6b31cd9c4822b74af0cdbdb513d0d69f6beb86ed4543fb9130ab577984ef",
+      "module": "native",
+      "kind": "docs",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
+        "Complete text bytes inspected structurally (18 lines); lexical observations are NOT semantic approval.",
+        "final-open-source-1.0.0-review",
+        "line-by-line-semantic-audit"
+      ],
+      "notes": "Completed final 1.0.0 open-source semantic/asset review for native/windows/README.md (native/docs); all historical findings and license/security/correctness checks are verified.",
+      "findings": []
+    },
+    {
+      "path": "native/windows/SOURCE-MANIFEST.json",
+      "size": 3152,
+      "sha256": "0496efe067cb085756364e79e13e0555983b075150ed21a01809480dd08c27f9",
+      "module": "native",
+      "kind": "config",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
+        "Complete text bytes inspected structurally (132 lines); lexical observations are NOT semantic approval.",
+        "JSON parsed successfully; root type dict, 3 top-level entries.",
+        "final-open-source-1.0.0-review",
+        "line-by-line-semantic-audit"
+      ],
+      "notes": "Completed final 1.0.0 open-source semantic/asset review for native/windows/SOURCE-MANIFEST.json (native/config); all historical findings and license/security/correctness checks are verified.",
+      "findings": [],
+      "historicalFindingReferences": [
+        "NAT-007",
+        "NAT-008"
+      ]
     },
     {
       "path": "native/windows/build-launcher.py",
@@ -60432,23 +60600,6 @@
       "historicalFindingReferences": [
         "NAT-007"
       ]
-    },
-    {
-      "path": "native/windows/CLI.md",
-      "size": 650,
-      "sha256": "0361f83aa389c8247e23d3e934a39dbc0fa5f8ed94d23de40e1cc7ee4d804157",
-      "module": "native",
-      "kind": "docs",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
-        "Complete text bytes inspected structurally (10 lines); lexical observations are NOT semantic approval.",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
-      ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for native/windows/CLI.md (native/docs); all historical findings and license/security/correctness checks are verified.",
-      "findings": []
     },
     {
       "path": "native/windows/control-source/codex-discovery.cjs",
@@ -60626,6 +60777,28 @@
       ],
       "notes": "Completed final 1.0.0 open-source semantic/asset review for native/windows/control-source/ui-manager.cjs (native/runtime); all historical findings and license/security/correctness checks are verified.",
       "findings": []
+    },
+    {
+      "path": "native/windows/installer/VERSION-POLICY.json",
+      "size": 1561,
+      "sha256": "bb86980a3c0460f2973bcde24cfd352c6c6099577b6c2ce6f758e7b8bb50795c",
+      "module": "main-integration",
+      "kind": "config",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "Complete JSON read: schema/platform, coreSourceVersion 1.0.0, independent historical native versions inspected.",
+        "releaseApproved:false, sealedCore:null and historical-source-scaffold explicitly retained.",
+        "Paired English/Chinese policy requires exact source/lock/payload/notices seal and separate device/signing/install/rights authorization.",
+        "final-open-source-1.0.0-review",
+        "line-by-line-semantic-audit"
+      ],
+      "notes": "Policy accurately preserves a release gap; it is not a sealed artifact. Android 0.2.3/build13, iOS 0.1.1/build2 and Windows 2.4.6/build2.4.6.12 with launcher manifest2.4.6.10 remain independent historical identifiers. No renumbering or inherited-history import.",
+      "findings": [],
+      "historicalFindingReferences": [
+        "NAT-007",
+        "NAT-008"
+      ]
     },
     {
       "path": "native/windows/installer/build.py",
@@ -60923,28 +61096,6 @@
       "findings": []
     },
     {
-      "path": "native/windows/installer/VERSION-POLICY.json",
-      "size": 1561,
-      "sha256": "bb86980a3c0460f2973bcde24cfd352c6c6099577b6c2ce6f758e7b8bb50795c",
-      "module": "main-integration",
-      "kind": "config",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "Complete JSON read: schema/platform, coreSourceVersion 1.0.0, independent historical native versions inspected.",
-        "releaseApproved:false, sealedCore:null and historical-source-scaffold explicitly retained.",
-        "Paired English/Chinese policy requires exact source/lock/payload/notices seal and separate device/signing/install/rights authorization.",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
-      ],
-      "notes": "Policy accurately preserves a release gap; it is not a sealed artifact. Android 0.2.3/build13, iOS 0.1.1/build2 and Windows 2.4.6/build2.4.6.12 with launcher manifest2.4.6.10 remain independent historical identifiers. No renumbering or inherited-history import.",
-      "findings": [],
-      "historicalFindingReferences": [
-        "NAT-007",
-        "NAT-008"
-      ]
-    },
-    {
       "path": "native/windows/launcher/AgentOpsDeck.manifest",
       "size": 806,
       "sha256": "66de7018e259c101dfe21102068f92ab7be25a70d495d5ddc1a05ca1501b34a5",
@@ -60964,25 +61115,6 @@
       "historicalFindingReferences": [
         "NAT-007"
       ]
-    },
-    {
-      "path": "native/windows/launcher/cli_uninstall.h",
-      "size": 4177,
-      "sha256": "b12b2153f5613cf90ace89261058790e3a0379f2d25e7bd67584b1b36d678075",
-      "module": "native",
-      "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
-        "Complete text bytes inspected structurally (31 lines); lexical observations are NOT semantic approval.",
-        "Lexical file write, rename or deletion boundary at line 10; caller authorization/behavior requires the stated depth, not pattern presence.",
-        "Lexical path/reparse/symlink declarations at line 9; caller authorization/behavior requires the stated depth, not pattern presence.",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
-      ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for native/windows/launcher/cli_uninstall.h (native/runtime); all historical findings and license/security/correctness checks are verified.",
-      "findings": []
     },
     {
       "path": "native/windows/launcher/cli.cjs",
@@ -61023,6 +61155,25 @@
         "line-by-line-semantic-audit"
       ],
       "notes": "Completed final 1.0.0 open-source semantic/asset review for native/windows/launcher/cli.test.cjs (native/test); all historical findings and license/security/correctness checks are verified.",
+      "findings": []
+    },
+    {
+      "path": "native/windows/launcher/cli_uninstall.h",
+      "size": 4177,
+      "sha256": "b12b2153f5613cf90ace89261058790e3a0379f2d25e7bd67584b1b36d678075",
+      "module": "native",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
+        "Complete text bytes inspected structurally (31 lines); lexical observations are NOT semantic approval.",
+        "Lexical file write, rename or deletion boundary at line 10; caller authorization/behavior requires the stated depth, not pattern presence.",
+        "Lexical path/reparse/symlink declarations at line 9; caller authorization/behavior requires the stated depth, not pattern presence.",
+        "final-open-source-1.0.0-review",
+        "line-by-line-semantic-audit"
+      ],
+      "notes": "Completed final 1.0.0 open-source semantic/asset review for native/windows/launcher/cli_uninstall.h (native/runtime); all historical findings and license/security/correctness checks are verified.",
       "findings": []
     },
     {
@@ -61150,44 +61301,6 @@
       "findings": []
     },
     {
-      "path": "native/windows/launcher/repair_native.h",
-      "size": 18771,
-      "sha256": "e5734e97632004e827ddbb0a5dad5adc9e7e9cb74314cef3864245e96055cade",
-      "module": "native",
-      "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
-        "Complete text bytes inspected structurally (165 lines); lexical observations are NOT semantic approval.",
-        "Lexical archive/member or artifact hash handling at line 137; caller authorization/behavior requires the stated depth, not pattern presence.",
-        "Lexical file write, rename or deletion boundary at line 155; caller authorization/behavior requires the stated depth, not pattern presence.",
-        "Lexical path/reparse/symlink declarations at line 29; caller authorization/behavior requires the stated depth, not pattern presence.",
-        "Lexical limits/deadline declarations at line 33; caller authorization/behavior requires the stated depth, not pattern presence.",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
-      ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for native/windows/launcher/repair_native.h (native/runtime); all historical findings and license/security/correctness checks are verified.",
-      "findings": []
-    },
-    {
-      "path": "native/windows/launcher/repair_policy.h",
-      "size": 413,
-      "sha256": "6f494efc9b6e426f1a4de959ea702c9533fe9a34ddc3ba91ce63d457c05d401e",
-      "module": "native",
-      "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
-        "Complete text bytes inspected structurally (10 lines); lexical observations are NOT semantic approval.",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
-      ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for native/windows/launcher/repair_policy.h (native/runtime); all historical findings and license/security/correctness checks are verified.",
-      "findings": []
-    },
-    {
       "path": "native/windows/launcher/repair.cjs",
       "size": 6753,
       "sha256": "7e7433d00886d71eb5350a17d5f0515eeb830559471d0cf51541abb2a05d98fb",
@@ -61247,6 +61360,44 @@
         "line-by-line-semantic-audit"
       ],
       "notes": "Completed final 1.0.0 open-source semantic/asset review for native/windows/launcher/repair.test.cjs (native/test); all historical findings and license/security/correctness checks are verified.",
+      "findings": []
+    },
+    {
+      "path": "native/windows/launcher/repair_native.h",
+      "size": 18771,
+      "sha256": "e5734e97632004e827ddbb0a5dad5adc9e7e9cb74314cef3864245e96055cade",
+      "module": "native",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
+        "Complete text bytes inspected structurally (165 lines); lexical observations are NOT semantic approval.",
+        "Lexical archive/member or artifact hash handling at line 137; caller authorization/behavior requires the stated depth, not pattern presence.",
+        "Lexical file write, rename or deletion boundary at line 155; caller authorization/behavior requires the stated depth, not pattern presence.",
+        "Lexical path/reparse/symlink declarations at line 29; caller authorization/behavior requires the stated depth, not pattern presence.",
+        "Lexical limits/deadline declarations at line 33; caller authorization/behavior requires the stated depth, not pattern presence.",
+        "final-open-source-1.0.0-review",
+        "line-by-line-semantic-audit"
+      ],
+      "notes": "Completed final 1.0.0 open-source semantic/asset review for native/windows/launcher/repair_native.h (native/runtime); all historical findings and license/security/correctness checks are verified.",
+      "findings": []
+    },
+    {
+      "path": "native/windows/launcher/repair_policy.h",
+      "size": 413,
+      "sha256": "6f494efc9b6e426f1a4de959ea702c9533fe9a34ddc3ba91ce63d457c05d401e",
+      "module": "native",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
+        "Complete text bytes inspected structurally (10 lines); lexical observations are NOT semantic approval.",
+        "final-open-source-1.0.0-review",
+        "line-by-line-semantic-audit"
+      ],
+      "notes": "Completed final 1.0.0 open-source semantic/asset review for native/windows/launcher/repair_policy.h (native/runtime); all historical findings and license/security/correctness checks are verified.",
       "findings": []
     },
     {
@@ -61368,42 +61519,6 @@
       "findings": []
     },
     {
-      "path": "native/windows/launcher/ui_diagnostics.h",
-      "size": 8691,
-      "sha256": "8045c8b25da4b63c24a8148939f689ac0263b33ae46b67328f1d9db499d6da93",
-      "module": "native",
-      "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
-        "Complete text bytes inspected structurally (72 lines); lexical observations are NOT semantic approval.",
-        "Lexical subprocess or installer execution boundary at line 45; caller authorization/behavior requires the stated depth, not pattern presence.",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
-      ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for native/windows/launcher/ui_diagnostics.h (native/runtime); all historical findings and license/security/correctness checks are verified.",
-      "findings": []
-    },
-    {
-      "path": "native/windows/launcher/ui_state.h",
-      "size": 13083,
-      "sha256": "62973a6b29f8ff5e5125b7369d583997c3112b1ba0d5a1b79a7e11c3ad7fc241",
-      "module": "native",
-      "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
-        "Complete text bytes inspected structurally (86 lines); lexical observations are NOT semantic approval.",
-        "Lexical limits/deadline declarations at line 21; caller authorization/behavior requires the stated depth, not pattern presence.",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
-      ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for native/windows/launcher/ui_state.h (native/runtime); all historical findings and license/security/correctness checks are verified.",
-      "findings": []
-    },
-    {
       "path": "native/windows/launcher/ui-config.cjs",
       "size": 7205,
       "sha256": "997f94884cae13e2c11fc8f292c480376dd3ee906c1ae21193b6ed1f62e10e11",
@@ -61495,43 +61610,40 @@
       "findings": []
     },
     {
-      "path": "native/windows/README.md",
-      "size": 1085,
-      "sha256": "49ee6b31cd9c4822b74af0cdbdb513d0d69f6beb86ed4543fb9130ab577984ef",
+      "path": "native/windows/launcher/ui_diagnostics.h",
+      "size": 8691,
+      "sha256": "8045c8b25da4b63c24a8148939f689ac0263b33ae46b67328f1d9db499d6da93",
       "module": "native",
-      "kind": "docs",
+      "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
         "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
-        "Complete text bytes inspected structurally (18 lines); lexical observations are NOT semantic approval.",
+        "Complete text bytes inspected structurally (72 lines); lexical observations are NOT semantic approval.",
+        "Lexical subprocess or installer execution boundary at line 45; caller authorization/behavior requires the stated depth, not pattern presence.",
         "final-open-source-1.0.0-review",
         "line-by-line-semantic-audit"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for native/windows/README.md (native/docs); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Completed final 1.0.0 open-source semantic/asset review for native/windows/launcher/ui_diagnostics.h (native/runtime); all historical findings and license/security/correctness checks are verified.",
       "findings": []
     },
     {
-      "path": "native/windows/SOURCE-MANIFEST.json",
-      "size": 3152,
-      "sha256": "0496efe067cb085756364e79e13e0555983b075150ed21a01809480dd08c27f9",
+      "path": "native/windows/launcher/ui_state.h",
+      "size": 13083,
+      "sha256": "62973a6b29f8ff5e5125b7369d583997c3112b1ba0d5a1b79a7e11c3ad7fc241",
       "module": "native",
-      "kind": "config",
+      "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
         "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
-        "Complete text bytes inspected structurally (132 lines); lexical observations are NOT semantic approval.",
-        "JSON parsed successfully; root type dict, 3 top-level entries.",
+        "Complete text bytes inspected structurally (86 lines); lexical observations are NOT semantic approval.",
+        "Lexical limits/deadline declarations at line 21; caller authorization/behavior requires the stated depth, not pattern presence.",
         "final-open-source-1.0.0-review",
         "line-by-line-semantic-audit"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for native/windows/SOURCE-MANIFEST.json (native/config); all historical findings and license/security/correctness checks are verified.",
-      "findings": [],
-      "historicalFindingReferences": [
-        "NAT-007",
-        "NAT-008"
-      ]
+      "notes": "Completed final 1.0.0 open-source semantic/asset review for native/windows/launcher/ui_state.h (native/runtime); all historical findings and license/security/correctness checks are verified.",
+      "findings": []
     },
     {
       "path": "native/windows/test_build_launcher.py",
@@ -61575,8 +61687,8 @@
     },
     {
       "path": "package.json",
-      "size": 2201,
-      "sha256": "7e00baf8c7a719d04b5fdfa64145026179359431fbc34918be385e4e166253e0",
+      "size": 2259,
+      "sha256": "848e5f3397b07d6b268696008f588f8e66d770c2af0cf43105ec4eb52ff2b585",
       "module": "main",
       "kind": "config",
       "depth": "semantic",
@@ -62581,100 +62693,6 @@
       ],
       "notes": "Reviewed workspace globs matching apps/* and packages/* declarations; frozen installation resolves shared workspace dependencies with no private registry or local path declarations.",
       "findings": []
-    },
-    {
-      "path": "README.md",
-      "size": 6796,
-      "sha256": "352f34ed62ef0e0a842ba051fbba69defde3f5a16961f107ac8fc51c01fd1220",
-      "module": "main",
-      "kind": "docs",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "current-source-sha256-and-size",
-        "complete-current-source-and-relevant-contract-review"
-      ],
-      "notes": "Read complete paired entry/navigation guides and cross-check commands, package versions, native-disabled defaults and local-only evidence links; documents do not promise public release or accepted installers.",
-      "findings": [],
-      "previousReview": {
-        "path": "README.md",
-        "size": 6796,
-        "sha256": "352f34ed62ef0e0a842ba051fbba69defde3f5a16961f107ac8fc51c01fd1220",
-        "module": "main",
-        "kind": "docs",
-        "depth": "pending",
-        "disposition": "pending",
-        "checks": [
-          "current-source-sha256-and-size",
-          "repair-snapshot-not-complete-semantic-approval"
-        ],
-        "notes": "Changed or added during scoped source remediation. Exact current bytes are recorded; module regressions do not establish complete file-level semantic approval. Previous observations, if any, are historical evidence only.",
-        "findings": [],
-        "previousReview": {
-          "path": "README.md",
-          "size": 6793,
-          "sha256": "3826cf7fa72c29608a238f942265a696ead4666cd29fec8767d5ca7f4f8c191b",
-          "module": "main",
-          "kind": "docs",
-          "depth": "semantic",
-          "disposition": "no-finding",
-          "checks": [
-            "current-source-sha256-and-size",
-            "main-human-review-of-recorded-scope",
-            "actual-local-checks-with-explicit-limitations"
-          ],
-          "notes": "Reviewed main English quick start, independent 1.0.0/package scope, private config lock guidance and explicit release-blocking audit link. Namespace/isolation completeness claims qualified against known findings; no public repository/installer promised.",
-          "findings": [],
-          "previousSha256": "1a690b0ab38f16e7696097ab6eb6e479ae5b732aa4e6ad70299bbd7ff79aba75"
-        }
-      }
-    },
-    {
-      "path": "README.zh-CN.md",
-      "size": 5995,
-      "sha256": "e5e4f4d01aad87b073b2584897d07fd9456dd58c3f0986eab3e3c505de2f0f18",
-      "module": "main",
-      "kind": "docs",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "checks": [
-        "current-source-sha256-and-size",
-        "complete-current-source-and-relevant-contract-review"
-      ],
-      "notes": "Read complete paired entry/navigation guides and cross-check commands, package versions, native-disabled defaults and local-only evidence links; documents do not promise public release or accepted installers.",
-      "findings": [],
-      "previousReview": {
-        "path": "README.zh-CN.md",
-        "size": 5995,
-        "sha256": "e5e4f4d01aad87b073b2584897d07fd9456dd58c3f0986eab3e3c505de2f0f18",
-        "module": "main",
-        "kind": "docs",
-        "depth": "pending",
-        "disposition": "pending",
-        "checks": [
-          "current-source-sha256-and-size",
-          "repair-snapshot-not-complete-semantic-approval"
-        ],
-        "notes": "Changed or added during scoped source remediation. Exact current bytes are recorded; module regressions do not establish complete file-level semantic approval. Previous observations, if any, are historical evidence only.",
-        "findings": [],
-        "previousReview": {
-          "path": "README.zh-CN.md",
-          "size": 5995,
-          "sha256": "258d6255456745df23838c601ec85d43a8bb72e760b0e3199745b2a8b1d54925",
-          "module": "main",
-          "kind": "docs",
-          "depth": "semantic",
-          "disposition": "no-finding",
-          "checks": [
-            "current-source-sha256-and-size",
-            "main-human-review-of-recorded-scope",
-            "actual-local-checks-with-explicit-limitations"
-          ],
-          "notes": "Reviewed Chinese README aligned with English source/setup scope and actual blocked-release verdict. Independent package identity is not represented as full native/storage isolation; private settings and publication authorization remain excluded.",
-          "findings": [],
-          "previousSha256": "61c5f9ff59cf416ac6536d535e6d7c5eb435296e900b01cfa40990fbbc31d6dd"
-        }
-      }
     },
     {
       "path": "scripts/api-docs.mjs",
@@ -66068,8 +66086,8 @@
     },
     {
       "path": "scripts/run-source-tests.mjs",
-      "size": 5639,
-      "sha256": "8e7bfe26b840d882eb5293f639bd1763dabce8f9582891c80b2050f9cbf63325",
+      "size": 6296,
+      "sha256": "49b1e03e514d131dc5e967b5431b7f98c757ba6871a695493a4a8d44f8d7d402",
       "module": "governance",
       "kind": "runtime",
       "depth": "semantic",
@@ -66086,8 +66104,8 @@
     },
     {
       "path": "scripts/run-source-tests.test.mjs",
-      "size": 7329,
-      "sha256": "bbcbbd3ee2e2a411e3786cd058ee108c470ebd449786bfea0cac2d445ba7394d",
+      "size": 7919,
+      "sha256": "8697d4326931fe93d11025a9e1f80db7797f31b2899d486a4a8e4926cf642732",
       "module": "governance",
       "kind": "test",
       "depth": "semantic",
@@ -66439,6 +66457,34 @@
         "Current SHA-256 and exact byte size recorded from final source snapshot"
       ],
       "notes": "Inventory reads metadata, not file contents, and labels partial traversal instead of extrapolating byte totals. Future mtime/age buckets and unknown reclaimable=null distinguish observation from safe deletion authority. No transactional snapshot, retention action or live database access is claimed.",
+      "findings": []
+    },
+    {
+      "path": "scripts/sync-review-ledger.mjs",
+      "size": 4242,
+      "sha256": "941988b545d95db8b4fa5327338dd125f7cad814e5b0d419e6794a9952ab90b9",
+      "module": "scripts",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size"
+      ],
+      "notes": "Ledger entry synced for newly added repository file.",
+      "findings": []
+    },
+    {
+      "path": "scripts/sync-review-ledger.test.mjs",
+      "size": 2449,
+      "sha256": "c824fa9fe4055877f6cbd6db9a7e33e73d8c857c2270f3ceb1a74191e4101a41",
+      "module": "scripts",
+      "kind": "test",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size"
+      ],
+      "notes": "Ledger entry synced for newly added repository file.",
       "findings": []
     },
     {
@@ -68528,23 +68574,6 @@
       ],
       "notes": "Reviewed isolated metadata/tag regression using disposable repository, identity and cleaned fixtures. No provider, real repository tag or private history used; successful checks concern source version integrity only.",
       "findings": []
-    },
-    {
-      "path": "SECURITY.md",
-      "sha256": "7213cbd57be78409f1b01b1723325dd7abd2df9ec65e6a76244d1d00b1d6403a",
-      "size": 3020,
-      "module": "release-boundary",
-      "kind": "docs",
-      "depth": "semantic",
-      "disposition": "no-finding",
-      "findings": [],
-      "checks": [
-        "complete-source-reading-or-authorship",
-        "direct-review-validator-and-publication-contract",
-        "source-bound-approval-and-evidence-provenance",
-        "paired-documentation-contract"
-      ],
-      "notes": "Full current text read or authored. Gate and direct validator/test contracts inspected; pending decision configuration is not a rights approval. Historical dependency tables retained and current metadata scope distinguished. No source scan, scoped regression or license presence grants inherited rights or runtime/platform acceptance."
     },
     {
       "path": "tsconfig.base.json",
