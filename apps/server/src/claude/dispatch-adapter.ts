@@ -107,6 +107,13 @@ export class ClaudeDispatchAdapter implements SdkDispatchAdapter {
     return proof;
   }
 
+  releaseRecovered(ref: SdkExecutionRef) {
+    const slot = this.match(ref);
+    if (!slot || (!slot.failed && !slot.ended)) return;
+    slot.released = true;
+    if (this.slots.get(ref.key) === slot) this.slots.delete(ref.key);
+  }
+
   close() {
     this.available = false;
     let failed = false;

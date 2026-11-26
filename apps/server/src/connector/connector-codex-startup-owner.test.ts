@@ -159,6 +159,19 @@ test('shared queue mapping preserves active Goal/thread activity and blocked fro
   assert.equal(codexQueueDisposition('row', { ...facts, executionCommandId: 'row' }, deck.getSession(key)), 'preparing');
   assert.equal(codexQueueDisposition('tail', facts, undefined), 'waiting');
   assert.equal(codexQueueDisposition('row', facts, undefined), 'preparing');
+  for (const patch of [
+    { sync: 'error' as const },
+    { phase: 'unknown' as const },
+    { threadActivity: 'unknown' as const },
+    { connection: 'disconnected' as const },
+    { executionProtection: { state: 'blocked' as const, nativeTurnId: 't', reason: 'background-work' as const } },
+  ]) {
+    const blockedSession = {
+      sessionKey: key, agentId: 'codex', title: 'Original', status: 'idle' as const,
+      runtime: { turnId: 't', phase: 'completed' as const, sync: 'current' as const, threadActivity: 'idle' as const, connection: 'connected' as const, lastEventAt: 1, ...patch },
+    };
+    assert.equal(codexQueueDisposition('row', facts, blockedSession), 'waiting', JSON.stringify(patch));
+  }
   const message = codexQueuedTurnMessage({ id: 'row', sessionKey: key, createdAt: 1, state: 'blocked', payload: payload() },
     facts, deck.getSession(key), 42);
   assert.equal(message.status, 'failed'); assert.equal(message.updatedAt, 42); assert.equal(message.queueVersion, '1:0');

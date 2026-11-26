@@ -30,7 +30,7 @@ export type AsyncSdkDriverOptions<T extends SdkOwnedTurn> = {
     start: (execution: SdkExecution, text: string, context?: SdkTurnContext, attachments?: SdkInputAttachment[], interaction?: WorkerInteractionContext) => T;
     terminal: (ref: SdkExecutionRef, outcome: SdkTerminalOutcome) => Promise<boolean>;
     unknown: (ref: SdkExecutionRef) => void; drained: (ref: SdkExecutionRef) => void;
-  }) => SdkDispatchAdapter & { close(): void };
+  }) => SdkDispatchAdapter & { close(): void; releaseRecovered?(ref: SdkExecutionRef): void };
 };
 type Intent<T> = { ref: SdkCompactRef; turn?: T; cleanup?: Promise<void>; cleaned: boolean; settled: boolean };
 
@@ -38,7 +38,7 @@ type Intent<T> = { ref: SdkCompactRef; turn?: T; cleanup?: Promise<void>; cleane
  * inferred permission, timer polling or unknown replay. HOME ownership and
  * HOME ownership belongs to the enclosing runtime. */
 export class AsyncSdkExecutionDriver<T extends SdkOwnedTurn> {
-  private readonly adapter: SdkDispatchAdapter & { close(): void };
+  private readonly adapter: SdkDispatchAdapter & { close(): void; releaseRecovered?(ref: SdkExecutionRef): void };
   private readonly dispatch: AsyncSdkDispatch;
   private readonly projection: AsyncSdkProjection;
   private readonly interactions: AsyncSdkInteractions | undefined;
@@ -118,6 +118,19 @@ export class AsyncSdkExecutionDriver<T extends SdkOwnedTurn> {
   }
   isOccupied(key: string): boolean {
     return this.intents.has(key) || Boolean(this.compaction?.has(key)) || this.pumps.has(key);
+  }
+  canRecover(key: string, expectedRunId: string): boolean {
+    if (this.compaction?.has(key) || this.pumps.has(key)) return false;
+    const intent = this.intents.get(key);
+    if (!intent) return true;
+    return intent.ref.id === expectedRunId && intent.cleaned === true;
+  }
+  async releaseRecovered(key: string, expectedRunId: string): Promise<void> {
+    const intent = this.intents.get(key);
+    if (!intent || intent.ref.id !== expectedRunId || !intent.cleaned) return;
+    await this.projection.discard(intent.ref);
+    this.adapter.releaseRecovered?.(intent.ref);
+    if (this.intents.get(key) === intent) this.intents.delete(key);
   }
   private ref(ref: SdkCompactRef): SdkCompactRef {
     return { key: ref.key, id: ref.id, epoch: ref.epoch, nativeSessionId: ref.nativeSessionId };

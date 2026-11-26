@@ -158,6 +158,9 @@ test('presentation distinguishes unread/read completion, execution, transport fa
   assert.equal(sessionPresentation({ ...session, runtime: { ...session.runtime!, sync: 'error' } }).label, 'History sync interrupted');
   assert.equal(sessionPresentation({ ...session, runtime: { ...session.runtime!, phase: 'interrupted' } }).state, 'neutral');
   assert.equal(sessionPresentation({ sessionKey: 'new', agentId: 'hermes', title: 'New', status: 'idle' }).state, 'neutral');
+  assert.deepEqual(sessionPresentation({ sessionKey: 'antigravity:new', agentId: 'antigravity', title: 'New', status: 'unknown' }), {
+    state: 'error', label: 'Agent runtime not ready',
+  });
 });
 test('only the last completed root reply is highlighted; queued followups do not hide it', () => {
   assert.equal(completedReplyId(session, [reply]), 'reply');

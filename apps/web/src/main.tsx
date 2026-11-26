@@ -208,7 +208,7 @@ import { useLatestMessages } from './lib/use-latest-messages';
 import { LatestMessagesNotice } from './components/LatestMessagesNotice';
 import { prependHistory, refreshHistory } from './lib/message-history';
 import { compactResponseNotice } from './lib/maintenance-controls';
-import { activeToolProgressSummary, compactProgressLabel, hasMessageSnapshotRevision, hasOptimisticActiveSend, hasQueueBlockingRun, hasQueuedMessageControls, isSessionBusy, isStreamCatchup, runSyncNotice, sessionRunOutcome, withOptimisticRunningState } from './lib/live-session';
+import { activeToolProgressSummary, canStopSession, compactProgressLabel, hasMessageSnapshotRevision, hasOptimisticActiveSend, hasQueueBlockingRun, hasQueuedMessageControls, isSessionBusy, isStreamCatchup, runSyncNotice, sessionRunOutcome, withOptimisticRunningState } from './lib/live-session';
 import { completedReplyId, hasInvalidCompletedReply, sessionPresentation, sessionSyncIssueLabel } from './lib/session-presentation';
 import { INVALID_ASSISTANT_OUTPUT_LABEL } from './lib/assistant-output';
 import { HistorySyncIssue } from './components/HistorySyncIssue';
@@ -662,7 +662,7 @@ function useAdaptiveSessionRefresh(refreshSessions: () => Promise<HubSessionsSta
       completionDelivery.flushAll();
       return result;
     }, SESSION_REFRESH_NORMAL_POLL_MS, REALTIME_SESSION_REFRESH_DEBOUNCE_MS,
-      () => adaptiveHistoryRefreshInterval(visibleSessionCount(), true), false, undefined, undefined, false);
+      () => adaptiveHistoryRefreshInterval(visibleSessionCount(), true), false, undefined, undefined, false, true);
     controllerRef.current = controller;
     return () => { controller.stop(); controllerRef.current = undefined; };
   }, []);
@@ -675,9 +675,9 @@ function useAdaptiveSessionRefresh(refreshSessions: () => Promise<HubSessionsSta
   };
 }
 
-function startLiveRefresh(refresh: (calibration?: boolean) => Promise<unknown>, fallbackMs: number | ((unchanged: number) => number), eventDelayMs: number, minIntervalMs?: () => number, alignSafety = false, sessionKey?: string, safetyMs?: () => number, pollWhileConnected = true) {
+function startLiveRefresh(refresh: (calibration?: boolean) => Promise<unknown>, fallbackMs: number | ((unchanged: number) => number), eventDelayMs: number, minIntervalMs?: () => number, alignSafety = false, sessionKey?: string, safetyMs?: () => number, pollWhileConnected = true, pursuitWhileConnected = false) {
   const surfaceVisible = () => !sessionKey || isSessionVisible(sessionKey);
-  const controller = createLiveRefresh({ refresh, fallbackMs, eventDelayMs, alignSafety, pollWhileConnected, ...(safetyMs ? { safetyMs } : {}),
+  const controller = createLiveRefresh({ refresh, fallbackMs, eventDelayMs, alignSafety, pollWhileConnected, pursuitWhileConnected, ...(safetyMs ? { safetyMs } : {}),
     ...(minIntervalMs ? { minIntervalMs } : {}),
     isVisible: () => document.visibilityState !== 'hidden' && surfaceVisible(),
     isConnected: () => deckStreamConnection === 'connected' });
@@ -909,14 +909,14 @@ const DesktopSessionPane = memo(function DesktopSessionPane({ session, active, r
   async function stopConfirmedRun() {
     const target = latestSession.current;
     const turnId = target.runtime?.turnId;
-    if (stoppingRef.current || sessionAddress(target.sessionKey).shared || !turnId || !isSessionBusy(target) || target.runtime?.stopRequested) return;
+    if (stoppingRef.current || sessionAddress(target.sessionKey).shared || !turnId || !canStopSession(target)) return;
     stoppingRef.current = true;
     setStopping(true);
     setControlError(undefined);
     try {
       if (!await confirmAction({ title: t('Stop this run?'), description: t('Only this run will be stopped. Queued messages and other sessions are kept.'), confirmLabel: t('Stop current run') })) return;
       if (!mounted.current || latestSession.current.sessionKey !== target.sessionKey) return;
-      if (latestSession.current.runtime?.turnId !== turnId || !isSessionBusy(latestSession.current)) throw new Error(t('The run changed. Refresh before stopping.'));
+      if (latestSession.current.runtime?.turnId !== turnId || !canStopSession(latestSession.current)) throw new Error(t('The run changed. Refresh before stopping.'));
       // The server also receives the exact run fence. A race after confirmation
       // must reject, never stop a newer run. Existing durable receipt recovery
       // handles an unknown response without resubmitting the stop command.
@@ -930,17 +930,18 @@ const DesktopSessionPane = memo(function DesktopSessionPane({ session, active, r
     <PaneToolbar>
       <button type="button" aria-label={t('Force refresh messages')} title={t('Force refresh messages')} disabled={manualRefreshing} onClick={() => {
         setManualRefreshing(true);
+        onChanged();
         void refreshSelectedMessagesNow(selectedKey, { force: true }).catch(() => { /* Current request owns its health result. */ }).finally(() => { if (mounted.current) setManualRefreshing(false); });
       }}><RefreshCcw size={13} className={manualRefreshing ? 'animate-spin' : undefined} /></button>
-      <button type="button" className="pane-emergency-stop" aria-label={t('Stop current run')} title={t(session.runtime?.turnId ? 'Stop current run' : 'Stop unavailable until the current run is confirmed')}
-        disabled={stopping || sessionAddress(session.sessionKey).shared || !isSessionBusy(session) || !session.runtime?.turnId || session.runtime?.stopRequested} onClick={() => void stopConfirmedRun()}><Power size={13} /></button>
+      <button type="button" className="pane-emergency-stop" aria-label={t('Stop current run')} title={t(canStopSession(session) ? 'Stop current run' : session.runtime?.stopRequested ? 'Stop requested…' : 'Stop unavailable until the current run is confirmed')}
+        disabled={stopping || sessionAddress(session.sessionKey).shared || !canStopSession(session)} onClick={() => void stopConfirmedRun()}><Power size={13} /></button>
     </PaneToolbar>
     {readHealth.severity === 'warning' || olderError ? <PaneStatusControls><PaneStatus label={olderError ? 'Older messages unavailable' : 'Latest messages temporarily unavailable'} state="warning">
-      {readHealth.severity === 'warning' ? <HistorySyncIssue label="Latest messages temporarily unavailable" detail={readHealth.detail} onRetry={() => refreshSelectedMessagesNow(selectedKey, { force: true })} /> : null}
+      {readHealth.severity === 'warning' ? <HistorySyncIssue label="Latest messages temporarily unavailable" detail={readHealth.detail} onRetry={async () => { onChanged(); await refreshSelectedMessagesNow(selectedKey, { force: true }); }} /> : null}
       {olderError ? <HistorySyncIssue label="Older messages unavailable" detail={olderError} onRetry={async () => { await loadMoreHistory(); }} /> : null}
     </PaneStatus></PaneStatusControls> : null}
     {controlError ? <div className="pane-control-error" role="alert"><span>{controlError}</span><button type="button" aria-label={t('Dismiss')} onClick={() => setControlError(undefined)}><X size={13} /></button></div> : null}
-    <DesktopChatPanel session={session} active={active} syncError={error} onRetrySync={() => refreshSelectedMessagesNow(selectedKey, { force: true })} messages={messageState.items} maxMessageChars={messageState.maxMessageChars}
+    <DesktopChatPanel session={session} active={active} syncError={error} onRetrySync={async () => { onChanged(); await refreshSelectedMessagesNow(selectedKey, { force: true }); }} messages={messageState.items} maxMessageChars={messageState.maxMessageChars}
       serverHiddenCount={messageState.hiddenCount} messagesLoading={Boolean(messageState.loading)} messagesRefreshing={messagesRefreshing || cachedHistory}
       historyLoading={Boolean(messageState.historyLoading)} onLoadMoreHistory={loadMoreHistory} onRenamed={onRenamed}
       onSent={async () => { onChanged(); messageLiveRefresh.current?.boost(); await refreshSelectedMessagesNow(selectedKey, { force: true }); }}
@@ -3834,7 +3835,7 @@ function SessionDetail({ syncError, olderHistoryError, maxMessageChars, session,
   }, [session.sessionKey, recoveryScope(), recoveryEpoch()]);
 
   async function stopRun() {
-    if (session.runtime?.stopRequested) return;
+    if (!canStopSession(session)) return;
     setVoiceError(undefined);
     try {
       await sendMessageWithRecovery(session.sessionKey, '/stop', 'web-only', [], newCommandKey(), session.runtime?.turnId);
@@ -4013,7 +4014,8 @@ function SessionDetail({ syncError, olderHistoryError, maxMessageChars, session,
     () => withOptimisticRunningState(session, activeSend, optimisticMessages[optimisticMessages.length - 1]?.createdAt),
     [session, activeSend, optimisticMessages],
   );
-  const mobileSessionBusy = hasQueueBlockingRun(session);
+  const canStopMobileSession = canStopSession(session);
+  const showMobileStopButton = canStopMobileSession || (hasQueueBlockingRun(session) && Boolean(session.runtime?.stopRequested));
   const [mobileToolsExpanded, setMobileToolsExpanded] = useState(false);
   const [mobileQueueExpanded, setMobileQueueExpanded] = useState(false);
   const queuedMessageIds = useMemo(
@@ -4079,7 +4081,7 @@ function SessionDetail({ syncError, olderHistoryError, maxMessageChars, session,
           <p className="text-xs text-slate-500">{shortAgent(session.agentId ?? 'agent')} · {readableEnvLabel((session as SessionSummary & { envConnectionLabel?: string }).envConnectionLabel) ?? tr('local')}</p>
           <SessionModelOverrideControl session={session} onUpdated={onRenamed} active={open} />
         </>}</CaptionPanel>
-        {mobileSessionBusy ? <Button type="button" variant="secondary" size="icon" className="h-6 w-6 shrink-0 rounded-lg border-red-200 bg-red-50 text-red-700 hover:bg-red-100" disabled={session.runtime?.stopRequested} onClick={() => void stopRun()} title={tr(session.runtime?.stopRequested ? 'Stop requested…' : 'Stop current run')} aria-label={tr("Stop current run")}><Square size={12} /></Button> : null}
+        {showMobileStopButton ? <Button type="button" variant="secondary" size="icon" className="h-6 w-6 shrink-0 rounded-lg border-red-200 bg-red-50 text-red-700 hover:bg-red-100" disabled={!canStopMobileSession} onClick={() => void stopRun()} title={tr(session.runtime?.stopRequested ? 'Stop requested…' : 'Stop current run')} aria-label={tr("Stop current run")}><Square size={12} /></Button> : null}
       </div>
       {mobileToolsExpanded && ['claude-code', 'ghcp'].includes(session.source ?? '') ? <div className="mt-1 overflow-x-auto">
         <DesktopHeaderStatusStrip session={displaySession} messages={renderedMessages} deliveryMode={deliveryMode} />

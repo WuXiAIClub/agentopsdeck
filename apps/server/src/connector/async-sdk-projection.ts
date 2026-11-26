@@ -140,6 +140,16 @@ export class AsyncSdkProjection {
     if (this.lanes.get(ref.key) === lane) this.lanes.delete(ref.key);
     return !lane.failed;
   }
+  async discard(ref: SdkCompactRef): Promise<void> {
+    const lane = this.lanes.get(ref.key);
+    if (!lane || !sameSdkTranscriptRef(lane.ref, ref)) return;
+    if (!lane.closed && !lane.failed) {
+      this.enqueue(lane, 'sdkTranscriptEnd', { runtime: this.options.runtime, ref: lane.ref }, true);
+    }
+    lane.closed = true;
+    try { await lane.tail; } catch { /* Recovered unknown lane drains best-effort. */ }
+    if (this.lanes.get(ref.key) === lane) this.lanes.delete(ref.key);
+  }
   close(): Promise<boolean> {
     if (this.closing) return this.closing;
     this.accepting = false;

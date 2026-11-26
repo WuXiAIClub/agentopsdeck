@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { existsSync, lstatSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import type { AgentReadiness } from '@agentopsdeck/shared';
+import type { AgentReadiness, CodexSubagentObservation } from '@agentopsdeck/shared';
 import type { AdmissionPause } from '../lifecycle/request-drain.js';
 import type { ConnectorAgentLifecycle } from '../connector/agent-runtimes.js';
 import type { ConnectorUserStore } from '../connector/connector-user-store.js';
@@ -35,6 +35,37 @@ const unavailable = () => new Error('Antigravity runtime unavailable; inspect lo
 const uuid = /^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i;
 const identity = (value: unknown): value is string => typeof value === 'string' && value.length > 0
   && value.length <= 512 && !/[\x00-\x1f\x7f]/.test(value);
+const ANTIGRAVITY_SUBAGENT_ACTIONS: Record<string, CodexSubagentObservation['action']> = {
+  'Run invoke_subagent': 'spawnAgent',
+  'Run define_subagent': 'spawnAgent',
+  'Run send_message': 'sendInput',
+  'Run manage_subagents': 'closeAgent',
+};
+
+export function antigravitySubagentObservation(
+  title: string | undefined,
+  toolCallId: string,
+  status: 'running' | 'completed' | 'errored',
+  observedAt: number,
+  outputText?: string,
+): CodexSubagentObservation | undefined {
+  if (!title) return undefined;
+  const action = ANTIGRAVITY_SUBAGENT_ACTIONS[title];
+  if (!action) return undefined;
+  const trimmed = outputText?.trim();
+  return {
+    action,
+    source: 'live',
+    observedAt,
+    agents: [{
+      id: toolCallId,
+      path: title,
+      status,
+      ...(trimmed ? { latestText: trimmed.slice(0, 600) } : {}),
+    }],
+  };
+}
+
 const sanitizeId = (value: string) => {
   const normalized = value.replace(/[^A-Za-z0-9_-]/g, '_').slice(0, 512);
   if (!normalized) throw failure();
@@ -200,6 +231,7 @@ export class AntigravitySdkTurn implements SdkOwnedTurn {
   private streamTimer: ReturnType<typeof setTimeout> | undefined;
   private readonly seenTools = new Set<string>();
   private readonly completedTools = new Set<string>();
+  private readonly toolTitles = new Map<string, string>();
 
   constructor(private readonly options: {
     config: AntigravityConfig;
@@ -283,13 +315,16 @@ export class AntigravitySdkTurn implements SdkOwnedTurn {
         return;
       }
       const toolCallId = sanitizeId(update.toolCallId);
+      if (update.title) this.toolTitles.set(toolCallId, update.title);
+      const toolTitle = update.title ?? this.toolTitles.get(toolCallId);
       const eventIndex = ++this.sequence;
       if (!this.seenTools.has(toolCallId)) {
         this.seenTools.add(toolCallId);
         const toolName = sanitizeToolName(update.kind ?? 'antigravity_tool');
-        const detail = update.title
-          ? { text: update.title, truncated: false }
+        const detail = toolTitle
+          ? { text: toolTitle, truncated: false }
           : undefined;
+        const subagent = antigravitySubagentObservation(toolTitle, toolCallId, 'running', this.now());
         projection.project({
           nativeEventId: sanitizeId(`evt_${execution.id}_call_${eventIndex}`),
           role: 'tool',
@@ -299,6 +334,7 @@ export class AntigravitySdkTurn implements SdkOwnedTurn {
           text: toolName,
           truncated: false,
           createdAt: this.now(),
+          ...(subagent ? { codexSubagent: subagent } : {}),
         }, detail);
       }
       if ((update.status === 'completed' || update.status === 'failed') && !this.completedTools.has(toolCallId)) {
@@ -307,6 +343,13 @@ export class AntigravitySdkTurn implements SdkOwnedTurn {
         const resultDetail = update.outputText !== undefined
           ? { text: update.outputText, truncated: Boolean(update.outputTruncated) }
           : undefined;
+        const subagent = antigravitySubagentObservation(
+          toolTitle,
+          toolCallId,
+          update.status === 'failed' ? 'errored' : 'completed',
+          this.now(),
+          update.outputText,
+        );
         projection.project({
           nativeEventId: sanitizeId(`evt_${execution.id}_result_${resultIndex}`),
           role: 'tool',
@@ -316,6 +359,7 @@ export class AntigravitySdkTurn implements SdkOwnedTurn {
           truncated: false,
           toolError: update.status === 'failed',
           createdAt: this.now(),
+          ...(subagent ? { codexSubagent: subagent } : {}),
         }, resultDetail);
       }
     } catch {
@@ -583,6 +627,13 @@ export class AntigravityDispatchAdapter implements SdkDispatchAdapter {
       historyPersisted: settlement.historyPersisted,
       nativeQuiescent: settlement.nativeQuiescent,
     };
+  }
+
+  releaseRecovered(ref: SdkExecutionRef): void {
+    const slot = this.active.get(ref.key);
+    if (!slot || slot.execution.id !== ref.id || slot.execution.epoch !== ref.epoch) return;
+    slot.failed = true;
+    this.active.delete(ref.key);
   }
 
   close(): void {

@@ -22,6 +22,21 @@ test('session list does not poll a healthy stream but refreshes on events and fa
   t.mock.timers.tick(60_000); await settle(); assert.equal(calls, 5);
 });
 
+test('pursuitWhileConnected allows bounded post-command pursuit ticks even when pollWhileConnected is false', async t => {
+  t.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: 0 });
+  let calls = 0;
+  const c = createLiveRefresh({ refresh: async () => { calls++; }, isVisible: () => true,
+    isConnected: () => true, fallbackMs: 15_000, eventDelayMs: 100, pollWhileConnected: false, pursuitWhileConnected: true });
+  t.after(() => c.stop()); c.start(); await settle();
+  t.mock.timers.tick(60_000); await settle(); assert.equal(calls, 1);
+  c.boost(); await settle(); assert.equal(calls, 2);
+  t.mock.timers.tick(1_000); await settle(); assert.equal(calls, 3);
+  t.mock.timers.tick(60_000); await settle();
+  const afterWindow = calls;
+  t.mock.timers.tick(60_000); await settle();
+  assert.equal(calls, afterWindow, 'pursuit stops once bounded window expires');
+});
+
 test('a failed event-driven list refresh still retries on a connected stream', async t => {
   t.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: 0 });
   let calls = 0;

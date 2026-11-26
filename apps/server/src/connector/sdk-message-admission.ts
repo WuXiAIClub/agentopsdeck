@@ -45,7 +45,7 @@ export function prepareSdkMessageAdmission(options: SdkMessageAdmissionOptions, 
     if (typeof actor.actorId !== 'string' || !actor.actorId || actor.actorId.startsWith('actor_') || actor.executionGrant
       || !journal.checkPermission(options.authorize, [key, { actorId: actor.actorId, text, images: [] }, 'messages:send'], options)) throw new TurnAuthorizationError();
     if (journal.session(key)!.nativeState === 'unknown' || journal.current(key)?.phase === 'unknown') {
-      throw new Error('SDK execution outcome is unknown; automatic resend is disabled');
+      throw new SessionDeletionConflict('SDK execution outcome is unknown; automatic resend is disabled');
     }
   };
   check();

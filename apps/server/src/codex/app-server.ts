@@ -359,7 +359,7 @@ export class CodexAppServer {
   // independent of native deduplication: completion joins must not self-join.
   private readonly historyRefreshDrains = new Set<Promise<void>>();
   private readonly displayHistory = new Map<string, CodexDisplayHistory>();
-  private threadRefreshResult = new Map<string, { at: number; available: boolean; liveTurnId?: string; terminalIdentity?: string | undefined; recoveryAt?: number;
+  private threadRefreshResult = new Map<string, { at: number; available: boolean; readOnly?: boolean; liveTurnId?: string; terminalIdentity?: string | undefined; recoveryAt?: number;
     display?: CodexDisplayHistory;
     coldFailure?: { at: number; revision: number; connectionId: string; current: () => boolean } }>();
   private maintenanceHistoryRecovery = new Set<string>();
@@ -461,8 +461,9 @@ export class CodexAppServer {
         && pending.revision === coldFailure.revision && this.connectionId === coldFailure.connectionId
         && coldFailure.current() && Date.now() >= coldFailure.at
         && Date.now() - coldFailure.at < CODEX_RUNNING_RECOVERY_INTERVAL_MS) return;
-      const recoveryIntervalMs = pending?.nativeHistory?.reason === 'background-work'
+      const recoveryIntervalMs = (pending?.nativeHistory?.reason === 'background-work'
         && this.loadedThreadIds.has(this.threadId(sessionKey))
+        || pending?.nativeHistory?.reason === 'native-unavailable')
         ? CODEX_BACKGROUND_WORK_RECOVERY_INTERVAL_MS
         : CODEX_RUNNING_RECOVERY_INTERVAL_MS;
       if (!queuedContinuation && pending?.sync === 'current' && pending.nativeHistory?.state === 'blocked'
@@ -1394,6 +1395,7 @@ export class CodexAppServer {
       }
     }
     if (!joinedFailure && !options.fresh && cached && maxAgeMs > 0 && Date.now() - cached.at < maxAgeMs
+      && (!cached.readOnly || options.readOnly)
       && (!cached.available || this.options.store.hasMessages(sessionKey))) {
       if (!cached.available) throw new Error('Codex thread snapshot unavailable');
       if (options.readOnly) await this.hydrateGoal(sessionKey);
@@ -1900,6 +1902,7 @@ export class CodexAppServer {
         ?? (recoveryActivity.current() ? cached?.recoveryAt : undefined);
       const coldFailure = recoveryActivity.current() ? cached?.coldFailure : undefined;
       this.threadRefreshResult.set(sessionKey, reusedDisplay ? cached! : { at: Date.now(), available: true,
+        ...(options.readOnly ? { readOnly: true } : {}),
         ...(display ? { display } : {}),
         ...(recoveryAt !== undefined ? { recoveryAt } : {}), ...(coldFailure ? { coldFailure } : {}),
         ...(liveTurnId ? { liveTurnId } : { terminalIdentity: this.terminalReadIdentity(sessionKey) }) });

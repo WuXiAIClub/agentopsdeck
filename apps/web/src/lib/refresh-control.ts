@@ -34,6 +34,8 @@ export function createLiveRefresh(options: {
   safetyMs?: number | (() => number);
   alignSafety?: boolean;
   pollWhileConnected?: boolean;
+  /** Allow bounded post-command pursuit ticks even when steady polling is disabled on a healthy SSE. */
+  pursuitWhileConnected?: boolean;
   // Sample at dispatch time: a pane can become foreground/background without
   // remounting its stream subscription or losing its snapshot fence.
   minIntervalMs?: () => number;
@@ -62,10 +64,13 @@ export function createLiveRefresh(options: {
   const safetyInterval = () => typeof options.safetyMs === 'function' ? options.safetyMs() : options.safetyMs ?? 60_000;
   const delay = () => {
     if (retryAt > Date.now()) return retryAt - Date.now();
-    if (options.pollWhileConnected === false && options.isConnected()) return failures ? 0 : undefined;
     // Transport connectivity is not proof that Connector history is fresh.
     // A command buys a bounded pursuit window, including on a healthy SSE.
     const pursuit = boostDelay();
+    if (options.pollWhileConnected === false && options.isConnected()) {
+      if (options.pursuitWhileConnected && pursuit !== undefined) return pursuit;
+      return failures ? 0 : undefined;
+    }
     if (pursuit !== undefined) return pursuit;
     if (options.isConnected()) {
       const interval = safetyInterval();
