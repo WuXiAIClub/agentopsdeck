@@ -38,7 +38,7 @@
   {
     "path": "apps/server/src/codex/tool-image-compat.test.ts",
     "category": "credential-url",
-    "sha256": "e19b6d856c6e6c74df742a5ddc2923f82ddff21b370d3517fd9186cddcaeecd7",
+    "sha256": "43a52fd586f30feb1edcdaaa7cae05977714c8e166a6016d84f4de551f7d3601",
     "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
   },
   {

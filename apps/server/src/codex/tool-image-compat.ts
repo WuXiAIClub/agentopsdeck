@@ -7,11 +7,35 @@ function record(value: unknown): value is RecordValue {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
-export type ToolImageCompatibilityOptions = { provider: string; upstreamBaseUrl: string };
+export type ToolImageCompatibilityOptions = {
+  provider: string;
+  upstreamBaseUrl: string;
+  retryStaleConnectionItems?: boolean | undefined;
+};
+
+const STALE_CONNECTION_ITEM_ERROR = /input item(?: ID)? does not belong to this connection/i;
+const MAX_RETRY_INSPECTION_BYTES = 64 * 1024;
 
 export function toolImageCompatibilityArguments(options: ToolImageCompatibilityOptions, baseUrl: string) {
   if (!/^[a-zA-Z0-9_-]+$/.test(options.provider)) throw new Error('Invalid tool image compatibility provider');
   return ['-c', `model_providers.${options.provider}.base_url=${JSON.stringify(baseUrl)}`];
+}
+
+export function stripStaleConnectionItems(body: unknown): unknown {
+  if (!record(body) || !Array.isArray(body.input)) return body;
+  let changed = false;
+  const input = body.input.map(item => {
+    if (!record(item)) return item;
+    const stripId = 'id' in item;
+    const stripEncrypted = item.type === 'reasoning' && 'encrypted_content' in item;
+    if (!stripId && !stripEncrypted) return item;
+    changed = true;
+    const copy: RecordValue = { ...item };
+    delete copy.id;
+    if (stripEncrypted) delete copy.encrypted_content;
+    return copy;
+  });
+  return changed ? { ...body, input } : body;
 }
 
 export function rewriteGeminiToolImages(body: unknown): unknown {
@@ -68,7 +92,7 @@ function forwardingHeaders(headers: IncomingHttpHeaders) {
 }
 
 export async function createToolImageCompatibilityRelay(options: ToolImageCompatibilityOptions,
-  limits = { bodyBytes: 32 * 1024 * 1024, concurrent: 2, timeoutMs: 10 * 60_000 }) {
+  limits = { bodyBytes: 32 * 1024 * 1024, concurrent: 8, timeoutMs: 10 * 60_000 }) {
   toolImageCompatibilityArguments(options, 'http://127.0.0.1');
   if (!Object.values(limits).every(value => Number.isSafeInteger(value) && value > 0) || limits.timeoutMs > 2_147_483_647) {
     throw new Error('Invalid tool image compatibility limits');
@@ -104,37 +128,83 @@ export async function createToolImageCompatibilityRelay(options: ToolImageCompat
         chunks.push(Buffer.from(chunk));
       }
       let payload = Buffer.concat(chunks);
+      let rewritten: unknown;
       if (incoming.method === 'POST') {
         if (incoming.headers['content-encoding'] && incoming.headers['content-encoding'] !== 'identity') {
           outgoing.writeHead(415).end(); return;
         }
         let original: unknown;
         try { original = JSON.parse(payload.toString('utf8')); } catch { outgoing.writeHead(400).end(); return; }
-        const rewritten = route === '/responses' ? rewriteGeminiToolImages(original) : original;
+        rewritten = route === '/responses' ? rewriteGeminiToolImages(original) : original;
         if (rewritten !== original) payload = Buffer.from(JSON.stringify(rewritten));
         if (payload.length > limits.bodyBytes) { outgoing.writeHead(413).end(); return; }
       }
       if (closed || outgoing.destroyed) return;
       const target = new URL(upstream.href);
       target.pathname = upstream.pathname.replace(/\/$/, '') + route;
-      const headers = forwardingHeaders(incoming.headers);
-      delete headers['content-length'];
-      if (incoming.method === 'POST') headers['content-length'] = String(payload.length);
-      const request = (target.protocol === 'https:' ? httpsRequest : httpRequest)(target, {
-        method: incoming.method, headers,
-      }, response => {
-        response.on('error', () => outgoing.destroy());
-        if (response.statusCode && response.statusCode >= 300 && response.statusCode < 400) {
-          response.resume(); outgoing.writeHead(502).end(); return;
-        }
-        outgoing.writeHead(response.statusCode ?? 502, forwardingHeaders(response.headers));
-        response.pipe(outgoing);
-      });
-      cancelUpstream = () => request.destroy();
-      request.on('error', () => {
-        if (!outgoing.headersSent) outgoing.writeHead(502).end(); else outgoing.destroy();
-      });
-      request.end(payload);
+      const baseHeaders = forwardingHeaders(incoming.headers);
+      delete baseHeaders['content-length'];
+      const sendUpstream = (bodyBuffer: Buffer, allowStaleRetry: boolean) => {
+        if (closed || outgoing.destroyed) return;
+        const headers = { ...baseHeaders };
+        if (incoming.method === 'POST') headers['content-length'] = String(bodyBuffer.length);
+        const request = (target.protocol === 'https:' ? httpsRequest : httpRequest)(target, {
+          method: incoming.method, headers,
+        }, response => {
+          response.on('error', () => outgoing.destroy());
+          if (response.statusCode && response.statusCode >= 300 && response.statusCode < 400) {
+            response.resume(); outgoing.writeHead(502).end(); return;
+          }
+          if (allowStaleRetry && response.statusCode === 400) {
+            const errorChunks: Buffer[] = [];
+            let errorBytes = 0;
+            let overflowed = false;
+            const flushErrorResponse = (pipeRemainder: boolean) => {
+              if (closed || outgoing.destroyed) { response.resume(); return; }
+              outgoing.writeHead(400, forwardingHeaders(response.headers));
+              for (const part of errorChunks) outgoing.write(part);
+              if (pipeRemainder) response.pipe(outgoing); else outgoing.end();
+            };
+            const onData = (chunk: Buffer | string) => {
+              const buf = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+              errorBytes += buf.length;
+              errorChunks.push(buf);
+              if (errorBytes > MAX_RETRY_INSPECTION_BYTES) {
+                overflowed = true;
+                response.off('data', onData);
+                response.off('end', onEnd);
+                flushErrorResponse(true);
+              }
+            };
+            const onEnd = () => {
+              if (overflowed || closed || outgoing.destroyed) return;
+              const text = Buffer.concat(errorChunks).toString('utf8');
+              if (STALE_CONNECTION_ITEM_ERROR.test(text)) {
+                const stripped = stripStaleConnectionItems(rewritten);
+                if (stripped !== rewritten) {
+                  const retryPayload = Buffer.from(JSON.stringify(stripped));
+                  if (retryPayload.length <= limits.bodyBytes) {
+                    sendUpstream(retryPayload, false);
+                    return;
+                  }
+                }
+              }
+              flushErrorResponse(false);
+            };
+            response.on('data', onData);
+            response.once('end', onEnd);
+            return;
+          }
+          outgoing.writeHead(response.statusCode ?? 502, forwardingHeaders(response.headers));
+          response.pipe(outgoing);
+        });
+        cancelUpstream = () => request.destroy();
+        request.on('error', () => {
+          if (!outgoing.headersSent) outgoing.writeHead(502).end(); else outgoing.destroy();
+        });
+        request.end(bodyBuffer);
+      };
+      sendUpstream(payload, Boolean(options.retryStaleConnectionItems) && incoming.method === 'POST');
     } catch {
       if (!outgoing.destroyed) {
         if (!outgoing.headersSent) outgoing.writeHead(502).end(); else outgoing.destroy();
