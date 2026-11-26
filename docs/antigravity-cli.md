@@ -21,11 +21,12 @@ No native binaries are shipped.
 
 ## Account quota card
 
-Open the workspace **Task status card → Antigravity account quota** on the
-AOD instance that runs the CLI. It reads `agy --output-format json -p '/usage'`
+On the AOD instance that runs the CLI, open **Layout presets → Antigravity account quota**
+in the workspace, or open **Antigravity account quota** from the desktop's tools.
+No task board is needed. The standalone card reads `agy --output-format json -p '/usage'`
 using the configured AOD Antigravity home, and shows the remaining percentage
 and reported reset time for each model group and quota window. This is account
-quota, not per-session token usage or billing. Expand the card to check it or use
+quota, not per-session token usage or billing. Open the card to check it or use
 **Refresh**; the server shares a successful snapshot for up to 30 seconds.
 
 The local administrator endpoint `GET /api/antigravity/usage` does not accept

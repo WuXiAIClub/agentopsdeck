@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
+import { RefreshCw } from 'lucide-react';
 import type { AntigravityUsage } from '@agentopsdeck/shared';
 import { api, recoveryScope } from '../api';
 import { useI18n } from '../lib/i18n';
+import { ResourceAction, ResourceTitle, ResourceToolbar } from './ResourceToolbar';
 
 export default function AntigravityUsagePanel({ scope }: { scope: string }) {
   const { t, locale } = useI18n();
@@ -20,8 +22,11 @@ export default function AntigravityUsagePanel({ scope }: { scope: string }) {
   const busy = result?.generation !== generation;
   const usage = busy ? undefined : result?.usage;
   const percent = new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 1 });
-  return <section aria-label={t('Antigravity account quota')} aria-busy={busy}>
-    <button type="button" disabled={busy || usage === null} onClick={() => setGeneration(value => value + 1)}>{t('Refresh')}</button>
+  return <section className="workspace-metric-card" aria-label={t('Antigravity account quota')} aria-busy={busy}>
+    <ResourceTitle>{t('Antigravity account quota')}</ResourceTitle>
+    <ResourceToolbar>
+      <ResourceAction label={t('Refresh')} disabled={busy || usage === null} onClick={() => setGeneration(value => value + 1)}><RefreshCw size={15} /></ResourceAction>
+    </ResourceToolbar>
     {busy && <p role="status">{t('Loading…')}</p>}
     {!busy && usage === undefined && <p role="alert">{t('Antigravity quota unavailable. Try refreshing.')}</p>}
     {usage === null && <p>{t('Antigravity is not configured on this server.')}</p>}

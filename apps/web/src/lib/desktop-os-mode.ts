@@ -67,6 +67,7 @@ export type DesktopIconKind =
   | 'taskboard'
   | 'terminal'
   | 'dashboard'
+  | 'antigravity-quota'
   | 'drawing'
   | 'moderator'
   | 'docker'
@@ -1186,6 +1187,7 @@ export function buildDesktopIcons(input: {
     newTaskboard?: string;
     terminal?: string;
     tokenDashboard?: string;
+    antigravityQuota?: string;
     whiteboard?: string;
     moderator?: string;
     docker?: string;
@@ -1333,6 +1335,12 @@ export function buildDesktopIcons(input: {
       kind: 'dashboard',
       title: labels.tokenDashboard ?? 'Token Telemetry',
       subtitle: 'Credits',
+      fenceId: 'tools-files',
+    },
+    {
+      id: 'app:antigravity-quota',
+      kind: 'antigravity-quota',
+      title: labels.antigravityQuota ?? 'Antigravity account quota',
       fenceId: 'tools-files',
     },
     {

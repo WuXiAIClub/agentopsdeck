@@ -45,6 +45,18 @@ test('opening resources docks by default while preserving existing pane hosts an
     assert.equal(raised.active, dashboard.id);
   }
 });
+test('Antigravity account quota restores as one standalone pane without a session', () => {
+  const quota = { id: 'quota', kind: 'antigravity-quota', resourceId: 'account' } as const;
+  const layout = openResourcePane(open(), quota, 1800, 1000);
+  assert.equal(validWorkspace(layout), true);
+  assert.equal(isSessionPane(quota), false);
+  assert.equal(validPane({ ...quota, sessionKey: session.sessionKey }), false);
+  assert.equal(validPane({ ...quota, resourceId: 'another-account' }), false);
+  const reactivated = openResourcePane({ ...layout, active: dashboard.id }, { ...quota, id: 'duplicate' }, 1800, 1000);
+  assert.equal(reactivated.active, quota.id);
+  assert.equal(reactivated.panes, layout.panes);
+  assert.deepEqual(restoreWorkspace(JSON.parse(JSON.stringify(layout)), new Set()), layout);
+});
 test('resources dock with a separate budget and never evict sessions at capacity', () => {
   let layout = presetWorkspace([session], 'single');
   for (let i = 0; i < 4; i++) layout = selectWorkspaceSession(layout, `s${i}`, undefined, `s${i}`, 1800, 1000);

@@ -57,6 +57,8 @@ test('Antigravity Connector docs stay paired, navigable and document isolation a
   }
   assert.ok(english.includes('AOD_ANTIGRAVITY_DEDICATED=true'));
   assert.ok(chinese.includes('AOD_ANTIGRAVITY_DEDICATED=true'));
+  assert.ok(english.includes('**Layout presets → Antigravity account quota**'));
+  assert.ok(chinese.includes('**布局预设 → Antigravity 账号额度**'));
 });
 
 test('every server source directory is covered by both module maps', () => {

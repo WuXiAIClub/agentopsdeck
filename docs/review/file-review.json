@@ -54,13 +54,13 @@
       "external": 2
     },
     "byDepth": {
-      "semantic": 3565,
+      "semantic": 3554,
       "asset": 19,
-      "structural": 15
+      "structural": 26
     },
     "byDisposition": {
-      "no-finding": 3584,
-      "pending": 15
+      "no-finding": 3573,
+      "pending": 26
     },
     "completedSemanticOrAssetFiles": 3565,
     "remainingFiles": 15,
@@ -44952,17 +44952,17 @@
     },
     {
       "path": "apps/web/src/components/AntigravityUsagePanel.tsx",
-      "size": 2909,
-      "sha256": "b449c708ce6fb52fbdeaf86a9ed79e19cbe2788a3bebc6e91794456ae3ee281f",
+      "size": 3216,
+      "sha256": "b85b4b207fcfb0f6522dacd147c838c3ba77b0bbbace7f06b6b2031ef54b106b",
       "module": "web-ui",
       "kind": "runtime",
       "depth": "structural",
       "disposition": "pending",
       "checks": [
-        "antigravity-account-quota-targeted-source-review",
+        "standalone-antigravity-quota-targeted-review",
         "exact-file-sha256-and-size"
       ],
-      "notes": "Reviewed recovery-scope identity, request cancellation and generation, text-only rendering, accessible progress and status/error semantics, and localized formatting. No live browser or assistive-device acceptance.",
+      "notes": "Reviewed the existing scoped quota read and cancellation, accessible progress and status, and the new title and refresh action. No authenticated browser or live CLI acceptance.",
       "findings": []
     },
     {
@@ -45092,19 +45092,17 @@
     },
     {
       "path": "apps/web/src/components/CardKindIcon.tsx",
-      "size": 1182,
-      "sha256": "fe062fbb98219aa6712f73a83302028ba5d24c0728bbe0a0b037035cf16167bb",
+      "size": 1214,
+      "sha256": "097d42b09ac036d897e452261965030b1ef32dd69516062d5a0a98d556704d8e",
       "module": "web-ui",
       "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "inventory-sha256-size",
-        "typescript-ast-structure-not-semantic",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "standalone-antigravity-quota-targeted-review",
+        "exact-file-sha256-and-size"
       ],
-      "notes": "[\"仅结构起点：12行、1个声明、2个静态导入、parseDiagnostics=0。声明形状：CardKindIcon。\",\"AST定位而非控制流证明：无被统计的hook/event/timer调用；JSX关注属性：无被统计的sink/ARIA属性。\",\"除下述手工观察另有说明外，未完整阅读运行体/调用者/契约；结构定位不等于XSS、权限、恢复、双语或a11y审查通过。\"]",
+      "notes": "Checked that the quota kind maps to the existing decorative metric icon. No visual browser acceptance.",
       "findings": []
     },
     {
@@ -46361,21 +46359,17 @@
     },
     {
       "path": "apps/web/src/components/SessionWorkspaceView.tsx",
-      "size": 123073,
-      "sha256": "60f73d298a7b318d059cc348daabe9eca5aa7249a289f45cda77204d9ee9c4ff",
+      "size": 124535,
+      "sha256": "a41d3711e7a37ab4906992210ac05d0ecb7c6285203c4fdc3073d2b4c70ff72b",
       "module": "web-ui",
       "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "inventory-sha256-size",
-        "typescript-ast-structure-not-semantic",
-        "manual-selected-source-ranges",
-        "manual-selected-call-chain-review",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "standalone-antigravity-quota-targeted-review",
+        "exact-file-sha256-and-size"
       ],
-      "notes": "[\"已读closeContextMenu只setContextPoint(undefined)，contextmenu listener排除input/textarea/select/contenteditable/link/task-card/selected文字；菜单资源动作仅局部。WorkspaceContextMenu keyboard helper在清单外，不能认定ESC丢焦点或没有现有intent能力。\",\"只对列出的运行片段做语义追踪；其余运行体没有全文阅读。文件级 depth 保持 structural，不能以局部发现抵充完整文件审查。\"]",
+      "notes": "Traced dedicated rendering, scope guard, singleton activation, and classic and desktop entry points through the existing layout machinery. No live browser, keyboard or touch acceptance.",
       "findings": []
     },
     {
@@ -46741,19 +46735,17 @@
     },
     {
       "path": "apps/web/src/components/WorkspaceBindingLines.tsx",
-      "size": 14579,
-      "sha256": "d6394890877dde751551b8c233ba8b9c4649e8056b89d6feec12e1a66f05d622",
+      "size": 14616,
+      "sha256": "8eb533b8f3b7ca1fba7f7491947321b8bbcef60782a6918e30da46b51fcc251c",
       "module": "web-ui",
       "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "inventory-sha256-size",
-        "typescript-ast-structure-not-semantic",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "standalone-antigravity-quota-targeted-review",
+        "exact-file-sha256-and-size"
       ],
-      "notes": "[\"仅结构起点：250行、6个声明、8个静态导入、parseDiagnostics=0。声明形状：Link, Source, RenderedBindingCurve, parseEndpoints, BindingSource, BindingGeometry。\",\"AST定位而非控制流证明：useEffect=5, document.addEventListener=7, abort.abort=1, document.removeEventListener=5, host.addEventListener=6, host.removeEventListener=6；JSX关注属性：无被统计的sink/ARIA属性。\",\"除下述手工观察另有说明外，未完整阅读运行体/调用者/契约；结构定位不等于XSS、权限、恢复、双语或a11y审查通过。\"]",
+      "notes": "Checked drag-link source and target filtering excludes the read-only quota pane. No browser drag acceptance.",
       "findings": []
     },
     {
@@ -47170,13 +47162,13 @@
     },
     {
       "path": "apps/web/src/components/WorkspaceOsDesktop.tsx",
-      "size": 412376,
-      "sha256": "96a24f75ed51c2b59b839a9b4235fba38f5084100ba9a21ebb6ea3d1d58c38a7",
+      "size": 412468,
+      "sha256": "8445129124e9889a1d33ceb85e0372c9e8ca779811b778525a1d9ca4660df4bc",
       "lineCount": 9609,
       "module": "web-ui",
       "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "fullSourceRead": false,
       "currentReviewedRegions": [
         "1-237",
@@ -47196,11 +47188,10 @@
         "8726-8800"
       ],
       "checks": [
-        "current-source-sha256-and-size",
-        "2026-11-25-antigravity-connector-review",
-        "typecheck-and-targeted-tests"
+        "standalone-antigravity-quota-targeted-review",
+        "exact-file-sha256-and-size"
       ],
-      "notes": "Reviewed Web UI Antigravity runtime wiring, i18n labels, session creation entry, and capability-gated affordances (attachments/compact/modelOverride/interactions disabled). Typechecked and verified with session-runtime-ui tests.",
+      "notes": "Checked the localized desktop label and gauge glyph wiring. No desktop pointer or keyboard acceptance in a browser.",
       "findings": [],
       "gaps": [
         "No real browser/touch/focus/multi-screen/provider/device acceptance; full source read is complete independently of this limit.",
@@ -47339,17 +47330,17 @@
     },
     {
       "path": "apps/web/src/components/WorkspaceStatusCard.tsx",
-      "size": 5319,
-      "sha256": "fac543b0f5f43ec78734c46dcba68dd6d865e9e9f0633fb85d04354499fe352f",
+      "size": 4920,
+      "sha256": "1272f6fbe9b9276600e57c3a5ffda9c5b1edfcbd18e96b5ee9c577998980cc3b",
       "module": "web-ui",
       "kind": "runtime",
       "depth": "structural",
       "disposition": "pending",
       "checks": [
-        "antigravity-account-quota-targeted-source-review",
+        "standalone-antigravity-quota-targeted-review",
         "exact-file-sha256-and-size"
       ],
-      "notes": "Existing details/summary UI stays keyboard operable; quota panel is lazy and only loaded when expanded. Unrelated card behavior not re-reviewed.",
+      "notes": "Checked removal of the quota subtree and its local state; task and existing metrics sections remain unchanged. No browser acceptance.",
       "findings": []
     },
     {
@@ -49155,38 +49146,32 @@
     },
     {
       "path": "apps/web/src/lib/desktop-os-mode.test.ts",
-      "size": 45250,
-      "sha256": "9c467f20df665ee1f5ca180059f0ffa4474864a28276809154b21f818c043f0d",
+      "size": 45675,
+      "sha256": "2092cd3e107bba5d2b453b8cb702b23adfa5734b261012377c8d382f3cd6337e",
       "module": "web-state",
       "kind": "test",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "inventory-size-and-sha256",
-        "typescript-complete-input-syntax-parse",
-        "ast-import-export-operation-test-structure",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "standalone-antigravity-quota-targeted-review",
+        "exact-file-sha256-and-size"
       ],
-      "notes": "仅自动结构检查，未据此宣称完整语义：1103行；语法诊断0；导出0个；导入5个（node:assert/strict、node:fs、node:test、@agentopsdeck/shared）；test/it调用点39个，首点:57；AST未识别直接网络/存储/计时器调用（不含间接调用）。完整人工阅读或相关契约未完成；语义审查待续。",
+      "notes": "Ran targeted desktop icon tests including the localized tools shortcut with no task boards; no desktop browser acceptance.",
       "findings": []
     },
     {
       "path": "apps/web/src/lib/desktop-os-mode.ts",
-      "size": 88113,
-      "sha256": "91af6fa7dd40c26597ea923b84cce26419327386201fda5782aff4840ba4cff3",
+      "size": 88348,
+      "sha256": "b6af2287791894c207f36604e064bae8d2ca82c1b602d965d4ae990f0bb6ab7b",
       "module": "web-state",
       "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "inventory-size-and-sha256",
-        "typescript-complete-input-syntax-parse",
-        "ast-import-export-operation-test-structure",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "standalone-antigravity-quota-targeted-review",
+        "exact-file-sha256-and-size"
       ],
-      "notes": "仅自动结构检查，未据此宣称完整语义：2607行；语法诊断0；导出101个（WorkspaceUiMode:11、WorkspaceColorMode:12、DesktopWallpaperTheme:14、DesktopWallpaperFit:24、DesktopWallpaperConfig:26、DesktopQqDockSize:35）；导入1个（@agentopsdeck/shared）；test/it调用点0个；相关操作点：localStorage.getItem:276、localStorage.getItem:281、localStorage.getItem:287、localStorage.setItem:303、localStorage.setItem:305、localStorage.getItem:332、localStorage.setItem:357、localStorage.getItem:387。完整人工阅读或相关契约未完成；语义审查待续。",
+      "notes": "Checked the quota shortcut is a tools app independent of task lists and verified its identity and localization with the targeted desktop icon test. No live browser acceptance.",
       "findings": []
     },
     {
@@ -54535,20 +54520,17 @@
     },
     {
       "path": "apps/web/src/lib/workspace-file-card-pane.ts",
-      "size": 4351,
-      "sha256": "82eac95269aad647f2aac99d5dd0838f56b1a6660a0160198c4f930378fc0e2a",
+      "size": 4427,
+      "sha256": "cf94a0faddf4a1195fdcc9589b158beab46cb6f1973ebc8130befff402fa372f",
       "module": "web-state",
       "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "inventory-size-and-sha256",
-        "typescript-complete-input-syntax-parse",
-        "ast-import-export-operation-test-structure",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "standalone-antigravity-quota-targeted-review",
+        "exact-file-sha256-and-size"
       ],
-      "notes": "仅自动结构检查，未据此宣称完整语义：73行；语法诊断0；导出6个（fileConfigurationKinds:6、syncFileCardPaneResource:23、readCachedFileCardConfiguration:36、writeCachedFileCardConfiguration:42、clearCachedFileCardConfigurations:54、fileCardPaneResource:62）；导入4个（./cache-cleaners.js、@agentopsdeck/shared、./workspace-layout.js、./workspace-file-card-context.js）；test/it调用点0个；AST未识别直接网络/存储/计时器调用（不含间接调用）。完整人工阅读或相关契约未完成；语义审查待续。",
+      "notes": "Checked both synchronous and asynchronous quota resource resolution exclude the pane from workspace file storage. Targeted resource test passed; no browser drag acceptance.",
       "findings": []
     },
     {
@@ -54571,20 +54553,17 @@
     },
     {
       "path": "apps/web/src/lib/workspace-file-card.test.ts",
-      "size": 7301,
-      "sha256": "05839c3d8e888c066ac55cd8ed7c5eeb769505edee5c9f20c4e66115ae92b2c7",
+      "size": 7622,
+      "sha256": "1441cbf03ec3c4acdaac00033ffb68d6e330834c8191172c496fa3b8e0caedae",
       "module": "web-state",
       "kind": "test",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "inventory-size-and-sha256",
-        "typescript-complete-input-syntax-parse",
-        "ast-import-export-operation-test-structure",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "standalone-antigravity-quota-targeted-review",
+        "exact-file-sha256-and-size"
       ],
-      "notes": "仅自动结构检查，未据此宣称完整语义：106行；语法诊断0；导出0个；导入9个（node:test、node:assert/strict、node:crypto、@agentopsdeck/shared）；test/it调用点6个，首点:11；AST未识别直接网络/存储/计时器调用（不含间接调用）。完整人工阅读或相关契约未完成；语义审查待续。",
+      "notes": "Ran the quota regression asserting no synchronous or asynchronous file identity. No file service integration was exercised.",
       "findings": []
     },
     {
@@ -54697,20 +54676,17 @@
     },
     {
       "path": "apps/web/src/lib/workspace-layout.ts",
-      "size": 52931,
-      "sha256": "8193c0b62571fd49ffacb28f30356978c72b74ed3abfe53d8fdb1a965573e7a9",
+      "size": 53122,
+      "sha256": "d2b44831ab6bba89f23b36677a7e529e513452d28ccee312d7eaa02d2cffcd84",
       "module": "web-state",
       "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "inventory-size-and-sha256",
-        "typescript-complete-input-syntax-parse",
-        "ast-import-export-operation-test-structure",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "standalone-antigravity-quota-targeted-review",
+        "exact-file-sha256-and-size"
       ],
-      "notes": "仅自动结构检查，未据此宣称完整语义：681行；语法诊断0；导出81个（MIN_PANE_WIDTH:5、MIN_PANE_HEIGHT:6、MIN_FLOAT_WIDTH:7、MIN_FLOAT_HEIGHT:8、paneMinimum:9、dockFitsWorkspace:15）；导入2个（./workspace-website.js、./workspace-snap.js）；test/it调用点0个；AST未识别直接网络/存储/计时器调用（不含间接调用）。完整人工阅读或相关契约未完成；语义审查待续。",
+      "notes": "Checked quota identity, resource activation, validation, and restore cleanup; covered by targeted layout tests. No live account layout sync acceptance.",
       "findings": []
     },
     {
@@ -54841,20 +54817,17 @@
     },
     {
       "path": "apps/web/src/lib/workspace-panels.test.ts",
-      "size": 18750,
-      "sha256": "bcade065ffaebd4d8c713034a11905090b11db275c54c3e02c4cd0654731b4e0",
+      "size": 19558,
+      "sha256": "47b16425945232ada0c7058fe1e464c84e798a48a8141388fe85be366573a0c6",
       "module": "web-state",
       "kind": "test",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "inventory-size-and-sha256",
-        "typescript-complete-input-syntax-parse",
-        "ast-import-export-operation-test-structure",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "standalone-antigravity-quota-targeted-review",
+        "exact-file-sha256-and-size"
       ],
-      "notes": "仅自动结构检查，未据此宣称完整语义：244行；语法诊断0；导出0个；导入6个（node:test、node:assert/strict、./workspace-layout.js、./session-snapshot.js）；test/it调用点16个，首点:11；AST未识别直接网络/存储/计时器调用（不含间接调用）。完整人工阅读或相关契约未完成；语义审查待续。",
+      "notes": "Ran the quota regression for singleton reactivation, identity rejection, and serialized restoration. No browser reload was exercised.",
       "findings": []
     },
     {
@@ -59195,62 +59168,62 @@
     },
     {
       "path": "docs/README.md",
-      "size": 3075,
-      "sha256": "8703dfb46b228ce2b5cd492fbc2faa05d41a10ecf7c720db766dc17549d5a424",
+      "size": 3077,
+      "sha256": "b0386a544ad49b35203b90db7f8885d83186a2bd63acd3b5195ab0ad264cec26",
       "module": "release-boundary",
       "kind": "docs",
       "depth": "structural",
       "disposition": "pending",
       "checks": [
-        "antigravity-account-quota-targeted-source-review",
+        "standalone-antigravity-quota-targeted-review",
         "exact-file-sha256-and-size"
       ],
-      "notes": "Added discoverable quota card link to the English navigation; bilingual link check covers paired guides.",
+      "notes": "Checked that the bilingual navigation and guide identify the standalone workspace quota card. Documentation tests passed; no live UI walkthrough.",
       "findings": []
     },
     {
       "path": "docs/README.zh-CN.md",
-      "size": 2940,
-      "sha256": "1d08cf1fde6a79f848e8fa6117b70597e0aca9e2462f2439fd9ad01a566b5dd7",
+      "size": 2943,
+      "sha256": "22075b4c168df11b8a7ce12dfa5ec64eb2e57418538174d9fd42f4826e0ec8fa",
       "module": "release-boundary",
       "kind": "docs",
       "depth": "structural",
       "disposition": "pending",
       "checks": [
-        "antigravity-account-quota-targeted-source-review",
+        "standalone-antigravity-quota-targeted-review",
         "exact-file-sha256-and-size"
       ],
-      "notes": "Added discoverable quota card link to the Simplified Chinese navigation; bilingual link check covers paired guides.",
+      "notes": "Checked that the bilingual navigation and guide identify the standalone workspace quota card. Documentation tests passed; no live UI walkthrough.",
       "findings": []
     },
     {
       "path": "docs/antigravity-cli.md",
-      "size": 7300,
-      "sha256": "df97cb0b97fe72cc2616c638d508e115ba82b04d158804d9f98e9e94873a39ac",
+      "size": 7406,
+      "sha256": "efd06abda7a5b570edb592b6d3caab15e1f4ec91782de00e805af287dc4b6e61",
       "module": "governance",
       "kind": "docs",
       "depth": "structural",
       "disposition": "pending",
       "checks": [
-        "antigravity-account-quota-targeted-source-review",
+        "standalone-antigravity-quota-targeted-review",
         "exact-file-sha256-and-size"
       ],
-      "notes": "Reviewed English card path, command, cache and administrator endpoint behavior against implementation; no broad connector acceptance is claimed.",
+      "notes": "Checked that the bilingual navigation and guide identify the standalone workspace quota card. Documentation tests passed; no live UI walkthrough.",
       "findings": []
     },
     {
       "path": "docs/antigravity-cli.zh-CN.md",
-      "size": 6771,
-      "sha256": "6645c3a53337e4a0f3bd06cb552c69e37d25c408e817b52cb0218b474d6473f2",
+      "size": 6852,
+      "sha256": "cb18373a1be87afb2518e2af437937f831ec47e525ba1c7bbd5f355e4946b44c",
       "module": "governance",
       "kind": "docs",
       "depth": "structural",
       "disposition": "pending",
       "checks": [
-        "antigravity-account-quota-targeted-source-review",
+        "standalone-antigravity-quota-targeted-review",
         "exact-file-sha256-and-size"
       ],
-      "notes": "Reviewed Simplified Chinese card path, command, cache and administrator endpoint behavior against implementation and English guide.",
+      "notes": "Checked that the bilingual navigation and guide identify the standalone workspace quota card. Documentation tests passed; no live UI walkthrough.",
       "findings": []
     },
     {
@@ -63547,19 +63520,18 @@
     },
     {
       "path": "scripts/documentation.test.mjs",
-      "sha256": "6e86f66c19d78fa52c1629c68da65a85fb2be75aa46d38587bff6d9770796b61",
-      "size": 9149,
+      "sha256": "56ecc2ed6ca4fb05e98d08ad411733afc442cb25a5035c4b8c890c471c016c53",
+      "size": 9312,
       "module": "release-boundary",
       "kind": "test",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "findings": [],
       "checks": [
-        "current-source-sha256-and-size",
-        "2026-11-25-antigravity-connector-review",
-        "typecheck-and-targeted-tests"
+        "standalone-antigravity-quota-targeted-review",
+        "exact-file-sha256-and-size"
       ],
-      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests."
+      "notes": "Ran the existing runner with bilingual quota-entry assertions and local link checks. The steps were not exercised against a live deployment."
     },
     {
       "path": "scripts/encrypted-stopped-backup.test.mjs",

@@ -19,10 +19,11 @@ Connector 运行时接线与 Web UI 入口已在 `apps/server/src/antigravity/`�
 
 ## 账号额度卡片
 
-在运行 CLI 的 AOD 实例中，打开工作区的 **任务状态卡 → Antigravity 账号额度**。
-卡片在配置好的 AOD Antigravity 独立目录中执行 `agy --output-format json -p '/usage'`，
+在运行 CLI 的 AOD 实例中，打开工作区的 **布局预设 → Antigravity 账号额度**，
+或在桌面工具中打开 **Antigravity 账号额度**。无需创建任务板。
+独立卡片在配置好的 AOD Antigravity 目录中执行 `agy --output-format json -p '/usage'`，
 展示各模型组和额度周期的剩余百分比及 CLI 上报的重置时间。这里显示的是账号额度，
-不是单会话 token 用量或账单。展开卡片即可查询，也可点击 **刷新**；服务端最多复用
+不是单会话 token 用量或账单。打开卡片即可查询，也可点击 **刷新**；服务端最多复用
 30 秒内的成功快照。
 
 本机管理员接口 `GET /api/antigravity/usage` 不接受 Connector 传输授权，也不能指定远程

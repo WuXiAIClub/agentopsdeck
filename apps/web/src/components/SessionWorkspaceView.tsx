@@ -53,6 +53,7 @@ import type { NotebookTransferOutcome } from '../lib/session-notebook';
 const WorkspaceRemoteHost = lazy(() => import('./WorkspaceRemoteHost'));
 const WorkspaceTaskboard = lazy(() => import('./WorkspaceTaskboard'));
 const WorkspaceStatusCard = lazy(() => import('./WorkspaceStatusCard'));
+const AntigravityUsagePanel = lazy(() => import('./AntigravityUsagePanel'));
 const WorkspaceDrawing = lazy(() => import('./WorkspaceDrawing'));
 const WorkspaceNativeDrawio = lazy(() => import('./WorkspaceNativeDrawio'));
 const WorkspaceWebsite = lazy(() => import('./WorkspaceWebsite'));
@@ -378,13 +379,14 @@ function SessionWorkspace({ selected, selectedKey, sessions, dismissed, sourceSt
     if (next === current && !current.panes.some(pane => pane.kind === kind && pane.resourceId === resourceId)) setLayoutNotice(t('Workspace resource limit reached. Close a panel before opening another.'));
     else setLayout(next);
   };
-  const visible = current.panes.flatMap<{ id: string; sessionKey: string; files?: 'file-browser' | 'file-editor' | 'image-viewer'; session?: SessionSummary; browser?: boolean; report?: { resourceId: string }; media?: boolean; moderator?: boolean; docker?: boolean; subagents?: boolean; research?: boolean; terminal?: boolean; metricCard?: { resourceId: string }; website?: { resourceId: string }; notebook?: NotebookPane; drawing?: { resourceId: string }; nativeDrawio?: { resourceId: string }; board?: { kind: 'taskboard' | 'statuscard'; resourceId: string }; title: string }>(pane => {
+  const visible = current.panes.flatMap<{ id: string; sessionKey: string; files?: 'file-browser' | 'file-editor' | 'image-viewer'; session?: SessionSummary; browser?: boolean; report?: { resourceId: string }; media?: boolean; moderator?: boolean; docker?: boolean; subagents?: boolean; research?: boolean; terminal?: boolean; antigravityQuota?: boolean; metricCard?: { resourceId: string }; website?: { resourceId: string }; notebook?: NotebookPane; drawing?: { resourceId: string }; nativeDrawio?: { resourceId: string }; board?: { kind: 'taskboard' | 'statuscard'; resourceId: string }; title: string }>(pane => {
     if (pane.kind === 'file-browser' || pane.kind === 'file-editor' || pane.kind === 'image-viewer') return [{ id: pane.id, sessionKey: paneKey(pane), files: pane.kind, title: t(fileCardLabel(pane.kind)) }];
     if (pane.kind === 'report') return [{ id: pane.id, sessionKey: paneKey(pane), report: pane, title: t('Report') }];
     if (pane.kind === 'git-tree') return [{ id: pane.id, sessionKey: paneKey(pane), title: t('Repository tree') }];
     if (pane.kind === 'issue-source') return [{ id: pane.id, sessionKey: paneKey(pane), title: t('Issue sources') }];
     if (pane.kind === 'browser') return [{ id: pane.id, sessionKey: paneKey(pane), browser: true, title: t('Browser card') }];
     if (pane.kind === 'metric-card') return [{ id: pane.id, sessionKey: paneKey(pane), metricCard: pane, title: t('Custom status card') }];
+    if (pane.kind === 'antigravity-quota') return [{ id: pane.id, sessionKey: paneKey(pane), antigravityQuota: true, title: t('Antigravity account quota') }];
     if (pane.kind === 'terminal') return [{ id: pane.id, sessionKey: paneKey(pane), terminal: true, title: t('Connector terminal') }];
     if (pane.kind === 'research') return [{ id: pane.id, sessionKey: paneKey(pane), research: true, title: t('Search and sources · Preview') }];
     if (pane.kind === 'website') return [{ id: pane.id, sessionKey: paneKey(pane), website: pane, title: t('Connector website · Preview') }];
@@ -1030,6 +1032,7 @@ function SessionWorkspace({ selected, selectedKey, sessions, dismissed, sourceSt
         : pane.moderator ? "moderator"
         : pane.docker ? "docker"
         : pane.subagents ? "subagents"
+        : pane.antigravityQuota ? "antigravity-quota"
         : pane.files ? "file-browser"
         : rawDef && !isSessionPane(rawDef) && rawDef.kind === "git-tree" ? "git-tree"
         : rawDef && !isSessionPane(rawDef) && rawDef.kind === "browser" ? "browser"
@@ -1051,7 +1054,24 @@ function SessionWorkspace({ selected, selectedKey, sessions, dismissed, sourceSt
     });
   }, [uiMode, visible, rawPaneById, completed]);
 
+  const openAntigravityQuota = useCallback(() => {
+    if (!scope) return;
+    const pane = { id: `pane:${crypto.randomUUID()}`, kind: 'antigravity-quota', resourceId: 'account' } as const;
+    setLayout(value => openResourcePane(value, pane, size.width, size.height));
+    setCollapsedKeys(previous => {
+      const key = paneKey(pane);
+      if (!previous.has(key)) return previous;
+      const next = new Set(previous);
+      next.delete(key);
+      return next;
+    });
+  }, [scope, size.width, size.height]);
+
   const handleOpenDesktopIcon = useCallback((item: DesktopIconItem) => {
+    if (item.kind === "antigravity-quota") {
+      openAntigravityQuota();
+      return;
+    }
     if (item.kind === "session" && item.session) {
       const sessKey = item.session.sessionKey;
       setLayout(value => {
@@ -1162,8 +1182,9 @@ function SessionWorkspace({ selected, selectedKey, sessions, dismissed, sourceSt
     if (item.kind === "browser") {
       setLayout(value => openResourcePane(value, { id: `pane:${crypto.randomUUID()}`, kind: "browser", resourceId: crypto.randomUUID() }, size.width, size.height));
     }
-  }, [selected?.sessionKey, size.width, size.height, preset, openSession, notebooks, scope, t, updateNotebookCatalog]);
+  }, [selected?.sessionKey, size.width, size.height, preset, openSession, openAntigravityQuota, notebooks, scope, t, updateNotebookCatalog]);
   const renderPaneBody = (pane: typeof visible[number], collapsed: boolean) => (
+    pane.antigravityQuota ? <Suspense fallback={<p role="status">{t('Loading…')}</p>}><AntigravityUsagePanel key={scope} scope={scope ?? ''} /></Suspense> :
     pane.session ? <WorkspaceSessionContent session={pane.session} renderPane={renderPane} /> : pane.website ? <Suspense fallback={<p role="status">{t("Loading…")}</p>}><WorkspaceWebsite key={`${scope}:${pane.website.resourceId}`} scope={scope ?? ""} resourceId={pane.website.resourceId} onOpen={openBoardResource} /></Suspense> : pane.nativeDrawio ? <Suspense fallback={<p role="status">{t("Loading…")}</p>}><WorkspaceNativeDrawio key={`${scope}:${pane.nativeDrawio.resourceId}`} scope={scope ?? ""} resourceId={pane.nativeDrawio.resourceId} onOpen={openBoardResource} /></Suspense> : pane.drawing ? <Suspense fallback={<p role="status">{t("Loading…")}</p>}><WorkspaceDrawing key={`${scope}:${pane.drawing.resourceId}`} scope={scope ?? ""} resourceId={pane.drawing.resourceId} onOpen={openBoardResource} /></Suspense> : pane.board ? <Suspense fallback={<p role="status">{t("Loading…")}</p>}>{pane.board.kind === "taskboard"
       ? <WorkspaceTaskboard key={`${scope}:${pane.board.resourceId}`} scope={scope ?? ""} resourceId={pane.board.resourceId} onOpen={openBoardResource} />
       : <WorkspaceStatusCard key={`${scope}:${pane.board.resourceId}`} scope={scope ?? ""} resourceId={pane.board.resourceId} onOpen={openBoardResource} />}</Suspense> : pane.notebook ? (
@@ -1239,6 +1260,7 @@ function SessionWorkspace({ selected, selectedKey, sessions, dismissed, sourceSt
       <button type="button" disabled={!scope || (resourceCapacityFull && !current.panes.some(pane => pane.kind === 'docker'))} onClick={event => { setLayout(value => openResourcePane(value, { id: `pane:${crypto.randomUUID()}`, kind: 'docker', resourceId: 'manager' }, size.width, size.height)); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="docker" />{t('Docker & Sandboxes')}</button>
       <button type="button" disabled={!scope || (resourceCapacityFull && !current.panes.some(pane => pane.kind === 'subagents'))} onClick={event => { subagentManualHoldRef.current = true; setLayout(value => dockSubagentCompanionPane(value, selected?.sessionKey ?? '', `pane:${crypto.randomUUID()}`, size.width, size.height)); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="subagents" />{t('Sub-agent Companion')}</button>
       <button type="button" disabled={!scope || resourceCapacityFull} onClick={event => { setLayout(value => openResourcePane(value, { id: `pane:${crypto.randomUUID()}`, kind: 'browser', resourceId: crypto.randomUUID() }, size.width, size.height)); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="browser" />{t('Browser card')}</button>
+      <button type="button" disabled={!scope || (resourceCapacityFull && !current.panes.some(pane => pane.kind === 'antigravity-quota'))} onClick={event => { openAntigravityQuota(); event.currentTarget.closest('details')?.removeAttribute('open'); closeContextMenu(); }}><CardKindIcon kind="antigravity-quota" />{t('Antigravity account quota')}</button>
       <button type="button" disabled={!scope || resourceCapacityFull} onClick={event => { openBoardResource('metric-card', 'catalog'); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="metric-card" />{t('Custom status cards')}</button>
       <button type="button" disabled={!scope || resourceCapacityFull} onClick={event => { openBoardResource('report', crypto.randomUUID()); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="report" />{t('Report')}</button>
       <button type="button" disabled={!scope || (resourceCapacityFull && !current.panes.some(pane => pane.kind === 'website' && pane.resourceId === 'catalog'))} onClick={event => { openBoardResource('website', 'catalog'); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="website" />{t('Connector website · Preview')}</button>
