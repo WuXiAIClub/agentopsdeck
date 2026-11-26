@@ -45004,8 +45004,8 @@
     },
     {
       "path": "apps/web/src/components/AntigravityUsagePanel.tsx",
-      "size": 5351,
-      "sha256": "b3f7b571d445104de2dedcc2a959467dca4937a9009ef8144c78237a34a8e81c",
+      "size": 5524,
+      "sha256": "b71c5936a510f257d64abf7bcd8f08448fb4a63f71cf49b19ff096dad499112c",
       "module": "web-ui",
       "kind": "runtime",
       "depth": "structural",
@@ -47581,8 +47581,8 @@
     },
     {
       "path": "apps/web/src/components/antigravity-quota-card.css",
-      "size": 5761,
-      "sha256": "64ba1c0c17e4ecaed5609257d38b0954b232c72a7d693cb9a83ad9b9bb436b3f",
+      "size": 5632,
+      "sha256": "47b8e9607d9d43832f027eecd2d2c0c182ddc2f51b29336d95cee1f218dafc8e",
       "module": "web",
       "kind": "runtime",
       "depth": "structural",
@@ -58987,8 +58987,8 @@
     },
     {
       "path": "apps/web/tests/workspace-polish.browser.mjs",
-      "size": 22822,
-      "sha256": "777adfc5f0b6c89a052c2d2efca0d630f71cea1cbd66419984f8920f579951eb",
+      "size": 23697,
+      "sha256": "9bf2505b55be9d337f9ae039e30765c7667ac78e4b82031e575dff8bae536c7b",
       "module": "web-ui",
       "kind": "test",
       "depth": "structural",
