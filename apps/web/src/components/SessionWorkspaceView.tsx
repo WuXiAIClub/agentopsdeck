@@ -3,7 +3,7 @@ import { lazy, memo, Suspense, useCallback, useEffect, useLayoutEffect, useMemo,
 import { createPortal } from 'react-dom';
 import { flushSync } from 'react-dom';
 import type { BoardSummary, SessionSummary } from '@agentopsdeck/shared';
-import { Bot, Link2, Lock, LockOpen, Columns2, Rows2, Grid2X2, PanelsTopLeft, PictureInPicture2, PanelBottom, GripHorizontal, ChevronDown, ChevronUp, X, StickyNote, Maximize2, Minimize2, Monitor, Sun, Moon } from 'lucide-react';
+import { ArrowUpRight, Bot, Link2, Lock, LockOpen, Columns2, Rows2, Grid2X2, PanelsTopLeft, PictureInPicture2, PanelBottom, GripHorizontal, ChevronDown, ChevronUp, X, StickyNote, Maximize2, Minimize2, Monitor, Sun, Moon } from 'lucide-react';
 import { PaneToolbarScope } from './PaneToolbar';
 import { RunningPaneBorder } from './RunningPaneBorder';
 import WorkspaceFileCardScope from './WorkspaceFileCardScope';
@@ -1241,12 +1241,12 @@ function SessionWorkspace({ selected, selectedKey, sessions, dismissed, sourceSt
   const renderResourceMenu = (menuRef?: Ref<HTMLDivElement>) => <div ref={menuRef} className="session-workspace-preset-menu">
       <div className="workspace-menu-group workspace-menu-grid" role="group" aria-label={t('Status cards')}>
         <div className="workspace-menu-group-title" aria-hidden="true">{t('Status cards')}</div>
-        <button type="button" disabled={!scope || (resourceCapacityFull && !current.panes.some(pane => pane.kind === 'antigravity-quota'))} onClick={event => {
+        <button type="button" className="workspace-menu-feature" disabled={!scope || (resourceCapacityFull && !current.panes.some(pane => pane.kind === 'antigravity-quota'))} onClick={event => {
           openAntigravityQuota();
           const menu = event.currentTarget.closest('details');
           if (menu) { menu.open = false; presetSummaryRef.current?.focus(); }
           closeContextMenu();
-        }}><CardKindIcon kind="antigravity-quota" />{t('Antigravity account quota')}</button>
+        }}><span className="workspace-glass-emblem"><CardKindIcon kind="antigravity-quota" /></span><span>{t('Antigravity account quota')}</span><ArrowUpRight className="workspace-menu-feature-arrow" size={16} aria-hidden="true" /></button>
         <button type="button" disabled={!scope || resourceCapacityFull} onClick={event => { openBoardResource('metric-card', 'catalog'); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="metric-card" />{t('Custom status cards')}</button>
         <button type="button" disabled={!scope || (resourceCapacityFull && !current.panes.some(pane => pane.kind === 'dashboard'))} onClick={event => { setLayout(value => openDashboardPane(value, `pane:${crypto.randomUUID()}`, size.width, size.height)); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="dashboard" />{t('Workspace overview · Preview')}</button>
         <button type="button" disabled={!scope || resourceCapacityFull} onClick={event => { openBoardResource('report', crypto.randomUUID()); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="report" />{t('Report')}</button>

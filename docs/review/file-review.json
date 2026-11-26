@@ -56,13 +56,13 @@
       "external": 2
     },
     "byDepth": {
-      "semantic": 3554,
+      "semantic": 3555,
       "asset": 19,
-      "structural": 29
+      "structural": 28
     },
     "byDisposition": {
-      "no-finding": 3573,
-      "pending": 29
+      "no-finding": 3574,
+      "pending": 28
     },
     "completedSemanticOrAssetFiles": 3565,
     "remainingFiles": 15,
@@ -44982,8 +44982,8 @@
     },
     {
       "path": "apps/web/src/components/AntigravityUsagePanel.tsx",
-      "size": 3713,
-      "sha256": "38367e1981fab497e73ee0ca2cbf804925762e9f0a3fd6ca883aea4fb32bac50",
+      "size": 4598,
+      "sha256": "9e8ba736222ac36716dd49056591a63b9bc50ca67d2e8fa661f0460cea8a80ce",
       "module": "web-ui",
       "kind": "runtime",
       "depth": "structural",
@@ -46389,8 +46389,8 @@
     },
     {
       "path": "apps/web/src/components/SessionWorkspaceView.tsx",
-      "size": 126017,
-      "sha256": "e66ddf2fb57111d524d762a6bb40c27a6062dfbc7f3bfd362ccd0b97b16bc8e5",
+      "size": 126213,
+      "sha256": "839cce17e627cf5eca8682ff0785262015df3461d5ef56c30b5e9dc2a729b19c",
       "module": "web-ui",
       "kind": "runtime",
       "depth": "structural",
@@ -47559,8 +47559,8 @@
     },
     {
       "path": "apps/web/src/components/antigravity-quota-card.css",
-      "size": 1998,
-      "sha256": "356001c2dfcc65d2a3a37ba143b2ae1797e0fa8e511da278268a76ca7f1e0d47",
+      "size": 4671,
+      "sha256": "732c91b0d5d0b1e8bbf4a74b5d274ea1d49b1f4205e6ea3af3110737b5b2fa76",
       "module": "web",
       "kind": "runtime",
       "depth": "structural",
@@ -55147,8 +55147,8 @@
         "exact-file-sha256-and-size"
       ],
       "notes": "Checked grouped menu grid and focus styles, viewport-constrained width and coarse pointer target rules while retaining popover positioning. Full stylesheet semantic review not repeated.",
-      "sha256": "723a262c15390bc804e72be4c714b2ba66dec007aa705fdc74f857a4cdbfc679",
-      "size": 555868,
+      "sha256": "aef0a60b0a3b6cbd5c32e39947307c3253fc8afa6d8c7cef08e2754a5d0c60a6",
+      "size": 559311,
       "module": "web-style-entry-completion",
       "historicalFindingReferences": [
         "WEB-STYLEENTRY-003"
@@ -58965,8 +58965,8 @@
     },
     {
       "path": "apps/web/tests/workspace-polish.browser.mjs",
-      "size": 18805,
-      "sha256": "bf2b45548fc98f637a94ec479522cff57912573597d2c2c587d611e74996ee87",
+      "size": 21836,
+      "sha256": "16ce6b35504bf0f786f68593fe40b7835d814f16ab06c1dec75c46244100966a",
       "module": "web-ui",
       "kind": "test",
       "depth": "structural",

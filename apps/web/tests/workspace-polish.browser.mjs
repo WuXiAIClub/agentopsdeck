@@ -49,8 +49,9 @@ try {
       const response = await app.request(url.pathname, { method: req.method(), headers: req.headers(), ...(req.postData() ? { body: req.postData() } : {}) });
       return route.fulfill({ status: response.status, headers: Object.fromEntries(response.headers), body: await response.text() });
     }
-    if (req.method() !== 'GET') { forbidden.push(`${req.method()} ${url.pathname}`); return route.abort(); }
     const json = body => route.fulfill({ json: body });
+    if (req.method() === 'POST' && url.pathname === '/api/hub/v1/completions/summary') return json({ items: [] });
+    if (req.method() !== 'GET') { forbidden.push(`${req.method()} ${url.pathname}`); return route.abort(); }
     if (url.pathname === '/api/auth/status') return json({ authenticated: true, recoveryScope: hub.identities.recoveryScope(principal), passkeys: { available: false, count: 0 } });
     if (url.pathname.endsWith('/sessions/state')) return json({ revision: '1', groups: [{ agentId: 'codex', sessions: keys.map((sessionKey, i) => ({ sessionKey, envConnectionId: 'local', source: 'codex', agentId: 'codex', title: `Session ${i + 1}`, status: 'idle' })) }] });
     if (url.pathname.endsWith('/messages')) return json({ limits: { maxMessageChars: 100000 }, revision: '1', totalCount: 1, hiddenCount: 0, messages: [{ id: 'message', role: 'assistant', text: 'Stable history', createdAt: 1, status: 'sent' }] });
@@ -124,6 +125,9 @@ try {
   await page.keyboard.press('Enter');
   const quotaEntry = page.getByRole('group', { name: 'Status cards', exact: true }).getByRole('button', { name: 'Antigravity account quota', exact: true });
   await quotaEntry.waitFor();
+  const resourceMenu = page.locator('.session-workspace-presets > .session-workspace-preset-menu');
+  assert.match(await resourceMenu.evaluate(el => getComputedStyle(el).backdropFilter), /blur\(/);
+  if (process.env.AOD_TEST_GLASS_SCREENSHOTS) await resourceMenu.screenshot({ path: join(process.env.AOD_TEST_GLASS_SCREENSHOTS, 'workspace-glass-menu.png'), animations: 'disabled' });
   await page.keyboard.press('Tab');
   assert.equal(await quotaEntry.evaluate(button => button === document.activeElement), true, 'quota is the first keyboard stop in the menu');
   await page.keyboard.press('Enter');
@@ -133,6 +137,35 @@ try {
   assert.deepEqual(await bars.evaluateAll(nodes => nodes.map(node => [node.value, node.hasAttribute('data-low')])), [[0.75, false], [0.15, true]]);
   assert.equal(await bars.first().getAttribute('aria-valuetext'), 'Remaining: 75%');
   assert.equal(await quotaCard.getByText('Quota reset time unavailable').count(), 1);
+  const dials = quotaCard.locator('.antigravity-quota-dial');
+  assert.deepEqual(await dials.allTextContents(), ['75%', '15%']);
+  const arcColors = () => dials.locator('.antigravity-quota-arc').evaluateAll(nodes => nodes.map(node => getComputedStyle(node).stroke));
+  const lightArcColors = await arcColors();
+  assert.notEqual(...lightArcColors, 'low quota uses a different arc color');
+  if (process.env.AOD_TEST_GLASS_SCREENSHOTS) await quotaCard.screenshot({ path: join(process.env.AOD_TEST_GLASS_SCREENSHOTS, 'workspace-glass-quota.png'), animations: 'disabled' });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.getByTestId('workspace-theme-toggle').click();
+  assert.notDeepEqual(await arcColors(), lightArcColors, 'the dark palette reaches the dials');
+  assert.match(await quotaCard.evaluate(el => getComputedStyle(el).backgroundImage), /radial-gradient/, 'the dark card retains the glass surface');
+  assert.equal(await quotaCard.locator('li').first().evaluate(el => getComputedStyle(el).animationName), 'none');
+  assert.equal(await quotaCard.locator('.antigravity-quota-hero').evaluate(el => getComputedStyle(el, '::before').content), 'none');
+  if (process.env.AOD_TEST_GLASS_SCREENSHOTS) await quotaCard.screenshot({ path: join(process.env.AOD_TEST_GLASS_SCREENSHOTS, 'workspace-glass-quota-dark.png'), animations: 'disabled' });
+  await page.emulateMedia({ forcedColors: 'active' });
+  assert.notEqual(...await quotaCard.locator('.antigravity-quota-dial').first().locator('circle').evaluateAll(nodes => nodes.map(node => getComputedStyle(node).stroke)), 'high contrast preserves the visual track and arc');
+  await page.emulateMedia({ forcedColors: 'none', reducedMotion: 'no-preference' });
+  await page.getByTestId('workspace-theme-toggle').click();
+  assert.equal(await quotaCard.evaluate(el => {
+    el.style.width = '224px';
+    const items = [...el.querySelectorAll('li')];
+    const stacked = items[0].getBoundingClientRect().bottom <= items[1].getBoundingClientRect().top;
+    const fits = el.scrollWidth <= el.clientWidth + 1;
+    el.style.removeProperty('width');
+    return stacked && fits;
+  }), true, 'a narrow card stacks the quota readings without horizontal scrolling');
+  const refreshed = page.waitForResponse(response => response.url().endsWith('/api/antigravity/usage') && response.ok());
+  await page.locator('[data-workspace-pane]').filter({ has: quotaCard }).getByRole('button', { name: 'Refresh', exact: true }).click();
+  await refreshed;
+  await bars.last().waitFor();
   await page.locator('[data-workspace-pane]').filter({ has: quotaCard }).getByRole('button', { name: 'Close pane', exact: true }).click();
   await quotaCard.waitFor({ state: 'detached' });
   for (const name of ['Browser card', 'Connector terminal']) {
