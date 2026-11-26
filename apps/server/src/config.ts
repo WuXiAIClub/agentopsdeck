@@ -217,6 +217,9 @@ export function loadConfig(env = process.env): ServerConfig {
   const copilot = copilotConfig(env);
   const antigravity = antigravityConfig(env);
   const websiteGateway = parseWebsiteGateway(env);
+  const compatUpstream = env.AOD_CODEX_GEMINI_TOOL_IMAGE_UPSTREAM?.trim()
+    || env.AOD_CODEX_RESPONSES_COMPAT_UPSTREAM?.trim();
+  const retryStale = env.AOD_CODEX_RETRY_STALE_CONNECTION_ITEMS === 'true';
   if (websiteGateway && (websiteGateway.port === Number(env.AOD_PORT ?? env.PORT ?? 8890)
     || parseServerRole(env.AOD_SERVER_ROLE) === 'connector' || env.AOD_HUB_ENABLED === 'false')) {
     throw new Error('Website gateway requires an enabled Hub and a separate listening port');
@@ -350,9 +353,10 @@ export function loadConfig(env = process.env): ServerConfig {
       defaultModel: env.AOD_CODEX_DEFAULT_MODEL?.trim() || '',
       modelProvider: emptyToUndefined(env.AOD_CODEX_MODEL_PROVIDER?.trim()),
       ...(env.AOD_CODEX_ENV_PASSTHROUGH?.trim() ? { modelProviderEnvironment: parseCodexEnvPassthrough(env.AOD_CODEX_ENV_PASSTHROUGH, env) } : {}),
-      toolImageCompatibility: env.AOD_CODEX_GEMINI_TOOL_IMAGE_UPSTREAM?.trim() ? {
+      toolImageCompatibility: compatUpstream ? {
         provider: env.AOD_CODEX_MODEL_PROVIDER?.trim() || '',
-        upstreamBaseUrl: env.AOD_CODEX_GEMINI_TOOL_IMAGE_UPSTREAM.trim(),
+        upstreamBaseUrl: compatUpstream,
+        ...(retryStale ? { retryStaleConnectionItems: true } : {}),
       } : undefined,
       modelChoices: parseCsv(env.AOD_CODEX_MODEL_CHOICES),
       autoCompactTokenLimit: optionalPositiveInt(env.AOD_CODEX_AUTO_COMPACT_TOKEN_LIMIT),
@@ -424,7 +428,11 @@ export function redactedConfig(config: ServerConfig) {
       modelProviderEnvironment: config.codex.modelProviderEnvironment
         ? Object.fromEntries(Object.keys(config.codex.modelProviderEnvironment).map(key => [key, redact(key)])) : undefined,
       toolImageCompatibility: config.codex.toolImageCompatibility
-        ? { enabled: true, provider: config.codex.toolImageCompatibility.provider } : undefined,
+        ? {
+          enabled: true,
+          provider: config.codex.toolImageCompatibility.provider,
+          ...(config.codex.toolImageCompatibility.retryStaleConnectionItems ? { retryStaleConnectionItems: true } : {}),
+        } : undefined,
     },
   };
 }

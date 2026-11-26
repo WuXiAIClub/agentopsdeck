@@ -10511,8 +10511,8 @@
     },
     {
       "path": "apps/server/src/codex/tool-image-compat.test.ts",
-      "size": 13004,
-      "sha256": "e19b6d856c6e6c74df742a5ddc2923f82ddff21b370d3517fd9186cddcaeecd7",
+      "size": 17527,
+      "sha256": "43a52fd586f30feb1edcdaaa7cae05977714c8e166a6016d84f4de551f7d3601",
       "module": "execution",
       "kind": "test",
       "depth": "semantic",
@@ -10531,8 +10531,8 @@
     },
     {
       "path": "apps/server/src/codex/tool-image-compat.ts",
-      "size": 8412,
-      "sha256": "a3fa3ffa453ed401c012a29a7aa610282e94a5a3b37bd86345aa040d62f6d50b",
+      "size": 11414,
+      "sha256": "b61e79a8b35aa8bc4a5d19c33c9f7f7cd13a50471906847bce05e0338009fc8a",
       "module": "execution",
       "kind": "runtime",
       "depth": "semantic",
@@ -11928,8 +11928,8 @@
     },
     {
       "path": "apps/server/src/config.ts",
-      "size": 30734,
-      "sha256": "a1ed68122947682bcae03163b59b2231218d0e0f538fba2617dd3678fcf69afa",
+      "size": 31091,
+      "sha256": "f875d75064bd86e1fb91f888eb753a09f97703e375d7c81dc8d0215a2bce30b7",
       "module": "api-auth",
       "kind": "config",
       "depth": "semantic",
@@ -65898,7 +65898,7 @@
     {
       "path": "scripts/publication-fixtures.json",
       "size": 9516,
-      "sha256": "5eefa3e7b6ec8cc543a7933acc41a9b0f328a2f41d73dc1545a2c81dce158a35",
+      "sha256": "fdc4560cb38de9a6c1e2a38749f6b199f8599e589c981ee454aabd291d0f8000",
       "module": "governance",
       "kind": "config",
       "depth": "semantic",

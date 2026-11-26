@@ -1,7 +1,12 @@
 import assert from 'node:assert/strict';
 import { createServer, request, type IncomingMessage, type ServerResponse } from 'node:http';
 import test from 'node:test';
-import { createToolImageCompatibilityRelay, rewriteGeminiToolImages, toolImageCompatibilityArguments } from './tool-image-compat.js';
+import {
+  createToolImageCompatibilityRelay,
+  rewriteGeminiToolImages,
+  stripStaleConnectionItems,
+  toolImageCompatibilityArguments,
+} from './tool-image-compat.js';
 import { loadConfig, redactedConfig } from '../config.js';
 
 const image = { type: 'input_image', image_url: 'data:image/png;base64,c3ludGhldGlj', detail: 'high' };
@@ -83,6 +88,23 @@ test('compatibility is opt-in and overrides only the explicitly selected provide
     '-c', 'model_providers.litellm.base_url="http://127.0.0.1:1234/private"',
   ]);
   assert.throws(() => toolImageCompatibilityArguments({ provider: 'bad.path', upstreamBaseUrl: '' }, ''), /Invalid/);
+
+  const responsesCompat = loadConfig({
+    AOD_CODEX_MODEL_PROVIDER: 'litellm',
+    AOD_CODEX_RESPONSES_COMPAT_UPSTREAM: 'http://localhost:4148/v1',
+    AOD_CODEX_RETRY_STALE_CONNECTION_ITEMS: 'true',
+  });
+  assert.deepEqual(responsesCompat.codex.toolImageCompatibility, {
+    provider: 'litellm',
+    upstreamBaseUrl: 'http://localhost:4148/v1',
+    retryStaleConnectionItems: true,
+  });
+  assert.deepEqual(redactedConfig(responsesCompat).codex.toolImageCompatibility, {
+    enabled: true,
+    provider: 'litellm',
+    retryStaleConnectionItems: true,
+  });
+  assert.equal(JSON.stringify(redactedConfig(responsesCompat)).includes('http://localhost:4148/v1'), false);
 });
 
 async function harness(handler: (incoming: IncomingMessage, outgoing: ServerResponse) => void,
@@ -220,5 +242,86 @@ test('native compaction requests retain their original bytes without image rewri
 test('upstream URLs cannot contain credentials, queries or unsupported schemes', async () => {
   for (const upstreamBaseUrl of ['file:///tmp/private', 'http://user:password@localhost/v1', 'http://localhost/v1?token=synthetic', 'not a URL']) {
     await assert.rejects(createToolImageCompatibilityRelay({ provider: 'litellm', upstreamBaseUrl }), /^Error: Invalid tool image compatibility upstream$/);
+  }
+});
+
+test('stripStaleConnectionItems removes stale item IDs and reasoning encrypted_content while preserving call pairing and summaries', () => {
+  const body = {
+    model: 'gpt-6.1-sol',
+    stream: true,
+    input: [
+      { type: 'message', id: 'msg-1', role: 'user', content: [{ type: 'input_text', text: 'Prompt' }] },
+      { type: 'reasoning', id: 'rs-1', summary: [{ type: 'summary_text', text: 'Plan' }], encrypted_content: 'enc-1' },
+      { type: 'function_call', id: 'fc-1', call_id: 'call-1', name: 'exec_command', arguments: '{"cmd":"pwd"}' },
+      { type: 'function_call_output', id: 'fco-1', call_id: 'call-1', output: 'ok' },
+    ],
+  };
+  const snapshot = JSON.stringify(body);
+  const stripped = stripStaleConnectionItems(body) as any;
+  assert.equal(JSON.stringify(body), snapshot);
+  assert.notEqual(stripped, body);
+  assert.deepEqual(stripped.input, [
+    { type: 'message', role: 'user', content: [{ type: 'input_text', text: 'Prompt' }] },
+    { type: 'reasoning', summary: [{ type: 'summary_text', text: 'Plan' }] },
+    { type: 'function_call', call_id: 'call-1', name: 'exec_command', arguments: '{"cmd":"pwd"}' },
+    { type: 'function_call_output', call_id: 'call-1', output: 'ok' },
+  ]);
+  assert.equal(stripStaleConnectionItems(stripped), stripped);
+});
+
+test('stale connection item 400 is retried once with stripped items when enabled, while unrelated 400 passes through', async () => {
+  const seen: any[] = [];
+  const stream = 'event: response.completed\ndata: {"type":"response.completed"}\n\n';
+  const upstream = createServer(async (incoming, outgoing) => {
+    let raw = ''; for await (const chunk of incoming) raw += chunk;
+    const parsed = JSON.parse(raw);
+    seen.push(parsed);
+    if (seen.length === 1) {
+      outgoing.writeHead(400, { 'content-type': 'application/json' }).end(JSON.stringify({
+        error: { message: 'litellm.BadRequestError: Github_copilotException - {"error":{"message":"input item does not belong to this connection","code":""}}' },
+      }));
+      return;
+    }
+    if (parsed.model === 'unrelated-400') {
+      outgoing.writeHead(400, { 'content-type': 'application/json' }).end('{"error":{"message":"invalid model"}}');
+      return;
+    }
+    outgoing.writeHead(200, { 'content-type': 'text/event-stream' }).end(stream);
+  });
+  await new Promise<void>(resolve => upstream.listen(0, '127.0.0.1', resolve));
+  const address = upstream.address();
+  assert.ok(address && typeof address !== 'string');
+  const relay = await createToolImageCompatibilityRelay({
+    provider: 'litellm',
+    upstreamBaseUrl: `http://127.0.0.1:${address.port}/v1`,
+    retryStaleConnectionItems: true,
+  });
+  try {
+    const first = await fetch(`${relay.baseUrl}/responses`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', authorization: 'Bearer synthetic' },
+      body: JSON.stringify(fixture('gpt-6.1-sol')),
+    });
+    assert.equal(first.status, 200);
+    assert.equal(await first.text(), stream);
+    assert.equal(seen.length, 2);
+    assert.equal(seen[0].input[1].encrypted_content, 'synthetic-encrypted');
+    assert.equal('encrypted_content' in seen[1].input[1], false);
+    assert.equal('id' in seen[1].input[2], false);
+    assert.equal(seen[1].input[2].call_id, 'synthetic-call');
+
+    const second = await fetch(`${relay.baseUrl}/responses`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(fixture('unrelated-400')),
+    });
+    assert.equal(second.status, 400);
+    assert.equal(await second.text(), '{"error":{"message":"invalid model"}}');
+    assert.equal(seen.length, 3);
+  } finally {
+    await relay.close();
+    const closing = new Promise<void>(resolve => upstream.close(() => resolve()));
+    upstream.closeAllConnections();
+    await closing;
   }
 });
