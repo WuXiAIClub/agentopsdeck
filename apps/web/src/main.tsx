@@ -208,7 +208,7 @@ import { useLatestMessages } from './lib/use-latest-messages';
 import { LatestMessagesNotice } from './components/LatestMessagesNotice';
 import { prependHistory, refreshHistory } from './lib/message-history';
 import { compactResponseNotice } from './lib/maintenance-controls';
-import { compactProgressLabel, hasMessageSnapshotRevision, hasOptimisticActiveSend, hasQueueBlockingRun, hasQueuedMessageControls, isSessionBusy, isStreamCatchup, runSyncNotice, sessionRunOutcome, withOptimisticRunningState } from './lib/live-session';
+import { activeToolProgressSummary, compactProgressLabel, hasMessageSnapshotRevision, hasOptimisticActiveSend, hasQueueBlockingRun, hasQueuedMessageControls, isSessionBusy, isStreamCatchup, runSyncNotice, sessionRunOutcome, withOptimisticRunningState } from './lib/live-session';
 import { completedReplyId, hasInvalidCompletedReply, sessionPresentation, sessionSyncIssueLabel } from './lib/session-presentation';
 import { INVALID_ASSISTANT_OUTPUT_LABEL } from './lib/assistant-output';
 import { HistorySyncIssue } from './components/HistorySyncIssue';
@@ -1901,12 +1901,19 @@ function RunProgressNotice({ session, messages, syncError, refreshing = false, o
         : runtime?.phase === 'unknown' || runtime?.threadActivity === 'unknown' ? 'Checking run state…'
           : runtime?.phase === 'waiting' || runtime?.threadActivity === 'waiting' ? 'Waiting for approval or input'
             : runtime?.phase === 'starting' ? 'Starting…' : busy ? 'Agent is working…' : runtime?.reason));
+  const activeTool = useMemo(
+    () => (label === 'Agent is working…' && !streamRecovering && !syncError ? activeToolProgressSummary(session, messages) : undefined),
+    [label, streamRecovering, syncError, session, messages],
+  );
+  const displayLabel = activeTool
+    ? `${translate(activeTool.kind === 'command' ? 'Running command' : 'Running tool', locale)}: ${activeTool.detail}`
+    : label ? translate(label, locale) : '';
   const detailLabels = !streamRecovering && !compactLabel
     ? notice.detailLabels.filter(detail => detail !== label)
     : [];
   return <div data-run-outcome={!streamRecovering ? outcome : undefined} data-output-integrity={invalidOutput ? 'invalid' : undefined} className={cn('mx-auto flex max-w-full w-fit items-center gap-2 rounded-xl border px-3 py-1.5 text-xs font-medium shadow-sm', invalidOutput || notice.incomplete || sessionPresentation(session).state === 'error' ? 'border-amber-200/80 bg-amber-50/90 text-amber-800' : outcome === 'interrupted' && !streamRecovering ? 'border-slate-200 bg-slate-50 text-slate-600' : outcome === 'completed' && !streamRecovering ? 'border-emerald-200/80 bg-emerald-50/90 text-emerald-700' : 'border-blue-200/80 bg-blue-50/90 text-blue-700')} role="status" title={runtime?.reason}>
     {outcome === 'completed' && !streamRecovering && !invalidOutput ? <Check size={13} aria-hidden="true" /> : <Sparkles size={13} className={!streamRecovering && notice.animate ? 'animate-pulse' : undefined} aria-hidden="true" />}
-    <span>{label ? translate(label, locale) : ''}{!streamRecovering && notice.elapsed ? ` · ${notice.elapsed}` : ''}</span>
+    <span>{displayLabel}{!streamRecovering && notice.elapsed ? ` · ${notice.elapsed}` : ''}</span>
     {detailLabels.map(detail => <span key={detail}>{' · '}{translate(detail, locale)}</span>)}
     {notice.backgroundLabel && !streamRecovering ? <details className="goal-pause-notice">
       <summary><Clock3 size={12} aria-hidden="true" />{translate(notice.backgroundLabel, locale)}</summary>

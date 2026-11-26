@@ -189,6 +189,7 @@ export function createAsyncCodexRuntime(options: {
     }, stopRuntime: runtime, stopAvailable: readable,
     reads: { projection: options.deck, snapshot: options.snapshot, diagnostics, allowRecentProjection: true,
       requestRecovery: (key, runId) => retain(() => runtime.requestSessionRecovery(key, runId)),
+      stopBackgroundTerminals: (key, runId) => readable() ? retain(() => runtime.stopOwnedBackgroundTerminals(key, runId)) : Promise.resolve(false),
       refresh: (key, settings) => retain(() => runtime.refreshSession(key, settings)),
       display: key => state === 'ready' ? retain(() => runtime.prepareSessionDisplay(key)) : Promise.resolve(undefined),
       historyReady: key => state === 'ready' && runtime.isSessionHistoryReady(key) },

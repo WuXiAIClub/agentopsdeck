@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import type { SessionSummary } from '@agentopsdeck/shared';
-import { canRequestSessionRecovery, createSessionRecoveryRequest } from './session-recovery.js';
+import { canRequestSessionRecovery, canStopSessionBackgroundTerminals, createSessionRecoveryRequest } from './session-recovery.js';
 
 function session(): SessionSummary {
   return { sessionKey: 'connection:session', title: 'Synthetic', status: 'failed',
@@ -76,4 +76,56 @@ test('double click shares one request and cancellation rejects late responses', 
   assert.equal(owner.current(successor), false);
   assert.ok(owner.begin());
   owner.cancel();
+});
+
+test('canStopSessionBackgroundTerminals only enables on idle connected owner Codex turns blocked on background-work', () => {
+  const blocked = (): SessionSummary => ({
+    ...session(),
+    status: 'idle',
+    runtime: {
+      turnId: 'turn',
+      phase: 'completed',
+      threadActivity: 'idle',
+      connection: 'connected',
+      sync: 'current',
+      lastEventAt: 1,
+      executionProtection: { state: 'blocked', nativeTurnId: 'turn', reason: 'background-work' },
+    },
+  });
+  for (const phase of ['completed', 'failed', 'interrupted'] as const) {
+    assert.equal(canStopSessionBackgroundTerminals({ ...blocked(), runtime: { ...blocked().runtime!, phase } }), true);
+  }
+  assert.equal(canStopSessionBackgroundTerminals({
+    ...blocked(),
+    sessionKey: JSON.stringify(['shared-session-v1', 'owner', 'session']),
+  }), false);
+  assert.equal(canStopSessionBackgroundTerminals({
+    ...blocked(),
+    sessionRef: { ...blocked().sessionRef!, runtimeId: 'openclaw' },
+  }), false);
+  assert.equal(canStopSessionBackgroundTerminals({
+    ...blocked(),
+    runtime: { ...blocked().runtime!, connection: 'disconnected' },
+  }), false);
+  assert.equal(canStopSessionBackgroundTerminals({
+    ...blocked(),
+    runtime: { ...blocked().runtime!, threadActivity: 'running' },
+  }), false);
+  assert.equal(canStopSessionBackgroundTerminals({
+    ...blocked(),
+    status: 'running',
+    hasActiveRun: true,
+    runtime: { ...blocked().runtime!, phase: 'running', threadActivity: 'running' },
+  }), false);
+  assert.equal(canStopSessionBackgroundTerminals({
+    ...blocked(),
+    runtime: { ...blocked().runtime!, operation: 'compact' },
+  }), false);
+  assert.equal(canStopSessionBackgroundTerminals({
+    ...blocked(),
+    runtime: {
+      ...blocked().runtime!,
+      executionProtection: { state: 'blocked', nativeTurnId: 'turn', reason: 'cleanup-unconfirmed' },
+    },
+  }), false);
 });

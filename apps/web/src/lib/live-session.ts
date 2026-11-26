@@ -1,4 +1,5 @@
 import type { ChatMessage, DeckEvent, SessionSummary } from '@agentopsdeck/shared';
+import { parseToolDetail } from './tool-detail-format.js';
 
 // A remembered request/cache revision is not proof that these displayed items
 // contain that snapshot (navigation, eviction and storage failure can drop it).
@@ -189,6 +190,76 @@ export function runSyncNotice(session: SessionSummary, now: number, latestMessag
     detailLabels: [...new Set([backgroundWorkLabel, backgroundPending ? historyErrorLabel : notice.errorLabel,
       notice.syncLabel, notice.connectionLabel, notice.threadLabel,
       latestMessagesUnavailable ? 'Latest messages unavailable' : undefined].filter((label): label is NonNullable<typeof label> => !!label))] } as const;
+}
+
+const IGNORED_LIVE_TOOL_NAMES = new Set(['subagent/activity', 'wait_agent', 'multi_agent_v1__wait_agent']);
+
+function compactSingleLine(value: string, maxChars = 48): string {
+  const normalized = value.replace(/\s+/g, ' ').trim();
+  if (!normalized) return '';
+  return normalized.length <= maxChars ? normalized : `${normalized.slice(0, maxChars - 1).trimEnd()}…`;
+}
+
+/** Presentation-only live tool summary for the active turn so multi-minute
+ * commands/tools never appear silently hung behind generic "Agent is working…". */
+export function activeToolProgressSummary(
+  session: SessionSummary,
+  messages: readonly ChatMessage[],
+): { kind: 'command' | 'tool'; detail: string } | undefined {
+  const runtime = session.runtime;
+  if (!runtime || runtime.phase !== 'running' || runtime.connection !== 'connected'
+    || runtime.sync === 'error' || runtime.threadActivity === 'unknown' || runtime.operation === 'compact') {
+    return undefined;
+  }
+  let startIndex = 0;
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const item = messages[i]!;
+    if (item.sessionKey === session.sessionKey && item.role === 'user' && item.status !== 'queued') {
+      startIndex = i + 1;
+      break;
+    }
+  }
+  const finished = new Set<string>();
+  const candidates: ChatMessage[] = [];
+  for (let i = startIndex; i < messages.length; i++) {
+    const msg = messages[i]!;
+    if (msg.sessionKey !== session.sessionKey || msg.role !== 'tool' || msg.parentToolUseId) continue;
+    if (runtime.turnId && msg.turnId && msg.turnId !== runtime.turnId) continue;
+    if (msg.toolPhase === 'result' && msg.toolCallId) {
+      finished.add(msg.toolCallId);
+      continue;
+    }
+    if (msg.toolPhase === 'call' || msg.status === 'sending') {
+      candidates.push(msg);
+    }
+  }
+  for (let i = candidates.length - 1; i >= 0; i--) {
+    const msg = candidates[i]!;
+    if (msg.toolCallId && finished.has(msg.toolCallId)) continue;
+    if (msg.codexSubagent?.action === 'wait') continue;
+    const rawName = (msg.toolName ?? '').trim();
+    if (rawName && IGNORED_LIVE_TOOL_NAMES.has(rawName)) continue;
+    const rawPreview = msg.toolPreview ?? msg.text ?? '';
+    const parsed = parseToolDetail(rawPreview);
+    if (parsed.kind === 'structured') {
+      if (parsed.toolName && IGNORED_LIVE_TOOL_NAMES.has(parsed.toolName)) continue;
+      if (parsed.input?.kind === 'command') {
+        const detail = compactSingleLine(parsed.input.command);
+        if (detail) return { kind: 'command', detail };
+      }
+      const structuredName = compactSingleLine(rawName || parsed.toolName || '', 40);
+      if (structuredName) {
+        const kind = /^(?:commandExecution|bash|sh|shell|exec_command|terminal)$/i.test(structuredName) ? 'command' : 'tool';
+        return { kind, detail: structuredName };
+      }
+    }
+    const fallbackName = compactSingleLine(rawName || rawPreview, 40);
+    if (fallbackName && !IGNORED_LIVE_TOOL_NAMES.has(fallbackName)) {
+      const kind = /^(?:commandExecution|bash|sh|shell|exec_command|terminal)$/i.test(fallbackName) ? 'command' : 'tool';
+      return { kind, detail: fallbackName };
+    }
+  }
+  return undefined;
 }
 
 export function mergeSelectedMessages(current: ChatMessage[], incoming: ChatMessage[], selected: Set<string | undefined>) {
