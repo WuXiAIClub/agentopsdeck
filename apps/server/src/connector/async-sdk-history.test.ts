@@ -27,7 +27,7 @@ function fixture(runtime: SdkAgentId) {
   const directory = mkdtempSync(join(tmpdir(), 'agentopsdeck-history-'));
   const tokens = new ConnectorTokenStore(join(directory, 'tokens.json'), authorization.slice(7));
   const store = new ConnectorUserStore(':memory:', undefined, { runtimeOwner: true });
-  const key = `${runtime}:original`, journal = runtime === 'ghcp' ? store.copilotJournal : store.claudeJournal;
+  const key = `${runtime}:original`, journal = runtime === 'ghcp' ? store.copilotJournal : runtime === 'antigravity' ? store.antigravityJournal : store.claudeJournal;
   journal.create({ key, nativeSessionId: 'original-native', title: 'Original', createdAt: 1 });
   const ref = { key, id: 'execution', epoch: 'epoch' }, scope = { runtime, key, authorization };
   store.turns.enqueue(runtime, { id: 'input', sessionKey: key, createdAt: 2, payload: { text: 'Input', images: [], actorId: 'owner' } });
@@ -35,6 +35,9 @@ function fixture(runtime: SdkAgentId) {
   const append = (id: string, text: string) => runtime === 'ghcp'
     ? store.copilotTranscript.append(ref, projectCopilotMessage({ id: `event-${id}`, type: 'assistant.message',
       timestamp: new Date(5000).toISOString(), data: { messageId: id, content: text } })!)
+    : runtime === 'antigravity'
+      ? store.antigravityTranscript.append(ref, projectCopilotMessage({ id: `event-${id}`, type: 'assistant.message',
+        timestamp: new Date(5000).toISOString(), data: { messageId: id, content: text } })!)
     : store.claudeTranscript.append(ref, projectClaudeMessage({ type: 'assistant', uuid: id, session_id: 'original-native',
       parent_tool_use_id: null, message: { role: 'assistant', content: text } }, 'original-native'));
   const command = createConnectorOwnerCommands(store, tokens);
@@ -48,7 +51,7 @@ function fixture(runtime: SdkAgentId) {
     async close() { await history.close(); store.close(); rmSync(directory, { recursive: true, force: true }); } };
 }
 
-for (const runtime of ['claude-code', 'ghcp'] as const) {
+for (const runtime of ['claude-code', 'ghcp', 'antigravity'] as const) {
   test(`${runtime}: history preserves bounded durable/queued page, details, anchors, ETag and delta after fresh authority`, { timeout: 20_000 }, async () => {
     const f = fixture(runtime);
     try {
@@ -91,7 +94,8 @@ for (const runtime of ['claude-code', 'ghcp'] as const) {
       const admitted = commands.send(f.key, '', { actorId: 'owner', accept: () => () => {} }, attachments);
       if (runtime === 'claude-code') f.store.claudeTranscript.updateStream(f.ref, { messageId: 'live', parentToolUseId: null,
         blocks: [{ blockIndex: 0, text: 'Partial native answer', truncated: false }] });
-      else f.store.copilotTranscript.updateStream(f.ref, { messageId: 'live', text: 'Partial native answer', truncated: false });
+      else if (runtime === 'ghcp') f.store.copilotTranscript.updateStream(f.ref, { messageId: 'live', text: 'Partial native answer', truncated: false });
+      else f.store.antigravityTranscript.updateStream(f.ref, { messageId: 'live', text: 'Partial native answer', truncated: false });
       const response = await f.request(); assert.equal(response.status, 200); const page = await response.json();
       assert.ok(page.messages.some((row: { text: string }) => row.text === 'Partial native answer'));
       const input = page.messages.find((row: { id: string }) => row.id === admitted.idempotencyKey);
@@ -179,11 +183,11 @@ for (const reason of ['timeout', 'abort', 'close'] as const)
 test('SDK history uses the real sole worker and persists native detail across close/reopen', { timeout: 20_000 }, async () => {
   const directory = mkdtempSync(join(tmpdir(), 'agentopsdeck-history-worker-'));
   const config = { file: join(directory, 'connector.sqlite'), tokenFile: join(directory, 'tokens.json'), bootstrapToken: authorization.slice(7),
-    sdkModels: { 'claude-code': { model: 'default' }, ghcp: { model: 'default' } } };
+    sdkModels: { 'claude-code': { model: 'default' }, ghcp: { model: 'default' }, antigravity: { model: 'default' } } };
   let owner = new AsyncConnectorOwner(config, silence);
   try {
     await owner.open();
-    for (const runtime of ['claude-code', 'ghcp'] as const) {
+    for (const runtime of ['claude-code', 'ghcp', 'antigravity'] as const) {
       const created = await owner.command('sdkSessionCreate', { runtime, authorization, commandKey: `create-${runtime}`, payloadJson: '{}' });
       assert.ok('key' in created && created.key);
       const key = created.key, scope = { runtime, key, authorization };

@@ -69,6 +69,9 @@ try {
     const climb = async () => {
       await pane.evaluate(el => { el.dispatchEvent(new WheelEvent('wheel', { deltaY: -500 })); el.scrollTop = 40; });
     };
+    const wheelAtTop = async () => {
+      await pane.evaluate(el => { el.scrollTop = 0; el.dispatchEvent(new WheelEvent('wheel', { deltaY: -500 })); });
+    };
     if (withTools) {
       failNext = true;
       await climb();
@@ -77,11 +80,12 @@ try {
       const readsAfterFailure = reads.length;
       await page.waitForTimeout(600);
       assert.equal(reads.length, readsAfterFailure, 'no failed-page retry loop');
-      await pane.evaluate(el => { el.scrollTop = 180; });
-      await page.waitForTimeout(50);
+      await wheelAtTop();
+      await page.waitForFunction(() => [...document.querySelectorAll('.message-selection-surface')].some(el => el.clientHeight && el.querySelectorAll('[data-message-search-id^="chat-"]').length > 200));
+    } else {
+      await climb();
+      await page.waitForFunction(() => [...document.querySelectorAll('.message-selection-surface')].some(el => el.clientHeight && el.querySelectorAll('[data-message-search-id^="chat-"]').length > 200));
     }
-    await climb();
-    await page.waitForFunction(() => [...document.querySelectorAll('.message-selection-surface')].some(el => el.clientHeight && el.querySelectorAll('[data-message-search-id^="chat-"]').length > 200));
     assert.ok(await pane.evaluate(el => el.scrollTop > 100), 'prepend preserves reading position rather than remaining at top');
     const countBefore = await chats.count();
     const oldestBefore = await chats.first().getAttribute('data-message-search-id');

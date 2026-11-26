@@ -81,6 +81,13 @@ structured `/usage` JSON). Responses are not cached by browsers.
   owner-authorized in-process recovery (`POST .../recovery`), which verifies
   cleanup and native binding before releasing the session; cancellation during
   setup or persistence does not manufacture provider stop proof or trigger replay.
+- Preserve the Connector's canonical history page order (`sequence`-ordered
+  durable transcript rows followed by active stream and queued rows) across Hub
+  message proxy, workspace sync, and shared read routes so `before` pagination
+  anchors remain valid during long tool-heavy turns and while messages are
+  queued. On the Web UI, upward scroll gestures at `scrollTop === 0` (including
+  panes whose collapsed tool timelines fit inside the viewport) trigger older
+  history loading directly and pause bottom-following to keep reading position.
 
 `assertOwnership` and `persistIntent` are integration boundaries, not an
 implemented journal or permission system. ACP cancellation results and

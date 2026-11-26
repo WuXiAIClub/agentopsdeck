@@ -215,3 +215,27 @@ test('login revocation during streamed read is checked again before delivery', a
   const frame = JSON.parse((await response.text()).trim());
   assert.equal(frame.status, 401); assert.equal(frame.body.messages, undefined);
 });
+
+test('Hub history and workspace sync preserve Connector page order when live/queued rows have earlier createdAt', async t => {
+  const f = fixture(t);
+  const remoteKey = 'antigravity:ordered-history';
+  const hubKey = encodeHubSessionId('test', remoteKey);
+  const pageMessages = [
+    { id: 'tool-101', sessionKey: remoteKey, role: 'tool' as const, text: 'read_file', createdAt: 5_000 },
+    { id: 'tool-102', sessionKey: remoteKey, role: 'tool' as const, text: '', createdAt: 5_001 },
+    { id: 'assistant-live', sessionKey: remoteKey, role: 'assistant' as const, text: 'Working…', createdAt: 1_000 },
+    { id: 'queued-user', sessionKey: remoteKey, role: 'user' as const, text: 'Follow-up', createdAt: 1_500, status: 'queued' as const },
+  ];
+  f.setRead(async () => ({ messages: pageMessages, totalCount: 104, hiddenCount: 100, updatedAt: 6_000 }));
+
+  const direct = await f.app.request(`/api/hub/v1/sessions/${encodeURIComponent(hubKey)}/messages?limit=200`);
+  assert.equal(direct.status, 200);
+  const directBody = await direct.json() as { messages: Array<{ id: string }>; hiddenCount: number };
+  assert.deepEqual(directBody.messages.map(m => m.id), ['tool-101', 'tool-102', 'assistant-live', 'queued-user']);
+  assert.equal(directBody.hiddenCount, 100);
+
+  const synced = await f.frames([{ sessionKey: hubKey, limit: 200 }]);
+  assert.equal(synced.length, 1);
+  assert.equal(synced[0]!.status, 200);
+  assert.deepEqual(((synced[0]!.body as { messages: Array<{ id: string }> }).messages).map(m => m.id), ['tool-101', 'tool-102', 'assistant-live', 'queued-user']);
+});
