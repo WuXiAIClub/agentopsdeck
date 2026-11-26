@@ -2006,6 +2006,7 @@ export default function WorkspaceOsDesktop({
           docker: t('Docker & Sandboxes'),
           subagents: t('Sub-agent Companion'),
           tokenDashboard: t('Token Telemetry'),
+          antigravityQuota: t('Antigravity account quota'),
           whiteboard: t('Whiteboard'),
           moderator: t('Moderator Hub'),
           gitTree: t('Git Graph'),
@@ -2168,6 +2169,7 @@ export default function WorkspaceOsDesktop({
       case 'taskboard':
         return variant === 'sprint-board' ? <ClipboardList size={size} /> : <Kanban size={size} />;
       case 'statuscard':
+      case 'antigravity-quota':
         return <Gauge size={size} />;
       case 'terminal':
         return <Terminal size={size} />;

@@ -15,7 +15,16 @@ export function parseSdkModelChoices(model: string, value: string | undefined): 
   return sdkModelChoices(model, value?.trim() ? value.split(',').map(item => item.trim()) : []);
 }
 
-export function sdkModelAllowed(config: { model?: string; modelChoices?: readonly string[] }, override?: string): boolean {
+export type SdkModelPolicy = {
+  model?: string | undefined;
+  modelChoices?: readonly string[] | undefined;
+  dynamicModels?: boolean | undefined;
+};
+
+export function sdkModelAllowed(config: SdkModelPolicy, override?: string): boolean {
   if (!config.model) return override === undefined;
+  if (config.dynamicModels) {
+    return override === undefined ? validSdkModel(config.model) : validSdkModel(override);
+  }
   return sdkModelChoices(config.model, config.modelChoices).includes(override ?? config.model);
 }

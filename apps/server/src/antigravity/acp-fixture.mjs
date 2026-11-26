@@ -4,6 +4,20 @@ import { appendFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { createInterface } from 'node:readline';
 
+if (process.argv[2] === 'models') {
+  if (process.env.HOME && basename(process.env.HOME) === 'models-error') {
+    process.stderr.write('synthetic models error\n');
+    process.exit(1);
+  }
+  process.stdout.write([
+    'gemini-4-neon-high\tGemini 4 Neon (High)',
+    'gemini-4-neon-xhigh\tGemini 4 Neon (XHigh)',
+    'claude-opus-5-5-high\tClaude Opus 5.5 (High)',
+    'claude-sonnet-5-5-high\tClaude Sonnet 5.5 (High)',
+  ].join('\n') + '\n');
+  process.exit(0);
+}
+
 const mode = basename(process.cwd());
 const sessionId = 'synthetic-native-session';
 const inputs = createInterface({ input: process.stdin });

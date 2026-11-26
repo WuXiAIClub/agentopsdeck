@@ -3,6 +3,7 @@ import type { ApplicationCompactParticipants } from '../application-compact-ingr
 import { createAsyncClaudeConnectorRuntime, type AsyncClaudeOwnedOptions, type AsyncClaudeOwnedPorts } from '../claude/async-owned-runtime.js';
 import { createAsyncCopilotConnectorRuntime, type AsyncCopilotOwnedOptions, type AsyncCopilotOwnedPorts } from '../copilot/async-owned-runtime.js';
 import { createAsyncAntigravityConnectorRuntime, type AsyncAntigravityOwnedOptions, type AsyncAntigravityOwnedPorts } from '../antigravity/sdk-runtime.js';
+import { createAntigravityModelsReader } from '../antigravity/models.js';
 import type { DeckStore } from '../projection/deck-store.js';
 import type { ConnectorAgentLifecycle } from './agent-runtimes.js';
 import type { AsyncConnectorOwner } from './async-connector-owner.js';
@@ -122,7 +123,10 @@ export class AsyncSdkApplication {
     this.history = new AsyncSdkHistory(owner, { timeoutMs, diagnostics: this.diagnostics });
     this.usage = new AsyncSdkUsage(owner, { timeoutMs, diagnostics: this.diagnostics });
     this.files = new AsyncSdkFiles(owner, { timeoutMs, diagnostics: this.diagnostics });
-    this.metadata = new AsyncSdkMetadata(owner, { timeoutMs, diagnostics: this.diagnostics });
+    const discoverModels = options.antigravity && !options.antigravity.modelChoices
+      ? { antigravity: createAntigravityModelsReader(structuredClone(options.antigravity)) }
+      : undefined;
+    this.metadata = new AsyncSdkMetadata(owner, { timeoutMs, diagnostics: this.diagnostics, ...(discoverModels ? { discoverModels } : {}) });
     const notify = (id: SdkAgentId, key: string, wake: boolean) => {
       if (this.closed || !runtime(id)) return;
       return this.observe(Promise.resolve().then(() => {

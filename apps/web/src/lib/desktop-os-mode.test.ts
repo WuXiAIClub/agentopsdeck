@@ -65,8 +65,8 @@ test('buildDesktopIcons combines system desktop apps and live sessions with sear
     notebooks: [{ id: 'nb-1', title: 'Sprint Notes' }],
     completedSessionKeys: new Set(['s2']),
   });
-  // 15 system apps (including app:subagents; no action:new-notebook or action:new-taskboard desktop icons) + 2 sessions = 17 icons
-  assert.equal(icons.length, 17);
+  // 16 system apps (no action:new-notebook or action:new-taskboard desktop icons) + 2 sessions = 18 icons
+  assert.equal(icons.length, 18);
   assert.ok(icons.some((i) => i.id === 'app:wechat-messenger' && i.kind === 'wechat-messenger'));
   assert.ok(icons.some((i) => i.id === 'app:docker' && i.kind === 'docker'));
   assert.ok(icons.some((i) => i.id === 'app:subagents' && i.kind === 'subagents'));
@@ -89,6 +89,13 @@ test('buildDesktopIcons combines system desktop apps and live sessions with sear
   });
   assert.equal(filtered.length, 1);
   assert.equal(filtered[0]?.id, 'session:s1');
+});
+
+test('Antigravity quota has a localized standalone tools shortcut without any task boards', () => {
+  const icons = buildDesktopIcons({ sessions: [], notebooks: [], taskboards: [], labels: { antigravityQuota: 'Antigravity 账号额度' } });
+  assert.deepEqual(icons.find(icon => icon.id === 'app:antigravity-quota'), {
+    id: 'app:antigravity-quota', kind: 'antigravity-quota', title: 'Antigravity 账号额度', fenceId: 'tools-files',
+  });
 });
 
 test('buildDesktopIcons renders N notebook icons + 1 new-notebook icon and M taskboard icons + 1 new-taskboard icon', () => {

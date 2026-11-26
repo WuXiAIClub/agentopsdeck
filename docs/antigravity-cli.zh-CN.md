@@ -12,17 +12,18 @@ Connector 运行时接线与 Web UI 入口已在 `apps/server/src/antigravity/`�
 `AOD_ANTIGRAVITY_COMMAND`、`AOD_ANTIGRAVITY_HOME` 与 `AOD_ANTIGRAVITY_WORKSPACE`
 即可在 Connector 与界面中启用 owner-only 的 `antigravity` 运行时。
 已支持图片/文本附件（`attachments`）、有界工具输出详情、上下文与 token 用量统计
-（`usage_update` / `session/prompt` `usage`）、模型目录与按会话切模型
-（`AOD_ANTIGRAVITY_MODEL` / `AOD_ANTIGRAVITY_MODEL_CHOICES` + `session/set_model`）
+（`usage_update` / `session/prompt` `usage`）、通过 `agy models` 动态发现模型目录与按会话切模型
+（支持可选的 `AOD_ANTIGRAVITY_MODEL` 默认模型与 `AOD_ANTIGRAVITY_MODEL_CHOICES` 白名单覆盖 + `session/set_model`）
 以及看板上下文透传。尚未支持的能力（`compact`、`interactions`）保持禁用并明确返回 `409`。
 不分发原生可执行程序。
 
 ## 账号额度卡片
 
-在运行 CLI 的 AOD 实例中，打开工作区的 **任务状态卡 → Antigravity 账号额度**。
-卡片在配置好的 AOD Antigravity 独立目录中执行 `agy --output-format json -p '/usage'`，
+在运行 CLI 的 AOD 实例中，打开工作区的 **布局预设 → Antigravity 账号额度**，
+或在桌面工具中打开 **Antigravity 账号额度**。无需创建任务板。
+独立卡片在配置好的 AOD Antigravity 目录中执行 `agy --output-format json -p '/usage'`，
 展示各模型组和额度周期的剩余百分比及 CLI 上报的重置时间。这里显示的是账号额度，
-不是单会话 token 用量或账单。展开卡片即可查询，也可点击 **刷新**；服务端最多复用
+不是单会话 token 用量或账单。打开卡片即可查询，也可点击 **刷新**；服务端最多复用
 30 秒内的成功快照。
 
 本机管理员接口 `GET /api/antigravity/usage` 不接受 Connector 传输授权，也不能指定远程

@@ -65,6 +65,12 @@ for (const [kind, content] of Object.entries(configurationContents)) test(`${kin
   assert.deepEqual(parseFileCardPending(JSON.stringify(pending), kind as keyof typeof configurationContents), pending);
 });
 
+test('Antigravity quota has no file card storage identity', async () => {
+  const pane: Pane = { id: 'quota', kind: 'antigravity-quota', resourceId: 'account' };
+  assert.deepEqual(syncFileCardPaneResource(pane), { resolved: true, resource: undefined });
+  assert.equal(await fileCardPaneResource(pane), undefined);
+});
+
 test('syncFileCardPaneResource and card caches avoid layout-switch blanking while isolating scopes', async () => {
   clearCachedFileCardConfigurations();
   clearCachedSharedSnapshots();

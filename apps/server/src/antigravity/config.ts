@@ -71,9 +71,11 @@ export function antigravityConfig(env: NodeJS.ProcessEnv, platform: NodeJS.Platf
   }
   const model = rawModel || undefined;
   const rawModelChoices = env[`${prefix}MODEL_CHOICES`]?.trim();
-  const modelChoices = model
-    ? parseSdkModelChoices(model, rawModelChoices)
-    : rawModelChoices ? parseSdkModelChoices('default', rawModelChoices).filter(item => item !== 'default') : undefined;
+  const modelChoices = rawModelChoices
+    ? (model
+      ? parseSdkModelChoices(model, rawModelChoices)
+      : parseSdkModelChoices('default', rawModelChoices).filter(item => item !== 'default'))
+    : undefined;
   return {
     command,
     homeDirectory,

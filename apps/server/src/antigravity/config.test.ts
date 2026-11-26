@@ -40,6 +40,12 @@ test('Antigravity validates startup bounds without printing supplied values', ()
   assert.equal(antigravityConfig({ ...valid(), AOD_ANTIGRAVITY_PERMISSION_MODE: 'deny' })?.permissionMode, 'deny');
   assert.throws(() => antigravityConfig({ ...valid(), AOD_ANTIGRAVITY_PERMISSION_MODE: 'invalid' }),
     /AOD_ANTIGRAVITY_PERMISSION_MODE must be allow or deny/);
+  const withDefaultOnly = antigravityConfig({
+    ...valid(),
+    AOD_ANTIGRAVITY_MODEL: 'gemini-4-neon-high',
+  });
+  assert.equal(withDefaultOnly?.model, 'gemini-4-neon-high');
+  assert.equal(withDefaultOnly?.modelChoices, undefined);
   const withModels = antigravityConfig({
     ...valid(),
     AOD_ANTIGRAVITY_MODEL: 'gemini-4-neon-high',

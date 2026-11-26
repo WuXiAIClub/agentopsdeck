@@ -3,7 +3,7 @@ import { lazy, memo, Suspense, useCallback, useEffect, useLayoutEffect, useMemo,
 import { createPortal } from 'react-dom';
 import { flushSync } from 'react-dom';
 import type { BoardSummary, SessionSummary } from '@agentopsdeck/shared';
-import { Bot, Link2, Lock, LockOpen, Columns2, Rows2, Grid2X2, PanelsTopLeft, PictureInPicture2, PanelBottom, GripHorizontal, ChevronDown, ChevronUp, X, StickyNote, Maximize2, Minimize2, Monitor, Sun, Moon } from 'lucide-react';
+import { ArrowUpRight, Bot, Link2, Lock, LockOpen, Columns2, Rows2, Grid2X2, PanelsTopLeft, PictureInPicture2, PanelBottom, GripHorizontal, ChevronDown, ChevronUp, X, StickyNote, Maximize2, Minimize2, Monitor, Sun, Moon } from 'lucide-react';
 import { PaneToolbarScope } from './PaneToolbar';
 import { RunningPaneBorder } from './RunningPaneBorder';
 import WorkspaceFileCardScope from './WorkspaceFileCardScope';
@@ -53,6 +53,7 @@ import type { NotebookTransferOutcome } from '../lib/session-notebook';
 const WorkspaceRemoteHost = lazy(() => import('./WorkspaceRemoteHost'));
 const WorkspaceTaskboard = lazy(() => import('./WorkspaceTaskboard'));
 const WorkspaceStatusCard = lazy(() => import('./WorkspaceStatusCard'));
+const AntigravityUsagePanel = lazy(() => import('./AntigravityUsagePanel'));
 const WorkspaceDrawing = lazy(() => import('./WorkspaceDrawing'));
 const WorkspaceNativeDrawio = lazy(() => import('./WorkspaceNativeDrawio'));
 const WorkspaceWebsite = lazy(() => import('./WorkspaceWebsite'));
@@ -378,13 +379,14 @@ function SessionWorkspace({ selected, selectedKey, sessions, dismissed, sourceSt
     if (next === current && !current.panes.some(pane => pane.kind === kind && pane.resourceId === resourceId)) setLayoutNotice(t('Workspace resource limit reached. Close a panel before opening another.'));
     else setLayout(next);
   };
-  const visible = current.panes.flatMap<{ id: string; sessionKey: string; files?: 'file-browser' | 'file-editor' | 'image-viewer'; session?: SessionSummary; browser?: boolean; report?: { resourceId: string }; media?: boolean; moderator?: boolean; docker?: boolean; subagents?: boolean; research?: boolean; terminal?: boolean; metricCard?: { resourceId: string }; website?: { resourceId: string }; notebook?: NotebookPane; drawing?: { resourceId: string }; nativeDrawio?: { resourceId: string }; board?: { kind: 'taskboard' | 'statuscard'; resourceId: string }; title: string }>(pane => {
+  const visible = current.panes.flatMap<{ id: string; sessionKey: string; files?: 'file-browser' | 'file-editor' | 'image-viewer'; session?: SessionSummary; browser?: boolean; report?: { resourceId: string }; media?: boolean; moderator?: boolean; docker?: boolean; subagents?: boolean; research?: boolean; terminal?: boolean; antigravityQuota?: boolean; metricCard?: { resourceId: string }; website?: { resourceId: string }; notebook?: NotebookPane; drawing?: { resourceId: string }; nativeDrawio?: { resourceId: string }; board?: { kind: 'taskboard' | 'statuscard'; resourceId: string }; title: string }>(pane => {
     if (pane.kind === 'file-browser' || pane.kind === 'file-editor' || pane.kind === 'image-viewer') return [{ id: pane.id, sessionKey: paneKey(pane), files: pane.kind, title: t(fileCardLabel(pane.kind)) }];
     if (pane.kind === 'report') return [{ id: pane.id, sessionKey: paneKey(pane), report: pane, title: t('Report') }];
     if (pane.kind === 'git-tree') return [{ id: pane.id, sessionKey: paneKey(pane), title: t('Repository tree') }];
     if (pane.kind === 'issue-source') return [{ id: pane.id, sessionKey: paneKey(pane), title: t('Issue sources') }];
     if (pane.kind === 'browser') return [{ id: pane.id, sessionKey: paneKey(pane), browser: true, title: t('Browser card') }];
     if (pane.kind === 'metric-card') return [{ id: pane.id, sessionKey: paneKey(pane), metricCard: pane, title: t('Custom status card') }];
+    if (pane.kind === 'antigravity-quota') return [{ id: pane.id, sessionKey: paneKey(pane), antigravityQuota: true, title: t('Antigravity account quota') }];
     if (pane.kind === 'terminal') return [{ id: pane.id, sessionKey: paneKey(pane), terminal: true, title: t('Connector terminal') }];
     if (pane.kind === 'research') return [{ id: pane.id, sessionKey: paneKey(pane), research: true, title: t('Search and sources · Preview') }];
     if (pane.kind === 'website') return [{ id: pane.id, sessionKey: paneKey(pane), website: pane, title: t('Connector website · Preview') }];
@@ -1030,6 +1032,7 @@ function SessionWorkspace({ selected, selectedKey, sessions, dismissed, sourceSt
         : pane.moderator ? "moderator"
         : pane.docker ? "docker"
         : pane.subagents ? "subagents"
+        : pane.antigravityQuota ? "antigravity-quota"
         : pane.files ? "file-browser"
         : rawDef && !isSessionPane(rawDef) && rawDef.kind === "git-tree" ? "git-tree"
         : rawDef && !isSessionPane(rawDef) && rawDef.kind === "browser" ? "browser"
@@ -1051,7 +1054,24 @@ function SessionWorkspace({ selected, selectedKey, sessions, dismissed, sourceSt
     });
   }, [uiMode, visible, rawPaneById, completed]);
 
+  const openAntigravityQuota = useCallback(() => {
+    if (!scope) return;
+    const pane = { id: `pane:${crypto.randomUUID()}`, kind: 'antigravity-quota', resourceId: 'account' } as const;
+    setLayout(value => openResourcePane(value, pane, size.width, size.height));
+    setCollapsedKeys(previous => {
+      const key = paneKey(pane);
+      if (!previous.has(key)) return previous;
+      const next = new Set(previous);
+      next.delete(key);
+      return next;
+    });
+  }, [scope, size.width, size.height]);
+
   const handleOpenDesktopIcon = useCallback((item: DesktopIconItem) => {
+    if (item.kind === "antigravity-quota") {
+      openAntigravityQuota();
+      return;
+    }
     if (item.kind === "session" && item.session) {
       const sessKey = item.session.sessionKey;
       setLayout(value => {
@@ -1162,8 +1182,9 @@ function SessionWorkspace({ selected, selectedKey, sessions, dismissed, sourceSt
     if (item.kind === "browser") {
       setLayout(value => openResourcePane(value, { id: `pane:${crypto.randomUUID()}`, kind: "browser", resourceId: crypto.randomUUID() }, size.width, size.height));
     }
-  }, [selected?.sessionKey, size.width, size.height, preset, openSession, notebooks, scope, t, updateNotebookCatalog]);
+  }, [selected?.sessionKey, size.width, size.height, preset, openSession, openAntigravityQuota, notebooks, scope, t, updateNotebookCatalog]);
   const renderPaneBody = (pane: typeof visible[number], collapsed: boolean) => (
+    pane.antigravityQuota ? <Suspense fallback={<p role="status">{t('Loading…')}</p>}><AntigravityUsagePanel key={scope} scope={scope ?? ''} /></Suspense> :
     pane.session ? <WorkspaceSessionContent session={pane.session} renderPane={renderPane} /> : pane.website ? <Suspense fallback={<p role="status">{t("Loading…")}</p>}><WorkspaceWebsite key={`${scope}:${pane.website.resourceId}`} scope={scope ?? ""} resourceId={pane.website.resourceId} onOpen={openBoardResource} /></Suspense> : pane.nativeDrawio ? <Suspense fallback={<p role="status">{t("Loading…")}</p>}><WorkspaceNativeDrawio key={`${scope}:${pane.nativeDrawio.resourceId}`} scope={scope ?? ""} resourceId={pane.nativeDrawio.resourceId} onOpen={openBoardResource} /></Suspense> : pane.drawing ? <Suspense fallback={<p role="status">{t("Loading…")}</p>}><WorkspaceDrawing key={`${scope}:${pane.drawing.resourceId}`} scope={scope ?? ""} resourceId={pane.drawing.resourceId} onOpen={openBoardResource} /></Suspense> : pane.board ? <Suspense fallback={<p role="status">{t("Loading…")}</p>}>{pane.board.kind === "taskboard"
       ? <WorkspaceTaskboard key={`${scope}:${pane.board.resourceId}`} scope={scope ?? ""} resourceId={pane.board.resourceId} onOpen={openBoardResource} />
       : <WorkspaceStatusCard key={`${scope}:${pane.board.resourceId}`} scope={scope ?? ""} resourceId={pane.board.resourceId} onOpen={openBoardResource} />}</Suspense> : pane.notebook ? (
@@ -1218,48 +1239,72 @@ function SessionWorkspace({ selected, selectedKey, sessions, dismissed, sourceSt
       <Suspense fallback={null}><SavedLayouts workspace={{ ...current, active: active?.id ?? null }} collapsedKeys={collapsedKeys} onRestore={restore} onApplyTemplate={applyWorkspaceTemplate} quickSwitchHost={quickSwitchHost} uiMode={uiMode} onSelectOsDesktop={() => toggleUiMode('os-desktop')} /></Suspense>
     </>;
   const renderResourceMenu = (menuRef?: Ref<HTMLDivElement>) => <div ref={menuRef} className="session-workspace-preset-menu">
-      {(['file-browser', 'file-editor', 'image-viewer'] as const).map(kind => <button key={kind} type="button" disabled={!scope || resourceCapacityFull} onClick={event => { setLayout(value => openResourcePane(value, { id: `pane:${crypto.randomUUID()}`, kind, resourceId: crypto.randomUUID() }, size.width, size.height)); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind={kind} />{t(fileCardLabel(kind))}</button>)}
-      {onCreateSession && <button type="button" onClick={event => { onCreateSession(); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="session" />{t('New session')}</button>}
-      <label className="workspace-add-session">{t('Add session card')}<select name="sessionworkspaceview-select-1" aria-label={t('Add session card')} value="" onChange={event => {
-        const key = event.target.value;
-        if (!key) return;
-        const next = selectWorkspaceSession(current, key, selected?.sessionKey, `pane:${crypto.randomUUID()}`, size.width, size.height);
-        if (next === current) setLayoutNotice(t('Workspace session limit reached. Close a session card before opening another.'));
-        else {
-          setLayout(next); setMaximizedId(undefined); setLayoutNotice('');
-          const session = available.get(key);
-          if (session) { setPreviousSelection(key); onSelect(session); }
-        }
-        event.currentTarget.closest('details')?.removeAttribute('open'); closeContextMenu();
-      }}><option value="">{t('Choose a session')}</option>{sessions.filter(session => !dismissed.has(session.sessionKey) && !current.panes.some(pane => isSessionPane(pane) && pane.sessionKey === session.sessionKey)).map(session => <option key={session.sessionKey} value={session.sessionKey}>{displayTitle(session)}</option>)}</select></label>
-      <button type="button" disabled={!scope || (resourceCapacityFull && !current.panes.some(pane => pane.kind === 'research'))} onClick={event => { setLayout(value => openResourcePane(value, { id: `pane:${crypto.randomUUID()}`, kind: 'research', resourceId: 'search' }, size.width, size.height)); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="research" />{t('Search and sources · Preview')}</button>
-      <button type="button" disabled={!scope || resourceCapacityFull} onClick={event => { setLayout(value => openResourcePane(value, { id: `pane:${crypto.randomUUID()}`, kind: 'git-tree', resourceId: crypto.randomUUID() }, size.width, size.height)); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="git-tree" />{t('Repository tree')}</button>
-      <button type="button" disabled={!scope || resourceCapacityFull} onClick={event => { setLayout(value => openResourcePane(value, { id: `pane:${crypto.randomUUID()}`, kind: 'issue-source', resourceId: crypto.randomUUID() }, size.width, size.height)); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="issue-source" />{t('Issue sources')}</button>
-      <button type="button" disabled={!scope || (resourceCapacityFull && !current.panes.some(pane => pane.kind === 'terminal'))} onClick={event => { setLayout(value => openResourcePane(value, { id: `pane:${crypto.randomUUID()}`, kind: 'terminal', resourceId: 'catalog' }, size.width, size.height)); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="terminal" />{t('Connector terminal')}</button>
-      <button type="button" disabled={!scope || (resourceCapacityFull && !current.panes.some(pane => pane.kind === 'docker'))} onClick={event => { setLayout(value => openResourcePane(value, { id: `pane:${crypto.randomUUID()}`, kind: 'docker', resourceId: 'manager' }, size.width, size.height)); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="docker" />{t('Docker & Sandboxes')}</button>
-      <button type="button" disabled={!scope || (resourceCapacityFull && !current.panes.some(pane => pane.kind === 'subagents'))} onClick={event => { subagentManualHoldRef.current = true; setLayout(value => dockSubagentCompanionPane(value, selected?.sessionKey ?? '', `pane:${crypto.randomUUID()}`, size.width, size.height)); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="subagents" />{t('Sub-agent Companion')}</button>
-      <button type="button" disabled={!scope || resourceCapacityFull} onClick={event => { setLayout(value => openResourcePane(value, { id: `pane:${crypto.randomUUID()}`, kind: 'browser', resourceId: crypto.randomUUID() }, size.width, size.height)); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="browser" />{t('Browser card')}</button>
-      <button type="button" disabled={!scope || resourceCapacityFull} onClick={event => { openBoardResource('metric-card', 'catalog'); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="metric-card" />{t('Custom status cards')}</button>
-      <button type="button" disabled={!scope || resourceCapacityFull} onClick={event => { openBoardResource('report', crypto.randomUUID()); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="report" />{t('Report')}</button>
-      <button type="button" disabled={!scope || (resourceCapacityFull && !current.panes.some(pane => pane.kind === 'website' && pane.resourceId === 'catalog'))} onClick={event => { openBoardResource('website', 'catalog'); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="website" />{t('Connector website · Preview')}</button>
-      <button type="button" disabled={!scope || (resourceCapacityFull && !current.panes.some(pane => pane.kind === 'taskboard'))} onClick={event => { setLayout(value => openResourcePane(value, { id: `pane:${crypto.randomUUID()}`, kind: 'taskboard', resourceId: 'default' }, size.width, size.height)); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="taskboard" />{t('Task board · Preview')}</button>
-      <button type="button" disabled={!scope || (resourceCapacityFull && !current.panes.some(pane => pane.kind === 'drawing'))} onClick={event => { openBoardResource('drawing', 'default'); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="drawing" />{t('Whiteboard · Preview')}</button>
-      <button type="button" disabled={!scope || (resourceCapacityFull && !current.panes.some(pane => pane.kind === 'native-drawio'))} onClick={event => { openBoardResource('native-drawio', 'default'); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="native-drawio" />{t('Native draw.io · Preview')}</button>
-      <button type="button" disabled={!scope || (resourceCapacityFull && !current.panes.some(pane => pane.kind === 'moderator'))} onClick={event => { setLayout(value => openResourcePane(value, { id: `pane:${crypto.randomUUID()}`, kind: 'moderator', resourceId: 'control' }, size.width, size.height)); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="moderator" />{t('Moderator Control Center')}</button>
-      {([['moderator-mode', 'Apply template: Moderator Mode', 'moderator'], ['collab-pair', 'Apply template: Dual Session + Notes & Taskboard', 'taskboard'], ['research-triage', 'Apply template: Research & Triage Deck', 'research']] as const).map(([tplId, tplLabel, tplKind]) => (
-        <button key={tplId} type="button" disabled={!scope} onClick={event => {
-          event.currentTarget.closest('details')?.removeAttribute('open');
-          applyWorkspaceTemplate(tplId as WorkspaceTemplateId, true);
-        }}><CardKindIcon kind={tplKind} />{t(tplLabel)}</button>
-      ))}
-      <button type="button" disabled={!scope || (resourceCapacityFull && !current.panes.some(pane => pane.kind === 'dashboard'))} onClick={event => { setLayout(value => openDashboardPane(value, `pane:${crypto.randomUUID()}`, size.width, size.height)); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="dashboard" />{t('Workspace overview · Preview')}</button>
-      <button type="button" disabled={!scope || (resourceCapacityFull && !current.panes.some(pane => pane.kind === 'media'))} onClick={event => { setLayout(value => openResourcePane(value, { id: `pane:${crypto.randomUUID()}`, kind: 'media', resourceId: 'library' }, size.width, size.height)); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="media" />{t('Media library')}</button>
-      {selected && !dismissed.has(selected.sessionKey) && <button type="button" disabled={!scope || (resourceCapacityFull && !current.panes.some(pane => pane.kind === 'notebook' && pane.target === 'session' && pane.resourceId === selected.sessionKey))} onClick={event => { setLayout(value => openResourcePane(value, { id: `pane:${crypto.randomUUID()}`, kind: 'notebook', target: 'session', resourceId: selected.sessionKey }, size.width, size.height)); event.currentTarget.closest('details')?.removeAttribute('open'); }}><StickyNote size={15} />{t('Session notebook · Preview')}</button>}
-      {notebooks.length > 0 && <div className="workspace-notebook-choices" role="group" aria-label={t('Open global notebook')}>{notebooks.map(note => <button key={note.id} type="button" disabled={!scope || (resourceCapacityFull && !current.panes.some(pane => pane.kind === 'notebook' && pane.target === 'hub' && pane.resourceId === note.id))} onClick={event => { setLayout(value => openResourcePane(value, { id: `pane:${crypto.randomUUID()}`, kind: 'notebook', target: 'hub', resourceId: note.id }, size.width, size.height)); event.currentTarget.closest('details')?.removeAttribute('open'); }}><StickyNote size={15} /><span>{t('Open notebook: {name}', { name: note.title || t('Global notebook') })}</span></button>)}</div>}
-      {current.panes.some(pane => !isSessionPane(pane)) && <button type="button" onClick={event => { setLayout(closePreviewPanes); event.currentTarget.closest('details')?.removeAttribute('open'); }} title={t('Notes and saved layouts are kept.')}><X size={15} />{t('Close Preview panels')}</button>}
-      <button type="button" onClick={event => { setLayout({ ...current, panes: current.panes.map(({ dockSize, dockFrame, ...pane }) => pane), dock: equalizeDock(current.dock) }); event.currentTarget.closest('details')?.removeAttribute('open'); }}><PanelsTopLeft size={15} />{t('Equalize panes')}</button>
-      {([['columns', 'Side by side', Columns2], ['rows', 'Top and bottom', Rows2], ['grid', 'Grid layout', Grid2X2], ['left-stack', 'Left and stacked right', PanelsTopLeft]] as const).map(([name, label, Icon]) =>
-        <button key={name} type="button" aria-label={t(label)} title={t(label)} onClick={event => { choosePreset(name); const menu = event.currentTarget.closest('details'); if (menu) { menu.open = false; menu.querySelector('summary')?.focus(); } }}><Icon size={15} />{t(label)}</button>)}
+      <div className="workspace-menu-group workspace-menu-grid" role="group" aria-label={t('Status cards')}>
+        <div className="workspace-menu-group-title" aria-hidden="true">{t('Status cards')}</div>
+        <button type="button" className="workspace-menu-feature" disabled={!scope || (resourceCapacityFull && !current.panes.some(pane => pane.kind === 'antigravity-quota'))} onClick={event => {
+          openAntigravityQuota();
+          const menu = event.currentTarget.closest('details');
+          if (menu) { menu.open = false; presetSummaryRef.current?.focus(); }
+          closeContextMenu();
+        }}><span className="workspace-glass-emblem"><CardKindIcon kind="antigravity-quota" /></span><span>{t('Antigravity account quota')}</span><ArrowUpRight className="workspace-menu-feature-arrow" size={16} aria-hidden="true" /></button>
+        <button type="button" disabled={!scope || resourceCapacityFull} onClick={event => { openBoardResource('metric-card', 'catalog'); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="metric-card" />{t('Custom status cards')}</button>
+        <button type="button" disabled={!scope || (resourceCapacityFull && !current.panes.some(pane => pane.kind === 'dashboard'))} onClick={event => { setLayout(value => openDashboardPane(value, `pane:${crypto.randomUUID()}`, size.width, size.height)); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="dashboard" />{t('Workspace overview · Preview')}</button>
+        <button type="button" disabled={!scope || resourceCapacityFull} onClick={event => { openBoardResource('report', crypto.randomUUID()); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="report" />{t('Report')}</button>
+      </div>
+      <div className="workspace-menu-group" role="group" aria-label={t('Sessions')}>
+        <div className="workspace-menu-group-title" aria-hidden="true">{t('Sessions')}</div>
+        {onCreateSession && <button type="button" onClick={event => { onCreateSession(); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="session" />{t('New session')}</button>}
+        <label className="workspace-add-session">{t('Add session card')}<select name="sessionworkspaceview-select-1" aria-label={t('Add session card')} value="" onChange={event => {
+          const key = event.target.value;
+          if (!key) return;
+          const next = selectWorkspaceSession(current, key, selected?.sessionKey, `pane:${crypto.randomUUID()}`, size.width, size.height);
+          if (next === current) setLayoutNotice(t('Workspace session limit reached. Close a session card before opening another.'));
+          else {
+            setLayout(next); setMaximizedId(undefined); setLayoutNotice('');
+            const session = available.get(key);
+            if (session) { setPreviousSelection(key); onSelect(session); }
+          }
+          event.currentTarget.closest('details')?.removeAttribute('open'); closeContextMenu();
+        }}><option value="">{t('Choose a session')}</option>{sessions.filter(session => !dismissed.has(session.sessionKey) && !current.panes.some(pane => isSessionPane(pane) && pane.sessionKey === session.sessionKey)).map(session => <option key={session.sessionKey} value={session.sessionKey}>{displayTitle(session)}</option>)}</select></label>
+        {selected && !dismissed.has(selected.sessionKey) && <button type="button" disabled={!scope || (resourceCapacityFull && !current.panes.some(pane => pane.kind === 'notebook' && pane.target === 'session' && pane.resourceId === selected.sessionKey))} onClick={event => { setLayout(value => openResourcePane(value, { id: `pane:${crypto.randomUUID()}`, kind: 'notebook', target: 'session', resourceId: selected.sessionKey }, size.width, size.height)); event.currentTarget.closest('details')?.removeAttribute('open'); }}><StickyNote size={15} />{t('Session notebook · Preview')}</button>}
+        {notebooks.length > 0 && <div className="workspace-notebook-choices" role="group" aria-label={t('Open global notebook')}>{notebooks.map(note => <button key={note.id} type="button" disabled={!scope || (resourceCapacityFull && !current.panes.some(pane => pane.kind === 'notebook' && pane.target === 'hub' && pane.resourceId === note.id))} onClick={event => { setLayout(value => openResourcePane(value, { id: `pane:${crypto.randomUUID()}`, kind: 'notebook', target: 'hub', resourceId: note.id }, size.width, size.height)); event.currentTarget.closest('details')?.removeAttribute('open'); }}><StickyNote size={15} /><span>{t('Open notebook: {name}', { name: note.title || t('Global notebook') })}</span></button>)}</div>}
+      </div>
+      <div className="workspace-menu-group workspace-menu-grid" role="group" aria-label={t('Files and tools')}>
+        <div className="workspace-menu-group-title" aria-hidden="true">{t('Files and tools')}</div>
+        {(['file-browser', 'file-editor', 'image-viewer'] as const).map(kind => <button key={kind} type="button" disabled={!scope || resourceCapacityFull} onClick={event => { setLayout(value => openResourcePane(value, { id: `pane:${crypto.randomUUID()}`, kind, resourceId: crypto.randomUUID() }, size.width, size.height)); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind={kind} />{t(fileCardLabel(kind))}</button>)}
+        <button type="button" disabled={!scope || (resourceCapacityFull && !current.panes.some(pane => pane.kind === 'research'))} onClick={event => { setLayout(value => openResourcePane(value, { id: `pane:${crypto.randomUUID()}`, kind: 'research', resourceId: 'search' }, size.width, size.height)); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="research" />{t('Search and sources · Preview')}</button>
+        <button type="button" disabled={!scope || resourceCapacityFull} onClick={event => { setLayout(value => openResourcePane(value, { id: `pane:${crypto.randomUUID()}`, kind: 'git-tree', resourceId: crypto.randomUUID() }, size.width, size.height)); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="git-tree" />{t('Repository tree')}</button>
+        <button type="button" disabled={!scope || resourceCapacityFull} onClick={event => { setLayout(value => openResourcePane(value, { id: `pane:${crypto.randomUUID()}`, kind: 'issue-source', resourceId: crypto.randomUUID() }, size.width, size.height)); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="issue-source" />{t('Issue sources')}</button>
+        <button type="button" disabled={!scope || (resourceCapacityFull && !current.panes.some(pane => pane.kind === 'terminal'))} onClick={event => { setLayout(value => openResourcePane(value, { id: `pane:${crypto.randomUUID()}`, kind: 'terminal', resourceId: 'catalog' }, size.width, size.height)); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="terminal" />{t('Connector terminal')}</button>
+        <button type="button" disabled={!scope || (resourceCapacityFull && !current.panes.some(pane => pane.kind === 'docker'))} onClick={event => { setLayout(value => openResourcePane(value, { id: `pane:${crypto.randomUUID()}`, kind: 'docker', resourceId: 'manager' }, size.width, size.height)); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="docker" />{t('Docker & Sandboxes')}</button>
+        <button type="button" disabled={!scope || (resourceCapacityFull && !current.panes.some(pane => pane.kind === 'subagents'))} onClick={event => { subagentManualHoldRef.current = true; setLayout(value => dockSubagentCompanionPane(value, selected?.sessionKey ?? '', `pane:${crypto.randomUUID()}`, size.width, size.height)); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="subagents" />{t('Sub-agent Companion')}</button>
+        <button type="button" disabled={!scope || resourceCapacityFull} onClick={event => { setLayout(value => openResourcePane(value, { id: `pane:${crypto.randomUUID()}`, kind: 'browser', resourceId: crypto.randomUUID() }, size.width, size.height)); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="browser" />{t('Browser card')}</button>
+        <button type="button" disabled={!scope || (resourceCapacityFull && !current.panes.some(pane => pane.kind === 'website' && pane.resourceId === 'catalog'))} onClick={event => { openBoardResource('website', 'catalog'); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="website" />{t('Connector website · Preview')}</button>
+        <button type="button" disabled={!scope || (resourceCapacityFull && !current.panes.some(pane => pane.kind === 'media'))} onClick={event => { setLayout(value => openResourcePane(value, { id: `pane:${crypto.randomUUID()}`, kind: 'media', resourceId: 'library' }, size.width, size.height)); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="media" />{t('Media library')}</button>
+      </div>
+      <div className="workspace-menu-group workspace-menu-grid" role="group" aria-label={t('Collaboration')}>
+        <div className="workspace-menu-group-title" aria-hidden="true">{t('Collaboration')}</div>
+        <button type="button" disabled={!scope || (resourceCapacityFull && !current.panes.some(pane => pane.kind === 'taskboard'))} onClick={event => { setLayout(value => openResourcePane(value, { id: `pane:${crypto.randomUUID()}`, kind: 'taskboard', resourceId: 'default' }, size.width, size.height)); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="taskboard" />{t('Task board · Preview')}</button>
+        <button type="button" disabled={!scope || (resourceCapacityFull && !current.panes.some(pane => pane.kind === 'drawing'))} onClick={event => { openBoardResource('drawing', 'default'); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="drawing" />{t('Whiteboard · Preview')}</button>
+        <button type="button" disabled={!scope || (resourceCapacityFull && !current.panes.some(pane => pane.kind === 'native-drawio'))} onClick={event => { openBoardResource('native-drawio', 'default'); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="native-drawio" />{t('Native draw.io · Preview')}</button>
+        <button type="button" disabled={!scope || (resourceCapacityFull && !current.panes.some(pane => pane.kind === 'moderator'))} onClick={event => { setLayout(value => openResourcePane(value, { id: `pane:${crypto.randomUUID()}`, kind: 'moderator', resourceId: 'control' }, size.width, size.height)); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="moderator" />{t('Moderator Control Center')}</button>
+      </div>
+      <div className="workspace-menu-group" role="group" aria-label={t('Layout templates')}>
+        <div className="workspace-menu-group-title" aria-hidden="true">{t('Layout templates')}</div>
+        {([['moderator-mode', 'Apply template: Moderator Mode', 'moderator'], ['collab-pair', 'Apply template: Dual Session + Notes & Taskboard', 'taskboard'], ['research-triage', 'Apply template: Research & Triage Deck', 'research']] as const).map(([tplId, tplLabel, tplKind]) => (
+          <button key={tplId} type="button" disabled={!scope} onClick={event => {
+            event.currentTarget.closest('details')?.removeAttribute('open');
+            applyWorkspaceTemplate(tplId as WorkspaceTemplateId, true);
+          }}><CardKindIcon kind={tplKind} />{t(tplLabel)}</button>
+        ))}
+      </div>
+      <div className="workspace-menu-group workspace-menu-grid" role="group" aria-label={t('Arrange workspace')}>
+        <div className="workspace-menu-group-title" aria-hidden="true">{t('Arrange workspace')}</div>
+        {current.panes.some(pane => !isSessionPane(pane)) && <button type="button" onClick={event => { setLayout(closePreviewPanes); event.currentTarget.closest('details')?.removeAttribute('open'); }} title={t('Notes and saved layouts are kept.')}><X size={15} />{t('Close Preview panels')}</button>}
+        <button type="button" onClick={event => { setLayout({ ...current, panes: current.panes.map(({ dockSize, dockFrame, ...pane }) => pane), dock: equalizeDock(current.dock) }); event.currentTarget.closest('details')?.removeAttribute('open'); }}><PanelsTopLeft size={15} />{t('Equalize panes')}</button>
+        {([['columns', 'Side by side', Columns2], ['rows', 'Top and bottom', Rows2], ['grid', 'Grid layout', Grid2X2], ['left-stack', 'Left and stacked right', PanelsTopLeft]] as const).map(([name, label, Icon]) =>
+          <button key={name} type="button" aria-label={t(label)} title={t(label)} onClick={event => { choosePreset(name); const menu = event.currentTarget.closest('details'); if (menu) { menu.open = false; menu.querySelector('summary')?.focus(); } }}><Icon size={15} />{t(label)}</button>)}
+      </div>
       </div>;
   const controls = <div className="session-workspace-controls" role="toolbar" aria-label={t('Chat layout')}>{settings}
     <button type="button" className="workspace-labeled-tool" disabled={!scope} aria-label={t('Quick question')} title={`${t('Quick question')} · Ctrl/⌘+Shift+K`} onClick={() => setQuickChatOpen(true)}><Bot size={15} /><span>{t('Ask')}</span></button>

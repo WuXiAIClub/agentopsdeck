@@ -27,7 +27,7 @@ export function applicationConnectorOwnerConfig(config: ServerConfig): Connector
         ...(config.copilot.modelChoices ? { modelChoices: config.copilot.modelChoices } : {}) } } : {}),
       ...(config.antigravity ? { antigravity: {
         model: config.antigravity.model ?? 'default',
-        ...(config.antigravity.modelChoices ? { modelChoices: config.antigravity.modelChoices } : {}),
+        ...(config.antigravity.modelChoices ? { modelChoices: config.antigravity.modelChoices } : { dynamicModels: true }),
       } } : {}),
     },
     fileToolPolicies: {

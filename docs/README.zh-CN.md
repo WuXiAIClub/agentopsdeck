@@ -14,7 +14,7 @@ AgentOpsDeck（AOD）1.0.0 是从源码运行的、自托管智能体运维工�
 | 配置独立实例 | [配置指南](configuration.zh-CN.md) |
 | 启用智能体、拆分 Hub/Connector | [集成指南](integrations.zh-CN.md) |
 | 查看尚未完成的 Antigravity CLI 连接器 | [Antigravity CLI 开发](antigravity-cli.zh-CN.md) |
-| 在工作区查看 Antigravity 账号额度 | [Antigravity 账号额度卡片](antigravity-cli.zh-CN.md#账号额度卡片) |
+| 打开独立的 Antigravity 账号额度卡片 | [Antigravity 账号额度卡片](antigravity-cli.zh-CN.md#账号额度卡片) |
 | 核对原生隔离与安装器门槛 | [原生安全](native-security.zh-CN.md) |
 | 规划远程访问、备份及升级 | [运维指南](operations.zh-CN.md) |
 | 排查安装或会话问题 | [故障排查](troubleshooting.zh-CN.md) |

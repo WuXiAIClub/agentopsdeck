@@ -9,7 +9,6 @@ import type { OpenBoardResource } from './WorkspaceBoardPicker';
 import { useWorkspaceBoardRevision } from '../lib/use-workspace-board-revision';
 const SystemMetricsPanel = lazy(() => import('./SystemMetricsPanel'));
 const UsageAggregationPanel = lazy(() => import('./UsageAggregationPanel'));
-const AntigravityUsagePanel = lazy(() => import('./AntigravityUsagePanel'));
 
 export default function WorkspaceStatusCard({ scope, resourceId, onOpen }: { scope: string; resourceId: string; onOpen: OpenBoardResource }) {
   const { t, locale } = useI18n();
@@ -17,7 +16,6 @@ export default function WorkspaceStatusCard({ scope, resourceId, onOpen }: { sco
   const [generation, setGeneration] = useState(0);
   const [metricsOpen, setMetricsOpen] = useState(false);
   const [usageOpen, setUsageOpen] = useState(false);
-  const [quotaOpen, setQuotaOpen] = useState(false);
   const { revision: remoteRevision, notice: remoteNotice } = useWorkspaceBoardRevision(scope, resourceId);
   const attemptedRemote = useRef('');
   useEffect(() => {
@@ -65,9 +63,6 @@ export default function WorkspaceStatusCard({ scope, resourceId, onOpen }: { sco
     </details>
     <details onToggle={e => setUsageOpen(e.currentTarget.open)}><summary>{t('Usage by group, tag and environment')}</summary>
       {usageOpen && <Suspense fallback={<p>{t('Loading…')}</p>}><UsageAggregationPanel key={scope} scope={scope}/></Suspense>}
-    </details>
-    <details onToggle={event => setQuotaOpen(event.currentTarget.open)}><summary>{t('Antigravity account quota')}</summary>
-      {quotaOpen && <Suspense fallback={<p>{t('Loading…')}</p>}><AntigravityUsagePanel key={scope} scope={scope} /></Suspense>}
     </details>
   </section>;
 }

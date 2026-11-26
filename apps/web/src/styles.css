@@ -10828,7 +10828,6 @@ html[data-color-mode="dark"] .action-menu-popover button:is(:hover, :focus-visib
 }
 
 html[data-color-mode="dark"] .saved-layouts-menu,
-html[data-color-mode="dark"] .session-workspace-presets > .session-workspace-preset-menu,
 html[data-color-mode="dark"] .workspace-remote-host > div,
 html[data-color-mode="dark"] .multi-screen-control-popover {
   background: rgba(15, 23, 42, 0.96);
@@ -10862,14 +10861,12 @@ html[data-color-mode="dark"] .saved-layout-templates-section {
   border-color: rgba(148, 163, 184, 0.22);
 }
 
-html[data-color-mode="dark"] .saved-layout-row button,
-html[data-color-mode="dark"] .session-workspace-presets > .session-workspace-preset-menu button {
+html[data-color-mode="dark"] .saved-layout-row button {
   color: #e2e8f0;
 }
 
 html[data-color-mode="dark"] .saved-layout-row button:hover,
-html[data-color-mode="dark"] .saved-layout-new:hover,
-html[data-color-mode="dark"] .session-workspace-presets > .session-workspace-preset-menu button:hover {
+html[data-color-mode="dark"] .saved-layout-new:hover {
   background: rgba(51, 65, 85, 0.68);
   color: #f8fafc;
 }
@@ -14523,6 +14520,15 @@ html[data-color-mode="dark"] .session-watermark-dismiss:hover:not(:disabled) {
   --aod-ctx-warn-hover-ink: #b45309;
   --aod-ctx-accent-pill-bg: linear-gradient(135deg, #2563eb, #0284c7);
   --aod-ctx-accent-pill-ink: #ffffff;
+  --aod-glass-base: #f1f5fd;
+  --aod-glass-tint: rgb(245 248 255 / .77);
+  --aod-glass-rim: rgb(255 255 255 / .85);
+  --aod-glass-layer: rgb(255 255 255 / .54);
+  --aod-glass-violet: rgb(121 118 240 / .23);
+  --aod-glass-aqua: rgb(30 183 211 / .17);
+  --aod-glass-accent: #424ab5;
+  --aod-glass-muted: #495873;
+  --aod-glass-light: radial-gradient(ellipse at 3% 0%, var(--aod-glass-violet), transparent 68%), radial-gradient(ellipse at 97% 8%, var(--aod-glass-aqua), transparent 56%);
 }
 
 html[data-color-mode="dark"] {
@@ -14545,6 +14551,14 @@ html[data-color-mode="dark"] {
   --aod-ctx-warn-hover-ink: #fcd34d;
   --aod-ctx-accent-pill-bg: linear-gradient(135deg, #0284c7, #2563eb);
   --aod-ctx-accent-pill-ink: #ffffff;
+  --aod-glass-base: #151e34;
+  --aod-glass-tint: rgb(18 26 46 / .83);
+  --aod-glass-rim: rgb(211 226 255 / .16);
+  --aod-glass-layer: rgb(157 181 241 / .09);
+  --aod-glass-violet: rgb(116 100 255 / .24);
+  --aod-glass-aqua: rgb(26 181 217 / .16);
+  --aod-glass-accent: #b8bcff;
+  --aod-glass-muted: #bbc7dd;
 }
 
 @keyframes cp-context-menu-in {
@@ -14651,6 +14665,139 @@ html[data-color-mode="dark"] {
   margin-top: 3px;
   padding-top: 4px;
   border-top: 1px solid var(--aod-ctx-divider);
+  backdrop-filter: none;
+}
+
+.session-workspace-presets > .session-workspace-preset-menu,
+.workspace-context-menu:has(> .session-workspace-preset-menu) {
+  width: min(414px, calc(100vw - 24px));
+  padding: 9px;
+  border: 1px solid var(--aod-glass-rim);
+  border-radius: 20px;
+  background: var(--aod-glass-light), var(--aod-glass-base);
+  box-shadow: var(--aod-ctx-shadow), inset 0 0 0 1px var(--aod-glass-rim);
+  color: var(--aod-ctx-ink);
+  backdrop-filter: none;
+  animation: workspace-glass-in .24s cubic-bezier(.16, 1, .3, 1) both;
+}
+
+@supports (backdrop-filter: blur(1px)) {
+  .session-workspace-presets > .session-workspace-preset-menu,
+  .workspace-context-menu:has(> .session-workspace-preset-menu) {
+    background-color: var(--aod-glass-tint);
+    backdrop-filter: blur(24px) saturate(150%);
+  }
+}
+
+@keyframes workspace-glass-in {
+  from { opacity: 0; translate: 0 -4px; }
+  to { opacity: 1; translate: 0 0; }
+}
+
+.workspace-glass-emblem {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  aspect-ratio: 1;
+  border: 1px solid var(--aod-glass-rim);
+  border-radius: 13px;
+  background: linear-gradient(145deg, var(--aod-glass-layer), var(--aod-glass-violet) 60%, var(--aod-glass-aqua));
+  box-shadow: inset 0 1px 0 var(--aod-glass-rim), 0 5px 12px rgb(22 27 69 / .14);
+  color: var(--aod-glass-accent);
+}
+
+.workspace-glass-emblem > svg { width: 19px; height: 19px; }
+
+.session-workspace-preset-menu .workspace-menu-group button.workspace-menu-feature {
+  grid-column: 1 / -1;
+  gap: 10px;
+  padding: 7px 11px 7px 7px;
+  border: 1px solid var(--aod-glass-rim);
+  border-radius: 15px;
+  background: var(--aod-glass-light), var(--aod-glass-layer);
+  box-shadow: inset 0 1px 0 var(--aod-glass-rim), 0 4px 13px rgb(22 27 69 / .1);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.workspace-menu-feature-arrow {
+  flex: none;
+  margin-inline-start: auto;
+  color: var(--aod-glass-accent);
+  transition: transform .2s cubic-bezier(.16, 1, .3, 1);
+}
+
+.session-workspace-preset-menu .workspace-menu-feature:is(:hover, :focus-visible):not(:disabled) .workspace-menu-feature-arrow {
+  transform: translate(2px, -2px);
+}
+
+.session-workspace-preset-menu .workspace-menu-group {
+  display: grid;
+  gap: 4px;
+  padding: 6px 0;
+}
+
+.session-workspace-preset-menu .workspace-menu-group + .workspace-menu-group {
+  border-top: 1px solid var(--aod-ctx-divider);
+}
+
+.session-workspace-preset-menu .workspace-menu-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.session-workspace-preset-menu .workspace-menu-group-title {
+  grid-column: 1 / -1;
+  padding: 2px 10px 3px;
+  color: var(--aod-glass-muted);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.session-workspace-preset-menu .workspace-menu-group button {
+  min-width: 0;
+  min-height: 34px;
+  align-items: center;
+  padding: 6px 9px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--aod-ctx-ink);
+  text-align: start;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+  transition: background-color .16s ease, color .16s ease;
+}
+
+.session-workspace-preset-menu .workspace-menu-group button:is(:hover, :focus-visible):not(:disabled) {
+  background: var(--aod-ctx-hover-bg);
+  color: var(--aod-ctx-hover-ink);
+}
+
+.session-workspace-preset-menu .workspace-menu-group button:focus-visible {
+  outline: 2px solid var(--aod-ctx-hover-icon);
+  outline-offset: -2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .session-workspace-presets > .session-workspace-preset-menu,
+  .workspace-context-menu:has(> .session-workspace-preset-menu) { animation: none; }
+  .session-workspace-preset-menu .workspace-menu-group button,
+  .workspace-menu-feature-arrow { transition: none; }
+  .session-workspace-preset-menu .workspace-menu-feature:is(:hover, :focus-visible):not(:disabled) .workspace-menu-feature-arrow { transform: none; }
+}
+
+@media (forced-colors: active) {
+  .session-workspace-presets > .session-workspace-preset-menu,
+  .workspace-context-menu:has(> .session-workspace-preset-menu) { border-color: CanvasText; background: Canvas; backdrop-filter: none; }
+  .session-workspace-preset-menu .workspace-menu-group button.workspace-menu-feature { border-color: ButtonText; }
+  .session-workspace-preset-menu .workspace-menu-group button:focus-visible { outline-color: Highlight; }
+}
+
+@media (pointer: coarse) {
+  .session-workspace-preset-menu .workspace-menu-group button {
+    min-height: 44px;
+  }
 }
 
 .workspace-context-menu .saved-layout-menu-title {

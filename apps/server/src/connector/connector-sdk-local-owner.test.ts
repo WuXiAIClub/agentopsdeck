@@ -61,7 +61,42 @@ test('SDK local protocol uses append-only commands, fixed fields and trusted cop
     const config = { file: '/tmp/unused', sdkModels: structuredClone(catalogs) };
     const copy = connectorOwnerConfig(config); config.sdkModels.ghcp.model = 'mutated';
     assert.equal(copy.sdkModels?.ghcp?.model, 'default');
+    assert.throws(() => copySdkOwnerCatalogs({ antigravity: { model: 'default', dynamicModels: 'yes' } }));
+    assert.deepEqual(copySdkOwnerCatalogs({ antigravity: { model: 'default', dynamicModels: true } }),
+      { antigravity: { model: 'default', modelChoices: ['default'], dynamicModels: true } });
   } finally { f.close(); }
+});
+
+test('antigravity dynamicModels catalog accepts valid discovered model overrides while rejecting malformed model IDs', async () => {
+  const directory = mkdtempSync(join(tmpdir(), 'agentopsdeck-sdk-dynamic-model-'));
+  const tokens = new ConnectorTokenStore(join(directory, 'tokens.json'), 'isolated-local-command-test-token');
+  const store = new ConnectorUserStore(':memory:', undefined, { runtimeOwner: true });
+  const owner = createConnectorOwnerCommands(store, tokens, { antigravity: { model: 'gemini-4-neon-high', dynamicModels: true } });
+  const key = 'antigravity:dynamic-test';
+  store.antigravityJournal.create({ key, nativeSessionId: 'native-dynamic', title: 'Dynamic', createdAt: 0 });
+  try {
+    const allowed = await owner('sdkModelUpdate', {
+      runtime: 'antigravity',
+      authorization,
+      commandKey: 'dynamic-claude',
+      key,
+      payloadJson: JSON.stringify({ model: 'claude-opus-5-5-high' }),
+    });
+    assert.ok('receipt' in allowed && allowed.receipt.state === 'accepted');
+    assert.equal(store.antigravityJournal.session(key)?.model, 'claude-opus-5-5-high');
+
+    const malformed = await owner('sdkModelUpdate', {
+      runtime: 'antigravity',
+      authorization,
+      commandKey: 'dynamic-malformed',
+      key,
+      payloadJson: JSON.stringify({ model: 'bad model with spaces' }),
+    });
+    assert.ok('receipt' in malformed && malformed.receipt.state === 'rejected' && malformed.receipt.result?.status === 400);
+  } finally {
+    store.close();
+    rmSync(directory, { recursive: true, force: true });
+  }
 });
 
 for (const runtime of ['claude-code', 'ghcp', 'antigravity'] as const) {
