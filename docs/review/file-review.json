@@ -16949,8 +16949,8 @@
     },
     {
       "path": "apps/server/src/connector/connector-sdk-context-owner.test.ts",
-      "size": 13418,
-      "sha256": "cc74cb3925b1631cd269d318cd3a2bad5e0e5bc2dd3ac8f694e97c54d804c17a",
+      "size": 13368,
+      "sha256": "4e0e0cbdb79c987b4a36d6ad4ab076bb95ed86e658b8bb00f19e5061aa13a636",
       "module": "connector",
       "kind": "test",
       "depth": "semantic",
@@ -21533,8 +21533,8 @@
     },
     {
       "path": "apps/server/src/connector/workspace-board-file-policy.ts",
-      "size": 3333,
-      "sha256": "9cedb8f2d648274975224694196222e10344545c338457688ec9c433ceb6d6e6",
+      "size": 3242,
+      "sha256": "42cb569c68a172a315045b7caff3c69a9e90ca2098886b3310694b55fb578812",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",

@@ -1,7 +1,7 @@
 import { normalizeWorkspaceFileRoot } from './workspace-file-platform.js';
 import { homedir } from 'node:os';
 
-export const FILE_BOARD_RUNTIMES = ['codex', 'claude-code', 'ghcp', 'antigravity'] as const;
+export const FILE_BOARD_RUNTIMES = ['codex', 'claude-code', 'ghcp'] as const;
 export type FileBoardRuntime = typeof FILE_BOARD_RUNTIMES[number];
 export type FileBoardPolicy = { root: string; policies: { owner: string; runtime: FileBoardRuntime }[] };
 export const LOCAL_FILE_BOARD_OWNER = 'local:file-boards';
@@ -21,13 +21,12 @@ export function fileBoardWritable(runtime: FileBoardRuntime, config: {
   claude?: { toolPolicy?: string }; copilot?: { toolPolicy?: string };
 }): boolean {
   if (runtime === 'codex') return true;
-  if (runtime === 'antigravity') return false;
   const policy = (runtime === 'claude-code' ? config.claude : config.copilot)?.toolPolicy;
   return policy === 'workspace-edit' || policy === 'trusted-exec';
 }
 export function fileBoardRuntime(key: string): FileBoardRuntime | undefined {
   const runtime = key.split(':', 1)[0];
-  return runtime === 'codex' || runtime === 'claude-code' || runtime === 'ghcp' || runtime === 'antigravity' ? runtime : undefined;
+  return runtime === 'codex' || runtime === 'claude-code' || runtime === 'ghcp' ? runtime : undefined;
 }
 /** Operator configuration only. No inferred owners, wildcard grants or HOME roots. */
 export function parseFileBoardPolicy(text: string | undefined, platform: NodeJS.Platform = process.platform, home = homedir()): FileBoardPolicy | undefined {
