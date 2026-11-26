@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import type { ChatMessage } from '@agentopsdeck/shared';
-import { prependHistory, refreshHistory } from './message-history.js';
+import { prependHistory, refreshHistory, shouldTriggerHistoryLoadAtTop } from './message-history.js';
 
 const rows = (start: number, end: number): ChatMessage[] => Array.from({ length: end - start }, (_, n) =>
   ({ id: String(start + n), sessionKey: 'session', role: 'assistant', text: String(start + n), createdAt: start + n }));
@@ -61,4 +61,27 @@ test('expanded history retains older pages even when latest page shifts past pre
   const next = refreshHistory(current, { messages: pageMessages, hiddenCount: 600 });
   assert.equal(next.items[0]?.id, '400');
   assert.equal(next.items.at(-1)?.id, '800');
+});
+
+test('shouldTriggerHistoryLoadAtTop triggers older load and pauses follow when upward gesture occurs at scrollTop 0', () => {
+  assert.deepEqual(
+    shouldTriggerHistoryLoadAtTop({ scrollTop: 0, visibleCount: 10, totalCount: 10, hiddenCount: 120, hasLoadMore: true, pending: false, loading: false }),
+    { trigger: true, pauseFollowing: true },
+  );
+  assert.deepEqual(
+    shouldTriggerHistoryLoadAtTop({ scrollTop: 0, visibleCount: 10, totalCount: 25, hiddenCount: 0, hasLoadMore: false, pending: false, loading: false }),
+    { trigger: true, pauseFollowing: true },
+  );
+  assert.deepEqual(
+    shouldTriggerHistoryLoadAtTop({ scrollTop: 0, visibleCount: 10, totalCount: 10, hiddenCount: 120, hasLoadMore: true, pending: true, loading: false }),
+    { trigger: true, pauseFollowing: false },
+  );
+  assert.deepEqual(
+    shouldTriggerHistoryLoadAtTop({ scrollTop: 12, visibleCount: 10, totalCount: 10, hiddenCount: 120, hasLoadMore: true, pending: false, loading: false }),
+    { trigger: false, pauseFollowing: false },
+  );
+  assert.deepEqual(
+    shouldTriggerHistoryLoadAtTop({ scrollTop: 0, visibleCount: 10, totalCount: 10, hiddenCount: 0, hasLoadMore: true, pending: false, loading: false }),
+    { trigger: false, pauseFollowing: false },
+  );
 });

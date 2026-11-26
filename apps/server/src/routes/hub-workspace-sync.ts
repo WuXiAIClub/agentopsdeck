@@ -9,7 +9,7 @@ import { decodeHubSessionId, encodeHubSessionId } from '../hub/session-id.js';
 import { ConnectorClientError, HistoryPreparing, type ConnectorClientResolver } from '../hub/connector-client.js';
 import { HISTORY_ASYNC_HEADER, historyPendingBody } from '@agentopsdeck/shared';
 import type { HubStore } from '../hub/hub-store.js';
-import { mergeMessageIdentities } from '../messages/identity.js';
+import { dedupeMessageIdentitiesInOrder } from '../messages/identity.js';
 import type { HubConnection } from '../hub/hub-store.js';
 import type { ChatMessage } from '@agentopsdeck/shared';
 import { stableGatewayRowsRevision } from '../refresh/signature.js';
@@ -171,7 +171,7 @@ export function registerHubWorkspaceSync(app: Hono, deps: (LegacyDependencies | 
               try { result = await client.messages(decoded.remoteSessionKey, String(item.limit), controller.signal, undefined, c.req.header(HISTORY_ASYNC_HEADER) === '1', drain); }
               finally { await drain.wait(); }
               await authorize(); controller.signal.throwIfAborted();
-              const messages = mergeMessageIdentities(result.messages).map(message => deps.wrap(message, item.sessionKey, connection));
+              const messages = dedupeMessageIdentitiesInOrder(result.messages).map(message => deps.wrap(message, item.sessionKey, connection));
               return { ...result, messages, revision: result.revision ?? stableGatewayRowsRevision(messages) };
             }, itemPriority);
             await authorize(); controller.signal.throwIfAborted();
