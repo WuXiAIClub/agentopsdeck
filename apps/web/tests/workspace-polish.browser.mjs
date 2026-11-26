@@ -142,13 +142,15 @@ try {
   const arcColors = () => dials.locator('.antigravity-quota-arc').evaluateAll(nodes => nodes.map(node => getComputedStyle(node).stroke));
   const lightArcColors = await arcColors();
   assert.notEqual(...lightArcColors, 'low quota uses a different arc color');
+  assert.equal(await quotaCard.locator('.antigravity-quota-hero').count(), 0, 'redundant hero banner is removed');
+  assert.equal(await quotaCard.locator('.antigravity-quota-group[aria-label="Gemini Models"] .antigravity-quota-group-header .antigravity-quota-sample').count(), 1, 'quota checked time renders in the Gemini Models header row');
   if (process.env.AOD_TEST_GLASS_SCREENSHOTS) await quotaCard.screenshot({ path: join(process.env.AOD_TEST_GLASS_SCREENSHOTS, 'workspace-glass-quota.png'), animations: 'disabled' });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.getByTestId('workspace-theme-toggle').click();
   assert.notDeepEqual(await arcColors(), lightArcColors, 'the dark palette reaches the dials');
   assert.match(await quotaCard.evaluate(el => getComputedStyle(el).backgroundImage), /radial-gradient/, 'the dark card retains the glass surface');
   assert.equal(await quotaCard.locator('li').first().evaluate(el => getComputedStyle(el).animationName), 'none');
-  assert.equal(await quotaCard.locator('.antigravity-quota-hero').evaluate(el => getComputedStyle(el, '::before').content), 'none');
+  assert.equal(await quotaCard.locator('.antigravity-quota-arc').first().evaluate(el => getComputedStyle(el).transitionDuration), '0s');
   if (process.env.AOD_TEST_GLASS_SCREENSHOTS) await quotaCard.screenshot({ path: join(process.env.AOD_TEST_GLASS_SCREENSHOTS, 'workspace-glass-quota-dark.png'), animations: 'disabled' });
   await page.emulateMedia({ forcedColors: 'active' });
   assert.notEqual(...await quotaCard.locator('.antigravity-quota-dial').first().locator('circle').evaluateAll(nodes => nodes.map(node => getComputedStyle(node).stroke)), 'high contrast preserves the visual track and arc');
@@ -159,13 +161,18 @@ try {
     el.style.height = `${dimensions.height}px`;
     const items = [...el.querySelectorAll('li')];
     const dial = el.querySelector('.antigravity-quota-dial');
+    const heading = el.querySelector('.antigravity-quota-group h3');
+    const sample = el.querySelector('.antigravity-quota-group-header .antigravity-quota-sample');
+    const headingRect = heading.getBoundingClientRect();
+    const sampleRect = sample.getBoundingClientRect();
     const result = {
       stacked: items[0].offsetTop < items[1].offsetTop,
       fits: el.scrollWidth <= el.clientWidth + 1,
       dial: dial.offsetWidth,
-      title: parseFloat(getComputedStyle(el.querySelector('.antigravity-quota-hero strong')).fontSize),
+      title: parseFloat(getComputedStyle(heading).fontSize),
       value: parseFloat(getComputedStyle(dial.querySelector('strong')).fontSize),
       gap: parseFloat(getComputedStyle(el.querySelector('.antigravity-quota-body')).gap),
+      sampleInline: Math.abs(headingRect.top + headingRect.height / 2 - (sampleRect.top + sampleRect.height / 2)) < 8 && sampleRect.left >= headingRect.right,
     };
     el.style.removeProperty('width');
     el.style.removeProperty('height');
@@ -175,6 +182,7 @@ try {
   const wide = await measureQuota(900, 600);
   const short = await measureQuota(900, 220);
   assert.ok(narrow.stacked && !wide.stacked, 'narrow readings reflow into one column');
+  assert.ok(wide.sampleInline && short.sampleInline, 'quota checked time stays on the Gemini Models header row when space permits');
   for (const size of [narrow, wide, short]) assert.ok(size.fits, 'quota readings fit without horizontal scrolling');
   for (const metric of ['dial', 'title', 'value', 'gap']) {
     assert.ok(wide[metric] > narrow[metric], `${metric} scales with card width`);
