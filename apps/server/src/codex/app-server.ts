@@ -147,6 +147,7 @@ const GOAL_ACK_CAPACITY = 128;
 const CODEX_SESSION_LIST_PAGE_SIZE = 100;
 const CODEX_SESSION_LIST_MAX_PAGES = 100;
 const CODEX_RUNNING_RECOVERY_INTERVAL_MS = 30_000;
+const CODEX_BACKGROUND_WORK_RECOVERY_INTERVAL_MS = 5_000;
 const CODEX_RETRY_NOTICE = 'Model connection interrupted · Codex is retrying…';
 const CODEX_ERROR_NOTICE = 'Codex reported an error · waiting for final run status';
 const MAX_PROJECTED_TOOL_TEXT_CHARS = 16 * 1024;
@@ -460,10 +461,14 @@ export class CodexAppServer {
         && pending.revision === coldFailure.revision && this.connectionId === coldFailure.connectionId
         && coldFailure.current() && Date.now() >= coldFailure.at
         && Date.now() - coldFailure.at < CODEX_RUNNING_RECOVERY_INTERVAL_MS) return;
+      const recoveryIntervalMs = pending?.nativeHistory?.reason === 'background-work'
+        && this.loadedThreadIds.has(this.threadId(sessionKey))
+        ? CODEX_BACKGROUND_WORK_RECOVERY_INTERVAL_MS
+        : CODEX_RUNNING_RECOVERY_INTERVAL_MS;
       if (!queuedContinuation && pending?.sync === 'current' && pending.nativeHistory?.state === 'blocked'
         && pending.nativeHistory.connectionId === this.connectionId && readable?.available
         && readable.recoveryAt !== undefined
-        && Date.now() - readable.recoveryAt < CODEX_RUNNING_RECOVERY_INTERVAL_MS) {
+        && Date.now() - readable.recoveryAt < recoveryIntervalMs) {
         if (!blocked && !this.closed) await this.drainQueuedTurn(sessionKey);
         return;
       }
@@ -597,7 +602,65 @@ export class CodexAppServer {
     const observed = await this.readHistoryFact(sessionKey);
     if (this.closed || this.executionUnavailable || connection !== this.connectionId
       || observed.deleted || observed.execution?.runId !== expectedRunId) return false;
+    const readable = this.threadRefreshResult.get(sessionKey);
+    if (readable) {
+      delete readable.recoveryAt;
+      delete readable.coldFailure;
+    }
     return this.turnWorker.wake();
+  }
+
+  /** Owner-authorized cleanup for terminals still running after a finished turn.
+   * Never interrupts a running/successor turn or touches unattributed terminals;
+   * queue protection still clears only through normal worker reconciliation. */
+  async stopOwnedBackgroundTerminals(sessionKey: string, expectedRunId: string) {
+    const connection = this.connectionId;
+    if (!connection || this.closed || this.executionUnavailable || !expectedRunId) return false;
+    const initial = await this.readHistoryFact(sessionKey);
+    const fact = initial.execution;
+    const validFact = (observed: typeof initial) => {
+      const current = observed.execution;
+      return !observed.deleted && !observed.outcomeUnknown && !!current && !current.preparation
+        && current.commandId === fact?.commandId && current.runId === expectedRunId
+        && current.connectionId === connection
+        && ['completed', 'failed', 'interrupted'].includes(current.phase)
+        && current.nativeHistory?.state === 'blocked'
+        && current.nativeHistory.reason === 'background-work'
+        && current.nativeHistory.turnId === expectedRunId
+        && current.nativeHistory.connectionId === connection;
+    };
+    if (!validFact(initial)) return false;
+    const threadId = this.threadId(sessionKey);
+    const activity = this.nativeHistoryActivityGuard(threadId);
+    const check = async () => {
+      if (this.closed || this.executionUnavailable || connection !== this.connectionId || !activity.current()) throw new RunControlConflict();
+      const latest = await this.readHistoryFact(sessionKey);
+      if (this.closed || this.executionUnavailable || connection !== this.connectionId || !activity.current() || !validFact(latest)) {
+        throw new RunControlConflict();
+      }
+    };
+    try {
+      await check();
+      const thread = historyThread(await activity.request('thread/read', { threadId, includeTurns: true }), threadId);
+      await check();
+      const latestTurn = arrayValue(thread.turns).at(-1);
+      if (thread.status?.type !== 'idle' || latestTurn?.id !== expectedRunId || latestTurn.status !== fact!.phase) return false;
+      const itemIds = new Set<string>([
+        ...arrayValue(latestTurn.items).filter(item => item.type === 'commandExecution').map(item => String(item.id)),
+        ...(fact!.pendingCommandTools ?? []),
+      ]);
+      await terminateBackgroundTerminals(activity.request, threadId, () => new Set(itemIds), check);
+      await check();
+      const readable = this.threadRefreshResult.get(sessionKey);
+      if (readable) {
+        delete readable.recoveryAt;
+        delete readable.coldFailure;
+      }
+      void this.turnWorker.wake();
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   /** History-only recovery under the caller's maintenance fence. Unlike the
@@ -4763,7 +4826,7 @@ export class CodexAppServer {
         }
         if (attempt === 0 && expected && connectionId && expected.sync === 'current'
           && expected.nativeHistory?.state === 'blocked' && expected.nativeHistory.connectionId === connectionId
-          && !['cleanup-unconfirmed', 'background-work'].includes(expected.nativeHistory.reason)
+          && expected.nativeHistory.reason !== 'cleanup-unconfirmed'
           && (thread.status?.type !== 'notLoaded' || expected.nativeHistory.reason === 'goal-blocked')
           && expected.nativeHistory.turnId === latestTurn?.id
           && expected.nativeHistory.fingerprint === nativeHistoryFingerprint(thread)
@@ -4781,7 +4844,7 @@ export class CodexAppServer {
           };
           try {
             const coldCleanupUnconfirmed = thread.status?.type === 'notLoaded'
-              ? (expected.nativeHistory.reason === 'background-work' ? 'background-work' : expected.nativeHistory.reason === 'cleanup-unconfirmed')
+              ? (expected.nativeHistory.reason === 'background-work' ? 'background-work' : false)
               : false;
             const recheckedHistory = await this.inspectNativeHistory(thread, expected, checkUnchanged, coldCleanupUnconfirmed, false, nativeRead);
             if (isDeepStrictEqual(recheckedHistory, expected.nativeHistory)

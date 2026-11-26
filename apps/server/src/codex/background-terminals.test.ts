@@ -734,3 +734,107 @@ test('read-only display refresh on an unloaded unmanaged thread with commandExec
   assert.equal(setup.codex.isSessionHistoryReady(unmanagedKey), true);
   assert.ok(setup.runtime.displayHistory.get(unmanagedKey));
 });
+
+test('requestSessionRecovery clears recoveryAt cooldown and loaded background-work polls every 5s without re-reading unchanged rollout', async context => {
+  const setup = fixture(context);
+  const directory = mkdtempSync(join(tmpdir(), 'agentopsdeck-bg-fast-poll-'));
+  context.after(() => rmSync(directory, { recursive: true, force: true }));
+  const rolloutPath = join(directory, 'rollout.jsonl');
+  writeFileSync(rolloutPath, JSON.stringify({ timestamp: '2026-10-23T00:00:00.000Z', type: 'event_msg', payload: { type: 'task_complete', turn_id: 'original-run' } }) + '\n');
+  setup.turn.status = 'completed';
+  (setup.history.thread as any).path = rolloutPath;
+  setup.runtime.loadedThreadIds.add('synthetic');
+  let wakes = 0;
+  setup.runtime.turnWorker.wake = () => { wakes++; return true; };
+  let now = 10_000;
+  context.mock.method(Date, 'now', () => now);
+  let active = true;
+  let listCalls = 0;
+  setup.runtime.request = async (method: string) => {
+    if (method === 'thread/read') return setup.history;
+    if (method === 'thread/goal/get') return { goal: null };
+    if (method === 'thread/backgroundTerminals/list') {
+      listCalls++;
+      return { data: active ? [terminal] : [] };
+    }
+    throw new Error(`unexpected RPC method: ${method}`);
+  };
+  let rolloutReads = 0;
+  const originalRead = setup.runtime.rolloutReader.read.bind(setup.runtime.rolloutReader);
+  setup.runtime.rolloutReader.read = async (...args: any[]) => {
+    rolloutReads++;
+    return originalRead(...args);
+  };
+
+  setup.runtime.handleNotification('turn/completed', { threadId: 'synthetic', turn: setup.turn });
+  await setup.runtime.completingTurns.get(setup.key);
+  assert.equal(setup.database.codexExecutions.get(setup.key)?.nativeHistory?.reason, 'background-work');
+  const initialRolloutReads = rolloutReads;
+  const initialListCalls = listCalls;
+
+  // Within 5s cooldown, worker skips recheck unless explicitly requested.
+  now += 2_000;
+  await setup.runtime.turnWorker.options.reconcile(setup.key);
+  assert.equal(listCalls, initialListCalls);
+
+  // Explicit recovery clears recoveryAt so the immediate worker pass rechecks.
+  assert.equal(await setup.codex.requestSessionRecovery(setup.key, 'original-run'), true);
+  assert.equal(wakes, 1);
+  await setup.runtime.turnWorker.options.reconcile(setup.key);
+  assert.ok(listCalls > initialListCalls, 'recovery button triggers immediate recheck');
+  assert.equal(rolloutReads, initialRolloutReads, 'unchanged rollout is not re-read while still blocked on background-work');
+
+  // After 5s (not 30s), loaded background-work rechecks automatically and clears once terminals exit.
+  active = false;
+  now += 5_500;
+  await setup.runtime.turnWorker.options.reconcile(setup.key);
+  assert.equal(setup.database.codexExecutions.get(setup.key)?.nativeHistory?.state, 'verified');
+});
+
+test('stopOwnedBackgroundTerminals terminates owned post-turn terminals and refuses running, successor or unattributed work', async context => {
+  const setup = fixture(context);
+  setup.turn.status = 'completed';
+  setup.runtime.loadedThreadIds.add('synthetic');
+  let activeTerminals = [terminal];
+  const terminated: string[] = [];
+  setup.runtime.request = async (method: string, params: any) => {
+    if (method === 'thread/read') return setup.history;
+    if (method === 'thread/goal/get') return { goal: null };
+    if (method === 'thread/backgroundTerminals/list') return { data: activeTerminals };
+    if (method === 'thread/backgroundTerminals/terminate') {
+      terminated.push(params.processId);
+      activeTerminals = [];
+      return { terminated: true };
+    }
+    throw new Error(`unexpected RPC method: ${method}`);
+  };
+
+  // Refuses while turn is still running (before terminal completion).
+  assert.equal(await setup.codex.stopOwnedBackgroundTerminals(setup.key, 'original-run'), false);
+  assert.equal(terminated.length, 0);
+
+  setup.runtime.handleNotification('turn/completed', { threadId: 'synthetic', turn: setup.turn });
+  await setup.runtime.completingTurns.get(setup.key);
+  assert.equal(setup.database.codexExecutions.get(setup.key)?.nativeHistory?.reason, 'background-work');
+
+  // Refuses mismatched runId.
+  assert.equal(await setup.codex.stopOwnedBackgroundTerminals(setup.key, 'wrong-run'), false);
+  assert.equal(terminated.length, 0);
+
+  // Refuses unattributed/foreign background terminals.
+  activeTerminals = [{ processId: 'foreign-proc', itemId: 'foreign-tool' }];
+  assert.equal(await setup.codex.stopOwnedBackgroundTerminals(setup.key, 'original-run'), false);
+  assert.equal(terminated.length, 0);
+
+  // Refuses if a successor turn is already present on native thread.
+  activeTerminals = [terminal];
+  setup.history.thread.turns.push({ id: 'successor-run', status: 'inProgress', items: [] } as any);
+  assert.equal(await setup.codex.stopOwnedBackgroundTerminals(setup.key, 'original-run'), false);
+  setup.history.thread.turns.pop();
+
+  // Terminates owned background terminal and wakes worker to clear protection.
+  assert.equal(await setup.codex.stopOwnedBackgroundTerminals(setup.key, 'original-run'), true);
+  assert.deepEqual(terminated, ['process']);
+  await setup.runtime.turnWorker.options.reconcile(setup.key);
+  assert.equal(setup.database.codexExecutions.get(setup.key)?.nativeHistory?.state, 'verified');
+});

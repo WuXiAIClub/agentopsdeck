@@ -7,7 +7,7 @@ import { clampMessageLimit } from '../messages/history-page.js';
 import { createConditionalHistory } from '../messages/conditional-history.js';
 import { readJsonBody } from '../utils/http-body.js';
 
-export type RuntimeReadsHttp = { reads: Pick<AsyncRuntimeReads, 'state' | 'page' | 'message'> & Partial<Pick<AsyncRuntimeReads, 'recheck'>> };
+export type RuntimeReadsHttp = { reads: Pick<AsyncRuntimeReads, 'state' | 'page' | 'message'> & Partial<Pick<AsyncRuntimeReads, 'recheck' | 'stopBackgroundTerminals'>> };
 /** Original node/protocol gates run first; never fall through to synchronous
  * authority after selecting this application, including errors or timeouts. */
 export function registerRuntimeReadsHttp(app: Hono, path: string, deps: RuntimeReadsHttp, runtime: PublicReadRuntime) {
@@ -28,6 +28,24 @@ export function registerRuntimeReadsHttp(app: Hono, path: string, deps: RuntimeR
       return c.json(result);
     } catch (error) {
       return c.json({ error: 'Recovery request could not be confirmed; execution remains protected' }, error instanceof ReadRequestError ? error.status : 503);
+    }
+  });
+  if (runtime === 'codex') app.post(`${path}/background-terminals/stop`, async (c, next) => {
+    const key = c.req.param('sessionKey')!;
+    if (sessionRuntimeId(key) !== runtime) return next();
+    c.header('Cache-Control', 'no-store');
+    const body = await readJsonBody(c.req.raw, 1024);
+    if (!body || typeof body !== 'object' || Array.isArray(body) || Object.keys(body).length !== 1
+      || !('expectedRunId' in body) || typeof body.expectedRunId !== 'string' || !body.expectedRunId.length
+      || body.expectedRunId.length > 512 || /[\x00-\x1f\x7f]/.test(body.expectedRunId)) return c.json({ error: 'Invalid execution identity' }, 400);
+    if (!deps.reads.stopBackgroundTerminals) return c.json({ error: 'Background terminal stop is unavailable on this Connector' }, 409);
+    try {
+      const result = await deps.reads.stopBackgroundTerminals({ key, authorization: c.req.header('authorization') ?? '', expectedRunId: body.expectedRunId }, c.req.raw);
+      if ('error' in result) return c.json({ error: result.error === 409 ? 'Background terminals changed or cannot be safely stopped; refresh session state'
+        : result.error === 403 ? 'Background terminal stop access denied' : 'Session not found' }, result.error);
+      return c.json(result);
+    } catch (error) {
+      return c.json({ error: 'Background terminal stop could not be confirmed; execution remains protected' }, error instanceof ReadRequestError ? error.status : 503);
     }
   });
   for (const kind of ['state', 'page', 'message'] as const) app.get(`${path}/${kind === 'state' ? 'state' : kind === 'page' ? 'messages' : 'messages/:messageId'}`, async (c, next) => {

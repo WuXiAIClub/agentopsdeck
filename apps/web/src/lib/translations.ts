@@ -3215,6 +3215,16 @@ export const chinese = {
   "{label} {phase} #{index} · click to inspect": "{label} {phase} #{index} · 点击查看详情",
   "Next tool after {elapsed}": "间隔 {elapsed} 后执行下一工具",
   "{label} {phase} {index} / {total}": "{label} {phase} 第 {index}/{total} 项",
+  "Stop background terminals": "结束后台终端",
+  "Stopping terminals…": "正在结束后台终端…",
+  "Stop background terminals?": "确认结束后台终端？",
+  "Only background terminals attributed to this finished run will be terminated. Foreign or unattributed terminals are refused, and intended long-running services should be kept running.": "仅会终止归属于本轮已结束执行的后台终端；外部或归属不明的终端会被安全拒绝。若其中包含预期长期运行的服务，请保留勿停。",
+  "Terminate background terminals owned by this finished run so queued execution can proceed.": "终止本轮已结束执行遗留的归属后台终端，以便后续排队执行继续推进。",
+  "Background terminals stopped · verifying execution protection…": "已结束后台终端 · 正在核验执行保护…",
+  "Background terminals stopped · session refresh failed; check again": "已结束后台终端 · 会话刷新失败，请重新核对",
+  "Background terminals could not be stopped · keep intended services or refresh state": "无法安全结束后台终端 · 请保留预期服务或刷新会话状态",
+  "Running command": "正在执行命令",
+  "Running tool": "正在调用工具",
 } as const;
 
 export type TranslationKey = keyof typeof chinese;

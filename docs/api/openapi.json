@@ -6456,6 +6456,39 @@
         "x-aod-authorization": "Unspecified in inventory; route-specific authentication and grants are required where enforced by the implementation."
       }
     },
+    "/api/hub/v1/sessions/{hubSessionId}/background-terminals/stop": {
+      "post": {
+        "operationId": "route_d3157e102a9dbc47",
+        "summary": "POST /api/hub/v1/sessions/:hubSessionId/background-terminals/stop",
+        "tags": [
+          "Hub"
+        ],
+        "description": "Source route inventory, not a complete request/response or authorization contract. Read x-aod-sources and the bilingual API guide before calling. Role-specific and internal registrations can share this path.",
+        "parameters": [
+          {
+            "name": "hubSessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Implementation-defined status, payload and streaming behavior; inspect the linked source and route tests."
+          }
+        },
+        "x-aod-sources": [
+          {
+            "file": "apps/server/src/routes/hub-session-auxiliary.ts",
+            "line": 88
+          }
+        ],
+        "x-aod-raw-path": "/api/hub/v1/sessions/:hubSessionId/background-terminals/stop",
+        "x-aod-authorization": "Unspecified in inventory; route-specific authentication and grants are required where enforced by the implementation."
+      }
+    },
     "/api/hub/v1/sessions/{hubSessionId}/compact": {
       "post": {
         "operationId": "route_7df9f4030491186c",
@@ -6597,7 +6630,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/routes/hub-session-auxiliary.ts",
-            "line": 118
+            "line": 128
           }
         ],
         "x-aod-raw-path": "/api/hub/v1/sessions/:hubSessionId/files",
@@ -6630,7 +6663,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/routes/hub-session-auxiliary.ts",
-            "line": 145
+            "line": 155
           }
         ],
         "x-aod-raw-path": "/api/hub/v1/sessions/:hubSessionId/files/rebuild",
@@ -6671,7 +6704,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/routes/hub-session-auxiliary.ts",
-            "line": 146
+            "line": 156
           }
         ],
         "x-aod-raw-path": "/api/hub/v1/sessions/:hubSessionId/files/rebuild/:jobId",
@@ -6710,7 +6743,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/routes/hub-session-auxiliary.ts",
-            "line": 147
+            "line": 157
           }
         ],
         "x-aod-raw-path": "/api/hub/v1/sessions/:hubSessionId/files/rebuild/:jobId",
@@ -6776,7 +6809,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/routes/hub-session-auxiliary.ts",
-            "line": 94
+            "line": 104
           }
         ],
         "x-aod-raw-path": "/api/hub/v1/sessions/:hubSessionId/interaction-mode",
@@ -6809,7 +6842,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/routes/hub-session-auxiliary.ts",
-            "line": 88
+            "line": 98
           }
         ],
         "x-aod-raw-path": "/api/hub/v1/sessions/:hubSessionId/interactions",
@@ -6850,7 +6883,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/routes/hub-session-auxiliary.ts",
-            "line": 102
+            "line": 112
           }
         ],
         "x-aod-raw-path": "/api/hub/v1/sessions/:hubSessionId/interactions/:requestId/answer",
@@ -7080,7 +7113,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/routes/hub-session-auxiliary.ts",
-            "line": 113
+            "line": 123
           }
         ],
         "x-aod-raw-path": "/api/hub/v1/sessions/:hubSessionId/skills",
@@ -13183,7 +13216,7 @@
       }
     }
   },
-  "x-aod-static-registrations": 488,
+  "x-aod-static-registrations": 489,
   "x-aod-unresolved-registrations": [
     {
       "method": "patch",
@@ -13366,19 +13399,24 @@
       "line": 15
     },
     {
-      "method": "get",
+      "method": "post",
       "file": "apps/server/src/connector/runtime-reads-http.ts",
       "line": 33
     },
     {
       "method": "get",
       "file": "apps/server/src/connector/runtime-reads-http.ts",
-      "line": 33
+      "line": 51
     },
     {
       "method": "get",
       "file": "apps/server/src/connector/runtime-reads-http.ts",
-      "line": 33
+      "line": 51
+    },
+    {
+      "method": "get",
+      "file": "apps/server/src/connector/runtime-reads-http.ts",
+      "line": 51
     },
     {
       "method": "get",
