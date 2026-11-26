@@ -13500,8 +13500,8 @@
     },
     {
       "path": "apps/server/src/connector/async-openclaw-application.test.ts",
-      "size": 39620,
-      "sha256": "537d6310ac73a30aa27c7a830e90d615a46ab61bfe36aa454d087d8b9997a4a7",
+      "size": 39658,
+      "sha256": "df7209e85ef4525d2e3881e1023b01fbd0a31b8a31b46d1744e82e31fc42b2c6",
       "module": "connector",
       "kind": "test",
       "depth": "semantic",
