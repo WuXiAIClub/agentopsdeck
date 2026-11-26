@@ -12,8 +12,8 @@ Connector 运行时接线与 Web UI 入口已在 `apps/server/src/antigravity/`�
 `AOD_ANTIGRAVITY_COMMAND`、`AOD_ANTIGRAVITY_HOME` 与 `AOD_ANTIGRAVITY_WORKSPACE`
 即可在 Connector 与界面中启用 owner-only 的 `antigravity` 运行时。
 已支持图片/文本附件（`attachments`）、有界工具输出详情、上下文与 token 用量统计
-（`usage_update` / `session/prompt` `usage`）、模型目录与按会话切模型
-（`AOD_ANTIGRAVITY_MODEL` / `AOD_ANTIGRAVITY_MODEL_CHOICES` + `session/set_model`）
+（`usage_update` / `session/prompt` `usage`）、通过 `agy models` 动态发现模型目录与按会话切模型
+（支持可选的 `AOD_ANTIGRAVITY_MODEL` 默认模型与 `AOD_ANTIGRAVITY_MODEL_CHOICES` 白名单覆盖 + `session/set_model`）
 以及看板上下文透传。尚未支持的能力（`compact`、`interactions`）保持禁用并明确返回 `409`。
 不分发原生可执行程序。
 

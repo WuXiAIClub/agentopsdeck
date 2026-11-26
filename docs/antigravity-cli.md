@@ -13,8 +13,9 @@ Setting `AOD_ANTIGRAVITY_ENABLED=true`, `AOD_ANTIGRAVITY_DEDICATED=true`,
 `AOD_ANTIGRAVITY_COMMAND`, `AOD_ANTIGRAVITY_HOME`, and `AOD_ANTIGRAVITY_WORKSPACE`
 enables the owner-only `antigravity` runtime in the Connector and Web UI.
 Image/text `attachments`, bounded tool output details, context and token usage
-metrics (`usage_update` / `session/prompt` `usage`), model catalog/selection
-(`AOD_ANTIGRAVITY_MODEL` / `AOD_ANTIGRAVITY_MODEL_CHOICES` + `session/set_model`),
+metrics (`usage_update` / `session/prompt` `usage`), dynamic model discovery via
+`agy models` (with optional `AOD_ANTIGRAVITY_MODEL` default and optional
+`AOD_ANTIGRAVITY_MODEL_CHOICES` allowlist override + `session/set_model`),
 and workspace board context are supported. Unsupported capabilities (`compact`,
 `interactions`) remain disabled and are explicitly rejected with `409`.
 No native binaries are shipped.

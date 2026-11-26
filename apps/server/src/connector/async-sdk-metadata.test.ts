@@ -189,3 +189,51 @@ test('metadata real sole worker reads durable unknown execution after reopen, wi
     }
   } finally { await owner.close(); rmSync(root, { recursive: true, force: true }); }
 });
+
+test('metadata dynamic discovery returns discovered models, falls back on error, and still enforces delivery revocation', async () => {
+  const f = fixture('antigravity');
+  try {
+    let failDiscovery = false;
+    let revokeDuringDiscovery = false;
+    const dynamicMetadata = new AsyncSdkMetadata(
+      { command: (kind, input) => f.command(kind, input) },
+      {
+        diagnostics: silence,
+        discoverModels: {
+          antigravity: async () => {
+            if (revokeDuringDiscovery) f.tokens.revoke(f.tokens.authenticateAuthorization(f.authorization)!.tokenId);
+            if (failDiscovery) throw new Error('antigravity_models_unavailable');
+            return [
+              { id: 'gemini-4-neon-high', label: 'Gemini 4 Neon (High)' },
+              { id: 'claude-opus-5-5-high', label: 'Claude Opus 5.5 (High)' },
+            ];
+          },
+        },
+      },
+    );
+    try {
+      const discovered = await dynamicMetadata.models({ runtime: 'antigravity', authorization: f.authorization }, new Request('http://local/models'));
+      assert.ok(!('error' in discovered));
+      assert.deepEqual(discovered.body, {
+        models: [
+          { id: 'gemini-4-neon-high', label: 'Gemini 4 Neon (High)' },
+          { id: 'claude-opus-5-5-high', label: 'Claude Opus 5.5 (High)' },
+        ],
+      });
+
+      failDiscovery = true;
+      const fallback = await dynamicMetadata.models({ runtime: 'antigravity', authorization: f.authorization }, new Request('http://local/models'));
+      assert.ok(!('error' in fallback));
+      assert.deepEqual(fallback.body, { models: [{ id: 'default', label: 'default' }, { id: 'alternate', label: 'alternate' }] });
+
+      failDiscovery = false;
+      revokeDuringDiscovery = true;
+      const revoked = await dynamicMetadata.models({ runtime: 'antigravity', authorization: f.authorization }, new Request('http://local/models'));
+      assert.deepEqual(revoked, { error: 401 });
+    } finally {
+      await dynamicMetadata.close();
+    }
+  } finally {
+    await f.close();
+  }
+});

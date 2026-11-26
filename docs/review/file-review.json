@@ -17,13 +17,13 @@
     "Native devices, providers, full backend, browser accessibility, artifacts and redistribution rights remain unaccepted."
   ],
   "summary": {
-    "totalFiles": 3600,
+    "totalFiles": 3602,
     "byKind": {
       "config": 57,
       "docs": 55,
       "asset": 8,
-      "test": 1753,
-      "runtime": 1713,
+      "test": 1754,
+      "runtime": 1714,
       "generated": 14
     },
     "byModule": {
@@ -34,6 +34,7 @@
       "main-integration": 35,
       "storage": 218,
       "antigravity": 17,
+      "server": 2,
       "execution": 471,
       "api-auth": 392,
       "hub-notebook": 22,
@@ -55,12 +56,12 @@
       "external": 2
     },
     "byDepth": {
-      "semantic": 3552,
+      "semantic": 3554,
       "asset": 19,
       "structural": 29
     },
     "byDisposition": {
-      "no-finding": 3571,
+      "no-finding": 3573,
       "pending": 29
     },
     "completedSemanticOrAssetFiles": 3565,
@@ -2668,8 +2669,8 @@
     },
     {
       "path": "apps/server/src/antigravity/acp-fixture.mjs",
-      "size": 5766,
-      "sha256": "2db82a63f368e16776331843648b94d978a85eb978c1f40e27c11b9f68026112",
+      "size": 6233,
+      "sha256": "0b7590577819dea3305e310708621a69343198b3ca6bd500a1d78db6ffcd6f3a",
       "module": "antigravity",
       "kind": "test",
       "depth": "semantic",
@@ -2684,8 +2685,8 @@
     },
     {
       "path": "apps/server/src/antigravity/config.test.ts",
-      "size": 3809,
-      "sha256": "e69977d0340678fd00967f283f24e282065625295258abecffbf8de3eb19ba95",
+      "size": 4046,
+      "sha256": "b6c729a5c161d1da1fdb7dbd585d0ae7b5a5096e9f739fbe5ed9859ae0a49d6c",
       "module": "antigravity",
       "kind": "test",
       "depth": "semantic",
@@ -2700,8 +2701,8 @@
     },
     {
       "path": "apps/server/src/antigravity/config.ts",
-      "size": 4364,
-      "sha256": "bdeade1867b6dc553de91e49845236f1f1c942fce86e2fca1657acfadef8fd75",
+      "size": 4378,
+      "sha256": "7cef6d84c7416dd79a7159010b8722e97ac21f934c978233fe854364d29b8de1",
       "module": "antigravity",
       "kind": "runtime",
       "depth": "semantic",
@@ -2843,6 +2844,34 @@
       "findings": []
     },
     {
+      "path": "apps/server/src/antigravity/models.test.ts",
+      "size": 4454,
+      "sha256": "a16b23ca71a7bcd8483129908ed4ae84250496b8c889fac30342184c4abcf5cc",
+      "module": "server",
+      "kind": "test",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size"
+      ],
+      "notes": "Ledger entry synced for newly added repository file.",
+      "findings": []
+    },
+    {
+      "path": "apps/server/src/antigravity/models.ts",
+      "size": 4042,
+      "sha256": "b2b702576e3645ad39788d6f00d8d767615d169afd44cb0afb5a105297c02d5c",
+      "module": "server",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size"
+      ],
+      "notes": "Ledger entry synced for newly added repository file.",
+      "findings": []
+    },
+    {
       "path": "apps/server/src/antigravity/owned-execution.test.ts",
       "size": 12964,
       "sha256": "7cd17d46323b2eb21c31c42f20748c46eba66bb9a0af7586584915ca2d118bb9",
@@ -2876,8 +2905,8 @@
     },
     {
       "path": "apps/server/src/antigravity/sdk-runtime.test.ts",
-      "size": 12915,
-      "sha256": "38f4c469b841227b5f56b6a91557a0d17fa9dba371bf6f7ffa14fd36e0012150",
+      "size": 15329,
+      "sha256": "f57b12917c9c99d3d2bb41b33d9861a84e9eafb5e7f9841277f93762c33d1f70",
       "module": "antigravity",
       "kind": "test",
       "depth": "semantic",
@@ -2892,8 +2921,8 @@
     },
     {
       "path": "apps/server/src/antigravity/sdk-runtime.ts",
-      "size": 33063,
-      "sha256": "8fc5f70630485a6cf71b3e02edc7175dca108f0923714eb48b7b4f75183b8218",
+      "size": 33121,
+      "sha256": "0dfe85115ba2d45960298136c097ea2ae3dcf166146b6f181260b385b229c220",
       "module": "antigravity",
       "kind": "runtime",
       "depth": "semantic",
@@ -3235,8 +3264,8 @@
     },
     {
       "path": "apps/server/src/application-connector-async.ts",
-      "size": 4996,
-      "sha256": "e8a2332b9da8bba7ebe1a54b9df744da69f5398d7ea2a9521d015c961d5a5351",
+      "size": 5017,
+      "sha256": "ea37bfd5b939fcc677dc48262d58ca25d30a8d31c0018266b27ccbb85f899dbf",
       "module": "api-auth",
       "kind": "runtime",
       "depth": "semantic",
@@ -14118,8 +14147,8 @@
     },
     {
       "path": "apps/server/src/connector/async-sdk-application.ts",
-      "size": 17214,
-      "sha256": "3f3223dc32b15a7ae694b4b730547059c0ac355c17a42d2ee2a1ac69ac509869",
+      "size": 17531,
+      "sha256": "f6f08c3b99c5919ff94774e78b1eb56a3a55ee01381c8ed91e6b45977c132d8b",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
@@ -14538,8 +14567,8 @@
     },
     {
       "path": "apps/server/src/connector/async-sdk-metadata.test.ts",
-      "size": 15500,
-      "sha256": "5ce29a4c19adbbfd1884b1614dbb616c20d4baa5aff322d01feecbb91d15471f",
+      "size": 17538,
+      "sha256": "9d083a78212eaf413b523ca7a2792ef4f0f4058a40f72a529f96d399026c7fc7",
       "module": "connector",
       "kind": "test",
       "depth": "semantic",
@@ -14555,8 +14584,8 @@
     },
     {
       "path": "apps/server/src/connector/async-sdk-metadata.ts",
-      "size": 3328,
-      "sha256": "a6cdef14e3d0220ffedf83f902914be20bf62470db326509e624bc1b6fd807c9",
+      "size": 4892,
+      "sha256": "8d011576524e84e090e9dffeb346401bc9590c4d41aa540887bea736fdf3c1bc",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
@@ -17303,8 +17332,8 @@
     },
     {
       "path": "apps/server/src/connector/connector-sdk-local-domain.ts",
-      "size": 13408,
-      "sha256": "14264c4cd0e2973fc5555639cf4abb43aa7b64e2869c3c8c18de7af00106496e",
+      "size": 13585,
+      "sha256": "932bc789d195efa9c995d5720671977a314e13dfae9ecc2ef4a4bea12baddae5",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
@@ -17320,8 +17349,8 @@
     },
     {
       "path": "apps/server/src/connector/connector-sdk-local-owner.test.ts",
-      "size": 19735,
-      "sha256": "869044b4e2efb607484730f4175a170d9b84a24b118ccbb93caa895feed5a947",
+      "size": 21600,
+      "sha256": "9a6d0181d36d962234faf4fa98c0420d9fab86e9f2882d80a2773e08f46e251c",
       "module": "connector",
       "kind": "test",
       "depth": "semantic",
@@ -17354,8 +17383,8 @@
     },
     {
       "path": "apps/server/src/connector/connector-sdk-message-domain.ts",
-      "size": 14386,
-      "sha256": "fa32b06c9aad07904a1d4eeee3c20db4ff409c1b1376db4f6fdf3cfed1caefa4",
+      "size": 14445,
+      "sha256": "ba1d1cdcd1d3ea47c16e5a2e0c5bf1915206cd121ca881ee3acba30a84281ae1",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
@@ -19537,8 +19566,8 @@
     },
     {
       "path": "apps/server/src/connector/sdk-commands.ts",
-      "size": 11365,
-      "sha256": "0590e7e5694da5a72136252fce47de7f54713cc8a664d103829069eb653c7dd9",
+      "size": 11337,
+      "sha256": "422bb07e1080c4a682111be02ce673dae5e5db10efbee108b95cc7214a7856ab",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
@@ -19994,8 +20023,8 @@
     },
     {
       "path": "apps/server/src/connector/sdk-message-admission.ts",
-      "size": 3987,
-      "sha256": "597af8f064a6becda7b6d6000d94ec8e4c2718f1b0460d7dc694f4f938931eda",
+      "size": 4012,
+      "sha256": "9e5f6b43137c3264f574180dd1933871336c4b06dc8b72086513689d5fadab4c",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
@@ -20110,8 +20139,8 @@
     },
     {
       "path": "apps/server/src/connector/sdk-models.ts",
-      "size": 1129,
-      "sha256": "71ab36a0abe6d69c994e545534e94644bc1bf3b76b5b5ebed8d703ccad9728da",
+      "size": 1368,
+      "sha256": "90cf4930f2a16715d79a6bd8cd5d90593ae2aa0e1dcf4473280a956fcaaa004e",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
@@ -20126,8 +20155,8 @@
     },
     {
       "path": "apps/server/src/connector/sdk-owned-runtime.ts",
-      "size": 13939,
-      "sha256": "f3ebefa2c5cc0f038cc10199b7cab298c5d43455b7ebdb05108ef4e397c0ae6b",
+      "size": 14058,
+      "sha256": "86e5cf7b72dbeb4d3f0c153e0e3b4fbe6d4d9b88b1fd9f403233f7aabf9429c1",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
@@ -38379,8 +38408,8 @@
     },
     {
       "path": "apps/server/src/routes/connector.ts",
-      "sha256": "c960e70e502bf3d2b484b2e1582fd649e544c546dc04875786b412808016f9a4",
-      "size": 91132,
+      "sha256": "3a9396ed3014d0d3788cf704288a9d1a075b926e2dc05809bca48730975c138d",
+      "size": 91918,
       "module": "api-completion",
       "kind": "runtime",
       "depth": "semantic",
@@ -59211,8 +59240,8 @@
     },
     {
       "path": "docs/antigravity-cli.md",
-      "size": 7406,
-      "sha256": "efd06abda7a5b570edb592b6d3caab15e1f4ec91782de00e805af287dc4b6e61",
+      "size": 7475,
+      "sha256": "5f3fa00a999e567141ffc0228a953bec46d2cb063da3988d97ac248df4d30080",
       "module": "governance",
       "kind": "docs",
       "depth": "structural",
@@ -59226,8 +59255,8 @@
     },
     {
       "path": "docs/antigravity-cli.zh-CN.md",
-      "size": 6852,
-      "sha256": "cb18373a1be87afb2518e2af437937f831ec47e525ba1c7bbd5f355e4946b44c",
+      "size": 6930,
+      "sha256": "c86b0f82c9b8cadd043760598afb887d089962d7306a10faed0bbdf11c167462",
       "module": "governance",
       "kind": "docs",
       "depth": "structural",

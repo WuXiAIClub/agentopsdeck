@@ -9,7 +9,7 @@ import type { ConnectorUserStore } from '../connector/connector-user-store.js';
 import type { SdkTextInput } from '../connector/sdk-dispatch.js';
 import type { SdkExecutionDriver, SdkOwnedTurn } from './sdk-execution-driver.js';
 import type { SdkAgentId, SdkExecutionJournal } from './sdk-execution-journal.js';
-import { sdkModelChoices, sdkModelAllowed } from './sdk-models.js';
+import { sdkModelAllowed } from './sdk-models.js';
 import { isSdkCompactCommand, SdkUnsupportedTextCommand } from './sdk-text-command.js';
 
 type Actor = Pick<SdkTextInput, 'actorId' | 'executionGrant'> & { signal?: AbortSignal };
@@ -20,7 +20,7 @@ export type SdkCommandOptions<R extends SdkAgentId> = {
   assertAvailable: (requireStartup: boolean) => void;
   authorize: (key: string, actor: SdkTextInput, action: 'messages:send' | 'runs:interrupt' | 'runs:compact') => boolean;
   changed: (key: string) => void;
-  models: { model?: string; modelChoices?: string[] };
+  models: { model?: string; modelChoices?: string[]; dynamicModels?: boolean };
 };
 
 /** Internal owner-only command boundary; NOT an HTTP authorization layer.
@@ -40,7 +40,7 @@ export class SdkCommands<R extends SdkAgentId> {
     if (!journal.session(key) || store.commands.sessionDeletion(key)
       || !journal.canStart(key) || store.turns.hasPending(this.options.runtime, key)) throw new SessionDeletionConflict();
     const defaultModel = models.model;
-    if (model !== null && !sdkModelChoices(defaultModel, models.modelChoices).includes(model)) {
+    if (model !== null && !sdkModelAllowed(models, model)) {
       throw new Error('Model is not in this Connector catalog');
     }
     journal.updateModel(key, model, () => {

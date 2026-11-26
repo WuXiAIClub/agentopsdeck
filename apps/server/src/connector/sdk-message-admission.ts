@@ -16,7 +16,7 @@ export type SdkMessageAdmissionOptions = {
   runtime: SdkAgentId; journal: SdkExecutionJournal; store: ConnectorUserStore;
   assertAvailable: (requireStartup: boolean) => void;
   authorize: (key: string, actor: SdkTextInput, action: 'messages:send') => boolean;
-  models: { model?: string; modelChoices?: string[] };
+  models: { model?: string; modelChoices?: string[]; dynamicModels?: boolean };
 };
 
 /** Same-connection original admission participants. No native executor, RPC

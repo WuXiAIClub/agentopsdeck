@@ -281,3 +281,49 @@ test('Antigravity Connector exposes configured model catalog and applies per-ses
     await fixture.close();
   }
 });
+
+test('Antigravity Connector dynamically discovers models (including Claude) via agy models when MODEL_CHOICES is omitted', async () => {
+  const fixture = await createConnectorFixture({
+    AOD_ANTIGRAVITY_MODEL: 'gemini-4-neon-high',
+  });
+  try {
+    const modelsResponse = await fixture.request('/models/antigravity');
+    assert.equal(modelsResponse.status, 200);
+    assert.deepEqual(await modelsResponse.json(), {
+      models: [
+        { id: 'gemini-4-neon-high', label: 'Gemini 4 Neon (High)' },
+        { id: 'gemini-4-neon-xhigh', label: 'Gemini 4 Neon (XHigh)' },
+        { id: 'claude-opus-5-5-high', label: 'Claude Opus 5.5 (High)' },
+        { id: 'claude-sonnet-5-5-high', label: 'Claude Sonnet 5.5 (High)' },
+      ],
+    });
+
+    const created = await fixture.request('/agents/antigravity/sessions', 'POST', { title: 'ACP Dynamic Claude' }, { 'idempotency-key': 'agy-create-dynamic-claude' });
+    assert.equal(created.status, 201);
+    const { key } = await created.json() as { key: string };
+    const encodedKey = encodeURIComponent(key);
+
+    const updated = await fixture.request(`/sessions/${encodedKey}`, 'PATCH', { model: 'claude-opus-5-5-high', idempotencyKey: 'agy-dynamic-claude-set' });
+    assert.equal(updated.status, 200);
+    assert.deepEqual((await updated.json()).settings, { model: 'claude-opus-5-5-high', modelProvider: null });
+    assert.equal(fixture.users.antigravityJournal.session(key)?.model, 'claude-opus-5-5-high');
+
+    const sent = await fixture.request(`/sessions/${encodedKey}/messages`, 'POST', {
+      message: 'hello dynamic claude',
+      idempotencyKey: 'agy-dynamic-claude-msg-1',
+    });
+    assert.equal(sent.status, 200);
+    await waitFor(async () => {
+      const response = await fixture.request(`/sessions/${encodedKey}/messages`);
+      if (response.status !== 200) return undefined;
+      const payload = await response.json() as { messages: Array<{ role: string; text: string }> };
+      return payload.messages.some(item => item.role === 'assistant' && item.text.includes('你好，ACP')) ? true : undefined;
+    });
+    await waitFor(async () => (fixture.users.antigravityJournal.canStart(key) ? true : undefined));
+
+    const rpcLog = readFileSync(join(fixture.workspace, 'requests.ndjson'), 'utf8');
+    assert.match(rpcLog, /"method":"session\/set_model".*"modelId":"claude-opus-5-5-high"/);
+  } finally {
+    await fixture.close();
+  }
+});

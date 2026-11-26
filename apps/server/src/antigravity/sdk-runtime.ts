@@ -615,7 +615,7 @@ export class AntigravityOwnedRuntime extends SdkOwnedRuntime<'antigravity', Anti
     check: (config: AntigravityConfig) => SdkPreflight = value => new AntigravityWorkerPreflight(value),
     deleteNative: (config: AntigravityConfig, request: PrivateWorkerDeletion) => SdkPreflight = (value, request) => new AntigravityWorkerDeletion(value, request)) {
     const config = structuredClone(options.config);
-    const ownedConfig = { ...config, model: config.model ?? 'default' };
+    const ownedConfig = { ...config, model: config.model ?? 'default', ...(!config.modelChoices ? { dynamicModels: true } : {}) };
     super({
       ...options,
       config: ownedConfig,

@@ -157,7 +157,7 @@ export async function executeConnectorSdkMessage<K extends ConnectorSdkMessageKi
         if (attachments) {
           const pending = prepareSdkMessageAdmission({ runtime: input.runtime, journal, store: owner,
             assertAvailable: () => { if (!owner.sdkCommandAdmissionOpen) throw new SessionDeletionConflict(); },
-            authorize: () => allowed(), models: { model: catalog.model, ...(catalog.modelChoices ? { modelChoices: [...catalog.modelChoices] } : {}) },
+            authorize: () => allowed(), models: { model: catalog.model, ...(catalog.modelChoices ? { modelChoices: [...catalog.modelChoices] } : {}), ...(catalog.dynamicModels ? { dynamicModels: true } : {}) },
           }, input.key, normalized.message, { actorId: actor.tokenId,
             accept: admission => owner.commands.queueCommit(scope, input.commandKey, { status: 200, body: { ok: true, ...admission } }),
           }, attachments);

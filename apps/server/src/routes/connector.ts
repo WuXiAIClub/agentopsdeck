@@ -56,7 +56,8 @@ import { claudeHistoryPage, claudeHistoryMessage } from '../claude/history.js';
 import type { CopilotConnectorRuntime } from '../copilot/connector-runtime.js';
 import { copilotHistoryPage, copilotHistoryMessage, antigravityHistoryPage, antigravityHistoryMessage } from '../copilot/history.js';
 import type { AntigravityConnectorRuntime } from '../antigravity/sdk-runtime.js';
-import { sdkModelChoices } from '../connector/sdk-models.js';
+import { createAntigravityModelsReader } from '../antigravity/models.js';
+import { sdkModelAllowed, sdkModelChoices } from '../connector/sdk-models.js';
 import type { AgentSummary, ConnectorCapabilities } from '@agentopsdeck/shared';
 import type { ServerConfig } from '../config.js';
 import type { ConnectorPrincipal, ConnectorScope, ConnectorTokenStore } from '../auth/connector-token.js';
@@ -495,6 +496,10 @@ export function registerConnectorRoutes(app: Hono, deps: {
     }
   });
 
+  const antigravityModels = deps.config.antigravity && !deps.config.antigravity.modelChoices
+    ? createAntigravityModelsReader(deps.config.antigravity)
+    : undefined;
+
   app.get(`${base}/models/:runtime`, async (c) => {
     const principal = requireScope(c.req.raw, deps.tokens, 'models:read');
     if (!principal) return c.json({ error: 'missing models:read scope' }, 403);
@@ -516,7 +521,15 @@ export function registerConnectorRoutes(app: Hono, deps: {
         const settings = runtime === 'claude-code' ? deps.config.claude : runtime === 'ghcp' ? deps.config.copilot : deps.config.antigravity;
         if (!settings || !sdk(runtime)) return c.json({ error: 'Model catalog unavailable for this runtime' }, 404);
         // Configured choices are not a claim of provider authentication.
-        models = sdkModelChoices(settings.model ?? 'default', settings.modelChoices).map(id => ({ id, label: id }));
+        if (runtime === 'antigravity' && antigravityModels) {
+          try {
+            models = await antigravityModels();
+          } catch {
+            models = sdkModelChoices(settings.model ?? 'default', settings.modelChoices).map(id => ({ id, label: id }));
+          }
+        } else {
+          models = sdkModelChoices(settings.model ?? 'default', settings.modelChoices).map(id => ({ id, label: id }));
+        }
       } else if (runtime === 'openclaw') {
         models = (await readGatewayModelSetStatus(deps.config)).observed.map(model => ({ id: model.alias, label: model.alias }));
       } else return c.json({ error: 'Model selection is unavailable for this runtime' }, 404);
@@ -654,7 +667,10 @@ export function registerConnectorRoutes(app: Hono, deps: {
       const runtime = sessionRuntimeId(key), owned = sdk(runtime);
       const settings = runtime === 'claude-code' ? deps.config.claude : runtime === 'ghcp' ? deps.config.copilot : deps.config.antigravity;
       if (!owned?.ready || !settings) throw new HTTPException(409, { message: 'Agent is not ready; settings were not changed' });
-      if (model !== null && !sdkModelChoices(settings.model ?? 'default', settings.modelChoices).includes(model)) {
+      const policy = runtime === 'antigravity' && !settings.modelChoices
+        ? { model: settings.model ?? 'default', dynamicModels: true }
+        : { model: settings.model ?? 'default', ...(settings.modelChoices ? { modelChoices: settings.modelChoices } : {}) };
+      if (model !== null && !sdkModelAllowed(policy, model)) {
         throw new HTTPException(400, { message: 'Model is not in this Connector catalog' });
       }
       owned.commands.updateModel(key, model, authorize, acknowledge);

@@ -4,11 +4,11 @@ import { CommandCapacity, CommandConflict } from '../commands/receipts.js';
 import type { ConnectorTokenStore } from '../auth/connector-token.js';
 import type { ConnectorUserStore } from './connector-user-store.js';
 import type { SdkAgentId } from './sdk-execution-journal.js';
-import { sdkModelChoices } from './sdk-models.js';
+import { sdkModelAllowed, sdkModelChoices } from './sdk-models.js';
 import { validApplicationTransactionEvidence, type ApplicationTransactionEvidence, type ApplicationTransactionClient } from '../auth/application-transaction-gate.js';
 import { applicationControlTransaction } from './application-stop-transaction.js';
 
-export type SdkOwnerCatalogs = Partial<Record<SdkAgentId, { model: string; modelChoices?: readonly string[] }>>;
+export type SdkOwnerCatalogs = Partial<Record<SdkAgentId, { model: string; modelChoices?: readonly string[]; dynamicModels?: boolean }>>;
 type Scope = { runtime: SdkAgentId; authorization: string; commandKey: string; payloadJson: string;
   /** Trusted caller observation can only veto new admission, never authorize. */
   rejectFresh?: 'runtime_unavailable'; application?: ApplicationTransactionEvidence };
@@ -41,9 +41,14 @@ export function copySdkOwnerCatalogs(value: unknown): SdkOwnerCatalogs {
   for (const r of ['claude-code', 'ghcp', 'antigravity'] as const) {
     if (!Object.hasOwn(value, r)) continue;
     const c = value[r];
-    if (!fields(c, ['model'], ['modelChoices']) || typeof c.model !== 'string'
-      || c.modelChoices !== undefined && (!Array.isArray(c.modelChoices) || c.modelChoices.some(v => typeof v !== 'string'))) throw Error('Invalid SDK owner catalog');
-    result[r] = { model: c.model, modelChoices: sdkModelChoices(c.model, c.modelChoices as string[] | undefined) };
+    if (!fields(c, ['model'], ['modelChoices', 'dynamicModels']) || typeof c.model !== 'string'
+      || c.modelChoices !== undefined && (!Array.isArray(c.modelChoices) || c.modelChoices.some(v => typeof v !== 'string'))
+      || c.dynamicModels !== undefined && typeof c.dynamicModels !== 'boolean') throw Error('Invalid SDK owner catalog');
+    result[r] = {
+      model: c.model,
+      modelChoices: sdkModelChoices(c.model, c.modelChoices as string[] | undefined),
+      ...(c.dynamicModels ? { dynamicModels: true } : {}),
+    };
   }
   return result;
 }
@@ -148,7 +153,7 @@ export async function executeConnectorSdkLocal<K extends ConnectorSdkLocalKind>(
         }
       } else {
         const model = p.model === null ? null : typeof p.model === 'string' ? p.model.trim() : undefined;
-        if (model === undefined || model !== null && !sdkModelChoices(catalog.model, catalog.modelChoices).includes(model)
+        if (model === undefined || model !== null && !sdkModelAllowed(catalog, model)
           || Object.hasOwn(p, 'thinking') && p.thinking !== null || Object.hasOwn(p, 'goal')) return reject(400);
         else if (!sessionKey || !journal.canStart(sessionKey) || owner.commands.sessionDeletion(sessionKey)
           || owner.turns.hasPending(input.runtime, sessionKey)) return reject(409);
