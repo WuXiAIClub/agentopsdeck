@@ -500,13 +500,15 @@ export class CodexAppServer {
         && !pending.preparation && !pending.reason && ['completed', 'failed'].includes(pending.phase)
         ? this.nativeHistoryActivityGuard(this.threadId(sessionKey)) : undefined;
       const coldConnection = this.connectionId;
-      const canFastVerifyBlockedDisplay = (candidate: CodexExecution | undefined) => !userContinuation
-        && !this.threadRefreshInflight.has(sessionKey)
+      const canFastVerifyBlockedDisplay = (candidate: CodexExecution | undefined) => !this.threadRefreshInflight.has(sessionKey)
         && !!candidate?.runId && !candidate.preparation && !candidate.reason
         && ['completed', 'failed', 'interrupted'].includes(candidate.phase)
         && candidate.sync === 'current' && candidate.nativeHistory?.state === 'blocked'
+        && candidate.nativeHistory.connectionId === this.connectionId
         && this.threadRefreshResult.get(sessionKey)?.available === true
-        && !!this.threadRefreshResult.get(sessionKey)?.display;
+        && !!this.threadRefreshResult.get(sessionKey)?.display
+        && (!userContinuation
+          || (candidate.nativeHistory.reason === 'background-work' && this.loadedThreadIds.has(this.threadId(sessionKey))));
       const skipRehydrateBeforeReconcile = canFastVerifyBlockedDisplay(pending)
         && (pending?.nativeHistory?.reason === 'goal-blocked' || this.loadedThreadIds.has(this.threadId(sessionKey)));
       if (!skipRehydrateBeforeReconcile) {
@@ -644,7 +646,10 @@ export class CodexAppServer {
       const thread = historyThread(await activity.request('thread/read', { threadId, includeTurns: true }), threadId);
       await check();
       const latestTurn = arrayValue(thread.turns).at(-1);
-      if (thread.status?.type !== 'idle' || latestTurn?.id !== expectedRunId || latestTurn.status !== fact!.phase) return false;
+      const allTurnsTerminal = arrayValue(thread.turns).every(turn => ['completed', 'failed', 'interrupted'].includes(turn.status));
+      if (!['idle', 'active'].includes(thread.status?.type)
+        || (thread.status?.type === 'active' && !allTurnsTerminal)
+        || latestTurn?.id !== expectedRunId || latestTurn.status !== fact!.phase) return false;
       const itemIds = new Set<string>([
         ...arrayValue(latestTurn.items).filter(item => item.type === 'commandExecution').map(item => String(item.id)),
         ...(fact!.pendingCommandTools ?? []),
