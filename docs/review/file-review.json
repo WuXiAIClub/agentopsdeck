@@ -7432,8 +7432,8 @@
     },
     {
       "path": "apps/server/src/codex/app-server.ts",
-      "sha256": "fe2dd853a1a28f7d4b6509e58687e739ac17e560e8b91f13a130c7ae6be4bd5c",
-      "size": 412598,
+      "sha256": "5f31131952b67b057b9081dcfdfef0ded2a5906b7eb0b26fdddb458a07036ff8",
+      "size": 413020,
       "module": "codex",
       "kind": "runtime",
       "depth": "semantic",
@@ -7564,8 +7564,8 @@
     },
     {
       "path": "apps/server/src/codex/background-terminals.test.ts",
-      "size": 48159,
-      "sha256": "010056cfe74e948df7da88cf2aeeebdcfc4fbf5c151e9bfd6074844dae5ba510",
+      "size": 51918,
+      "sha256": "ef4386fa6de24c7dbbe06bc499682acfa58a7d25b4d46304c0cc4d083438af07",
       "module": "execution",
       "kind": "test",
       "depth": "semantic",
