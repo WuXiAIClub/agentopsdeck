@@ -38,7 +38,7 @@ export function validConnectorStorageOutput(kind: ConnectorStorageKind, v: unkno
   if (kind === 'authorizedStorageStats') return record(value, ['databaseBytes', 'walBytes', 'availableBytes', 'lowSpace', 'walPressure', 'connection', 'reads'])
     && integer(value.databaseBytes) && integer(value.walBytes) && integer(value.availableBytes)
     && typeof value.lowSpace === 'boolean' && typeof value.walPressure === 'boolean' && recovery(value.connection)
-    && record(value.reads, ['claude', 'copilot']) && timings(value.reads.claude) && timings(value.reads.copilot);
+    && record(value.reads, ['claude', 'copilot', 'antigravity']) && timings(value.reads.claude) && timings(value.reads.copilot) && timings(value.reads.antigravity);
   // SQLite reports -1 frame counts when the existing DB is not in WAL mode.
   return record(value, ['deferred']) && value.deferred === true
     || record(value, ['deferred', 'busy', 'logFrames', 'checkpointedFrames']) && value.deferred === false

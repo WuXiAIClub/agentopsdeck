@@ -50,7 +50,7 @@ export type WorkerBoardTools = NonNullable<Awaited<ReturnType<typeof loadWorkerB
 /** Private host/worker opt-in. Credentials remain in this closure, never SDK arguments,
  * model input, worker events, environment or native child process configuration.
  * POSIX ownership / Windows private ACL checks are not isolation from the same OS account. */
-export async function loadWorkerBoardTools(directory: string | undefined, runtime: 'claude-code' | 'ghcp' | 'codex', sessionId: string,
+export async function loadWorkerBoardTools(directory: string | undefined, runtime: 'claude-code' | 'ghcp' | 'codex' | 'antigravity', sessionId: string,
   active: () => boolean | Promise<boolean>, fetcher: typeof fetch = fetch) {
   if (!directory) return;
   const owner = process.getuid?.();

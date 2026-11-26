@@ -45,6 +45,11 @@ No pinned native/provider compatibility matrix is claimed for this source draft.
 
 ## Other adapters
 
+Antigravity CLI is being developed separately on the feature branch. Its ACP
+transport tests do not yet provide a selectable production connector; see
+[Antigravity CLI development](antigravity-cli.md) for the implemented contracts
+and remaining lifecycle/identity/UI integration. No enablement is claimed yet.
+
 Starter toggles `AOD_LOCAL_OPENCLAW_CLI`, `AOD_HERMES_ENABLED`,
 `AOD_CLAUDE_ENABLED` and `AOD_COPILOT_ENABLED` are false. Merely changing a toggle
 does not install a CLI, authenticate it or validate provider compatibility.

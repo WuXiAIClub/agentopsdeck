@@ -15,6 +15,7 @@ export function parseSdkModelChoices(model: string, value: string | undefined): 
   return sdkModelChoices(model, value?.trim() ? value.split(',').map(item => item.trim()) : []);
 }
 
-export function sdkModelAllowed(config: { model: string; modelChoices?: readonly string[] }, override?: string): boolean {
+export function sdkModelAllowed(config: { model?: string; modelChoices?: readonly string[] }, override?: string): boolean {
+  if (!config.model) return override === undefined;
   return sdkModelChoices(config.model, config.modelChoices).includes(override ?? config.model);
 }

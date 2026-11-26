@@ -11,7 +11,7 @@ function gate() { let release!: () => void; const promise = new Promise<void>(re
 const tick = () => new Promise<void>(resolve => setImmediate(resolve));
 const silence = new PerformanceDiagnostics(() => {});
 const sanitized = (error: unknown) => error instanceof Error && !error.message.includes('PRIVATE');
-function owned(id: SdkAgentId) {
+function owned<R extends SdkAgentId>(id: R) {
   const calls = { initialized: 0, closed: 0, paused: 0, resumed: 0, history: 0, directory: 0 };
   const facts = { ownershipHeld: true, cleanupUnconfirmed: false, closed: false, faulted: false, nativeWorkers: 0 };
   let initialized = false, paused = false;

@@ -54,7 +54,8 @@ import type { HermesRuntime } from '../hermes/runtime.js';
 import type { ClaudeConnectorRuntime } from '../claude/connector-runtime.js';
 import { claudeHistoryPage, claudeHistoryMessage } from '../claude/history.js';
 import type { CopilotConnectorRuntime } from '../copilot/connector-runtime.js';
-import { copilotHistoryPage, copilotHistoryMessage } from '../copilot/history.js';
+import { copilotHistoryPage, copilotHistoryMessage, antigravityHistoryPage, antigravityHistoryMessage } from '../copilot/history.js';
+import type { AntigravityConnectorRuntime } from '../antigravity/sdk-runtime.js';
 import { sdkModelChoices } from '../connector/sdk-models.js';
 import type { AgentSummary, ConnectorCapabilities } from '@agentopsdeck/shared';
 import type { ServerConfig } from '../config.js';
@@ -141,6 +142,7 @@ export function registerConnectorRoutes(app: Hono, deps: {
   hermes?: HermesRuntime;
   claude?: ClaudeConnectorRuntime;
   copilot?: CopilotConnectorRuntime;
+  antigravity?: AntigravityConnectorRuntime;
   artifactRegistry?: ArtifactRegistryAccess;
   openclawQueue?: OpenClawTurnQueue;
   refreshSessions: (options?: { maxAgeMs?: number }) => Promise<void>;
@@ -213,18 +215,19 @@ export function registerConnectorRoutes(app: Hono, deps: {
   const hermesHttp = deps.hermesApplication ?? deps;
   const base = '/api/connector/v1';
   const historyDiagnostics = new HistoryDiagnostics();
-  const sdk = (runtime: string) => runtime === 'claude-code' ? deps.claude : runtime === 'ghcp' ? deps.copilot : undefined;
-  const sdkJournal = (runtime: 'claude-code' | 'ghcp') => runtime === 'claude-code' ? deps.connectorUsers.claudeJournal : deps.connectorUsers.copilotJournal;
+  const sdk = (runtime: string) => runtime === 'claude-code' ? deps.claude : runtime === 'ghcp' ? deps.copilot : runtime === 'antigravity' ? deps.antigravity : undefined;
+  const sdkJournal = (runtime: 'claude-code' | 'ghcp' | 'antigravity') => runtime === 'claude-code' ? deps.connectorUsers.claudeJournal : runtime === 'ghcp' ? deps.connectorUsers.copilotJournal : deps.connectorUsers.antigravityJournal;
   const fileRebuilds = new SessionFileRebuilds(deps.connectorUsers.fileIndex, key => {
     const runtime = sessionRuntimeId(key);
     if (runtime === 'codex') return deps.store.getSession(key) && !deps.connectorUsers.commands.sessionDeletion(key)
       ? deps.connectorUsers.fileIndex.projectionBinding(key) : undefined;
-    if ((runtime !== 'claude-code' && runtime !== 'ghcp') || deps.connectorUsers.commands.sessionDeletion(key)
+    if ((runtime !== 'claude-code' && runtime !== 'ghcp' && runtime !== 'antigravity') || deps.connectorUsers.commands.sessionDeletion(key)
       || sdkJournal(runtime).deletion(key)?.phase === 'deleted') return undefined;
     return sdkJournal(runtime).session(key)?.nativeSessionId;
   }, (key, before) => {
     if (sessionRuntimeId(key) === 'codex') return deps.connectorUsers.fileIndex.projectionEvidencePage(key, before);
     if (sessionRuntimeId(key) === 'ghcp') return deps.connectorUsers.copilotTranscript.fileEvidencePage(key, before);
+    if (sessionRuntimeId(key) === 'antigravity') return deps.connectorUsers.antigravityTranscript.fileEvidencePage(key, before);
     return deps.connectorUsers.claudeTranscript.fileEvidencePage(key, before);
   }, Date.now, key => sessionRuntimeId(key) === 'codex' ? 'verified-projection' : 'durable-events');
   const replayEvents: EventReplayRead = deps.eventReplay ?? (after => replayStoreEvents(deps.store, after));
@@ -293,7 +296,7 @@ export function registerConnectorRoutes(app: Hono, deps: {
   for (const route of [`${base}/sessions/:sessionKey`, `${base}/sessions/:sessionKey/*`]) {
     app.use(route, async (c, next) => {
       const runtime = sessionRuntimeId(c.req.param('sessionKey')!);
-      if (runtime === 'claude-code' || runtime === 'ghcp') {
+      if (runtime === 'claude-code' || runtime === 'ghcp' || runtime === 'antigravity') {
         // Bindings have their own narrow principal and session/readiness checks.
         // Do not force that credential through ordinary execution permissions.
         const suffix = c.req.path.split('/sessions/')[1]?.split('/').slice(1).join('/') ?? '';
@@ -412,12 +415,13 @@ export function registerConnectorRoutes(app: Hono, deps: {
     const codexReady = deps.codex?.enabled === true && deps.codex.isSessionListReady();
     return c.json({
       ok: true,
-      status: gateway.ok || cliAvailable || codexReady || deps.hermes?.ready || deps.claude?.ready || deps.copilot?.ready ? 'online' : 'degraded',
+      status: gateway.ok || cliAvailable || codexReady || deps.hermes?.ready || deps.claude?.ready || deps.copilot?.ready || deps.antigravity?.ready ? 'online' : 'degraded',
       gateway,
       codex: { enabled: deps.codex?.enabled === true, sessionListReady: codexReady },
       hermes: { enabled: !!deps.hermes, ready: deps.hermes?.ready === true, status: deps.hermes?.status ?? 'disabled' },
       claude: { enabled: !!deps.claude, ready: deps.claude?.ready === true, status: deps.claude?.status ?? 'disabled' },
       copilot: { enabled: !!deps.copilot, ready: deps.copilot?.ready === true, status: deps.copilot?.status ?? 'disabled' },
+      antigravity: { enabled: !!deps.antigravity, ready: deps.antigravity?.ready === true, status: deps.antigravity?.status ?? 'disabled' },
       fallback: { openclawCli: cliAvailable },
       updatedAt: Date.now(),
     });
@@ -437,7 +441,9 @@ export function registerConnectorRoutes(app: Hono, deps: {
         'claude-code': { enabled: !!deps.claude, ready: deps.claude?.ready === true, status: deps.claude?.status ?? 'disabled', ownerOnly: true,
           features: { text: true, queue: true, interrupt: true, history: true, attachments: true, compact: true, delete: true, modelOverride: true, interactions: sdkHttp.sdkInteractions ? sdkHttp.sdkInteractions.ready('claude-code') === true : !!deps.interactions && deps.claude?.ready === true } },
         ghcp: { enabled: !!deps.copilot, ready: deps.copilot?.ready === true, status: deps.copilot?.status ?? 'disabled', ownerOnly: true,
-          features: { text: true, queue: true, interrupt: true, history: true, attachments: true, compact: true, delete: true, modelOverride: true, interactions: sdkHttp.sdkInteractions ? sdkHttp.sdkInteractions.ready('ghcp') === true : !!deps.interactions && deps.copilot?.ready === true } } },
+          features: { text: true, queue: true, interrupt: true, history: true, attachments: true, compact: true, delete: true, modelOverride: true, interactions: sdkHttp.sdkInteractions ? sdkHttp.sdkInteractions.ready('ghcp') === true : !!deps.interactions && deps.copilot?.ready === true } },
+        antigravity: { enabled: !!deps.antigravity, ready: deps.antigravity?.ready === true, status: deps.antigravity?.status ?? 'disabled', ownerOnly: true,
+          features: { text: true, queue: true, interrupt: true, history: true, attachments: false, compact: false, delete: true, modelOverride: true, interactions: false } } },
       scopes: principal.scopes,
       limits: { maxMessageChars: MAX_MESSAGE_CHARS, maxRequestsPerMinute: 120, maxSseConnections: 2 },
       // Capabilities must not depend on an optional OpenClaw model lookup.
@@ -503,14 +509,14 @@ export function registerConnectorRoutes(app: Hono, deps: {
         models = configured.length || deps.config.codex.modelProvider
           ? ids.map(id => ({ id, label: id })) : await deps.codex.listModels();
         for (const id of ids) if (!models.some(model => model.id === id)) models = [...models, { id, label: id }];
-      } else if (runtime === 'claude-code' || runtime === 'ghcp') {
+      } else if (runtime === 'claude-code' || runtime === 'ghcp' || runtime === 'antigravity') {
         if (principal.scopes.includes('execution:delegate') || c.req.header('x-agentopsdeck-execution-grant')) {
           return c.json({ error: 'SDK model discovery requires owner authority' }, 403);
         }
-        const settings = runtime === 'claude-code' ? deps.config.claude : deps.config.copilot;
+        const settings = runtime === 'claude-code' ? deps.config.claude : runtime === 'ghcp' ? deps.config.copilot : deps.config.antigravity;
         if (!settings || !sdk(runtime)) return c.json({ error: 'Model catalog unavailable for this runtime' }, 404);
         // Configured choices are not a claim of provider authentication.
-        models = sdkModelChoices(settings.model, settings.modelChoices).map(id => ({ id, label: id }));
+        models = sdkModelChoices(settings.model ?? 'default', settings.modelChoices).map(id => ({ id, label: id }));
       } else if (runtime === 'openclaw') {
         models = (await readGatewayModelSetStatus(deps.config)).observed.map(model => ({ id: model.alias, label: model.alias }));
       } else return c.json({ error: 'Model selection is unavailable for this runtime' }, 404);
@@ -646,9 +652,9 @@ export function registerConnectorRoutes(app: Hono, deps: {
     },
     sdkModelUpdate: (key, model, authorize, acknowledge) => {
       const runtime = sessionRuntimeId(key), owned = sdk(runtime);
-      const settings = runtime === 'claude-code' ? deps.config.claude : deps.config.copilot;
+      const settings = runtime === 'claude-code' ? deps.config.claude : runtime === 'ghcp' ? deps.config.copilot : deps.config.antigravity;
       if (!owned?.ready || !settings) throw new HTTPException(409, { message: 'Agent is not ready; settings were not changed' });
-      if (model !== null && !sdkModelChoices(settings.model, settings.modelChoices).includes(model)) {
+      if (model !== null && !sdkModelChoices(settings.model ?? 'default', settings.modelChoices).includes(model)) {
         throw new HTTPException(400, { message: 'Model is not in this Connector catalog' });
       }
       owned.commands.updateModel(key, model, authorize, acknowledge);
@@ -680,7 +686,7 @@ export function registerConnectorRoutes(app: Hono, deps: {
     if (!principal || principal.scopes.includes('execution:delegate') || c.req.header('x-agentopsdeck-execution-grant')) return c.json({ error: 'Token usage requires owner authority' }, 403);
     executionActor(c);
     const key = c.req.param('sessionKey'), runtime = sessionRuntimeId(key);
-    if (runtime !== 'codex' && runtime !== 'claude-code' && runtime !== 'ghcp') return c.json({ error: 'Unsupported runtime' }, 409);
+    if (runtime !== 'codex' && runtime !== 'claude-code' && runtime !== 'ghcp' && runtime !== 'antigravity') return c.json({ error: 'Unsupported runtime' }, 409);
     const exists = runtime === 'codex' ? deps.store.getSession(key) : sdkJournal(runtime).session(key);
     if (!exists || deps.connectorUsers.commands.sessionDeletion(key)) return c.json({ error: 'session not found' }, 404);
     let range;
@@ -715,7 +721,7 @@ export function registerConnectorRoutes(app: Hono, deps: {
     if (authorized()?.tokenId !== principal.tokenId) return c.json({ error: 'Owner authority revoked' }, 403);
     if (c.req.raw.signal.aborted) return c.json({ error: 'Request interrupted' }, 408);
     const key = c.req.param('sessionKey')!, runtime = sessionRuntimeId(key);
-    if (runtime !== 'codex' && runtime !== 'claude-code' && runtime !== 'ghcp') return c.json({ error: 'Unsupported runtime' }, 409);
+    if (runtime !== 'codex' && runtime !== 'claude-code' && runtime !== 'ghcp' && runtime !== 'antigravity') return c.json({ error: 'Unsupported runtime' }, 409);
     const exists = runtime === 'codex' ? deps.store.getSession(key) : sdkJournal(runtime).session(key);
     if (!exists || deps.connectorUsers.commands.sessionDeletion(key)
       || runtime !== 'codex' && sdkJournal(runtime).deletion(key)?.phase === 'deleted') return c.json({ error: 'session not found' }, 404);
@@ -768,13 +774,13 @@ export function registerConnectorRoutes(app: Hono, deps: {
     const key = c.req.param('sessionKey'), runtime = sessionRuntimeId(key);
     executionActor(c);
     if (deps.connectorUsers.commands.sessionDeletion(key)) return c.json({ error: 'session not available' }, 404);
-    const exists = runtime === 'claude-code' || runtime === 'ghcp' ? sdkJournal(runtime).session(key) : deps.store.getSession(key);
+    const exists = runtime === 'claude-code' || runtime === 'ghcp' || runtime === 'antigravity' ? sdkJournal(runtime).session(key) : deps.store.getSession(key);
     if (!exists) return c.json({ error: 'session not found' }, 404);
     const cursor = c.req.query('cursor');
     if (cursor !== undefined && (!cursor.length || cursor.length > 1024)) return c.json({ error: 'Invalid file cursor' }, 400);
     try { return c.json({ ...deps.connectorUsers.fileIndex.page(key, cursor,
-      runtime === 'claude-code' || runtime === 'ghcp' ? sdkJournal(runtime).session(key)?.nativeSessionId : undefined),
-      ...((runtime === 'claude-code' || runtime === 'ghcp' || runtime === 'codex' && deps.connectorUsers.fileIndex.projectionBinding(key))
+      runtime === 'claude-code' || runtime === 'ghcp' || runtime === 'antigravity' ? sdkJournal(runtime).session(key)?.nativeSessionId : undefined),
+      ...((runtime === 'claude-code' || runtime === 'ghcp' || runtime === 'antigravity' || runtime === 'codex' && deps.connectorUsers.fileIndex.projectionBinding(key))
         ? { rebuildAvailable: true } : {}) }); }
     catch (error) {
       if (error instanceof FileIndexCursorError) return c.json({ error: error.message }, 409);
@@ -786,7 +792,7 @@ export function registerConnectorRoutes(app: Hono, deps: {
     if (!requireScope(c.req.raw, deps.tokens, 'messages:read')) return c.json({ error: 'missing messages:read scope' }, 403);
     const initial = executionActor(c);
     const key = c.req.param('sessionKey')!, runtime = sessionRuntimeId(key), id = c.req.param('jobId');
-    if (runtime !== 'claude-code' && runtime !== 'ghcp' && runtime !== 'codex') return c.json({ error: 'Historical file rebuild is not supported for this runtime' }, 409);
+    if (runtime !== 'claude-code' && runtime !== 'ghcp' && runtime !== 'antigravity' && runtime !== 'codex') return c.json({ error: 'Historical file rebuild is not supported for this runtime' }, 409);
     let step = 0;
     if (id && c.req.method === 'POST') {
       const body = await readJsonBody(c.req.raw, 256);
@@ -819,13 +825,13 @@ export function registerConnectorRoutes(app: Hono, deps: {
     const before = c.req.query('before');
     if (before !== undefined && (!before.length || before.length > 4096)) return c.json({ error: 'Invalid history anchor' }, 400);
     const runtime = sessionRuntimeId(sessionKey);
-    if (runtime === 'claude-code' || runtime === 'ghcp') {
+    if (runtime === 'claude-code' || runtime === 'ghcp' || runtime === 'antigravity') {
       if (!sdkJournal(runtime).session(sessionKey)) return c.json({ error: 'session not found' }, 404);
       try {
         const body = await snapshotResponse(c, principal.tokenId, 'messages:read', cursor => {
           if (!sdkJournal(runtime).session(sessionKey) || sdkJournal(runtime).deletion(sessionKey)
             || deps.connectorUsers.commands.sessionDeletion(sessionKey)) throw new HTTPException(404, { res: Response.json({ error: 'session not found' }, { status: 404 }) });
-          const page = timeHistorySync('page', () => (runtime === 'claude-code' ? claudeHistoryPage : copilotHistoryPage)(deps.connectorUsers, sessionKey, Math.min(200, clampMessageLimit(c.req.query('limit'))), before));
+          const page = timeHistorySync('page', () => (runtime === 'claude-code' ? claudeHistoryPage : runtime === 'ghcp' ? copilotHistoryPage : antigravityHistoryPage)(deps.connectorUsers, sessionKey, Math.min(200, clampMessageLimit(c.req.query('limit'))), before));
           return page ? { ...page, updatedAt: Date.now(), revision: stableGatewayRowsRevision(page.messages),
             sourceCursor: cursor, limits: { maxMessageChars: MAX_MESSAGE_CHARS } } : null;
         });
@@ -876,12 +882,12 @@ export function registerConnectorRoutes(app: Hono, deps: {
     const sessionKey = c.req.param('sessionKey');
     const cached = deps.historySnapshotReady(sessionKey) && deps.store.hasMessage(sessionKey, c.req.param('messageId'));
     const runtime = sessionRuntimeId(sessionKey);
-    if (runtime === 'claude-code' || runtime === 'ghcp') {
+    if (runtime === 'claude-code' || runtime === 'ghcp' || runtime === 'antigravity') {
       try {
         const body = await snapshotResponse(c, principal.tokenId, 'messages:read', cursor => {
           if (!sdkJournal(runtime).session(sessionKey) || sdkJournal(runtime).deletion(sessionKey)
             || deps.connectorUsers.commands.sessionDeletion(sessionKey)) return null;
-          const message = (runtime === 'claude-code' ? claudeHistoryMessage : copilotHistoryMessage)(deps.connectorUsers, sessionKey, c.req.param('messageId'));
+          const message = (runtime === 'claude-code' ? claudeHistoryMessage : runtime === 'ghcp' ? copilotHistoryMessage : antigravityHistoryMessage)(deps.connectorUsers, sessionKey, c.req.param('messageId'));
           return message ? { message, updatedAt: Date.now(), sourceCursor: cursor } : null;
         });
         if (!sdkJournal(runtime).session(sessionKey) || sdkJournal(runtime).deletion(sessionKey)
@@ -920,7 +926,7 @@ export function registerConnectorRoutes(app: Hono, deps: {
   });
 
   registerQueueRoutes(app, `${base}/sessions/:sessionKey`, { actor: executionActor, users: deps.connectorUsers,
-    store: deps.store, codex: deps.codex, hermes: deps.hermes, claude: deps.claude, copilot: deps.copilot, openclaw: deps.openclawQueue });
+    store: deps.store, codex: deps.codex, hermes: deps.hermes, claude: deps.claude, copilot: deps.copilot, antigravity: deps.antigravity, openclaw: deps.openclawQueue });
 
   registerCompactReceipts(app, `${base}/sessions/:sessionKey`, {
     receipts: deps.connectorUsers.commands,
@@ -1009,7 +1015,7 @@ export function registerConnectorRoutes(app: Hono, deps: {
       return result ? c.json(result) : c.json({ error: 'session not found' }, 404);
     }
     const runtime = sessionRuntimeId(sessionKey);
-    if (runtime === 'claude-code' || runtime === 'ghcp') {
+    if (runtime === 'claude-code' || runtime === 'ghcp' || runtime === 'antigravity') {
       const owned = sdk(runtime);
       // This check precedes any runtime side effect. Persist a definitive
       // rejection, not a 5xx that receipt recovery must treat as uncertain.
@@ -1017,6 +1023,7 @@ export function registerConnectorRoutes(app: Hono, deps: {
       if (!owned?.ready) return c.json({ error: 'Agent is not ready; command was not admitted', code: 'agent_not_ready' }, 409);
       if (!sdkJournal(runtime).session(sessionKey)) return c.json({ error: 'session not found' }, 404);
       if (isSdkCompactCommand(validated.message)) return c.json({ error: 'Use the explicit compact control' }, 409);
+      if (runtime === 'antigravity' && validated.media.length) return c.json({ error: 'Antigravity attachments are not supported' }, 409);
       if (validated.message.trim() === '/stop' && validated.media.length) return c.json({ error: 'Stop control does not accept attachments' }, 400);
       let attachments;
       try { attachments = prepareSdkAttachments(validated.media); }
@@ -1159,7 +1166,7 @@ export function registerConnectorRoutes(app: Hono, deps: {
     }
   });
 
-  for (const runtime of ['claude-code', 'ghcp']) app.post(`${base}/agents/${runtime}/sessions`, async (c, next) => {
+  for (const runtime of ['claude-code', 'ghcp', 'antigravity']) app.post(`${base}/agents/${runtime}/sessions`, async (c, next) => {
     const owned = sdk(runtime);
     if (!owned) return next(); // Keep the existing explicit disabled receipt.
     const principal = requireScope(c.req.raw, deps.tokens, 'sessions:create');
@@ -1187,7 +1194,7 @@ export function registerConnectorRoutes(app: Hono, deps: {
     const principal = requireScope(c.req.raw, deps.tokens, 'sessions:create');
     if (!principal) return c.json({ error: 'missing sessions:create scope' }, 403);
     const agentId = c.req.param('agentId');
-    if ((agentId === 'ghcp' || agentId === 'claude-code') && !sdk(agentId)) return c.json({ error: 'Requested Agent runtime is disabled' }, 409);
+    if ((agentId === 'ghcp' || agentId === 'claude-code' || agentId === 'antigravity') && !sdk(agentId)) return c.json({ error: 'Requested Agent runtime is disabled' }, 409);
     const body = await c.req.json().catch(() => ({})) as { title?: string; label?: string; model?: string };
     const title = String(body.title ?? body.label ?? 'New chat').trim() || 'New chat';
     const validateIdentity = (sessionKey: string) => {
@@ -1201,9 +1208,10 @@ export function registerConnectorRoutes(app: Hono, deps: {
       c.req.raw.signal.throwIfAborted();
       if (!deps.tokens.hasScope(principal.tokenId, 'sessions:create')) throw new TurnAuthorizationError();
     };
-    if (agentId === 'claude-code' || agentId === 'ghcp') {
-      const config = agentId === 'claude-code' ? deps.config.claude : deps.config.copilot;
-      if (body.model && body.model !== config?.model) return c.json({ error: 'Use the configured Agent model' }, 409);
+    if (agentId === 'claude-code' || agentId === 'ghcp' || agentId === 'antigravity') {
+      const config = agentId === 'claude-code' ? deps.config.claude : agentId === 'ghcp' ? deps.config.copilot : deps.config.antigravity;
+      const expectedModel = agentId === 'antigravity' ? (config?.model ?? 'default') : config?.model;
+      if (body.model && body.model !== expectedModel) return c.json({ error: 'Use the configured Agent model' }, 409);
       if (title.length > 120 || /[\x00-\x1f\x7f]/.test(title)) return c.json({ error: 'Invalid SDK session title' }, 400);
       try {
         const created = sdk(agentId)!.commands.createSession(title, { authorize,

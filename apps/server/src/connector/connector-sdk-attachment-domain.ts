@@ -23,7 +23,7 @@ const fields = (v: unknown, keys: string[]): v is Record<string, unknown> => !!v
 const id = (v: unknown): v is string => typeof v === 'string' && v.length > 0 && v.length <= 512 && !/[\u0000-\u001f\u007f]/.test(v);
 const ref = (v: unknown): v is SdkCompactRef => fields(v, ['key', 'id', 'epoch', 'nativeSessionId'])
   && id(v.key) && id(v.id) && id(v.epoch) && id(v.nativeSessionId)
-  && ['claude-code', 'ghcp'].includes(sessionRuntimeId(v.key)) && !v.key.endsWith(':');
+  && ['claude-code', 'ghcp', 'antigravity'].includes(sessionRuntimeId(v.key)) && !v.key.endsWith(':');
 const chunk = (v: Record<string, unknown>) => id(v.admissionId) && id(v.id) && Number.isSafeInteger(v.size)
   && Number(v.size) > 0 && Number(v.size) <= SDK_ATTACHMENT_MAX_BYTES && Number.isSafeInteger(v.offset)
   && Number(v.offset) >= 0 && Number(v.offset) < Number(v.size) && Number(v.offset) % SDK_ATTACHMENT_CHUNK_BYTES === 0;
@@ -52,7 +52,7 @@ export function validConnectorSdkAttachmentOutput(k: ConnectorSdkAttachmentKind,
 export function executeConnectorSdkAttachment<K extends ConnectorSdkAttachmentKind>(k: K,
   input: ConnectorSdkAttachmentCommands[K]['input'], owner: ConnectorUserStore, tokens?: ConnectorTokenStore): ConnectorSdkAttachmentCommands[K]['output'] {
   if (!validConnectorSdkAttachmentInput(k, input) || !tokens) throw Error('connector_storage_unavailable');
-  const journal = input.runtime === 'claude-code' ? owner.claudeJournal : owner.copilotJournal;
+  const journal = input.runtime === 'claude-code' ? owner.claudeJournal : input.runtime === 'ghcp' ? owner.copilotJournal : owner.antigravityJournal;
   const authorize = createTurnAuthorizer(owner.executionGrants, (token, scope) => tokens.hasScope(token, scope));
   const check = () => {
     const snapshot = journal.readSnapshot(input.ref.key), e = snapshot.execution;

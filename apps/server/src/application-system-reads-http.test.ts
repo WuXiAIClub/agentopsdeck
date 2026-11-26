@@ -62,6 +62,20 @@ async function fixture(t: TestContext, role: 'hub' | 'standalone' = 'hub', mode:
     observed(value: typeof observed) { observed = value; }, available(value: boolean) { available = value; } };
 }
 
+test('Antigravity account quota rejects unauthorized and transport credentials, even when disabled', async context => {
+  const fixtureApp = await fixture(context, 'hub', 'json', true);
+  const path = 'antigravity/usage';
+  assert.equal((await fixtureApp.app.request(`/api/${path}`)).status, 403);
+  assert.equal((await fixtureApp.request(path, { [EXPECTED_NODE_HEADER]: 'forged' })).status, 403);
+  assert.equal((await fixtureApp.request(path, { 'x-agentopsdeck-execution-grant': 'forged' })).status, 403);
+  const response = await fixtureApp.request(path);
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get('cache-control'), 'no-store');
+  assert.deepEqual(await response.json(), { usage: null });
+  await fixtureApp.revoke();
+  assert.equal((await fixtureApp.request(path)).status, 403);
+});
+
 for (const role of ['hub', 'standalone'] as const) for (const mode of ['sqlite', 'json'] as const) for (const keyed of [true, false])
   test(`${role}/${mode}/${keyed ? 'Cookie' : 'no Key'} original Gateway restart management chain`, async t => {
     const f = await fixture(t, role, mode, keyed, 5000, true);

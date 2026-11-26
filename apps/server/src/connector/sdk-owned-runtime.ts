@@ -13,7 +13,7 @@ import { SessionDeletionConflict } from '../commands/turn-queue.js';
 import type { PrivateWorkerDeletion } from './private-worker-preflight.js';
 import type { AgentReadiness } from '@agentopsdeck/shared';
 
-type PrivateConfig = { homeDirectory: string; startupTimeoutMs: number; model: string; modelChoices?: string[] };
+type PrivateConfig = { homeDirectory: string; startupTimeoutMs: number; model?: string; modelChoices?: string[] };
 type OwnedDriver = Pick<SdkExecutionDriver<SdkOwnedTurn>, 'inspect' | 'wake' | 'interrupt' | 'pauseQueueWorker' | 'close'> & Partial<Pick<SdkExecutionDriver<SdkOwnedTurn>, 'compact'>>;
 export type SdkPreflight = { ready: Promise<boolean>; finished: Promise<void>; inspectQuiescence(): boolean; close(): void };
 export type SdkOwnedProjection = { publish(key: string, ready: boolean): unknown; publishSummary(key: string, ready: boolean): void };
@@ -73,7 +73,8 @@ export class SdkOwnedRuntime<R extends SdkAgentId, C extends PrivateConfig, D ex
       },
     });
     this.commands = new SdkCommands({ runtime: options.runtime, journal: options.journal,
-      store: options.store, driver: this.driver, authorize: options.authorize, models: this.config,
+      store: options.store, driver: this.driver, authorize: options.authorize,
+      models: { ...(this.config.model !== undefined ? { model: this.config.model } : {}), ...(this.config.modelChoices !== undefined ? { modelChoices: this.config.modelChoices } : {}) },
       assertAvailable: requireStartup => {
         if (this.closing || this.maintenancePause || this.driver.inspect().admissionPaused
           || !options.store.sdkCommandAdmissionOpen || options.store.runtimeOwnerFile !== this.ownerFile) throw failed();

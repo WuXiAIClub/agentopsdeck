@@ -26,7 +26,7 @@ const fields = (v: unknown, required: string[], optional: string[] = []): v is R
   && typeof v === 'object' && !Array.isArray(v) && required.every(k => Object.hasOwn(v, k))
   && Object.keys(v).every(k => required.includes(k) || optional.includes(k));
 const text = (v: unknown, max: number): v is string => typeof v === 'string' && !!v.length && v.length <= max && !/[\u0000-\u001f\u007f]/.test(v);
-const scope = (v: Record<string, unknown>) => (v.runtime === 'claude-code' || v.runtime === 'ghcp')
+const scope = (v: Record<string, unknown>) => (v.runtime === 'claude-code' || v.runtime === 'ghcp' || v.runtime === 'antigravity')
   && text(v.key, 512) && sessionRuntimeId(v.key) === v.runtime && v.key !== `${v.runtime}:`;
 export function validConnectorSdkUsageInput(kind: ConnectorSdkUsageKind, value: unknown): boolean {
   const snapshot = kind === 'sdkUsageSnapshotRead' || kind === 'sdkUsageSnapshotCreate';
@@ -67,7 +67,7 @@ export async function executeConnectorSdkUsage<K extends ConnectorSdkUsageKind>(
     const actor = tokens?.authenticateAuthorization(input.authorization);
     if (!actor) throw new AccessChanged(401);
     if (actor.tokenId.startsWith('actor_') || actor.scopes.includes('execution:delegate') || !actor.scopes.includes('messages:read')) throw new AccessChanged(403);
-    const journal = input.runtime === 'claude-code' ? owner.claudeJournal : owner.copilotJournal;
+    const journal = input.runtime === 'claude-code' ? owner.claudeJournal : input.runtime === 'ghcp' ? owner.copilotJournal : owner.antigravityJournal;
     const session = journal.session(input.key);
     if (!session || journal.deletion(input.key) || owner.commands.sessionDeletion(input.key)) throw new AccessChanged(404);
     return { runtime: input.runtime, key: input.key, readerId: actor.tokenId, nativeSessionId: session.nativeSessionId };

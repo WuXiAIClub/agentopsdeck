@@ -8,13 +8,13 @@ import { validBoardUuid } from '@agentopsdeck/shared';
 import { validBoardToolCredential, type BoardToolCredential } from '../tools/workspace-board-cli.js';
 import { boardBindingFingerprint, validManagedBoardBinding, type ManagedBoardBinding } from '../tools/workspace-board-binding-format.js';
 
-export type BoardBindingRuntime = 'claude-code' | 'ghcp' | 'codex';
+export type BoardBindingRuntime = 'claude-code' | 'ghcp' | 'codex' | 'antigravity';
 export type BoardBindingInput = { id: string; runtime: BoardBindingRuntime; sessionId: string; credential: BoardToolCredential };
 export type BoardBindingPolicy = { owner: string; runtime: BoardBindingRuntime; endpoint: string };
 type Stored = { runtime: BoardBindingRuntime; sessionId: string; credential: BoardToolCredential; managed: ManagedBoardBinding };
 type Tombstone = { id: string; owner: string; runtime: BoardBindingRuntime; sessionId: string; fingerprint: string };
 export type BoardBindingView = { id: string; runtime: BoardBindingRuntime; sessionId: string; expiresAt: number; state: 'installed' | 'removed' };
-const runtime = (v: unknown): v is BoardBindingRuntime => v === 'claude-code' || v === 'ghcp' || v === 'codex';
+const runtime = (v: unknown): v is BoardBindingRuntime => v === 'claude-code' || v === 'ghcp' || v === 'codex' || v === 'antigravity';
 const owner = (v: unknown): v is string => typeof v === 'string' && /^[A-Za-z0-9:_-]{1,160}$/.test(v);
 const object = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v);
 const fail = (status: 403 | 409 | 429 | 503): never => { throw new BoardBindingError(status); };

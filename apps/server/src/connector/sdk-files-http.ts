@@ -4,10 +4,10 @@ import { sessionRuntimeId, type SessionFilePage, type SessionFileRebuild } from 
 import { readJsonBody } from '../utils/http-body.js';
 import { ReadRequestError } from '../lifecycle/read-request-owner.js';
 
-export type SdkFilesHttp = Pick<OwnedFilesHttp<'claude-code' | 'ghcp'>, 'files' | 'timeoutMs' | 'authorization' | 'around' | 'requestFiles'>;
+export type SdkFilesHttp = Pick<OwnedFilesHttp<'claude-code' | 'ghcp' | 'antigravity'>, 'files' | 'timeoutMs' | 'authorization' | 'around' | 'requestFiles'>;
 type Scope<R> = { runtime: R; key: string; authorization: string };
 type Result<T> = { error: 401 | 403 | 404 | 409 | 429 } | { body: T };
-export type OwnedFilesHttp<R extends 'codex' | 'claude-code' | 'ghcp'> = {
+export type OwnedFilesHttp<R extends 'codex' | 'claude-code' | 'ghcp' | 'antigravity'> = {
   timeoutMs?: number;
   authorization?(c: Context): string;
   around?(c: Context, work: () => Promise<Response>): Promise<Response>;
@@ -23,10 +23,10 @@ export type OwnedFilesHttp<R extends 'codex' | 'claude-code' | 'ghcp'> = {
 /** Wire only; selecting a runtime does not expand the worker authority. */
 export function registerSdkFilesHttp(app: Hono, base: string, deps: SdkFilesHttp) {
   return registerOwnedFilesHttp(app, base, { ...deps, select(key) {
-    const runtime = sessionRuntimeId(key); return runtime === 'claude-code' || runtime === 'ghcp' ? runtime : undefined;
+    const runtime = sessionRuntimeId(key); return runtime === 'claude-code' || runtime === 'ghcp' || runtime === 'antigravity' ? runtime : undefined;
   } });
 }
-export function registerOwnedFilesHttp<R extends 'codex' | 'claude-code' | 'ghcp'>(app: Hono, base: string, deps: OwnedFilesHttp<R>) {
+export function registerOwnedFilesHttp<R extends 'codex' | 'claude-code' | 'ghcp' | 'antigravity'>(app: Hono, base: string, deps: OwnedFilesHttp<R>) {
   const timeoutMs = deps.timeoutMs ?? 10_000;
   if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 2_147_483_647) throw new RangeError('Finite files HTTP deadline required');
   let readers = 0;

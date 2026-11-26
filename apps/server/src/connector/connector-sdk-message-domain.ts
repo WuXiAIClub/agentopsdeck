@@ -34,7 +34,7 @@ export const isConnectorSdkMessageKind = (kind: string): kind is ConnectorSdkMes
 const fields = (v: unknown, required: string[], optional: string[] = []): v is Record<string, unknown> => !!v
   && typeof v === 'object' && !Array.isArray(v) && required.every(k => Object.hasOwn(v, k))
   && Object.keys(v).every(k => required.includes(k) || optional.includes(k));
-const runtime = (v: unknown): v is SdkAgentId => v === 'claude-code' || v === 'ghcp';
+const runtime = (v: unknown): v is SdkAgentId => v === 'claude-code' || v === 'ghcp' || v === 'antigravity';
 const id = (v: unknown): v is string => typeof v === 'string' && !!v && Buffer.byteLength(v) <= 512 && !/[\u0000-\u001f\u007f]/.test(v);
 const commandKey = (v: unknown): v is string => typeof v === 'string' && /^[A-Za-z0-9._:-]{1,200}$/.test(v);
 function payload(v: unknown): Record<string, unknown> | null {
@@ -120,7 +120,7 @@ export async function executeConnectorSdkMessage<K extends ConnectorSdkMessageKi
   const check = () => { if (!allowed()) throw new TurnAuthorizationError(); };
   if (!allowed()) return { error: 403 };
   const scope = JSON.stringify([actor.tokenId, input.key]);
-  const journal = input.runtime === 'claude-code' ? owner.claudeJournal : owner.copilotJournal;
+  const journal = input.runtime === 'claude-code' ? owner.claudeJournal : input.runtime === 'ghcp' ? owner.copilotJournal : owner.antigravityJournal;
   const wrap = (receipt: CommandReceipt | null, admitted = false) => {
     const turn = receipt?.state === 'accepted' ? receipt.result?.body.idempotencyKey : undefined;
     const queue: CommandQueueObservation = typeof turn === 'string'

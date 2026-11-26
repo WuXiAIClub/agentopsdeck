@@ -1,7 +1,7 @@
 import { MAX_MESSAGE_CHARS, sessionRuntimeId, type ChatMessage } from '@agentopsdeck/shared';
 import type { ConnectorTokenStore } from '../auth/connector-token.js';
 import { claudeHistoryMessage, claudeHistoryPage } from '../claude/history.js';
-import { copilotHistoryMessage, copilotHistoryPage } from '../copilot/history.js';
+import { antigravityHistoryMessage, antigravityHistoryPage, copilotHistoryMessage, copilotHistoryPage } from '../copilot/history.js';
 import { stableGatewayRowsRevision } from '../refresh/signature.js';
 import type { ConnectorUserStore } from './connector-user-store.js';
 import type { SdkAgentId } from './sdk-execution-journal.js';
@@ -25,7 +25,7 @@ const fields = (v: unknown, required: string[], optional: string[] = []): v is R
   && Object.keys(v).every(k => required.includes(k) || optional.includes(k));
 const text = (v: unknown, max: number): v is string => typeof v === 'string' && !!v.length && v.length <= max && !/[\u0000-\u001f\u007f]/.test(v);
 const count = (v: unknown) => Number.isSafeInteger(v) && Number(v) >= 0;
-const scope = (v: Record<string, unknown>) => (v.runtime === 'claude-code' || v.runtime === 'ghcp')
+const scope = (v: Record<string, unknown>) => (v.runtime === 'claude-code' || v.runtime === 'ghcp' || v.runtime === 'antigravity')
   && text(v.key, 512) && sessionRuntimeId(v.key) === v.runtime && v.key !== `${v.runtime}:`;
 export function validConnectorSdkHistoryInput(k: ConnectorSdkHistoryKind, v: unknown): boolean {
   const extra = k === 'sdkHistoryPage' ? ['limit'] : k === 'sdkHistoryMessage' ? ['messageId'] : ['readerId', 'nativeSessionId'];
@@ -65,7 +65,7 @@ export function executeConnectorSdkHistory<K extends ConnectorSdkHistoryKind>(ki
   const actor = tokens?.authenticateAuthorization(input.authorization);
   if (!actor) return { error: 401 };
   if (actor.tokenId.startsWith('actor_') || actor.scopes.includes('execution:delegate') || !actor.scopes.includes('messages:read')) return { error: 403 };
-  const journal = input.runtime === 'claude-code' ? owner.claudeJournal : owner.copilotJournal;
+  const journal = input.runtime === 'claude-code' ? owner.claudeJournal : input.runtime === 'ghcp' ? owner.copilotJournal : owner.antigravityJournal;
   const session = journal.session(input.key);
   if (!session || journal.deletion(input.key) || owner.commands.sessionDeletion(input.key)) return { error: 404 };
   const identity: SdkHistoryIdentity = { runtime: input.runtime, key: input.key, readerId: actor.tokenId, nativeSessionId: session.nativeSessionId };
@@ -74,12 +74,14 @@ export function executeConnectorSdkHistory<K extends ConnectorSdkHistoryKind>(ki
   if (kind !== 'sdkHistoryDeliver') {
     const sourceCursor = owner.events.latestEventId();
     if ('limit' in input) {
-      const page = (input.runtime === 'claude-code' ? claudeHistoryPage : copilotHistoryPage)(owner, input.key, input.limit, input.before);
+      const page = (input.runtime === 'claude-code' ? claudeHistoryPage
+        : input.runtime === 'ghcp' ? copilotHistoryPage : antigravityHistoryPage)(owner, input.key, input.limit, input.before);
       if (!page) return { error: 409 };
       result = { ...identity, body: { ...page, updatedAt: Date.now(), revision: stableGatewayRowsRevision(page.messages),
         sourceCursor, limits: { maxMessageChars: MAX_MESSAGE_CHARS } } };
     } else if ('messageId' in input) {
-      const message = (input.runtime === 'claude-code' ? claudeHistoryMessage : copilotHistoryMessage)(owner, input.key, input.messageId);
+      const message = (input.runtime === 'claude-code' ? claudeHistoryMessage
+        : input.runtime === 'ghcp' ? copilotHistoryMessage : antigravityHistoryMessage)(owner, input.key, input.messageId);
       if (!message) return { error: 404 };
       result = { ...identity, messageId: input.messageId, body: { message, updatedAt: Date.now(), sourceCursor } };
     }

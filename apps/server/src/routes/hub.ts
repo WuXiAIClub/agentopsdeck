@@ -460,7 +460,7 @@ export function registerHubRoutes(app: Hono, deps: {
   });
   const fileTarget = (client: ConnectorClientResolver) => (userId: string, sessionId: string) => {
       const decoded = decodeHubSessionId(sessionId);
-      if (!decoded || !/^(codex|claude-code|ghcp):/.test(decoded.remoteSessionKey)) throw new HubFileBoardError(400);
+      if (!decoded || !/^(codex|claude-code|ghcp|antigravity):/.test(decoded.remoteSessionKey)) throw new HubFileBoardError(400);
       const connection = deps.hubStore.getConnection(decoded.connectionId, userId);
       const authority = deps.hubStore.connectionAuthority(decoded.connectionId, userId);
       if (!connection?.nodeId || connection.status === 'disabled' || authority === undefined) throw new HubFileBoardError(404);

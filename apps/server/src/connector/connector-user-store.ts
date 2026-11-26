@@ -142,13 +142,15 @@ export class ConnectorUserStore {
   readonly claudeTranscript: ClaudeTranscriptStore;
   readonly copilotJournal: SdkExecutionJournal;
   readonly copilotTranscript: CopilotTranscriptStore;
+  readonly antigravityJournal: SdkExecutionJournal;
+  readonly antigravityTranscript: CopilotTranscriptStore;
   readonly mirrorOutbox: MirrorOutbox;
   readonly interactions: InteractionStore;
   private closed = false;
   close() { this.closed = true; this.stopTurnStarts(); this.db.close(); }
   storageRecovery() { return connectionRecoverySnapshot(this.db); }
   async storageStats() {
-    return { ...await ownedStorageStats(this.file), connection: this.storageRecovery(), reads: { claude: this.claudeTranscript.readStats(), copilot: this.copilotTranscript.readStats() } };
+    return { ...await ownedStorageStats(this.file), connection: this.storageRecovery(), reads: { claude: this.claudeTranscript.readStats(), copilot: this.copilotTranscript.readStats(), antigravity: this.antigravityTranscript.readStats() } };
   }
   checkpointStorage(check?: () => void) { return checkpointOwnedWalAsync(this.db, this.file, { available: () => !this.closed, check }); }
   private readonly db: DatabaseSync;
@@ -294,9 +296,12 @@ export class ConnectorUserStore {
         key => !this.interactions.hasUnresolvedKey(key), this.tokenUsage);
       this.copilotJournal = new SdkExecutionJournal(this.db, 'ghcp', undefined, () => this.requireSdkWriter(true), compactPolicy,
         key => !this.interactions.hasUnresolvedKey(key), this.tokenUsage);
+      this.antigravityJournal = new SdkExecutionJournal(this.db, 'antigravity', undefined, () => this.requireSdkWriter(true), compactPolicy,
+        key => !this.interactions.hasUnresolvedKey(key), this.tokenUsage);
       this.fileIndex = new SessionFileIndex(this.db);
       this.claudeTranscript = new ClaudeTranscriptStore(this.db);
       this.copilotTranscript = new CopilotTranscriptStore(this.db);
+      this.antigravityTranscript = new CopilotTranscriptStore(this.db, Date.now, 'antigravity');
       // Only the exclusive runtime owner may recover. Management-only store
       // opens must never freeze an execution owned by another live process.
       if (options.runtimeOwner) {
@@ -304,6 +309,7 @@ export class ConnectorUserStore {
         this.interactions.recover(Date.now());
         this.claudeJournal.recover(this.turns);
         this.copilotJournal.recover(this.turns);
+        this.antigravityJournal.recover(this.turns);
         this.reconcileEndedInteractions();
       }
     } catch (error) {
@@ -328,7 +334,8 @@ export class ConnectorUserStore {
         settled = execution?.runId === scope.runId && this.codexExecutions.canStart(scope.sessionKey);
       } else {
         const journal = scope.sessionKey.startsWith('claude-code:') ? this.claudeJournal
-          : scope.sessionKey.startsWith('ghcp:') ? this.copilotJournal : undefined;
+          : scope.sessionKey.startsWith('ghcp:') ? this.copilotJournal
+          : scope.sessionKey.startsWith('antigravity:') ? this.antigravityJournal : undefined;
         const execution = journal?.current(scope.sessionKey);
         settled = !!execution && execution.id === scope.runId
           && ['completed', 'failed', 'interrupted'].includes(execution.phase)
@@ -348,6 +355,7 @@ export class ConnectorUserStore {
       && !this.turns.hasPending('hermes', sessionKey) && this.hermesJournal.canStart(sessionKey)
       && !this.turns.hasPending('claude-code', sessionKey) && !this.claudeJournal.hasUnresolved(sessionKey)
       && !this.turns.hasPending('ghcp', sessionKey) && !this.copilotJournal.hasUnresolved(sessionKey)
+      && !this.turns.hasPending('antigravity', sessionKey) && !this.antigravityJournal.hasUnresolved(sessionKey)
       && this.openClawExecutions.canDelete(sessionKey) && this.codexExecutions.canStart(sessionKey);
   }
 
@@ -357,11 +365,13 @@ export class ConnectorUserStore {
   canChangeSettings(sessionKey: string) {
     if (this.interactions.hasUnresolvedKey(sessionKey)) return false;
     if (sessionKey.startsWith('claude-code:') && this.turns.hasPending('claude-code', sessionKey)
-      || sessionKey.startsWith('ghcp:') && this.turns.hasPending('ghcp', sessionKey)) return false;
+      || sessionKey.startsWith('ghcp:') && this.turns.hasPending('ghcp', sessionKey)
+      || sessionKey.startsWith('antigravity:') && this.turns.hasPending('antigravity', sessionKey)) return false;
     return !this.turns.hasDispatchPending('openclaw', sessionKey) && !this.turns.hasDispatchPending('codex', sessionKey)
       && !this.turns.hasDispatchPending('hermes', sessionKey) && this.hermesJournal.canStart(sessionKey)
       && !this.turns.hasDispatchPending('claude-code', sessionKey) && !this.claudeJournal.hasUnresolved(sessionKey)
       && !this.turns.hasDispatchPending('ghcp', sessionKey) && !this.copilotJournal.hasUnresolved(sessionKey)
+      && !this.turns.hasDispatchPending('antigravity', sessionKey) && !this.antigravityJournal.hasUnresolved(sessionKey)
       && this.openClawExecutions.canChangeSettings(sessionKey) && this.codexExecutions.canChangeSettings(sessionKey);
   }
 

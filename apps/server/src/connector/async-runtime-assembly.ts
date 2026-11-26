@@ -189,7 +189,7 @@ export async function createAsyncRuntimeAssembly(options: AsyncRuntimeAssemblyOp
       gatewayObserver: openclaw.gatewayObserver,
       get state() { return state; },
       get ready() { return state === 'ready' && !pause && (!codex.enabled || codex.status().available)
-        && sdk.agents.every(agent => agent.id === 'claude-code' ? sdk.claude?.ready : sdk.copilot?.ready)
+        && sdk.agents.every(agent => agent.id === 'claude-code' ? sdk.claude?.ready : agent.id === 'ghcp' ? sdk.copilot?.ready : sdk.antigravity?.ready)
         && (!hermes.agents.length || hermes.ready) && openclaw.ready; },
       refreshProjection: (settings: { maxAgeMs?: number } = {}) => {
         try { check(); } catch { return Promise.reject(new ConnectorOwnerUnavailable()); }

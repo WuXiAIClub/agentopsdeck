@@ -15,7 +15,11 @@ import type { SdkAgentId } from './sdk-execution-journal.js';
 import { PerformanceDiagnostics } from '../diagnostics/performance.js';
 
 const authorization = 'Bearer isolated-local-command-test-token';
-const catalogs = { 'claude-code': { model: 'default', modelChoices: ['default', 'alternate'] }, ghcp: { model: 'default', modelChoices: ['default', 'alternate'] } };
+const catalogs = {
+  'claude-code': { model: 'default', modelChoices: ['default', 'alternate'] },
+  ghcp: { model: 'default', modelChoices: ['default', 'alternate'] },
+  antigravity: { model: 'default', modelChoices: ['default', 'alternate'] },
+};
 const silence = new PerformanceDiagnostics(() => {});
 const tick = () => new Promise<void>(resolve => setImmediate(resolve));
 function fixture(runtime: SdkAgentId) {
@@ -24,7 +28,7 @@ function fixture(runtime: SdkAgentId) {
   const actorId = tokens.authenticateAuthorization(authorization)!.tokenId;
   const store = new ConnectorUserStore(':memory:', undefined, { runtimeOwner: true });
   const owner = createConnectorOwnerCommands(store, tokens, catalogs);
-  const journal = runtime === 'claude-code' ? store.claudeJournal : store.copilotJournal;
+  const journal = runtime === 'claude-code' ? store.claudeJournal : runtime === 'ghcp' ? store.copilotJournal : store.antigravityJournal;
   const key = `${runtime}:original`;
   journal.create({ key, nativeSessionId: 'native', title: 'Original', createdAt: 0 });
   const scope = (operation: 'settings' | 'create') => JSON.stringify([operation, JSON.stringify([actorId, operation === 'settings' ? key : runtime])]);
@@ -60,7 +64,7 @@ test('SDK local protocol uses append-only commands, fixed fields and trusted cop
   } finally { f.close(); }
 });
 
-for (const runtime of ['claude-code', 'ghcp'] as const) {
+for (const runtime of ['claude-code', 'ghcp', 'antigravity'] as const) {
   test(`${runtime}: creation preserves legacy JSON title coercion and metadata fingerprint`, async () => {
     const f = fixture(runtime);
     try {

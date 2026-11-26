@@ -2,6 +2,7 @@ import type { AgentReadiness } from '@agentopsdeck/shared';
 import type { ApplicationCompactParticipants } from '../application-compact-ingress.js';
 import { createAsyncClaudeConnectorRuntime, type AsyncClaudeOwnedOptions, type AsyncClaudeOwnedPorts } from '../claude/async-owned-runtime.js';
 import { createAsyncCopilotConnectorRuntime, type AsyncCopilotOwnedOptions, type AsyncCopilotOwnedPorts } from '../copilot/async-owned-runtime.js';
+import { createAsyncAntigravityConnectorRuntime, type AsyncAntigravityOwnedOptions, type AsyncAntigravityOwnedPorts } from '../antigravity/sdk-runtime.js';
 import type { DeckStore } from '../projection/deck-store.js';
 import type { ConnectorAgentLifecycle } from './agent-runtimes.js';
 import type { AsyncConnectorOwner } from './async-connector-owner.js';
@@ -43,7 +44,7 @@ export type AsyncSdkApplicationHttp = {
   sdkMetadata: SdkMetadataHttp;
 };
 type Original = {
-  driver: Pick<AsyncSdkExecutionDriver<SdkOwnedTurn>, 'wake' | 'compact' | 'interruptMessage'>;
+  driver: Pick<AsyncSdkExecutionDriver<SdkOwnedTurn>, 'wake' | 'interruptMessage'> & Partial<Pick<AsyncSdkExecutionDriver<SdkOwnedTurn>, 'compact'>>;
   remove: (key: string, commandKey: string, authorization: string, signal?: AbortSignal,
     application?: ApplicationTransactionEvidence, authority?: ApplicationCommandScope) => ReturnType<SdkDeletionHttp['remove']>;
 };
@@ -61,11 +62,12 @@ export type AsyncSdkApplicationOptions = {
   owner: Pick<AsyncConnectorOwner, 'command' | 'runtimeOwnerFile'>;
   projection: Pick<DeckStore, 'upsertSession' | 'replaceMessages' | 'removeSession' | 'getSession' | 'addMessage'>;
   claude?: AsyncClaudeOwnedOptions['config']; copilot?: AsyncCopilotOwnedOptions['config'];
+  antigravity?: AsyncAntigravityOwnedOptions['config'];
   turnContext?: AsyncClaudeOwnedOptions['turnContext'];
   gateway?: () => string; changed?: (key: string) => void;
   timeoutMs?: number; diagnostics?: PerformanceDiagnostics;
 };
-export type AsyncSdkApplicationPorts = { claude?: AsyncClaudeOwnedPorts; copilot?: AsyncCopilotOwnedPorts };
+export type AsyncSdkApplicationPorts = { claude?: AsyncClaudeOwnedPorts; copilot?: AsyncCopilotOwnedPorts; antigravity?: AsyncAntigravityOwnedPorts };
 const unavailable = () => Error('SDK application unavailable; original command ownership retained');
 
 /** One complete SDK assembly using the startup owner's existing DB connection.
@@ -74,6 +76,7 @@ const unavailable = () => Error('SDK application unavailable; original command o
 export class AsyncSdkApplication {
   readonly claude: Runtime | undefined;
   readonly copilot: Runtime | undefined;
+  readonly antigravity: Runtime | undefined;
   readonly http: AsyncSdkApplicationHttp & { sdkMessages: { messages: Pick<AsyncSdkMessages, 'sendPhysical' | 'readReceiptPhysical' | 'readSendReceiptPhysical'>;
     stopPhysical: NonNullable<ApplicationStopParticipants['sdk']>['stopPhysical']; status: AsyncSdkStatus };
     sdkCompact: NonNullable<ApplicationCompactParticipants['sdk']> };
@@ -100,7 +103,13 @@ export class AsyncSdkApplication {
       ...(options.turnContext ? { turnContext: options.turnContext } : {}) };
     this.claude = options.claude ? createAsyncClaudeConnectorRuntime({ ...common, config: structuredClone(options.claude) }, ports.claude) : undefined;
     this.copilot = options.copilot ? createAsyncCopilotConnectorRuntime({ ...common, config: structuredClone(options.copilot) }, ports.copilot) : undefined;
-    const runtime = (id: SdkAgentId) => id === 'claude-code' ? this.claude : this.copilot;
+    this.antigravity = options.antigravity ? createAsyncAntigravityConnectorRuntime({
+      owner: options.owner, projection: options.projection, diagnostics: this.diagnostics,
+      ...(options.changed ? { changed: options.changed } : {}),
+      ...(options.turnContext ? { turnContext: options.turnContext } : {}),
+      config: structuredClone(options.antigravity),
+    }, ports.antigravity) : undefined;
+    const runtime = (id: SdkAgentId) => id === 'claude-code' ? this.claude : id === 'ghcp' ? this.copilot : this.antigravity;
     const original = (id: SdkAgentId) => { const target = runtime(id); if (this.closed || !target) throw unavailable(); return target; };
     const ready = (id: SdkAgentId) => !this.closed && runtime(id)?.ready === true;
     const originalCommand = options.owner.command.bind(options.owner);
@@ -148,9 +157,14 @@ export class AsyncSdkApplication {
         removePhysical: (input, authority) => original(input.runtime).withReady(value =>
           value.remove(input.key, input.commandKey, input.authorization, undefined, input.application, authority)) },
       sdkCompact: { ...controls, owner, compact: (id, key, commandKey, authorization, signal) =>
-        original(id).withReady(value => value.driver.compact(key, commandKey, authorization, signal)),
+        original(id).withReady(value => {
+          if (!value.driver.compact) return Promise.resolve('not_started' as const);
+          return value.driver.compact(key, commandKey, authorization, signal);
+        }),
         compactPhysical: (input, authority) => original(input.runtime).withReady(value =>
-          value.driver.compact(input.key, input.commandKey, input.authorization, undefined, input.application, authority)),
+          value.driver.compact
+            ? value.driver.compact(input.key, input.commandKey, input.authorization, undefined, input.application, authority)
+            : Promise.resolve('not_started' as const)),
         readPhysical: async (input, authority) => {
           const result = await this.track(owner.command('sdkCompactReceiptRead', input));
           await authority.authorize('prepare'); authority.local(); return result;
@@ -172,7 +186,7 @@ export class AsyncSdkApplication {
       const trace = guardedTrace(this.diagnostics, 'sdk-owned-lifecycle'); trace.add('step', 20 + step); trace.finish(true);
     }));
   }
-  activate(): void { if (!this.closed) { this.claude?.activate(); this.copilot?.activate(); } }
+  activate(): void { if (!this.closed) { this.claude?.activate(); this.copilot?.activate(); this.antigravity?.activate(); } }
   start(): Promise<void> {
     return this.startOriginals(false);
   }
@@ -185,7 +199,7 @@ export class AsyncSdkApplication {
     if (this.closed) return Promise.reject(unavailable());
     return this.track(Promise.resolve().then(async () => {
       if (this.closed) throw unavailable();
-      const results = await Promise.allSettled([this.claude, this.copilot].filter((target): target is Runtime => !!target)
+      const results = await Promise.allSettled([this.claude, this.copilot, this.antigravity].filter((target): target is Runtime => !!target)
         .map(target => Promise.resolve().then(() => maintenance ? target.whenPrepared() : target.whenStarted())));
       if (this.closed || results.some(result => result.status === 'rejected')) throw unavailable();
     }));
@@ -201,7 +215,7 @@ export class AsyncSdkApplication {
         const generation = this.projectionGeneration;
         // A failed/synchronously throwing peer must neither skip its sibling
         // nor release physical ownership while that sibling is still reading.
-        const results = await Promise.allSettled([this.claude, this.copilot].filter((target): target is Runtime => !!target)
+        const results = await Promise.allSettled([this.claude, this.copilot, this.antigravity].filter((target): target is Runtime => !!target)
           .map(target => Promise.resolve().then(() => target.refreshProjection())));
         if (results.some(result => result.status === 'rejected')) throw unavailable();
         if (this.closed) throw unavailable();
@@ -218,12 +232,12 @@ export class AsyncSdkApplication {
     if (this.closed) return Promise.reject(unavailable());
     return this.track(Promise.resolve().then(async () => {
       if (this.closed) throw unavailable();
-      const results = await Promise.allSettled([this.claude, this.copilot].filter((target): target is Runtime => !!target)
+      const results = await Promise.allSettled([this.claude, this.copilot, this.antigravity].filter((target): target is Runtime => !!target)
         .map(target => Promise.resolve().then(() => target.refreshDirectory())));
       if (this.closed || results.some(result => result.status === 'rejected')) throw unavailable();
     }));
   };
-  get agents(): readonly ConnectorAgentLifecycle[] { return [this.claude, this.copilot].filter((value): value is Runtime => !!value); }
+  get agents(): readonly ConnectorAgentLifecycle[] { return [this.claude, this.copilot, this.antigravity].filter((value): value is Runtime => !!value); }
   close(): Promise<void> {
     if (this.closing) return this.closing;
     this.closed = true;

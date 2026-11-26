@@ -20,7 +20,7 @@ export type SdkMessagesHttp = {
   stop?: (input: SdkMessageStopRequest) => Promise<SdkMessageStopAdmission | { error: 401 | 403 | 409 | 503 }>;
   /** Private original runtime observation. False only vetoes fresh work; true
    * is never an authorization proof. Dispatch retains its own epoch checks. */
-  ready: (runtime: 'claude-code' | 'ghcp') => boolean;
+  ready: (runtime: 'claude-code' | 'ghcp' | 'antigravity') => boolean;
   timeoutMs?: number;
   diagnostics?: PerformanceDiagnostics;
 };
@@ -37,7 +37,7 @@ export function registerSdkMessagesHttp(app: Hono, path: string, deps: SdkMessag
   let bodyReaders = 0;
   app.post(`${path}/messages`, async (c, next) => {
     const key = c.req.param('sessionKey')!, runtime = sessionRuntimeId(key);
-    if (runtime !== 'claude-code' && runtime !== 'ghcp') return next();
+    if (runtime !== 'claude-code' && runtime !== 'ghcp' && runtime !== 'antigravity') return next();
     c.header('Cache-Control', 'no-store');
     const authorization = c.req.raw.headers.get('authorization') ?? '';
     if (!authorization.trim()) return c.json({ error: 'unauthorized' }, 401);
@@ -102,7 +102,7 @@ export function registerSdkMessagesHttp(app: Hono, path: string, deps: SdkMessag
   // projection failure. No payload, display refresh, new receipt or native work.
   app.get(`${path}/commands/:commandKey/status`, async (c, next) => {
     const key = c.req.param('sessionKey')!, runtime = sessionRuntimeId(key);
-    if (!deps.status || runtime !== 'claude-code' && runtime !== 'ghcp') return next();
+    if (!deps.status || runtime !== 'claude-code' && runtime !== 'ghcp' && runtime !== 'antigravity') return next();
     c.header('Cache-Control', 'no-store');
     const commandKey = c.req.param('commandKey')!;
     if (!validKey(commandKey)) return c.json({ error: 'Invalid command key' }, 400);
@@ -118,7 +118,7 @@ export function registerSdkMessagesHttp(app: Hono, path: string, deps: SdkMessag
   });
   for (const queue of [false, true]) app.get(`${path}/commands/:commandKey${queue ? '/queue' : ''}`, async (c, next) => {
     const key = c.req.param('sessionKey')!, runtime = sessionRuntimeId(key);
-    if (runtime !== 'claude-code' && runtime !== 'ghcp') return next();
+    if (runtime !== 'claude-code' && runtime !== 'ghcp' && runtime !== 'antigravity') return next();
     c.header('Cache-Control', 'no-store');
     const commandKey = c.req.param('commandKey')!;
     if (!validKey(commandKey)) return c.json({ error: 'Invalid command key' }, 400);

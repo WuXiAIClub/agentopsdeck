@@ -94,6 +94,7 @@ function summarizeMessagesForList(messages: ChatMessage[], limit = MESSAGE_LIST_
   const visibleMessages = messages.length > limit ? messages.slice(-limit) : messages;
   return visibleMessages.map((message) => {
     if (!isInternalOutputMessage(message)) return message;
+    if (message.role === 'tool' && message.toolPhase !== undefined) return message;
     const text = readableText(message.text);
     const lineCount = Math.max(1, text.split('\n').length);
     const preview = text.slice(0, 1_000).split('\n').map((line) => line.trim()).filter(Boolean).slice(0, 3).join('\n') || '[tool output]';
@@ -108,9 +109,9 @@ function summarizeMessagesForList(messages: ChatMessage[], limit = MESSAGE_LIST_
 }
 
 function isInternalOutputMessage(message: ChatMessage) {
+  if (message.role === 'tool') return true;
   const text = readableText(message.text);
   if (!text || text === '(empty)') return false;
-  if (message.role === 'tool') return true;
   // Assistant turns stay conversation unless the whole turn is a normalized tool
   // transcript emitted by Gateway. This keeps LLM text visible while still
   // collapsing synthetic [tool ...] assistant rows into the tool timeline.

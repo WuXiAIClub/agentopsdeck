@@ -12,7 +12,7 @@ import type { HermesQueueHttp } from './connector/hermes-queue-http.js';
 import { EXPECTED_NODE_HEADER } from './connector/node-identity.js';
 import { performanceDiagnostics, type PerformanceDiagnostics } from './diagnostics/performance.js';
 
-type Runtime = 'claude-code' | 'ghcp' | 'hermes' | 'codex' | 'openclaw';
+type Runtime = 'claude-code' | 'ghcp' | 'antigravity' | 'hermes' | 'codex' | 'openclaw';
 type Ports<R extends Runtime> = OwnedQueueHttp<R>['queue'];
 type Method = keyof Ports<Runtime>;
 const readDigest = createHash('sha256').update('original-queue-read').digest('hex');
@@ -92,10 +92,10 @@ export function registerApplicationQueueHttp(app: Hono, deps: {
   const path = '/api/sessions/:sessionKey';
   if (deps.sdk) {
     const sdk = deps.sdk;
-    registerOwnedQueueHttp<'claude-code' | 'ghcp'>(app, path, {
+    registerOwnedQueueHttp<'claude-code' | 'ghcp' | 'antigravity'>(app, path, {
       queue: sdk.queue, requestQueue: c => scoped(c, sdk.queue), ready: runtime => sdk.ready(runtime),
       authorization: transport, around, timeoutMs, diagnostics, operation: 'sdk-queue-http',
-      runtime: key => { const runtime = sessionRuntimeId(key); return runtime === 'claude-code' || runtime === 'ghcp' ? runtime : undefined; },
+      runtime: key => { const runtime = sessionRuntimeId(key); return runtime === 'claude-code' || runtime === 'ghcp' || runtime === 'antigravity' ? runtime : undefined; },
     });
   }
   if (deps.hermes) {

@@ -35,7 +35,7 @@ export function registerSdkDeletionHttp(app: Hono, path: string, deps: SdkDeleti
     ...deps,
     remove: (...args) => deps.remove(...args),
     ready: runtime => deps.ready(runtime),
-    runtime: key => { const r = sessionRuntimeId(key); return r === 'claude-code' || r === 'ghcp' ? r : undefined; },
+    runtime: key => { const r = sessionRuntimeId(key); return r === 'claude-code' || r === 'ghcp' || r === 'antigravity' ? r : undefined; },
     receipt: (runtime, key, commandKey, authorization) => deps.owner.command('sdkDeletionReceiptRead', { runtime, key, commandKey, authorization }),
     operation: 'sdk-deletion-http',
   });

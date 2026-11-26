@@ -3,7 +3,7 @@ import { guardedTrace } from '../diagnostics/guarded-trace.js';
 import { performanceDiagnostics, type PerformanceDiagnostics } from '../diagnostics/performance.js';
 
 const actions = ['create', 'message', 'stop', 'compact', 'settings', 'delete', 'queue', 'interaction', 'files', 'usage'] as const;
-const runtimes = ['codex', 'openclaw', 'claude-code', 'ghcp', 'hermes'] as const;
+const runtimes = ['codex', 'openclaw', 'claude-code', 'ghcp', 'antigravity', 'hermes'] as const;
 const stages = ['admission', 'prepare', 'effect'] as const;
 export type ApplicationCommandIntent = Readonly<{
   action: typeof actions[number]; runtime: typeof runtimes[number]; resource: string;

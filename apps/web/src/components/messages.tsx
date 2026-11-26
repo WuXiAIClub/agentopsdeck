@@ -894,9 +894,9 @@ export function readableText(value: unknown): string {
 }
 
 function isInternalOutput(message: ChatMessage) {
+  if (message.role === 'tool') return true;
   const text = stripThinkingLines(readableText(message.text));
   if (!text || text === '(empty)') return false;
-  if (message.role === 'tool') return true;
   // Assistant turns stay chat bubbles so interim step-by-step replies remain visible,
   // except normalized tool transcripts. Those are execution records and must stay collapsed.
   if (message.role === 'assistant') return isNormalizedToolTranscript(text);
@@ -997,7 +997,7 @@ function toGroupedToolTimelineEntry(group: { key: string; call?: ChatMessage; re
   const preview = [callText, resultText].filter(Boolean).join('\n\n');
   if (isToolOutputPlaceholder(preview)) return null;
   const resultDeltaText = group.result ? toolResultTextForTokenEstimate(resultText) : '';
-  const label = toolEntryLabel(message, preview);
+  const label = group.call?.toolName ?? toolEntryLabel(message, preview);
   const executing = isToolExecuting(group.call, group.result);
   const hint = group.result?.status === 'failed' ? 'failed' : (executing ? 'executing' : undefined);
   // Named tools already determine the variant; don't scan their output for a
@@ -1255,6 +1255,7 @@ function displayMessageText(rawText: string) {
 }
 
 function messageFailureText(message: ChatMessage, displayText: string) {
+  if (message.role === 'tool') return undefined;
   if (hasInvalidAssistantOutput(message)) return INVALID_ASSISTANT_OUTPUT_TEXT;
   const suffix = message.failureReason ? ` (${message.failureReason})` : '';
   if (isAssistantTurnFailureText(displayText) || displayText === 'Assistant turn failed before producing content.') return `Assistant turn failed before producing content.${suffix}`;

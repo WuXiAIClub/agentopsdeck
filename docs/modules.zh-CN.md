@@ -22,6 +22,8 @@
 
 | 源码模块 | 职责与边界 |
 | --- | --- |
+| [`apps/server/src/antigravity`](../apps/server/src/antigravity) | 实验性 Linux ACP 传输、专属 HOME 所有权及受日志/清理证明约束的执行契约。尚未接入生产或智能体选择器；参见 [CLI 开发](antigravity-cli.zh-CN.md)。 |
+| [`apps/server/src/antigravity`](../apps/server/src/antigravity) | Linux Antigravity CLI ACP 传输、隔离配置和合成协议测试；尚未实现生产生命周期、持久标识绑定及界面接入。 |
 | [`apps/server/src/auth`](../apps/server/src/auth) | 密钥、会话/cookie、Passkey、审计/限流、可信来源及原请求作用域；不记录认证材料。 |
 | [`apps/server/src/claude`](../apps/server/src/claude) | Claude worker、权限、历史和执行归属；运行时需独立配置。 |
 | [`apps/server/src/codex`](../apps/server/src/codex) | App-server RPC、轮次身份、rollout/历史、投影、工具详情和后台任务；区分历史失败与执行失败。 |

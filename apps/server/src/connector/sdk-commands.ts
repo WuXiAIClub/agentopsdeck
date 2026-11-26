@@ -20,7 +20,7 @@ export type SdkCommandOptions<R extends SdkAgentId> = {
   assertAvailable: (requireStartup: boolean) => void;
   authorize: (key: string, actor: SdkTextInput, action: 'messages:send' | 'runs:interrupt' | 'runs:compact') => boolean;
   changed: (key: string) => void;
-  models: { model: string; modelChoices?: string[] };
+  models: { model?: string; modelChoices?: string[] };
 };
 
 /** Internal owner-only command boundary; NOT an HTTP authorization layer.
@@ -36,14 +36,16 @@ export class SdkCommands<R extends SdkAgentId> {
     this.assertSettingsAvailable(key);
     this.options.journal.checkAuthority(authorize);
     const { store, journal, models } = this.options;
+    if (!models.model) throw new Error('Model override is not supported for this runtime');
     if (!journal.session(key) || store.commands.sessionDeletion(key)
       || !journal.canStart(key) || store.turns.hasPending(this.options.runtime, key)) throw new SessionDeletionConflict();
-    if (model !== null && !sdkModelChoices(models.model, models.modelChoices).includes(model)) {
+    const defaultModel = models.model;
+    if (model !== null && !sdkModelChoices(defaultModel, models.modelChoices).includes(model)) {
       throw new Error('Model is not in this Connector catalog');
     }
     journal.updateModel(key, model, () => {
       this.options.assertAvailable(true); journal.checkAuthority(authorize);
-      return acknowledge(model ?? models.model);
+      return acknowledge(model ?? defaultModel);
     });
     this.notify(key);
   }

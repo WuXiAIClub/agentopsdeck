@@ -2,6 +2,7 @@ import type { ConnectorUserStore } from '../connector/connector-user-store.js';
 import { COPILOT_TRANSCRIPT_PAGE_BYTES } from './transcript-store.js';
 
 type Source = Pick<ConnectorUserStore, 'copilotJournal' | 'copilotTranscript'> & Partial<Pick<ConnectorUserStore, 'sdkAttachments'>>;
+type AntigravitySource = Pick<ConnectorUserStore, 'antigravityJournal' | 'antigravityTranscript'> & Partial<Pick<ConnectorUserStore, 'sdkAttachments'>>;
 /** Authorized callers only. A single bounded view of durable, live and queued
  * rows; queue echoes retain public IDs, pending inputs stay at the bottom. */
 export function copilotHistoryPage(source: Source, key: string, limit = 200, before?: string) {
@@ -39,4 +40,14 @@ export function copilotHistoryMessage(source: Source, key: string, id: string) {
   if (message?.role !== 'tool') return message ? source.sdkAttachments?.project(message) ?? message : undefined;
   const detail = source.copilotTranscript.toolDetail(key, id);
   return detail ? { ...message, text: detail.text, contentTruncated: detail.truncated } : message;
+}
+
+export function antigravityHistoryPage(source: AntigravitySource, key: string, limit = 200, before?: string) {
+  return copilotHistoryPage({ copilotJournal: source.antigravityJournal, copilotTranscript: source.antigravityTranscript,
+    ...(source.sdkAttachments ? { sdkAttachments: source.sdkAttachments } : {}) }, key, limit, before);
+}
+
+export function antigravityHistoryMessage(source: AntigravitySource, key: string, id: string) {
+  return copilotHistoryMessage({ copilotJournal: source.antigravityJournal, copilotTranscript: source.antigravityTranscript,
+    ...(source.sdkAttachments ? { sdkAttachments: source.sdkAttachments } : {}) }, key, id);
 }

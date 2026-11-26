@@ -2,7 +2,7 @@ import { sessionRuntimeId, type ChatMessage, type CommandReceipt } from '@agento
 import type { ConnectorTokenStore } from '../auth/connector-token.js';
 import { CommandCapacity, CommandConflict } from '../commands/receipts.js';
 import { claudeHistoryPage } from '../claude/history.js';
-import { copilotHistoryPage } from '../copilot/history.js';
+import { antigravityHistoryPage, copilotHistoryPage } from '../copilot/history.js';
 import type { ConnectorUserStore } from './connector-user-store.js';
 import type { SdkAgentId, SdkDeletion, SdkJournalSnapshot } from './sdk-execution-journal.js';
 import { validSdkJournalSnapshot } from './connector-sdk-journal-domain.js';
@@ -35,7 +35,7 @@ const id = (v: unknown): v is string => typeof v === 'string' && v.length > 0 &&
 const integer = (v: unknown): v is number => Number.isSafeInteger(v) && Number(v) >= 0;
 const authorization = (v: unknown) => typeof v === 'string' && !!v.trim() && Buffer.byteLength(v) <= 4096 && !/[\r\n\u0000]/.test(v);
 const commandKey = (v: unknown) => typeof v === 'string' && /^[A-Za-z0-9._:-]{1,200}$/.test(v);
-const scope = (v: Record<string, unknown>) => (v.runtime === 'claude-code' || v.runtime === 'ghcp')
+const scope = (v: Record<string, unknown>) => (v.runtime === 'claude-code' || v.runtime === 'ghcp' || v.runtime === 'antigravity')
   && id(v.key) && sessionRuntimeId(v.key) === v.runtime && v.key !== `${v.runtime}:`;
 const intent = (v: unknown, key: unknown): v is SdkDeletion => fields(v, ['id', 'key', 'nativeSessionId', 'phase', 'createdAt'])
   && v.key === key && id(v.id) && id(v.nativeSessionId) && v.phase === 'pending' && integer(v.createdAt);
@@ -96,7 +96,7 @@ const same = (a: SdkDeletion, b: SdkDeletion) => a.id === b.id && a.key === b.ke
 export async function executeConnectorSdkLifecycle<K extends ConnectorSdkLifecycleKind>(kind: K,
   request: ConnectorSdkLifecycleCommands[K]['input'], owner: ConnectorUserStore, tokens?: ConnectorTokenStore, transactions?: ApplicationTransactionClient): Promise<ConnectorSdkLifecycleCommands[K]['output']> {
   if (!validConnectorSdkLifecycleInput(kind, request)) throw Error('connector_storage_unavailable');
-  const input = structuredClone(request), journal = input.runtime === 'ghcp' ? owner.copilotJournal : owner.claudeJournal;
+  const input = structuredClone(request), journal = input.runtime === 'ghcp' ? owner.copilotJournal : input.runtime === 'antigravity' ? owner.antigravityJournal : owner.claudeJournal;
   let value: unknown;
   if (kind === 'sdkDeletionReceiptRead') {
     const v = input as Claim, actor = tokens?.authenticateAuthorization(v.authorization);
@@ -111,7 +111,7 @@ export async function executeConnectorSdkLifecycle<K extends ConnectorSdkLifecyc
     const snapshot = journal.readSnapshot(input.key);
     const history = (input as ConnectorSdkLifecycleCommands['sdkLifecycleRead']['input']).history;
     const view: SdkLifecycleView = { runtime: input.runtime, key: input.key, snapshot, page: history && snapshot.session
-      ? (input.runtime === 'ghcp' ? copilotHistoryPage(owner, input.key) : claudeHistoryPage(owner, input.key)) ?? null : null };
+      ? (input.runtime === 'ghcp' ? copilotHistoryPage(owner, input.key) : input.runtime === 'antigravity' ? antigravityHistoryPage(owner, input.key) : claudeHistoryPage(owner, input.key)) ?? null : null };
     // The original history budget excludes the worker envelope/snapshot. Trim
     // oldest rows, retaining truthful hidden counts, to fit the existing RPC
     // budget rather than increasing every owner's aggregate result reservation.

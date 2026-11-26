@@ -955,6 +955,8 @@ export const api = {
         throw error;
       }));
   },
+  antigravityUsage: (signal: AbortSignal) => readJson<{ usage: import('@agentopsdeck/shared').AntigravityUsage | null }>(
+    '/api/antigravity/usage', { signal, timeoutMs: 20_000 }),
   gatewayStatus: (maxAgeMs = 0) => {
     const scopeKey = requestKey('/api/gateway/status');
     if (forbiddenGatewayScopeKey === scopeKey || isLocalRuntimeForbiddenInStorage('gateway')) {

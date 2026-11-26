@@ -12,7 +12,7 @@ import { ConnectorOwnerUnavailable } from './connector/connector-owner-domain.js
 import { EXPECTED_NODE_HEADER } from './connector/node-identity.js';
 import { performanceDiagnostics, type PerformanceDiagnostics } from './diagnostics/performance.js';
 
-type Runtime = 'codex' | 'hermes' | 'claude-code' | 'ghcp';
+type Runtime = 'codex' | 'hermes' | 'claude-code' | 'ghcp' | 'antigravity';
 const digest = createHash('sha256').update('{}').digest('hex');
 
 /** Original application credentials remain separate from the daily Connector
@@ -45,7 +45,7 @@ export function registerApplicationDeletionHttp(app: Hono, deps: {
   const receipt: DeletionPorts<Runtime>['receipt'] = (runtime, key, commandKey, authorization) => {
     if (runtime === 'codex' && deps.codex) return deps.codex.deletion.receipt(key, commandKey, authorization);
     if (runtime === 'hermes' && deps.hermes) return deps.hermes.lifecycle.receipt(key, commandKey, authorization);
-    if ((runtime === 'claude-code' || runtime === 'ghcp') && deps.sdk)
+    if ((runtime === 'claude-code' || runtime === 'ghcp' || runtime === 'antigravity') && deps.sdk)
       return deps.sdk.owner.command('sdkDeletionReceiptRead', { runtime, key, commandKey, authorization });
     return Promise.reject(new ConnectorOwnerUnavailable());
   };
@@ -66,7 +66,7 @@ export function registerApplicationDeletionHttp(app: Hono, deps: {
           result = await deps.codex.deletion.remove(key, commandKey, authorization, source.evidence, scope);
         else if (runtime === 'hermes' && deps.hermes)
           result = await deps.hermes.lifecycle.remove(key, commandKey, authorization, source.evidence, scope);
-        else if ((runtime === 'claude-code' || runtime === 'ghcp') && deps.sdk?.removePhysical)
+        else if ((runtime === 'claude-code' || runtime === 'ghcp' || runtime === 'antigravity') && deps.sdk?.removePhysical)
           result = await deps.sdk.removePhysical({ runtime, key, commandKey, authorization, application: source.evidence }, scope);
         else throw new ConnectorOwnerUnavailable();
         await scope.authorize('prepare'); scope.local(); return result;
@@ -75,7 +75,7 @@ export function registerApplicationDeletionHttp(app: Hono, deps: {
   };
   registerOwnedDeletionHttp<Runtime>(app, '/api/sessions/:sessionKey', {
     runtime: key => { const runtime = sessionRuntimeId(key);
-      return runtime === 'codex' || runtime === 'hermes' || runtime === 'claude-code' || runtime === 'ghcp' ? runtime : undefined; },
+      return runtime === 'codex' || runtime === 'hermes' || runtime === 'claude-code' || runtime === 'ghcp' || runtime === 'antigravity' ? runtime : undefined; },
     receipt, remove: () => Promise.reject(new ConnectorOwnerUnavailable()),
     ready: runtime => available() && (runtime === 'codex' ? deps.codex?.ready() === true
       : runtime === 'hermes' ? deps.hermes?.ready() === true : deps.sdk?.ready(runtime) === true),

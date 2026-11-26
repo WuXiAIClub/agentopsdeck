@@ -12,7 +12,7 @@ import { registerSessionSettingsRoutes } from './session-settings-http.js';
 import { DeckStore } from '../projection/deck-store.js';
 import type { GatewayWsClient } from '../gateway/ws-client.js';
 
-for (const runtime of ['claude-code', 'ghcp'] as const) {
+for (const runtime of ['claude-code', 'ghcp', 'antigravity'] as const) {
   test(`${runtime}: SDK savepoint rolls back model, dispatch phase and ACK; exclusive startup rejects only prewrite without replay`, async t => {
     const directory = mkdtempSync(join(tmpdir(), 'agentopsdeck-sdk-settings-rollback-'));
     t.after(() => rmSync(directory, { recursive: true, force: true }));
@@ -23,7 +23,7 @@ for (const runtime of ['claude-code', 'ghcp'] as const) {
     const open = (runtimeOwner: boolean) => {
       const store = new ConnectorUserStore(file, undefined, { runtimeOwner });
       const db = (store as unknown as { db: DatabaseSync }).db;
-      const journal = runtime === 'claude-code' ? store.claudeJournal : store.copilotJournal;
+      const journal = runtime === 'claude-code' ? store.claudeJournal : runtime === 'ghcp' ? store.copilotJournal : store.antigravityJournal;
       const phase = (receiptKey: string, receiptScope = scope) => (db.prepare(`SELECT settings_dispatch_phase AS phase
         FROM command_receipts WHERE scope = ? AND command_key = ?`).get(receiptScope, receiptKey) as { phase: string | null }).phase;
       const deck = new DeckStore();
@@ -114,7 +114,7 @@ for (const runtime of ['claude-code', 'ghcp'] as const) {
 
   test(`${runtime}: settings receipts, lifecycle fencing, model persistence and no gateway fallback`, async t => {
     const store = new ConnectorUserStore(':memory:'); t.after(() => store.close());
-    const journal = runtime === 'claude-code' ? store.claudeJournal : store.copilotJournal;
+    const journal = runtime === 'claude-code' ? store.claudeJournal : runtime === 'ghcp' ? store.copilotJournal : store.antigravityJournal;
     const key = `${runtime}:fixture`, deck = new DeckStore();
     journal.create({ key, nativeSessionId: 'native-id', title: 'Fixture', createdAt: 1 });
     deck.upsertSession({ sessionKey: key, source: runtime, agentId: runtime, title: 'Fixture', status: 'idle' });

@@ -23,7 +23,7 @@ export const isConnectorSdkMetadataKind = (kind: string): kind is ConnectorSdkMe
 const fields = (v: unknown, keys: string[]): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v)
   && Object.keys(v).length === keys.length && keys.every(k => Object.hasOwn(v, k));
 const text = (v: unknown, max = 512): v is string => typeof v === 'string' && !!v.length && v.length <= max && !/[\u0000-\u001f\u007f]/.test(v);
-const runtime = (v: unknown) => v === 'claude-code' || v === 'ghcp';
+const runtime = (v: unknown) => v === 'claude-code' || v === 'ghcp' || v === 'antigravity';
 const key = (v: Record<string, unknown>) => text(v.key) && sessionRuntimeId(v.key) === v.runtime && v.key !== `${v.runtime}:`;
 export function validConnectorSdkMetadataInput(kind: ConnectorSdkMetadataKind, v: unknown): boolean {
   return fields(v, ['runtime', 'authorization', ...(kind === 'sdkStateRead' ? ['key', 'connected'] : kind === 'sdkModelsDeliver' ? ['readerId'] : [])])
@@ -56,7 +56,7 @@ export function executeConnectorSdkMetadata<K extends ConnectorSdkMetadataKind>(
   if (actor.tokenId.startsWith('actor_') || actor.scopes.includes('execution:delegate') || !actor.scopes.includes(scope)) return { error: 403 };
   let result: unknown;
   if ('key' in input) {
-    const journal = input.runtime === 'claude-code' ? owner.claudeJournal : owner.copilotJournal;
+    const journal = input.runtime === 'claude-code' ? owner.claudeJournal : input.runtime === 'ghcp' ? owner.copilotJournal : owner.antigravityJournal;
     const snapshot = journal.readSnapshot(input.key);
     if (!snapshot.session || snapshot.deletion || owner.commands.sessionDeletion(input.key)) return { error: 404 };
     const sourceCursor = owner.events.latestEventId();

@@ -43,7 +43,7 @@ export function registerSdkQueueHttp(app: Hono, path: string, deps: SdkQueueHttp
     ...deps, ready: runtime => deps.ready(runtime),
     queue: { page: input => deps.queue.page(input), commandPage: input => deps.queue.commandPage(input),
       edit: input => deps.queue.edit(input), cancel: input => deps.queue.cancel(input), readReceipt: input => deps.queue.readReceipt(input) },
-    runtime: key => { const runtime = sessionRuntimeId(key); return runtime === 'claude-code' || runtime === 'ghcp' ? runtime : undefined; },
+    runtime: key => { const runtime = sessionRuntimeId(key); return runtime === 'claude-code' || runtime === 'ghcp' || runtime === 'antigravity' ? runtime : undefined; },
     operation: 'sdk-queue-http',
   });
 }

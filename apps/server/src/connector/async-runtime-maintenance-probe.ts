@@ -15,7 +15,7 @@ type Codex = {
   refreshMaintenanceSessionAsync(key: string, authority: CodexMaintenanceRecoveryAuthority): Promise<void>;
   isSessionListReady(): boolean; isSessionHistoryReady(key: string): boolean;
 };
-type Sdk = { id: 'claude-code' | 'ghcp'; refreshSession(key: string, options: { fresh: true }): Promise<void>;
+type Sdk = { id: 'claude-code' | 'ghcp' | 'antigravity'; refreshSession(key: string, options: { fresh: true }): Promise<void>;
   isSessionHistoryReady(key: string): boolean };
 
 /** Complete original 55s probe, NOT a replacement maintenance lock or a new

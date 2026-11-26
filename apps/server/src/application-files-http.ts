@@ -42,7 +42,7 @@ export function registerApplicationFilesHttp(app: Hono, deps: {
       return Promise.resolve(c.json({ error: 'Invalid local file authority' }, 403));
     return authority.run(original(c.req.raw).request, async check => { const response = await work(); await check(); return response; });
   };
-  const requestFiles = <R extends 'codex' | 'claude-code' | 'ghcp'>(c: Context, port: OwnedFilesHttp<R>['files']): OwnedFilesHttp<R>['files'] => {
+  const requestFiles = <R extends 'codex' | 'claude-code' | 'ghcp' | 'antigravity'>(c: Context, port: OwnedFilesHttp<R>['files']): OwnedFilesHttp<R>['files'] => {
     const source = original(c.req.raw);
     const mutate = <I extends { runtime: R; key: string; jobId?: string; step?: number }, T>(
       operation: 'start' | 'step' | 'cancel', input: I, work: (pinned: I & { application: ApplicationTransactionEvidence }) => Promise<T>) => {

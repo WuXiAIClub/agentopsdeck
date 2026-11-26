@@ -10,7 +10,7 @@ export type ApplicationTransactionEvidence = Readonly<{
   authorization?: string; accessKey?: string; cookie?: string;
 }>;
 export type ApplicationTransactionBinding = Readonly<{
-  runtime: 'codex' | 'openclaw' | 'hermes' | 'claude-code' | 'ghcp'; resource: string; commandKey: string;
+  runtime: 'codex' | 'openclaw' | 'hermes' | 'claude-code' | 'ghcp' | 'antigravity'; resource: string; commandKey: string;
   payloadDigest: string; phase: 'claim' | 'queue' | 'control-claim' | 'control-ready'; evidence: ApplicationTransactionEvidence;
 }>;
 export type OriginalTransactionWrite = <T>(write: () => T) => Promise<T>;
@@ -26,7 +26,7 @@ export function validApplicationTransactionEvidence(v: unknown): v is Applicatio
     && Object.values(v).reduce<number>((sum, value) => sum + Buffer.byteLength(value as string), 0) <= 65_536;
 }
 export function validApplicationTransactionBinding(v: unknown): v is ApplicationTransactionBinding {
-  return object(v) && Object.keys(v).length === 6 && ['codex', 'openclaw', 'hermes', 'claude-code', 'ghcp'].includes(String(v.runtime))
+  return object(v) && Object.keys(v).length === 6 && ['codex', 'openclaw', 'hermes', 'claude-code', 'ghcp', 'antigravity'].includes(String(v.runtime))
     && typeof v.resource === 'string' && v.resource.length > 0 && sessionRuntimeId(v.resource) === v.runtime
     && Buffer.byteLength(v.resource) <= (v.runtime === 'codex' || v.runtime === 'openclaw' ? 4096 : 512)
     && !/[\u0000-\u001f\u007f]/.test(v.resource)

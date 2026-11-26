@@ -1,4 +1,5 @@
 export * from './agent-interaction.js';
+export type { AntigravityQuotaWindow, AntigravityUsage } from './antigravity-usage.js';
 export * from './shared-message-input.js';
 export { readCodexGoal, type CodexGoal } from './codex-goal.js';
 export { goalActions, readGoalControl, readGoalControlSnapshot, type GoalAction, type GoalControl, type GoalControlSnapshot } from './codex-goal-control.js';
@@ -65,7 +66,7 @@ export type SessionStructuredStatus = {
 };
 
 /** Installation/runtime identity; connection aliases and URLs are not identity. */
-export const AGENT_RUNTIME_IDS = ['openclaw', 'codex', 'hermes', 'claude-code', 'ghcp'] as const;
+export const AGENT_RUNTIME_IDS = ['openclaw', 'codex', 'hermes', 'claude-code', 'ghcp', 'antigravity'] as const;
 export type AgentRuntimeId = typeof AGENT_RUNTIME_IDS[number];
 export function isAgentRuntimeId(value: unknown): value is AgentRuntimeId {
   return typeof value === 'string' && (AGENT_RUNTIME_IDS as readonly string[]).includes(value);
@@ -78,7 +79,7 @@ export function sessionRuntimeId(key: string): AgentRuntimeId {
 /** Identity support does not enable a runtime or expand delegated permissions.
  * Check both fields: an OpenClaw label must not disguise an owner-only key. */
 export function isOwnerOnlyRuntimeResource(resource: { runtime?: unknown; sessionKey?: unknown }): boolean {
-  const ownerOnly = (id: unknown) => id === 'hermes' || id === 'claude-code' || id === 'ghcp';
+  const ownerOnly = (id: unknown) => id === 'hermes' || id === 'claude-code' || id === 'ghcp' || id === 'antigravity';
   return ownerOnly(resource.runtime)
     || typeof resource.sessionKey === 'string' && ownerOnly(sessionRuntimeId(resource.sessionKey));
 }

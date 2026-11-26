@@ -1927,7 +1927,7 @@ function isUserFacingSession(session: SessionSummary) {
 }
 
 function isSdkSessionKey(key: string) {
-  return key.startsWith('claude-code:') || key.startsWith('ghcp:');
+  return key.startsWith('claude-code:') || key.startsWith('ghcp:') || key.startsWith('antigravity:');
 }
 
 function isPreviewVisibleAgent(agentId: string | undefined) {

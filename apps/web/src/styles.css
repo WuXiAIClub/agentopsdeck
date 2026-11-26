@@ -2879,6 +2879,7 @@ article:has(> .message-delivery[data-delivery="submitting"]) { background: #304b
 .session-runtime-label[data-runtime="openclaw"] { background: #ccfbf1; border-color: #5eead4; color: #115e59; }
 .session-runtime-label[data-runtime="cc"], .session-runtime-label[data-runtime="claude-code"] { background: #ffedd5; border-color: #fdba74; color: #9a3412; }
 .session-runtime-label[data-runtime="ghcp"] { background: #fce7f3; border-color: #f9a8d4; color: #9d174d; }
+.session-runtime-label[data-runtime="antigravity"] { background: #e0f2fe; border-color: #7dd3fc; color: #075985; }
 [data-session-card][aria-current="true"] .session-identity-row { color: rgb(255 255 255 / 0.9); }
 [data-session-card][aria-current="true"] .connector-mark-icon { color: inherit !important; }
 .source-preview-toggle { margin-left: auto; flex-shrink: 0; border-radius: 5px; padding: 4px 6px; font-size: 10px; color: #475569; background: #f1f5f9; }

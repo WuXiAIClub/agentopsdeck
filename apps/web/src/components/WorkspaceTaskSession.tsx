@@ -55,7 +55,7 @@ export default function WorkspaceTaskSession({scope,resourceId,taskIds,detail,mi
     {busy&&<p role="status">{t('Working…')}</p>}
     {!pending&&<fieldset disabled={busy||!selectionReady}>
       <label>{t('Target environment')}<select name="workspacetasksession-select-1" value={connection} onChange={e=>setConnection(e.target.value)}><option value="">{t('Choose environment')}</option>{connections.map(c=><option key={c.id} value={c.id}>{c.label}</option>)}</select></label>
-      <label>{t('Agent runtime')}<select name="workspacetasksession-select-2" value={runtime} onChange={e=>setRuntime(e.target.value)}><option value="codex">Codex</option><option value="claude-code">Claude Code</option><option value="ghcp">GitHub Copilot</option></select></label>
+      <label>{t('Agent runtime')}<select name="workspacetasksession-select-2" value={runtime} onChange={e=>setRuntime(e.target.value)}><option value="codex">Codex</option><option value="claude-code">Claude Code</option><option value="ghcp">GitHub Copilot</option><option value="antigravity">Antigravity</option></select></label>
       <label>{t('Model')}<select name="workspacetasksession-select-3" value={model} onChange={e=>setModel(e.target.value)}><option value="">—</option>{models.map(m=><option key={m.id} value={m.id}>{m.label}</option>)}</select></label>
       <label>{t('New session title')}<input name="workspacetasksession-input-4" value={title} maxLength={120} onChange={e=>setTitle(e.target.value)}/></label>
       <p>{t('Selected tasks: {count}',{count:taskIds.length})}</p>

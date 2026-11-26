@@ -111,7 +111,7 @@ export function registerHubTaskSessions(app: Hono, deps: { hubStore: HubStore; p
   app.post(base, safe(async c => {
     const { owner, board, check } = scope(c), b = await readJsonBody(c.req.raw, 16384) as Record<string, unknown>; check();
     if (!b || Array.isArray(b) || Object.keys(b).some(k => !['requestId','connectionId','runtime','title','model','taskIds','fields','expiresAt'].includes(k))
-      || !validBoardUuid(b.requestId) || typeof b.connectionId !== 'string' || !['codex','claude-code','ghcp'].includes(String(b.runtime))
+      || !validBoardUuid(b.requestId) || typeof b.connectionId !== 'string' || !['codex','claude-code','ghcp','antigravity'].includes(String(b.runtime))
       || typeof b.title !== 'string' || !b.title.trim() || b.title !== b.title.trim() || b.title.length > 120 || /[\x00-\x1f\x7f]/.test(b.title)
       || typeof b.model !== 'string' || !b.model.trim() || b.model !== b.model.trim() || b.model.length > 256 || /[\x00-\x1f\x7f]/.test(b.model)
       || !Array.isArray(b.taskIds) || !b.taskIds.length || b.taskIds.length > 32 || new Set(b.taskIds).size !== b.taskIds.length

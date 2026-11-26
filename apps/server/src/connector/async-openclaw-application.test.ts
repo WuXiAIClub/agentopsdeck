@@ -257,7 +257,9 @@ test('real Gateway history, original media reader, worker execution and public H
   // and publish again; an old revision cannot certify this native preparation.
   await f.application.connectionChanged(); holdMedia = true; bridgeEntered = false;
   response = await f.request('/messages', 'GET', undefined, { [HISTORY_ASYNC_HEADER]: '1' });
-  assert.equal(response.status, 202); assert.equal(bridgeEntered, true); assert.equal(reads, 2);
+  assert.equal(response.status, 202);
+  await until(() => bridgeEntered);
+  assert.equal(bridgeEntered, true); assert.equal(reads, 2);
   assert.equal(history.ready(key), false);
   let closed = false; const closing = f.application.close(); void closing.then(() => { closed = true; });
   await tick(); assert.equal(closed, false);

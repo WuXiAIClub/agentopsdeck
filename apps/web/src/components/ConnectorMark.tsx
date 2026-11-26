@@ -15,7 +15,7 @@ export function ConnectorMark({ session }: { session: SessionSummary }) {
 export function SessionIdentityRow({ session }: { session: SessionSummary }) {
   // Runtime identity is not the user-defined OpenClaw agent name.
   const runtime = session.sessionRef?.runtimeId ?? session.source;
-  const labels: Record<string, string> = { codex: 'Codex', hermes: 'Hermes', openclaw: 'OpenClaw', cc: 'CC', 'claude-code': 'CC', ghcp: 'GHCP' };
+  const labels: Record<string, string> = { codex: 'Codex', hermes: 'Hermes', openclaw: 'OpenClaw', cc: 'CC', 'claude-code': 'CC', ghcp: 'GHCP', antigravity: 'Antigravity' };
   const label = labels[runtime ?? ''] ?? 'OpenClaw';
   return <span className="session-identity-row">
     <ConnectorMark session={session} />

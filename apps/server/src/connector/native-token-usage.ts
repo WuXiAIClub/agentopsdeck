@@ -42,7 +42,7 @@ export class NativeTokenUsageStore {
     }
   }
   record(runtime: Runtime, key: string, eventId: string, counts: NativeTokenCounts, model?: string, observedAt = this.now()) {
-    if (!['codex', 'claude-code', 'ghcp'].includes(runtime) || !key.startsWith(`${runtime}:`) || !eventId || eventId.length > 1024 || !nativeTokenCounts(counts)) throw Error('Invalid native token observation');
+    if (!['codex', 'claude-code', 'ghcp', 'antigravity'].includes(runtime) || !key.startsWith(`${runtime}:`) || !eventId || eventId.length > 1024 || !nativeTokenCounts(counts)) throw Error('Invalid native token observation');
     if (!integer(observedAt)) throw Error('Invalid native observation time');
     if (model !== undefined && !nativeModelId(model)) throw Error('Invalid native model');
     this.db.prepare('INSERT OR IGNORE INTO native_token_samples(runtime,session_key,event_id,observed_at,input_tokens,output_tokens,cache_read,cache_write,model) VALUES(?,?,?,?,?,?,?,?,?)')
@@ -127,7 +127,7 @@ export class NativeTokenUsageStore {
     // the sole DB owner. Synchronous reads cannot interleave with its writes;
     // row-vs-summary reconciliation also rejects an inconsistent snapshot.
     tokenUsageRange(from, to, bucketMs);
-    if (!['codex', 'claude-code', 'ghcp'].includes(runtime) || !key.startsWith(`${runtime}:`)) throw Error('Invalid native token runtime');
+    if (!['codex', 'claude-code', 'ghcp', 'antigravity'].includes(runtime) || !key.startsWith(`${runtime}:`)) throw Error('Invalid native token runtime');
     const rows = this.db.prepare(`SELECT event_id, observed_at, model, input_tokens, output_tokens, cache_read, cache_write
       FROM native_token_samples WHERE runtime=? AND session_key=? AND observed_at>=? AND observed_at<?
       ORDER BY observed_at,event_id LIMIT ?`).all(runtime, key, from, to, NATIVE_TOKEN_EXPORT_LIMIT + 1);
@@ -141,7 +141,7 @@ export class NativeTokenUsageStore {
     return validateNativeTokenUsageExport({ version: 1, usage, observations });
   }
   range(runtime: Runtime, key: string, from: number, to: number, bucketMs: number): NativeTokenUsage {
-    if (!['codex', 'claude-code', 'ghcp'].includes(runtime) || !key.startsWith(`${runtime}:`)
+    if (!['codex', 'claude-code', 'ghcp', 'antigravity'].includes(runtime) || !key.startsWith(`${runtime}:`)
       || !integer(from) || !integer(to) || to <= from || to - from > 31 * 86_400_000
       ) throw Error('Invalid token usage range');
     tokenUsageRange(from, to, bucketMs);

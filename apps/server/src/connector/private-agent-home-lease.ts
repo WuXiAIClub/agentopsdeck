@@ -5,10 +5,11 @@ import { isAbsolute, join } from 'node:path';
 import { pathsOverlap } from '../claude/config.js';
 import { assertWindowsPrivatePath, canonicalPrivatePath } from './windows-private-worker.js';
 
-type Runtime = 'claude-code' | 'ghcp';
+type Runtime = 'claude-code' | 'ghcp' | 'antigravity';
 const names = {
   'claude-code': { lock: '.agentopsdeck-claude-owner', binding: '.agentopsdeck-claude-binding' },
   ghcp: { lock: '.agentopsdeck-copilot-owner', binding: '.agentopsdeck-copilot-binding' },
+  antigravity: { lock: '.agentopsdeck-antigravity-owner', binding: '.agentopsdeck-antigravity-binding' },
 } as const;
 const failed = () => new Error('Private Agent home ownership is unconfirmed; keep state and use offline recovery');
 function assertNoForeignRuntime(home: string, runtime: Runtime) {

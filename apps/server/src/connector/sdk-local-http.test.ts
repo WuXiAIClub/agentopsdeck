@@ -15,7 +15,11 @@ import { validConnectorSdkLocalOutput } from './connector-sdk-local-domain.js';
 import type { SdkAgentId } from './sdk-execution-journal.js';
 
 const token = 'isolated-sdk-local-http-test', authorization = `Bearer ${token}`;
-const catalogs = { 'claude-code': { model: 'default', modelChoices: ['default', 'alternate'] }, ghcp: { model: 'default', modelChoices: ['default', 'alternate'] } };
+const catalogs = {
+  'claude-code': { model: 'default', modelChoices: ['default', 'alternate'] },
+  ghcp: { model: 'default', modelChoices: ['default', 'alternate'] },
+  antigravity: { model: 'default', modelChoices: ['default', 'alternate'] },
+};
 const base = '/api/connector/v1';
 const tick = () => new Promise<void>(resolve => setImmediate(resolve));
 function fixture(runtime: SdkAgentId) {
@@ -23,7 +27,7 @@ function fixture(runtime: SdkAgentId) {
   const tokens = new ConnectorTokenStore(join(directory, 'tokens.json'), token);
   const actor = tokens.authenticateAuthorization(authorization)!.tokenId;
   const store = new ConnectorUserStore(':memory:', undefined, { runtimeOwner: true });
-  const journal = runtime === 'ghcp' ? store.copilotJournal : store.claudeJournal;
+  const journal = runtime === 'ghcp' ? store.copilotJournal : runtime === 'antigravity' ? store.antigravityJournal : store.claudeJournal;
   const key = `${runtime}:original`;
   journal.create({ key, nativeSessionId: 'native', title: 'Original', createdAt: 0 });
   const command = createConnectorOwnerCommands(store, tokens, catalogs);
@@ -46,7 +50,7 @@ function fixture(runtime: SdkAgentId) {
     close: () => { store.close(); rmSync(directory, { recursive: true, force: true }); } };
 }
 
-for (const runtime of ['claude-code', 'ghcp'] as const) {
+for (const runtime of ['claude-code', 'ghcp', 'antigravity'] as const) {
   for (const operation of ['create', 'settings'] as const) test(`${runtime} HTTP ${operation}: original wire/fingerprint/receipt and maintenance recovery`, async () => {
     const f = fixture(runtime);
     try {

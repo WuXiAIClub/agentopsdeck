@@ -25,6 +25,10 @@ export function applicationConnectorOwnerConfig(config: ServerConfig): Connector
         ...(config.claude.modelChoices ? { modelChoices: config.claude.modelChoices } : {}) } } : {}),
       ...(config.copilot ? { ghcp: { model: config.copilot.model,
         ...(config.copilot.modelChoices ? { modelChoices: config.copilot.modelChoices } : {}) } } : {}),
+      ...(config.antigravity ? { antigravity: {
+        model: config.antigravity.model ?? 'default',
+        ...(config.antigravity.modelChoices ? { modelChoices: config.antigravity.modelChoices } : {}),
+      } } : {}),
     },
     fileToolPolicies: {
       ...(config.claude?.toolPolicy !== undefined ? { claude: { toolPolicy: config.claude.toolPolicy } } : {}),

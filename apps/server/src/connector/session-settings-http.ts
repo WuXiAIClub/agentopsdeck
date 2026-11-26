@@ -74,7 +74,7 @@ export function registerSessionSettingsRoutes(app: Hono, path: string, deps: {
         await deps.codex.changeGoal(sessionKey, control, authorize, begin, () => acknowledge({ goalControl: control.action }));
         return c.json({ ok: true });
       }
-      if (['claude-code', 'ghcp'].includes(sessionRuntimeId(sessionKey))) {
+      if (['claude-code', 'ghcp', 'antigravity'].includes(sessionRuntimeId(sessionKey))) {
         if (!deps.sdkSettingsAdmission) return c.json({ error: 'SDK settings are unavailable' }, 409);
         deps.sdkSettingsAdmission(sessionKey);
       }
@@ -90,7 +90,7 @@ export function registerSessionSettingsRoutes(app: Hono, path: string, deps: {
       const thinking = body.thinking === null ? null : typeof body.thinking === 'string' ? body.thinking.trim() : undefined;
       if (model === undefined || model === '' || (model?.length ?? 0) > 4096
         || (Object.hasOwn(body, 'thinking') && (thinking === undefined || thinking === '' || (thinking?.length ?? 0) > 4096))) return c.json({ error: 'Invalid session settings' }, 400);
-      if (['claude-code', 'ghcp'].includes(sessionRuntimeId(sessionKey))) {
+      if (['claude-code', 'ghcp', 'antigravity'].includes(sessionRuntimeId(sessionKey))) {
         if (!deps.sdkModelUpdate) return c.json({ error: 'SDK model settings are unavailable' }, 409);
         if (thinking !== undefined && thinking !== null) return c.json({ error: 'SDK thinking overrides are not supported' }, 400);
         // The SDK callback currently reports a transactional ACK, not the

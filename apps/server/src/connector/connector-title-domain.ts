@@ -7,8 +7,8 @@ import { CommandCapacity, CommandConflict } from '../commands/receipts.js';
 import type { ConnectorUserStore } from './connector-user-store.js';
 import { applicationControlTransaction } from './application-stop-transaction.js';
 
-export type TitleRuntime = 'openclaw' | 'hermes' | 'claude-code' | 'ghcp';
-export const titleRuntime = (v: string): v is TitleRuntime => ['openclaw', 'hermes', 'claude-code', 'ghcp'].includes(v);
+export type TitleRuntime = 'openclaw' | 'hermes' | 'claude-code' | 'ghcp' | 'antigravity';
+export const titleRuntime = (v: string): v is TitleRuntime => ['openclaw', 'hermes', 'claude-code', 'ghcp', 'antigravity'].includes(v);
 type Scope = { authorization: string; key: string };
 export type TitleIntent = { id: string; receiptId: string; key: string; commandKey: string; title: string };
 export type TitleResult = { commandKey: string; receipt: CommandReceipt | null; intent: TitleIntent | null };

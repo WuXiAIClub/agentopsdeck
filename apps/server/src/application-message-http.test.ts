@@ -39,9 +39,9 @@ function fixture(timeoutMs = 2000, stops = false, statuses = false, compacts = f
   const codex = { sendPhysical: send, readReceiptPhysical: read, readSendReceiptPhysical: read };
   const openclaw = codex;
   const sdk = {
-    sendPhysical: async (input: Scope & { runtime: 'claude-code' | 'ghcp' }) => ({ ...await send(input), runtime: input.runtime }),
-    readReceiptPhysical: async (input: Scope & { runtime: 'claude-code' | 'ghcp' }) => ({ ...await read(input), runtime: input.runtime }),
-    readSendReceiptPhysical: async (input: Scope & { runtime: 'claude-code' | 'ghcp' }) => ({ ...await read(input), runtime: input.runtime }),
+    sendPhysical: async (input: Scope & { runtime: 'claude-code' | 'ghcp' | 'antigravity' }) => ({ ...await send(input), runtime: input.runtime }),
+    readReceiptPhysical: async (input: Scope & { runtime: 'claude-code' | 'ghcp' | 'antigravity' }) => ({ ...await read(input), runtime: input.runtime }),
+    readSendReceiptPhysical: async (input: Scope & { runtime: 'claude-code' | 'ghcp' | 'antigravity' }) => ({ ...await read(input), runtime: input.runtime }),
   };
   const hermes = {
     sendPhysical: async (input: Scope) => ({ ...await send(input), runtime: 'hermes' as const }),

@@ -5,12 +5,12 @@ import { readJsonBody } from '../utils/http-body.js';
 import { ReadRequestError } from '../lifecycle/read-request-owner.js';
 import type { NativeTokenUsage, NativeTokenUsageExport, NativeTokenSnapshot } from '@agentopsdeck/shared';
 
-export type SdkUsageHttp = Pick<OwnedUsageHttp<'claude-code' | 'ghcp'>, 'usage' | 'timeoutMs' | 'authorization' | 'around' | 'requestUsage'>;
+export type SdkUsageHttp = Pick<OwnedUsageHttp<'claude-code' | 'ghcp' | 'antigravity'>, 'usage' | 'timeoutMs' | 'authorization' | 'around' | 'requestUsage'>;
 type UsageResult = { error: 401 | 403 | 404 | 409 | 413 | 503; code?: 'token_export_limit' }
   | { body: NativeTokenUsage | NativeTokenUsageExport | NativeTokenSnapshot };
 type Range = { from: number; to: number; bucketMs: number };
 type Scope<R> = { runtime: R; key: string; authorization: string };
-export type OwnedUsageHttp<R extends 'codex' | 'claude-code' | 'ghcp'> = {
+export type OwnedUsageHttp<R extends 'codex' | 'claude-code' | 'ghcp' | 'antigravity'> = {
   timeoutMs?: number;
   authorization?(c: Context): string;
   around?(c: Context, work: () => Promise<Response>): Promise<Response>;
@@ -26,10 +26,10 @@ export type OwnedUsageHttp<R extends 'codex' | 'claude-code' | 'ghcp'> = {
 /** Wire parsing only. Runtime selection never changes worker command authority. */
 export function registerSdkUsageHttp(app: Hono, base: string, deps: SdkUsageHttp) {
   return registerOwnedUsageHttp(app, base, { ...deps, select(key) {
-    const runtime = sessionRuntimeId(key); return runtime === 'claude-code' || runtime === 'ghcp' ? runtime : undefined;
+    const runtime = sessionRuntimeId(key); return runtime === 'claude-code' || runtime === 'ghcp' || runtime === 'antigravity' ? runtime : undefined;
   } });
 }
-export function registerOwnedUsageHttp<R extends 'codex' | 'claude-code' | 'ghcp'>(app: Hono, base: string, deps: OwnedUsageHttp<R>) {
+export function registerOwnedUsageHttp<R extends 'codex' | 'claude-code' | 'ghcp' | 'antigravity'>(app: Hono, base: string, deps: OwnedUsageHttp<R>) {
   const timeoutMs = deps.timeoutMs ?? 10_000;
   if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 2_147_483_647) throw new RangeError('Finite usage HTTP deadline required');
   let readers = 0;

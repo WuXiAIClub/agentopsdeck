@@ -165,7 +165,7 @@ export function registerHubConnectionFiles(app: Hono, deps: HubConnectionProxyRo
   app.get(`${base}/agents`, c => handle(c, () => json(c, 'agents')));
   app.get(`${base}/models/:runtime`, c => handle(c, async () => {
     const runtime = c.req.param('runtime');
-    if (!['codex', 'openclaw', 'claude-code', 'ghcp'].includes(runtime)) return c.json({ error: 'Unsupported model catalog' }, 400);
+    if (!['codex', 'openclaw', 'claude-code', 'ghcp', 'antigravity'].includes(runtime)) return c.json({ error: 'Unsupported model catalog' }, 400);
     return json(c, `models/${runtime}`);
   }));
   for (const path of ['files/roots', 'files/git/roots', 'issues/sources']) app.get(`${base}/${path}`, c => handle(c, () => json(c, path)));

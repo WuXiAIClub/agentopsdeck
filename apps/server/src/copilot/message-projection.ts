@@ -16,7 +16,8 @@ const invalid = () => new Error('Invalid Copilot message projection');
 /** Stable assistant identity across delta/final/reopen, not transient event
  * UUIDs. Child scope is part of the key, never flattened into the root. */
 export function copilotMessageId(key: string, scope: CopilotMessageScope, role: string, identity: string) {
-  return `ghcp-message:${Buffer.from(JSON.stringify([key, scope.agentId ?? null, scope.parentToolCallId ?? null, role, identity])).toString('base64url')}`;
+  const prefix = key.startsWith('antigravity:') ? 'antigravity-message' : 'ghcp-message';
+  return `${prefix}:${Buffer.from(JSON.stringify([key, scope.agentId ?? null, scope.parentToolCallId ?? null, role, identity])).toString('base64url')}`;
 }
 
 export function projectCopilotMessage(value: unknown): CopilotProjectedMessage | undefined {

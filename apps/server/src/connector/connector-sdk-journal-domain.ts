@@ -35,7 +35,7 @@ const fields = (v: unknown, required: string[], optional: string[] = []): v is R
   && typeof v === 'object' && !Array.isArray(v) && required.every(key => Object.hasOwn(v, key))
   && Object.keys(v).every(key => required.includes(key) || optional.includes(key));
 const id = (v: unknown): v is string => typeof v === 'string' && v.length > 0 && v.length <= 512 && !/[\u0000-\u001f\u007f]/.test(v);
-const runtime = (v: unknown): v is SdkAgentId => v === 'claude-code' || v === 'ghcp';
+const runtime = (v: unknown): v is SdkAgentId => v === 'claude-code' || v === 'ghcp' || v === 'antigravity';
 const key = (v: unknown, r?: unknown): v is string => id(v) && runtime(sessionRuntimeId(v))
   && v !== `${sessionRuntimeId(v)}:` && (r === undefined || sessionRuntimeId(v) === r);
 const outcome = (v: unknown) => v === 'completed' || v === 'failed' || v === 'interrupted';
@@ -129,9 +129,9 @@ export function validConnectorSdkJournalOutput(kind: ConnectorSdkJournalKind, v:
  * deletion, settings and compact intent are intentionally not exposed without
  * their original fresh authorization/receipt transaction. No provider/replay. */
 export function executeConnectorSdkJournal<K extends ConnectorSdkJournalKind>(kind: K,
-  input: ConnectorSdkJournalCommands[K]['input'], owner: Pick<ConnectorUserStore, 'claudeJournal' | 'copilotJournal' | 'turns'>): ConnectorSdkJournalCommands[K]['output'] {
+  input: ConnectorSdkJournalCommands[K]['input'], owner: Pick<ConnectorUserStore, 'claudeJournal' | 'copilotJournal' | 'antigravityJournal' | 'turns'>): ConnectorSdkJournalCommands[K]['output'] {
   if (!validConnectorSdkJournalInput(kind, input)) throw Error('connector_storage_unavailable');
-  const journal = input.runtime === 'claude-code' ? owner.claudeJournal : owner.copilotJournal;
+  const journal = input.runtime === 'claude-code' ? owner.claudeJournal : input.runtime === 'ghcp' ? owner.copilotJournal : owner.antigravityJournal;
   const v = input as Execution & { nativeRequestId: string; outcome: SdkTerminalOutcome; result: SdkCompactResult;
     completionEventId: string; historyPersisted: boolean; nativeQuiescent: boolean; sample: SdkMetricSample };
   let value: unknown;

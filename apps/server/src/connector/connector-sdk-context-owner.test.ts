@@ -12,13 +12,12 @@ import { ConnectorUserStore } from './connector-user-store.js';
 import { connectorProjectionReadKinds, createConnectorOwnerCommands, validConnectorOwnerInput,
   validConnectorOwnerOutput } from './connector-owner-domain.js';
 import type { ConnectorSdkContextCommands } from './connector-sdk-context-domain.js';
-import type { SdkAgentId } from './sdk-execution-journal.js';
 import { workspaceFileContext } from './workspace-file-context.js';
 import { LOCAL_FILE_BOARD_OWNER } from './workspace-board-file-policy.js';
 
 type Scope = ConnectorSdkContextCommands['sdkExecutionContext']['input'];
 const silence = new PerformanceDiagnostics(() => {});
-async function fixture(t: import('node:test').TestContext, runtime: SdkAgentId,
+async function fixture(t: import('node:test').TestContext, runtime: 'claude-code' | 'ghcp',
   options: { scope?: boolean; toolPolicy?: string; policy?: boolean; local?: boolean; delegated?: boolean } = {}) {
   const root = mkdtempSync(join(tmpdir(), 'sdk-original-context-'));
   const config = { file: join(root, 'connector.sqlite'), tokenFile: join(root, 'tokens.json'), bootstrapToken: 'isolated-context-test' };

@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import type { ApplicationTransactionClient, ApplicationTransactionEvidence } from '../auth/application-transaction-gate.js';
 import { applicationControlTransaction } from './application-stop-transaction.js';
 
-type Runtime = 'codex' | 'claude-code' | 'ghcp';
+type Runtime = 'codex' | 'claude-code' | 'ghcp' | 'antigravity';
 export type ApplicationInteractionInput = { key: string; mode?: string; requestId?: string; submission?: unknown };
 const payload = (input: ApplicationInteractionInput) => JSON.stringify(input.mode === undefined
   ? { requestId: input.requestId, submission: input.submission } : { mode: input.mode });
