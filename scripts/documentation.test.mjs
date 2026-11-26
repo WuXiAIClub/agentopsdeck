@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -30,8 +31,19 @@ test('selected third-party evidence stays an inventory, not publication approval
 });
 
 function text(path) {
-  return readFileSync(join(repository, path), 'utf8');
+  return readFileSync(join(repository, path), 'utf8').replace(/\r\n/g, '\n');
 }
+
+test('documentation reads normalize Windows CRLF before checking multiline contracts', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'aod-documentation-crlf-'));
+  try {
+    const file = join(directory, 'guide.md');
+    writeFileSync(file, 'their names\r\nalone do not isolate two deployments\r\n');
+    assert.equal(text(relative(repository, file)), 'their names\nalone do not isolate two deployments\n');
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
 
 function markdownFiles(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap(entry => {

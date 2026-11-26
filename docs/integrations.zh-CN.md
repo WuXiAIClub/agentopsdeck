@@ -27,6 +27,40 @@ POSIX 默认命令为 `codex`，Windows 为 `codex.cmd`，可用 `AOD_CODEX_COMM
 `<AOD_CODEX_HOME>/.env`（权限 `0600` 且归属服务账号），或通过
 `AOD_CODEX_ENV_PASSTHROUGH` 显式列出变量名从服务进程环境透传。
 
+当 Codex 的有效配置设置 `model_catalog_json` 时，AOD 使用原生 `model/list`
+目录，保留可见性与显示名称，不再查询自定义供应商的 `/models` 接口。
+将目录放在专属原生 HOME 中，并在启动 AOD 前刷新。不指定目录时，
+自定义供应商的 HTTP 模型发现行为不变。
+
+### 原生环境与本机供应商桥接
+
+Windows 上建议将 `AOD_CODEX_COMMAND` 设置为原生 `codex.exe` 的绝对路径。
+AOD 为子进程构造受限的 `PATH` 和专属 `HOME`、`USERPROFILE`、
+`LOCALAPPDATA`；依赖原用户目录寻找 Codex 的安装包装脚本可能因此失效。
+不要使用会导入其他实例设置或历史的包装脚本。
+
+`AOD_*` 用于 AOD 服务配置，不用于 `<AOD_CODEX_HOME>/.env` 中的供应商密钥：
+原生环境文件拒绝 `AOD_*`、`HOME`、`PATH`、`CODEX_HOME` 等执行控制变量。
+使用供应商自身的变量名，例如由 Codex `env_key` 引用的 `VEKIL_API_KEY`。
+真实值只写入私有原生环境文件，不公开、不复用其他实例的凭据。
+任意父进程环境变量（包括代理设置）不会自动继承；显式供应商透传使用
+`AOD_CODEX_ENV_PASSTHROUGH`。
+
+使用可选 [Vekil](https://github.com/sozercan/vekil) 桥接时，需单独安装、认证，
+将监听范围限制为本机并开启调用方认证。检查就绪状态后运行无害的 Codex
+任务，不要仅凭模型列表请求成功判断可用。AOD 为 Codex 设置
+`NO_PROXY=localhost,127.0.0.1,::1`；独立运行的 Codex 可能也需要这些本机
+排除项，避免 Windows 或企业代理在请求到达 Vekil 前返回 502。
+保留其他代理设置。
+
+Copilot 的 Gemini 模型可能只提供 Chat Completions，而不是原生 Responses。
+Codex 要求 Responses，需针对这些公开模型 ID 显式开启 Vekil 的
+`--responses-over-chat-models`。这是适配 Copilot 接口，不是直连 Google
+Gemini API。遵循 Vekil 当前兼容要求：Chat 模型的图像及工具能力受限，
+不能假设支持托管搜索、远程压缩、Responses Lite、Code Mode、
+自由格式 `apply_patch` 或 Responses WebSockets。适用时使用其固定模型的
+托管启动器；持久运行的专属 Codex 配置需应用等效保护设置。
+
 审批值支持 `never`、`on-request`、`untrusted`，继承默认值为 `never`。
 **审批策略不等于文件系统沙箱**：执行器可以访问服务账号拥有权限的文件。
 应结合 OS／容器隔离及受限可信工作区，首个任务前审查工具权限；只改审批策略

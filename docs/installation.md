@@ -45,6 +45,30 @@ requires administrator permissions, use your Node installation's supported setup
 instead of installing dependencies with `sudo`. Do not delete or regenerate the
 lockfile to work around installation errors.
 
+### Windows source prerequisites
+
+Use Windows PowerShell or PowerShell 7 and verify `git --version`,
+`node --version` and `pnpm.cmd --version` in the same account that will run AOD.
+After installing tools or changing the user `PATH`, open a new terminal; a
+running editor or service can retain its old environment. The `node-pty` package
+can use its matching Windows prebuild; if it must compile, provision Python 3
+and Visual Studio C++ Build Tools rather than Linux `make`.
+
+The root `.gitattributes` keeps Git-detected text files at LF, including on
+Windows. This prevents checkout conversion from invalidating the byte-based
+review ledger. For an existing clean checkout, configure
+`git config --local core.autocrlf false` and obtain a fresh checkout; preserve
+local edits instead of using a destructive reset. Documentation checks also
+normalize CRLF when reading files.
+
+Prefer `pnpm.cmd` and `npm.cmd` if PowerShell blocks the corresponding `.ps1`
+shims. For a trusted local setup script, when organizational policy permits it,
+`powershell.exe -NoProfile -ExecutionPolicy Bypass -File <trusted-script.ps1>`
+changes execution policy only for that process. Do not weaken machine-wide
+policy, bypass Group Policy, or run downloaded scripts without reviewing them.
+Script execution policy is distinct from AOD/Codex tool approval and filesystem
+sandboxing; a successful CLI launch does not prove shell tools are authorized.
+
 ## 3. Create private configuration
 
 ```sh

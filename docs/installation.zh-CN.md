@@ -41,6 +41,26 @@ pnpm install --frozen-lockfile --prod=false
 请按 Node 安装方式处理，不要用 `sudo` 安装项目依赖。
 不要通过删除或重新生成锁文件来绕过安装错误。
 
+### Windows 源码启动要求
+
+使用 Windows PowerShell 或 PowerShell 7，在运行 AOD 的同一账号下检查
+`git --version`、`node --version` 和 `pnpm.cmd --version`。安装工具或更新用户
+`PATH` 后重新打开终端；已启动的编辑器或服务可能仍保留旧环境。
+`node-pty` 可使用匹配的 Windows 预编译文件；需要编译时，应准备 Python 3
+和 Visual Studio C++ Build Tools，而不是照搬 Linux 的 `make`。
+
+根目录 `.gitattributes` 将 Git 识别的文本文件固定为 LF，Windows 也不例外，
+避免检出时的换行转换使按原始字节校验的审查账本失效。
+已有干净检出可配置 `git config --local core.autocrlf false` 后重新获取检出；
+先保留本地改动，不要使用破坏性重置。文档测试读取文件时也会规范化 CRLF。
+
+PowerShell 拦截 `.ps1` 包管理器入口时，优先使用 `pnpm.cmd`、`npm.cmd`。
+对于已审查的本机安装脚本，仅当组织策略允许时，使用
+`powershell.exe -NoProfile -ExecutionPolicy Bypass -File <trusted-script.ps1>`
+为该进程临时设置执行策略。不要降低整机策略、绕过组策略或执行未经审查的
+下载脚本。脚本执行策略与 AOD/Codex 的工具审批及文件系统沙箱是不同边界；
+CLI 能启动不代表 shell 工具已获授权。
+
 ## 3. 创建私有配置
 
 ```sh
