@@ -23,10 +23,14 @@ export type ConnectorSdkLifecycleCommands = {
   sdkDeletionReady: { input: Ref & { authorization: string }; output: boolean };
   sdkDeletionSettle: { input: Ref & { accepted: boolean; nativeQuiescent: boolean }; output: false | SdkDeletionAdmission };
   sdkDeletionReceiptRead: { input: Claim; output: SdkDeletionReceipt | { error: 401 | 403 } };
+  sdkSessionRecover: {
+    input: Scope & { authorization: string; expectedRunId: string; hasNativeBinding?: boolean };
+    output: { error: 401 | 403 | 404 | 409 } | { requested: true };
+  };
 };
 export type ConnectorSdkLifecycleKind = keyof ConnectorSdkLifecycleCommands;
 export const connectorSdkLifecycleSteps = Object.freeze({ sdkLifecycleRead: 106, sdkDeletionClaim: 107,
-  sdkDeletionReady: 108, sdkDeletionSettle: 109, sdkDeletionReceiptRead: 110 });
+  sdkDeletionReady: 108, sdkDeletionSettle: 109, sdkDeletionReceiptRead: 110, sdkSessionRecover: 371 });
 export const isConnectorSdkLifecycleKind = (v: string): v is ConnectorSdkLifecycleKind => Object.hasOwn(connectorSdkLifecycleSteps, v);
 const fields = (v: unknown, keys: string[], optional: string[] = []): v is Record<string, unknown> => !!v
   && typeof v === 'object' && !Array.isArray(v) && keys.every(k => Object.hasOwn(v, k))
@@ -43,6 +47,9 @@ export function validConnectorSdkLifecycleInput(k: ConnectorSdkLifecycleKind, v:
   if (!v || typeof v !== 'object' || !scope(v as Record<string, unknown>)) return false;
   const p = v as Record<string, unknown>;
   if (k === 'sdkLifecycleRead') return fields(v, ['runtime', 'key', 'history']) && typeof p.history === 'boolean';
+  if (k === 'sdkSessionRecover') return fields(v, ['runtime', 'key', 'authorization', 'expectedRunId'], ['hasNativeBinding'])
+    && authorization(p.authorization) && id(p.expectedRunId)
+    && (!Object.hasOwn(p, 'hasNativeBinding') || typeof p.hasNativeBinding === 'boolean');
   if (k === 'sdkDeletionClaim' || k === 'sdkDeletionReceiptRead') return fields(v, ['runtime', 'key', 'authorization', 'commandKey'], k === 'sdkDeletionClaim' ? ['application'] : [])
     && authorization(p.authorization) && commandKey(p.commandKey) && (!Object.hasOwn(p, 'application') || validApplicationTransactionEvidence(p.application));
   return intent(p.intent, p.key) && id(p.receiptId) && (k === 'sdkDeletionReady'
@@ -51,6 +58,10 @@ export function validConnectorSdkLifecycleInput(k: ConnectorSdkLifecycleKind, v:
       && typeof p.accepted === 'boolean' && typeof p.nativeQuiescent === 'boolean');
 }
 export function validConnectorSdkLifecycleOutput(k: ConnectorSdkLifecycleKind, v: unknown): boolean {
+  if (k === 'sdkSessionRecover') {
+    if (fields(v, ['error'])) return typeof v.error === 'number' && [401, 403, 404, 409].includes(v.error);
+    return fields(v, ['requested']) && v.requested === true;
+  }
   if (k === 'sdkDeletionReceiptRead') {
     if (fields(v, ['error'])) return v.error === 401 || v.error === 403;
     return fields(v, ['runtime', 'key', 'commandKey', 'receipt']) && scope(v) && commandKey(v.commandKey)
@@ -106,6 +117,15 @@ export async function executeConnectorSdkLifecycle<K extends ConnectorSdkLifecyc
       const scope = JSON.stringify(['delete', JSON.stringify([actor.tokenId, v.key])]);
       value = { runtime: v.runtime, key: v.key, commandKey: v.commandKey, receipt: owner.commands.get(scope, v.commandKey) ?? null };
     }
+  } else if (kind === 'sdkSessionRecover') {
+    const v = input as ConnectorSdkLifecycleCommands['sdkSessionRecover']['input'];
+    const actor = tokens?.authenticateAuthorization(v.authorization);
+    if (!actor) value = { error: 401 };
+    else if (actor.tokenId.startsWith('actor_') || !actor.scopes.includes('messages:read') || actor.scopes.includes('execution:delegate')) value = { error: 403 };
+    else if (!owner.sdkCommandAdmissionOpen) value = { error: 409 };
+    else if (owner.commands.sessionDeletion(v.key) || !journal.session(v.key) || journal.deletion(v.key)?.phase === 'deleted') value = { error: 404 };
+    else value = journal.recoverUnknownSession(v.key, v.expectedRunId, owner.turns, v.hasNativeBinding)
+      ? { requested: true } : { error: 409 };
   } else if (kind === 'sdkLifecycleRead') {
     // No await: journal and bounded transcript share the original worker event.
     const snapshot = journal.readSnapshot(input.key);

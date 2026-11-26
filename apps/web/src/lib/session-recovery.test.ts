@@ -30,6 +30,19 @@ test('shared sessions, other runtimes and missing execution identity have no own
   assert.equal(canRequestSessionRecovery({ ...value, runtime: withoutIdentity }), false);
 });
 
+test('SDK runtimes expose owner recovery only when connected and in unknown phase', () => {
+  for (const runtimeId of ['claude-code', 'ghcp', 'antigravity'] as const) {
+    const base: SessionSummary = {
+      ...session(),
+      sessionRef: { nodeId: 'node', runtimeId, nativeSessionKey: `${runtimeId}:synthetic` },
+    };
+    assert.equal(canRequestSessionRecovery({ ...base, runtime: { ...base.runtime!, phase: 'unknown', connection: 'connected' } }), true);
+    assert.equal(canRequestSessionRecovery({ ...base, runtime: { ...base.runtime!, phase: 'unknown', connection: 'disconnected' } }), false);
+    assert.equal(canRequestSessionRecovery({ ...base, runtime: { ...base.runtime!, phase: 'failed', connection: 'connected' } }), false);
+    assert.equal(canRequestSessionRecovery({ ...base, runtime: { ...base.runtime!, phase: 'running', connection: 'connected' } }), false);
+  }
+});
+
 test('healthy running, waiting, finalizing and syncing sessions never show recovery', () => {
   for (const phase of ['starting', 'running', 'waiting', 'finalizing'] as const) {
     for (const sync of ['current', 'syncing'] as const) {

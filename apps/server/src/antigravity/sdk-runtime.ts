@@ -25,7 +25,7 @@ import { AntigravitySessionProjection } from '../copilot/session-projection.js';
 import type { CopilotTextStream } from '../copilot/stream-projection.js';
 import type { CopilotToolDetail } from '../copilot/tool-details.js';
 import type { SdkMetricSample } from '../connector/sdk-metrics.js';
-import type { AntigravityPromptBlock, AntigravitySessionUpdate } from './acp-client.js';
+import { AntigravityAcpError, type AntigravityPromptBlock, type AntigravitySessionUpdate } from './acp-client.js';
 import type { AntigravityConfig } from './config.js';
 import { verifyAntigravityEnvironment } from './environment.js';
 import { AntigravityProcessWorker } from './execution-worker.js';
@@ -195,6 +195,9 @@ export class AntigravitySdkTurn implements SdkOwnedTurn {
   private sequence = 0;
   private assistantText = '';
   private assistantTruncated = false;
+  private promptAdmitted = false;
+  private streamDirty = false;
+  private streamTimer: ReturnType<typeof setTimeout> | undefined;
   private readonly seenTools = new Set<string>();
   private readonly completedTools = new Set<string>();
 
@@ -235,6 +238,18 @@ export class AntigravitySdkTurn implements SdkOwnedTurn {
     return Number.isSafeInteger(value) && value >= 0 ? value : Date.now();
   }
 
+  private flushStream(): void {
+    clearTimeout(this.streamTimer);
+    this.streamTimer = undefined;
+    if (!this.streamDirty || this.failed) return;
+    this.streamDirty = false;
+    this.options.projection.stream({
+      messageId: sanitizeId(`assistant_${this.options.execution.id}`),
+      text: this.assistantText,
+      truncated: this.assistantTruncated,
+    });
+  }
+
   private handleUpdate(event: AntigravitySessionUpdate): void {
     if (this.failed || !this.agySessionId || event.sessionId !== this.agySessionId) {
       this.failed = true;
@@ -243,19 +258,21 @@ export class AntigravitySdkTurn implements SdkOwnedTurn {
     try {
       const { update } = event;
       const { execution, projection } = this.options;
-      const assistantMessageId = sanitizeId(`assistant_${execution.id}`);
       if (update.sessionUpdate === 'agent_message_chunk') {
         const chunk = update.content.text;
         const slice = chunk.slice(0, COPILOT_MESSAGE_TEXT_LIMIT - this.assistantText.length);
         if (slice.length < chunk.length) this.assistantTruncated = true;
         this.assistantText += slice;
-        projection.stream({
-          messageId: assistantMessageId,
-          text: this.assistantText,
-          truncated: this.assistantTruncated,
-        });
+        this.streamDirty = true;
+        if (!this.streamTimer) {
+          this.streamTimer = setTimeout(() => {
+            this.streamTimer = undefined;
+            try { this.flushStream(); } catch { this.failed = true; }
+          }, 50);
+        }
         return;
       }
+      this.flushStream();
       if (update.sessionUpdate === 'usage_update') {
         const metricSequence = ++this.sequence;
         projection.metrics?.({
@@ -368,9 +385,13 @@ export class AntigravitySdkTurn implements SdkOwnedTurn {
           createdAt: this.now(),
         });
         this.admitResolve({ nativeRequestId: userMessageId });
+        this.promptAdmitted = true;
       });
       if (this.failed) throw failure();
       if (!['end_turn', 'cancelled', 'refusal', 'max_tokens', 'max_turn_requests'].includes(result.stopReason)) throw failure();
+      clearTimeout(this.streamTimer);
+      this.streamTimer = undefined;
+      this.streamDirty = false;
       if (result.usage) {
         const metricSequence = ++this.sequence;
         projection.metrics?.({
@@ -400,9 +421,18 @@ export class AntigravitySdkTurn implements SdkOwnedTurn {
       }
       this.outcome = this.stopRequested ? 'interrupted' : 'completed';
     } catch (error) {
-      this.failed = true;
-      this.admitReject(error instanceof Error ? error : failure());
+      clearTimeout(this.streamTimer);
+      this.streamTimer = undefined;
+      this.streamDirty = false;
+      if (error instanceof AntigravityAcpError && this.promptAdmitted && this.seenTools.size === 0 && !this.failed) {
+        this.outcome = 'failed';
+      } else {
+        this.failed = true;
+        this.admitReject(error instanceof Error ? error : failure());
+      }
     } finally {
+      clearTimeout(this.streamTimer);
+      this.streamTimer = undefined;
       const drained = await this.worker.stopAndDrain();
       this.cleaned = drained.cleaned;
       this.quiescent = drained.cleaned && drained.quiescent;
@@ -417,6 +447,10 @@ export class AntigravitySdkTurn implements SdkOwnedTurn {
 
   inspectQuiescence(): Promise<boolean> {
     return Promise.resolve(this.cleaned && (this.quiescent || this.stopRequested));
+  }
+
+  inspectCleaned(): Promise<boolean> {
+    return Promise.resolve(this.cleaned);
   }
 
   inspectSettlement(): Promise<{ historyPersisted: boolean; nativeQuiescent: boolean }> {
@@ -438,6 +472,9 @@ export class AntigravitySdkTurn implements SdkOwnedTurn {
   }
 
   close(): void {
+    clearTimeout(this.streamTimer);
+    this.streamTimer = undefined;
+    this.streamDirty = false;
     this.failed = true;
     this.admitReject(failure());
     void this.worker.stopAndDrain().then(drained => {
@@ -762,6 +799,7 @@ export async function createAsyncAntigravityOwnedRuntime(options: AsyncAntigravi
     ...options,
     config,
     runtime: 'antigravity',
+    hasNativeBinding: (value, nativeSessionId) => Boolean(readAntigravitySessionBinding(value, nativeSessionId)),
     check: ports.check ?? (value => new AntigravityWorkerPreflight(value)),
     deleteNative: ports.deleteNative ?? ((value, request) => new AntigravityWorkerDeletion(value, request)),
     driver: hooks => new AsyncAntigravityExecutionDriver({

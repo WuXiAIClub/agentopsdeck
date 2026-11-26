@@ -172,7 +172,7 @@ test('callbacks freeze input before return, serialize physical ACKs, and only pu
   assert.equal(calls.length, 3); assert.equal(projection.snapshot().pending, 0);
 });
 
-for (const fault of ['wrong-ref', 'wrong-runtime', 'throw', 'false', 'budget', 'invalid'] as const) {
+for (const fault of ['wrong-ref', 'wrong-runtime', 'throw', 'budget', 'invalid'] as const) {
   test(`callback ${fault} fails closed; original physical work drains and no later write replays`, async () => {
     const first = deferred<unknown>(), ref = refFor('claude-code'); let calls = 0, faults = 0;
     const owner = { command: (async (_kind, _input) => {
@@ -187,12 +187,50 @@ for (const fault of ['wrong-ref', 'wrong-runtime', 'throw', 'false', 'budget', '
     else callbacks.project(rows('later', 'later'));
     const close = projection.close(); await tick(); assert.ok(projection.snapshot().pending > 0);
     first.resolve(fault === 'throw' ? Promise.reject(Error('physical failed')) : { runtime: fault === 'wrong-runtime' ? 'ghcp' : 'claude-code',
-      ref: fault === 'wrong-ref' ? { ...ref, epoch: 'replacement' } : ref, applied: fault !== 'false' });
+      ref: fault === 'wrong-ref' ? { ...ref, epoch: 'replacement' } : ref, applied: true });
     assert.equal(await close, false); assert.equal(faults, 1);
     assert.equal(projection.snapshot().pending, 0); assert.equal(projection.snapshot().inputBytes, 0);
     assert.ok(calls <= 2); assert.equal(projection.snapshot().executions, 0);
   });
 }
+
+test('rejected durable append isolates only the affected session lane as unknown without faulting runtime or dropping stream pressure', async () => {
+  const first = deferred<unknown>(), ref = refFor('antigravity'), peer = { ...refFor('antigravity'), key: 'antigravity:peer', nativeSessionId: 'peer-native' };
+  let calls = 0, faults = 0;
+  const unknowns: SdkCompactRef[] = [];
+  const owner = { command: (async (_kind, input) => {
+    calls++;
+    if (calls === 1) return first.promise;
+    const target = (input as { ref: SdkCompactRef }).ref;
+    return { runtime: 'antigravity', ref: target, applied: true };
+  }) as AsyncConnectorOwner['command'] };
+  const projection = new AsyncSdkProjection({
+    owner,
+    runtime: 'antigravity',
+    faulted: () => { faults++; },
+    unknown: value => { unknowns.push(value); },
+    diagnostics: silence,
+  });
+  const callbacks = projection.antigravity(ref, 'prompt'), peerCallbacks = projection.antigravity(peer, 'peer prompt');
+  callbacks.project(row('first', 'm1'));
+  callbacks.project(row('later', 'm2'));
+  await tick();
+  for (let i = 0; i < CONNECTOR_PENDING_LIMIT + 5; i++) {
+    peerCallbacks.stream({ messageId: 's1', text: `chunk-${i}`, truncated: false });
+  }
+  assert.equal(projection.snapshot().faulted, false);
+  first.resolve({ runtime: 'antigravity', ref, applied: false });
+  assert.equal(await projection.flush(ref), false);
+  assert.equal(await projection.release(ref), false);
+  assert.equal(unknowns.length, 1);
+  assert.deepEqual(unknowns[0], ref);
+  assert.equal(faults, 0);
+  assert.equal(projection.snapshot().faulted, false);
+  peerCallbacks.project(row('peer ok', 'p1'));
+  assert.equal(await projection.flush(peer), true);
+  assert.equal(await projection.release(peer), true);
+  assert.equal(await projection.close(), true);
+});
 
 test('aggregate UTF-8 input bytes bound callbacks before individual command budget is exhausted', async () => {
   const gate = deferred<unknown>(), ref = refFor('claude-code'); let calls = 0;

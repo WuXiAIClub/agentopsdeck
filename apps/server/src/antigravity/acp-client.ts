@@ -8,8 +8,8 @@ export const ANTIGRAVITY_ACP_PROTOCOL_VERSION = 1;
 export const ANTIGRAVITY_ACP_FRAME_BYTES = 1_048_576;
 export const ANTIGRAVITY_ACP_WRITE_BYTES = 32 * 1024 * 1024;
 export const ANTIGRAVITY_ACP_PENDING_LIMIT = 64;
-export const ANTIGRAVITY_ACP_UPDATE_LIMIT = 4096;
-export const ANTIGRAVITY_ACP_UPDATE_BYTES = 4_194_304;
+export const ANTIGRAVITY_ACP_UPDATE_LIMIT = 65_536;
+export const ANTIGRAVITY_ACP_UPDATE_BYTES = 64 * 1024 * 1024;
 const failure = () => Error('Antigravity ACP transport unavailable; delivery may be unknown');
 const record = (value: unknown): value is Record<string, unknown> => !!value && typeof value === 'object' && !Array.isArray(value);
 const identity = (value: unknown): value is string => typeof value === 'string' && value.length > 0
@@ -203,7 +203,7 @@ export class AntigravityAcpClient {
         ...(totalTokens !== undefined ? { totalTokens } : {}),
       } : undefined;
       return { stopReason: value.stopReason, ...(usage ? { usage } : {}) };
-    } catch (error) { this.fail(); throw error; }
+    } catch (error) { if (!(error instanceof AntigravityAcpError)) this.fail(); throw error; }
     finally { this.prompting = false; this.promptSent = false; }
   }
 

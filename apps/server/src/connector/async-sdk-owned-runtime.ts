@@ -20,11 +20,12 @@ import type { ApplicationTransactionEvidence } from '../auth/application-transac
 
 type Owner = Pick<AsyncConnectorOwner, 'command' | 'runtimeOwnerFile'>;
 type Config = { homeDirectory: string; model?: string };
-type Driver = Pick<AsyncSdkExecutionDriver<SdkOwnedTurn>, 'inspect' | 'wake' | 'pauseQueueWorker' | 'close'>;
+type Driver = Pick<AsyncSdkExecutionDriver<SdkOwnedTurn>, 'inspect' | 'wake' | 'pauseQueueWorker' | 'close'> & { isOccupied?: (key: string) => boolean };
 export type AsyncSdkOwnedOptions<R extends SdkAgentId, C extends Config, D extends Driver> = {
   owner: Owner; runtime: R; config: C; diagnostics?: PerformanceDiagnostics;
   projection?: Pick<DeckStore, 'upsertSession' | 'replaceMessages' | 'removeSession'>;
   changed?: (key: string) => void;
+  hasNativeBinding?: (config: C, nativeSessionId: string) => boolean;
   check: (config: C) => SdkPreflight;
   deleteNative: (config: C, request: PrivateWorkerDeletion) => SdkPreflight;
   driver: (hooks: { admissionReady: () => boolean; assertOwnership: () => void; changed: (key: string) => void }) => D;
@@ -54,6 +55,7 @@ export class AsyncSdkOwnedRuntime<R extends SdkAgentId, C extends Config, D exte
   private projectionGeneration = 0;
   private readonly deletions = new Set<Promise<SdkDeletionAdmission | { error: 401 | 403 | 409 | 503 }>>();
   private readonly deleting = new Set<string>();
+  private readonly recoveries = new Set<Promise<{ error: 401 | 403 | 404 | 409 } | { requested: true }>>();
   private readonly workers = new Set<SdkPreflight>();
   private constructor(private readonly options: AsyncSdkOwnedOptions<R, C, D>,
     private readonly file: string, private readonly lease: PrivateAgentHomeLease) {
@@ -85,7 +87,7 @@ export class AsyncSdkOwnedRuntime<R extends SdkAgentId, C extends Config, D exte
   }
   private observe(step: number, failed: boolean) {
     const trace = guardedTrace(this.options.diagnostics ?? performanceDiagnostics, 'sdk-owned-lifecycle');
-    trace.add('step', step); trace.add('pending', this.reads.size + this.deletions.size);
+    trace.add('step', step); trace.add('pending', this.reads.size + this.deletions.size + this.recoveries.size);
     trace.add('unknown', Number(this.faulted)); trace.finish(failed);
   }
   private fence(step: number) { this.faulted = true; this.observe(step, true); }
@@ -220,6 +222,33 @@ export class AsyncSdkOwnedRuntime<R extends SdkAgentId, C extends Config, D exte
     const job = this.removeOwned(key, commandKey, authorization, signal, evidence, authority).finally(() => { this.deleting.delete(key); this.deletions.delete(job); });
     this.deletions.add(job); return job;
   }
+  recoverSession(key: string, expectedRunId: string, authorization: string, signal?: AbortSignal): Promise<{ error: 401 | 403 | 404 | 409 } | { requested: true }> {
+    if (!this.ready || this.deleting.has(key) || this.driver.isOccupied?.(key) || this.recoveries.size >= 128 || signal?.aborted) {
+      return Promise.reject(failed());
+    }
+    const job = Promise.resolve().then(async () => {
+      const view = await this.options.owner.command('sdkLifecycleRead', { runtime: this.id, key, history: false });
+      if (!this.ready || this.deleting.has(key) || this.driver.isOccupied?.(key) || signal?.aborted) throw failed();
+      this.assertOwnership();
+      const hasNativeBinding = view.snapshot.session && this.options.hasNativeBinding
+        ? this.options.hasNativeBinding(structuredClone(this.config), view.snapshot.session.nativeSessionId)
+        : undefined;
+      const result = await this.options.owner.command('sdkSessionRecover', {
+        runtime: this.id, key, authorization, expectedRunId,
+        ...(hasNativeBinding === undefined ? {} : { hasNativeBinding }),
+      });
+      if ('requested' in result) {
+        this.historyReady.delete(key);
+        if (!this.closed) {
+          await this.read(key, true);
+          this.options.changed?.(key);
+          if (this.canExecute()) void this.driver.wake(key);
+        }
+      }
+      return result;
+    }).finally(() => { this.recoveries.delete(job); });
+    this.recoveries.add(job); return job;
+  }
   private async removeOwned(key: string, commandKey: string, authorization: string, signal?: AbortSignal,
     application?: ApplicationTransactionEvidence, authority?: ApplicationCommandScope) {
     await authority?.authorize('prepare'); authority?.local();
@@ -273,7 +302,7 @@ export class AsyncSdkOwnedRuntime<R extends SdkAgentId, C extends Config, D exte
     if (this.pauseLease) return this.pauseLease;
     const driver = this.driver.pauseQueueWorker(); let drained = false;
     const lease: AdmissionPause = { drained: Promise.all([driver.drained,
-      Promise.allSettled([this.startup, this.projectionRefresh, ...this.deletions, ...[...this.reads.values()].map(r => r.work)])]).then(() => {
+      Promise.allSettled([this.startup, this.projectionRefresh, ...this.deletions, ...this.recoveries, ...[...this.reads.values()].map(r => r.work)])]).then(() => {
       if (this.preflight && this.preflight.inspectQuiescence() !== true || [...this.workers].some(w => w.inspectQuiescence() !== true)) throw failed();
       drained = true;
     }), resume: () => {
@@ -309,7 +338,7 @@ export class AsyncSdkOwnedRuntime<R extends SdkAgentId, C extends Config, D exte
     }
     // Operation cancellation is not physical cleanup failure. Drain every
     // original operation; driver/physical proofs decide HOME release.
-    jobs.push(Promise.allSettled([this.startup, this.projectionRefresh, ...this.deletions, ...[...this.reads.values()].map(r => r.work)]));
+    jobs.push(Promise.allSettled([this.startup, this.projectionRefresh, ...this.deletions, ...this.recoveries, ...[...this.reads.values()].map(r => r.work)]));
     this.closing = this.lease.releaseAfter(async () => {
       const results = await Promise.allSettled(jobs);
       if (this.faulted || results.some(r => r.status === 'rejected')

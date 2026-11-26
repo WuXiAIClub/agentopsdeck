@@ -2501,7 +2501,7 @@ export class CodexAppServer {
       // Missing rollout provenance is not an empty/settled tool proof.
       if (typeof thread.path !== 'string' || !thread.path.trim()) throw new TurnStartDeferred();
       if (cleanupTurns.some((turn: any) => turn.items.some((item: any) => item.type === 'commandExecution'
-        && item.status !== 'completed' && item.status !== 'declined'))) throw new TurnStartDeferred();
+        && item.status !== 'completed' && item.status !== 'declined' && item.status !== 'failed'))) throw new TurnStartDeferred();
       const interruptedTurnIds = cleanupTurns.filter((turn: any) => turn.status === 'interrupted').map((turn: any) => String(turn.id));
       await this.rolloutReader.projectTurnsAndDisposeWithin(thread.path, interruptedTurnIds,
         this.options.requestTimeoutMs ?? CODEX_HISTORY_VERIFICATION_TIMEOUT_MS, async (rollout, expired) => {
@@ -3238,9 +3238,19 @@ export class CodexAppServer {
     if (!projector) return undefined;
     return async text => {
       const pending = this.assistantProjections.get(sessionKey) ?? new Set<Promise<void>>();
-      const remaining = deadline - performance.now();
+      let remaining = deadline - performance.now();
       // A previous observation may have timed out. Keep its ORIGINAL task in
       // the same live/shutdown ownership set; a new read cannot replace it.
+      if (pending.size && remaining > 0) {
+        let waitTimer: ReturnType<typeof setTimeout> | undefined;
+        try {
+          await Promise.race([
+            Promise.allSettled([...pending]),
+            new Promise<void>(resolve => { waitTimer = setTimeout(resolve, Math.max(1, Math.min(80, Math.ceil(remaining)))); }),
+          ]);
+        } finally { clearTimeout(waitTimer); }
+        remaining = deadline - performance.now();
+      }
       if (pending.size || remaining <= 0) throw new HistoricalProjectionPendingError();
       const original = Promise.resolve().then(() => projector(text));
       const tracked = original.then(() => { pending.delete(tracked); }, () => {
@@ -4046,6 +4056,7 @@ export class CodexAppServer {
       await this.request('initialize', { clientInfo: { name: 'agentopsdeck', title: AGENTOPSDECK_PRODUCT_NAME, version: AGENTOPSDECK_VERSION }, capabilities: { experimentalApi: true } });
       if (this.closed || this.child !== child || this.connectionId !== connectionId) throw new Error('Codex initialization connection changed');
       this.notify('initialized', {});
+      this.turnWorker.wake();
     } catch (error) {
       this.recycleChild(child, error instanceof Error ? error : new Error('Codex initialization failed'));
       throw error;
@@ -4866,6 +4877,7 @@ export class CodexAppServer {
         const rolloutStarted = performance.now();
         let projected: { snapshot: Awaited<ReturnType<CodexRolloutReader['readSnapshot']>>;
           value: Awaited<ReturnType<typeof historicalProjection>> };
+        let projectionSettling = false;
         try {
           const deadline = rolloutStarted + readBudget;
           projected = await this.rolloutReader.readProjectedSnapshotWithin(thread.path, {}, Math.max(1, Math.ceil(readBudget)), async snapshot => {
@@ -4873,8 +4885,16 @@ export class CodexAppServer {
             return historicalProjection(sessionKey, thread.turns,
               this.historyAssistantProjector(sessionKey, deadline), snapshot, thread.path);
           });
+        } catch (error) {
+          if (error instanceof HistoricalProjectionPendingError && attempt === 0
+            && !this.assistantProjections.get(sessionKey)?.size
+            && readBudget - (performance.now() - rolloutStarted) > 0) {
+            projectionSettling = true;
+          } else throw error;
         }
         finally { readBudget -= performance.now() - rolloutStarted; }
+        if (projectionSettling) { incompleteReason = 'Assistant output projection still settling'; continue; }
+        projected = projected!;
         let rollout = projected.snapshot;
         const projection = projected.value;
         const displaySource = this.rolloutReader.sourceVersion(rollout);

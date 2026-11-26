@@ -391,6 +391,27 @@ export class SdkExecutionJournal {
     });
   }
 
+  recoverUnknownSession(key: string, expectedRunId: string, turns: TurnQueue, hasNativeBinding?: boolean): boolean {
+    if (!validId(key) || !validId(expectedRunId) || key === `${this.runtime}:` || sessionRuntimeId(key) !== this.runtime) return false;
+    return this.atomic(() => {
+      if (!this.sessionAvailable(key) || this.deletion(key)) return false;
+      const session = this.session(key), execution = this.current(key);
+      if (!session || !execution || execution.id !== expectedRunId) return false;
+      if (execution.phase !== 'unknown' && session.nativeState !== 'unknown') return false;
+      const nextOutcome: SdkTerminalOutcome = execution.outcome ?? (execution.stopRequested ? 'interrupted' : 'failed');
+      const nextNativeState: SdkNativeState = session.nativeState === 'ready' ? 'ready'
+        : session.nativeState === 'allocated' ? 'allocated'
+        : execution.nativeMode === 'resume' ? 'ready'
+        : hasNativeBinding === true ? 'ready'
+        : hasNativeBinding === false ? 'allocated'
+        : execution.nativeRequestId ? 'ready' : 'allocated';
+      if (execution.phase !== nextOutcome) this.save({ ...execution, phase: nextOutcome, outcome: nextOutcome });
+      if (session.nativeState !== nextNativeState) this.saveSession({ ...session, nativeState: nextNativeState });
+      if (execution.kind !== 'compact') turns.settleClaimedBatchInTransaction(this.db, this.runtime, execution.key, execution.members, 'accepted');
+      return true;
+    });
+  }
+
   recover(turns: TurnQueue) {
     this.db.prepare(`UPDATE sdk_agent_deletions SET data = json_set(data, '$.phase', 'unknown')
       WHERE runtime = ? AND json_extract(data, '$.phase') = 'pending'`).run(this.runtime);

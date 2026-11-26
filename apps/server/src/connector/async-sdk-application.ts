@@ -16,6 +16,7 @@ import type { SdkLocalHttp } from './sdk-local-http.js';
 import type { SdkQueueHttp } from './sdk-queue-http.js';
 import type { SdkDeletionHttp } from './sdk-deletion-http.js';
 import type { SdkCompactHttp } from './sdk-compact-http.js';
+import type { SdkRecoveryHttp } from './sdk-recovery-http.js';
 import type { SdkInteractionsHttp } from './sdk-interactions-http.js';
 import { AsyncSdkInteractionRuntime } from './async-sdk-interaction-runtime.js';
 import { AsyncSdkHistory } from './async-sdk-history.js';
@@ -43,11 +44,13 @@ export type AsyncSdkApplicationHttp = {
   sdkUsage: SdkUsageHttp;
   sdkFiles: SdkFilesHttp;
   sdkMetadata: SdkMetadataHttp;
+  sdkRecovery?: SdkRecoveryHttp;
 };
 type Original = {
   driver: Pick<AsyncSdkExecutionDriver<SdkOwnedTurn>, 'wake' | 'interruptMessage'> & Partial<Pick<AsyncSdkExecutionDriver<SdkOwnedTurn>, 'compact'>>;
   remove: (key: string, commandKey: string, authorization: string, signal?: AbortSignal,
     application?: ApplicationTransactionEvidence, authority?: ApplicationCommandScope) => ReturnType<SdkDeletionHttp['remove']>;
+  recoverSession: (key: string, expectedRunId: string, authorization: string, signal?: AbortSignal) => ReturnType<SdkRecoveryHttp['recover']>;
 };
 type Runtime = ConnectorAgentLifecycle & {
   readonly ready: boolean; readonly status: AgentReadiness; activate(): void; whenStarted(): Promise<void>; whenPrepared(): Promise<void>;
@@ -80,7 +83,8 @@ export class AsyncSdkApplication {
   readonly antigravity: Runtime | undefined;
   readonly http: AsyncSdkApplicationHttp & { sdkMessages: { messages: Pick<AsyncSdkMessages, 'sendPhysical' | 'readReceiptPhysical' | 'readSendReceiptPhysical'>;
     stopPhysical: NonNullable<ApplicationStopParticipants['sdk']>['stopPhysical']; status: AsyncSdkStatus };
-    sdkCompact: NonNullable<ApplicationCompactParticipants['sdk']> };
+    sdkCompact: NonNullable<ApplicationCompactParticipants['sdk']>;
+    sdkRecovery: SdkRecoveryHttp };
   private readonly interactions: AsyncSdkInteractionRuntime;
   private readonly history: AsyncSdkHistory;
   private readonly usage: AsyncSdkUsage;
@@ -160,6 +164,8 @@ export class AsyncSdkApplication {
         original(id).withReady(value => value.remove(key, commandKey, authorization, signal)),
         removePhysical: (input, authority) => original(input.runtime).withReady(value =>
           value.remove(input.key, input.commandKey, input.authorization, undefined, input.application, authority)) },
+      sdkRecovery: { ...controls, recover: (id, key, expectedRunId, authorization, signal) =>
+        original(id).withReady(value => value.recoverSession(key, expectedRunId, authorization, signal)) },
       sdkCompact: { ...controls, owner, compact: (id, key, commandKey, authorization, signal) =>
         original(id).withReady(value => {
           if (!value.driver.compact) return Promise.resolve('not_started' as const);

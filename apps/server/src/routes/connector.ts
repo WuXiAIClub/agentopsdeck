@@ -41,6 +41,7 @@ import type { HermesQueueHttp } from '../connector/hermes-queue-http.js';
 import type { HermesReadsHttp } from '../connector/hermes-reads-http.js';
 import type { CodexReadsHttp } from '../connector/codex-reads-http.js';
 import type { SdkCompactHttp } from '../connector/sdk-compact-http.js';
+import type { SdkRecoveryHttp } from '../connector/sdk-recovery-http.js';
 import { HTTPException } from 'hono/http-exception';
 import { registerCompactReceipts, registerCreationReceipts, registerDeletionReceipts, registerMessageReceipts, reply } from '../commands/http.js';
 import { CommandCapacity, CommandConflict } from '../commands/receipts.js';
@@ -171,6 +172,7 @@ export function registerConnectorRoutes(app: Hono, deps: {
   sdkQueue?: SdkQueueHttp;
   sdkDeletion?: SdkDeletionHttp;
   sdkCompact?: SdkCompactHttp;
+  sdkRecovery?: SdkRecoveryHttp;
   sdkInteractions?: SdkInteractionsHttp;
   sdkHistory?: SdkHistoryHttp;
   sdkUsage?: SdkUsageHttp;
@@ -206,7 +208,7 @@ export function registerConnectorRoutes(app: Hono, deps: {
       throw new Error('OpenClaw application requires complete messages, control and read ports');
     }
   }
-  if (deps.sdkApplication && [deps.sdkMessages, deps.sdkLocal, deps.sdkQueue, deps.sdkDeletion, deps.sdkCompact, deps.sdkInteractions, deps.sdkHistory, deps.sdkUsage, deps.sdkFiles, deps.sdkMetadata].some(Boolean)) {
+  if (deps.sdkApplication && [deps.sdkMessages, deps.sdkLocal, deps.sdkQueue, deps.sdkDeletion, deps.sdkCompact, deps.sdkRecovery, deps.sdkInteractions, deps.sdkHistory, deps.sdkUsage, deps.sdkFiles, deps.sdkMetadata].some(Boolean)) {
     throw new Error('SDK application ports cannot be mixed with legacy individual assembly');
   }
   const sdkHttp = deps.sdkApplication ?? deps;
@@ -307,7 +309,7 @@ export function registerConnectorRoutes(app: Hono, deps: {
         if (!owned) return c.json({ error: 'Requested Agent runtime is disabled' }, 409);
         executionActor(c); // Reject delegation on reads as well as writes.
         const read = c.req.method === 'GET' && /^(?:token-usage(?:\/export)?|files|state|messages(?:\/[^/]+(?:\/media\/[a-f0-9]{64})?)?|queue(?:\/.*)?|commands(?:\/.*)?|compact-commands\/[^/]+|settings-commands\/[^/]+|deletion-commands\/[^/]+)$/.test(suffix);
-        const send = c.req.method === 'POST' && (suffix === 'messages' || suffix === 'compact');
+        const send = c.req.method === 'POST' && (suffix === 'messages' || suffix === 'compact' || suffix === 'recovery');
         const queueWrite = ['PATCH', 'DELETE'].includes(c.req.method) && /^(?:queue\/[^/]+|commands\/[^/]+\/queue)$/.test(suffix);
         const settings = c.req.method === 'PATCH' && suffix === '';
         const remove = c.req.method === 'DELETE' && suffix === '';
@@ -329,6 +331,7 @@ export function registerConnectorRoutes(app: Hono, deps: {
       await next();
     });
   }
+  app.post(`${base}/sessions/:sessionKey/recovery`, c => c.json({ error: 'Session recovery is unavailable on this Connector' }, 409));
   const machine = registerConnectorMachineHttp(app, deps.tokens, deps.config);
   if (deps.interactions) registerInteractions(app, { runtime: deps.interactions, users: deps.connectorUsers, tokens: deps.tokens,
     exists: key => {

@@ -79,12 +79,12 @@ inputs.on('line', line => {
       return;
     }
     if (text === 'update-count-limit') {
-      for (let count = 0; count < 4097; count++) update('synthetic');
+      for (let count = 0; count < 65_537; count++) update('s');
       response(input.id, { stopReason: 'end_turn' });
       return;
     }
     if (text === 'update-byte-limit') {
-      for (let count = 0; count < 9; count++) update('x'.repeat(500_000));
+      for (let count = 0; count < 135; count++) update('x'.repeat(500_000));
       response(input.id, { stopReason: 'end_turn' });
       return;
     }

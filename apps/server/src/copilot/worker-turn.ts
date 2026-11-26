@@ -111,6 +111,14 @@ export class CopilotWorkerTurn implements CopilotNativeTurn {
     try { process.kill(-this.child.pid, 0); return false; }
     catch (error) { return (error as NodeJS.ErrnoException).code === 'ESRCH'; }
   }
+  async inspectCleaned() {
+    if (!this.exited) return false;
+    if (!this.child.pid) return true;
+    if (this.scope) return this.scope.cleaned();
+    if (process.platform === 'win32') return !this.bad;
+    try { process.kill(-this.child.pid, 0); return false; }
+    catch (error) { return (error as NodeJS.ErrnoException).code === 'ESRCH'; }
+  }
   close() {
     this.interaction?.close('stopped');
     this.scope?.close();
