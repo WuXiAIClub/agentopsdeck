@@ -44982,8 +44982,8 @@
     },
     {
       "path": "apps/web/src/components/AntigravityUsagePanel.tsx",
-      "size": 4598,
-      "sha256": "9e8ba736222ac36716dd49056591a63b9bc50ca67d2e8fa661f0460cea8a80ce",
+      "size": 4726,
+      "sha256": "fea75366e96501ba753f83336b4c5be15520282f09ab9bf6dd6517aad85d3df8",
       "module": "web-ui",
       "kind": "runtime",
       "depth": "structural",
@@ -44992,7 +44992,7 @@
         "workspace-quota-appearance-targeted-review",
         "exact-file-sha256-and-size"
       ],
-      "notes": "Reviewed label hierarchy, percentage and date formatting, low-quota cue with numerical equivalent, and retained scope and cancellation behavior. No authenticated live quota acceptance.",
+      "notes": "Targeted review of the inner layout wrapper; toolbar portals, progress semantics, quota rendering and request scope are unchanged. No live provider or assistive-device acceptance.",
       "findings": []
     },
     {
@@ -47559,8 +47559,8 @@
     },
     {
       "path": "apps/web/src/components/antigravity-quota-card.css",
-      "size": 4671,
-      "sha256": "732c91b0d5d0b1e8bbf4a74b5d274ea1d49b1f4205e6ea3af3110737b5b2fa76",
+      "size": 5761,
+      "sha256": "64ba1c0c17e4ecaed5609257d38b0954b232c72a7d693cb9a83ad9b9bb436b3f",
       "module": "web",
       "kind": "runtime",
       "depth": "structural",
@@ -47569,7 +47569,7 @@
         "workspace-quota-appearance-targeted-review",
         "exact-file-sha256-and-size"
       ],
-      "notes": "Reviewed fluid progress groups, theme tokens, text wrapping, and forced-color fallback. No assistive-device acceptance.",
+      "notes": "Targeted review of card-relative width and height scaling, bounded type and spacing, narrow reflow and the static fallback. Chromium geometry assertions passed; other engines not tested.",
       "findings": []
     },
     {
@@ -58965,8 +58965,8 @@
     },
     {
       "path": "apps/web/tests/workspace-polish.browser.mjs",
-      "size": 21836,
-      "sha256": "16ce6b35504bf0f786f68593fe40b7835d814f16ab06c1dec75c46244100966a",
+      "size": 22822,
+      "sha256": "777adfc5f0b6c89a052c2d2efca0d630f71cea1cbd66419984f8920f579951eb",
       "module": "web-ui",
       "kind": "test",
       "depth": "structural",
@@ -58975,7 +58975,7 @@
         "workspace-quota-appearance-targeted-review",
         "exact-file-sha256-and-size"
       ],
-      "notes": "Added isolated keyboard and synthetic quota progress assertions against production assets. Attempted the fixture without querying the running instance; Chromium was unavailable at launch. Browser acceptance remains pending.",
+      "notes": "The isolated Chromium quota section passed: narrow, wide and short cards scale type, dials and spacing without horizontal overflow. Existing keyboard, theme, reduced-motion and refresh checks also passed in that section. Full fixture not run in this round.",
       "findings": []
     },
     {
