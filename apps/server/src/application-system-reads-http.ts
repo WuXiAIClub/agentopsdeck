@@ -7,6 +7,8 @@ import { EXPECTED_NODE_HEADER } from './connector/node-identity.js';
 import { ReadRequestError } from './lifecycle/read-request-owner.js';
 import { registerSystemRoutes, SystemRestartFenceError, type SystemReadDependencies } from './routes/system.js';
 import { createAntigravityUsageReader } from './antigravity/usage.js';
+import { publicGitAccountOptions } from './git-status/config.js';
+import { createGitRepoStatusReader, GitRepoStatusError } from './git-status/service.js';
 
 /** Full original frontend read chain. Native work belongs to the original
  * system owner, even after the bounded Auth/HTTP waiter has ended. */
@@ -17,6 +19,8 @@ export function registerApplicationSystemReadsHttp(app: Hono, deps: SystemReadDe
 }) {
   let closed = false;
   const readUsage = deps.config.antigravity && createAntigravityUsageReader(deps.config.antigravity);
+  const gitAccounts = deps.config.gitStatusAccounts ?? [];
+  const readGitRepoStatus = createGitRepoStatusReader(gitAccounts);
   const available = () => !closed && deps.available();
   const authority = new SessionReadAuthority(request => {
     if (!available()) throw new ConnectorOwnerUnavailable();
@@ -74,7 +78,25 @@ export function registerApplicationSystemReadsHttp(app: Hono, deps: SystemReadDe
     try { return context.json({ usage: await readUsage() }); }
     catch { return context.json({ error: 'antigravity_usage_unavailable' }, 503); }
   });
-  for (const route of ['/api/health', '/api/config/debug', '/api/gateway/status', '/api/antigravity/usage']) app.get(route, dispatch);
+  original.get('/api/git/accounts', context => {
+    return context.json({ accounts: publicGitAccountOptions(gitAccounts) });
+  });
+  original.get('/api/git/repo-status', async context => {
+    const repo = context.req.query('repo') ?? '';
+    const accountId = context.req.query('account') || undefined;
+    const refresh = context.req.query('refresh') === '1' || context.req.query('refresh') === 'true';
+    try {
+      const status = await readGitRepoStatus({ repo, ...(accountId ? { accountId } : {}), refresh, signal: context.req.raw.signal });
+      return context.json({ status });
+    } catch (error) {
+      if (error instanceof GitRepoStatusError) {
+        if (error.retryAfterSeconds !== undefined) context.header('Retry-After', String(error.retryAfterSeconds));
+        return context.json({ error: error.code, ...(error.retryAfterSeconds !== undefined ? { retryAfterSeconds: error.retryAfterSeconds } : {}) }, error.status);
+      }
+      return context.json({ error: 'git_repo_status_unavailable' }, 503);
+    }
+  });
+  for (const route of ['/api/health', '/api/config/debug', '/api/gateway/status', '/api/antigravity/usage', '/api/git/accounts', '/api/git/repo-status']) app.get(route, dispatch);
   if (deps.commands) app.post('/api/gateway/restart', dispatch);
   let closing: Promise<void> | undefined;
   return Object.freeze({ close: () => {
