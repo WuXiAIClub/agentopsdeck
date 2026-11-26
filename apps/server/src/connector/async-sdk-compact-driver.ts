@@ -12,7 +12,7 @@ import type { SdkMessageStopRequest } from './connector-sdk-stop-domain.js';
 import { dispatchSdkMessageStop } from './async-sdk-message-stop.js';
 
 export type AsyncSdkCompactOptions = {
-  models: { model: string; modelChoices?: readonly string[] };
+  models: { model: string; modelChoices?: readonly string[]; dynamicModels?: boolean };
   timeoutMs?: number;
   start: (execution: SdkCompactExecution) => SdkOwnedCompactWorker;
 };

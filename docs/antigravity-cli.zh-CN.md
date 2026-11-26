@@ -14,7 +14,10 @@ Connector 运行时接线与 Web UI 入口已在 `apps/server/src/antigravity/`�
 已支持图片/文本附件（`attachments`）、有界工具输出详情、上下文与 token 用量统计
 （`usage_update` / `session/prompt` `usage`）、通过 `agy models` 动态发现模型目录与按会话切模型
 （支持可选的 `AOD_ANTIGRAVITY_MODEL` 默认模型与 `AOD_ANTIGRAVITY_MODEL_CHOICES` 白名单覆盖 + `session/set_model`）
-以及看板上下文透传。尚未支持的能力（`compact`、`interactions`）保持禁用并明确返回 `409`。
+以及看板上下文透传，并已支持专用的手动上下文压缩能力（通过 `POST .../compact`
+在 `session/resume` 后执行 ACP `/compact`，支持 `AOD_ANTIGRAVITY_COMPACT_TIMEOUT_MS`
+超时配置与 `/stop` 取消，且不向对话历史注入额外消息）。尚未支持的能力（`interactions`）
+保持禁用并明确返回 `409`。
 不分发原生可执行程序。
 
 ## 账号额度卡片

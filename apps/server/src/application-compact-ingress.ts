@@ -7,7 +7,7 @@ import type { SdkDispatchResult } from './connector/sdk-dispatch.js';
 import { ConnectorOwnerUnavailable, connectorOwnerCommandBytes, encodeConnectorOwnerJson } from './connector/connector-owner-domain.js';
 import { runNativeOperation } from './connector/native-operation.js';
 
-export type ApplicationSdkCompactInput = { runtime: 'claude-code' | 'ghcp'; key: string; commandKey: string;
+export type ApplicationSdkCompactInput = { runtime: 'claude-code' | 'ghcp' | 'antigravity'; key: string; commandKey: string;
   authorization: string; payloadJson: string; application?: ApplicationTransactionEvidence };
 export type ApplicationCompactParticipants = {
   openclaw?: Pick<AsyncOpenClawCompact, 'compactPhysical' | 'readPhysical'> | undefined;
@@ -62,7 +62,7 @@ export function createApplicationCompactIngress(commands: Pick<ReturnType<typeof
         return { ...result, dispatch };
       }, 'sdkCompactClaim');
     },
-    async readPhysical(runtime: 'openclaw' | 'claude-code' | 'ghcp',
+    async readPhysical(runtime: 'openclaw' | 'claude-code' | 'ghcp' | 'antigravity',
       input: { key: string; commandKey: string; authorization: string }, authority: ApplicationCommandScope, operation: 'message' | 'compact' = 'compact') {
       const result = runtime === 'openclaw'
         ? await participants.openclaw?.readPhysical({ ...input, operation }, authority)

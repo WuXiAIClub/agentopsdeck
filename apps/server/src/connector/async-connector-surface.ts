@@ -354,7 +354,7 @@ export async function createAsyncConnectorSurface(options: AsyncConnectorSurface
               ghcp: { enabled: !!copilot, ready: copilot?.ready === true, status: copilot?.status ?? 'disabled', ownerOnly: true,
                 features: { text: true, queue: true, interrupt: true, history: true, attachments: true, compact: true, delete: true, modelOverride: true, interactions: copilot?.ready === true } },
               antigravity: { enabled: !!antigravity, ready: antigravity?.ready === true, status: antigravity?.status ?? 'disabled', ownerOnly: true,
-                features: { text: true, queue: true, interrupt: true, history: true, attachments: false, compact: false, delete: true, modelOverride: true, interactions: false } },
+                features: { text: true, queue: true, interrupt: true, history: true, attachments: false, compact: true, delete: true, modelOverride: true, interactions: false } },
             },
             scopes: handle.principal.scopes,
             limits: { maxMessageChars: MAX_MESSAGE_CHARS, maxRequestsPerMinute: 120, maxSseConnections: 2 },

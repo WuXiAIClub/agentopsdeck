@@ -16,8 +16,11 @@ Image/text `attachments`, bounded tool output details, context and token usage
 metrics (`usage_update` / `session/prompt` `usage`), dynamic model discovery via
 `agy models` (with optional `AOD_ANTIGRAVITY_MODEL` default and optional
 `AOD_ANTIGRAVITY_MODEL_CHOICES` allowlist override + `session/set_model`),
-and workspace board context are supported. Unsupported capabilities (`compact`,
-`interactions`) remain disabled and are explicitly rejected with `409`.
+and workspace board context, plus dedicated manual compaction (`POST .../compact`
+running ACP `/compact` over `session/resume`, configurable via
+`AOD_ANTIGRAVITY_COMPACT_TIMEOUT_MS`, with `/stop` cancellation and without
+injecting chat messages into the transcript) are supported. Unsupported
+capabilities (`interactions`) remain disabled and are explicitly rejected with `409`.
 No native binaries are shipped.
 
 ## Account quota card

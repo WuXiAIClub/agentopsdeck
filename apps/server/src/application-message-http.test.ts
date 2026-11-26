@@ -107,7 +107,7 @@ function fixture(timeoutMs = 2000, stops = false, statuses = false, compacts = f
     revoke() { actor = undefined; }, freeze() { live = false; } };
 }
 
-for (const runtime of ['openclaw', 'claude-code', 'ghcp']) test(`local HTTP ${runtime}: dedicated compact, recovery and original identity wire`, async () => {
+for (const runtime of ['openclaw', 'claude-code', 'ghcp', 'antigravity']) test(`local HTTP ${runtime}: dedicated compact, recovery and original identity wire`, async () => {
   const f = fixture(2000, true, true, true);
   try {
     const post = (body: unknown, headers: Record<string, string> = {}) => f.request('/compact', { method: 'POST',
@@ -133,7 +133,7 @@ test('local HTTP: only original OpenClaw compact text is intercepted; unsupporte
     assert.equal(f.compactSends.length, 1);
     assert.deepEqual(f.compactSends[0], { key: 'openclaw:original', commandKey: 'message-compact', authorization: 'Bearer startup-only-private',
       payloadJson: '{"message":"/compact"}', application: {}, operation: 'message' });
-    for (const runtime of ['claude-code', 'ghcp']) {
+    for (const runtime of ['claude-code', 'ghcp', 'antigravity']) {
       const response = await f.post({ message: '/compact extra' }, {}, runtime);
       assert.equal((await response.json()).control, true);
     }

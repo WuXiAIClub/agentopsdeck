@@ -1,4 +1,5 @@
 import { posix, win32 } from 'node:path';
+import { sdkCompactTimeout } from '../connector/sdk-compact-config.js';
 import { parseSdkModelChoices, validSdkModel } from '../connector/sdk-models.js';
 
 export type AntigravityConfig = {
@@ -6,6 +7,7 @@ export type AntigravityConfig = {
   homeDirectory: string;
   workspace: string;
   startupTimeoutMs: number;
+  compactTimeoutMs?: number;
   permissionMode?: 'deny' | 'allow';
   model?: string;
   modelChoices?: string[];
@@ -81,6 +83,7 @@ export function antigravityConfig(env: NodeJS.ProcessEnv, platform: NodeJS.Platf
     homeDirectory,
     workspace,
     startupTimeoutMs,
+    compactTimeoutMs: sdkCompactTimeout(env, prefix),
     permissionMode: rawPermissionMode,
     ...(model ? { model } : {}),
     ...(modelChoices?.length ? { modelChoices } : {}),

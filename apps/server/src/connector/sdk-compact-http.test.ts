@@ -8,6 +8,7 @@ import { ConnectorTokenStore } from '../auth/connector-token.js';
 import { PerformanceDiagnostics } from '../diagnostics/performance.js';
 import { createAsyncClaudeOwnedRuntime } from '../claude/async-owned-runtime.js';
 import { createAsyncCopilotOwnedRuntime } from '../copilot/async-owned-runtime.js';
+import { createAsyncAntigravityOwnedRuntime } from '../antigravity/sdk-runtime.js';
 import { AsyncConnectorOwner } from './async-connector-owner.js';
 import { AsyncSdkCompactDriver } from './async-sdk-compact-driver.js';
 import { ConnectorUserStore } from './connector-user-store.js';
@@ -20,7 +21,7 @@ const authorization = 'Bearer isolated-compact-http';
 function gate<T = void>() { let resolve!: (v: T) => void; const promise = new Promise<T>(yes => { resolve = yes; }); return { promise, resolve }; }
 const passed = (): SdkPreflight => ({ ready: Promise.resolve(true), finished: Promise.resolve(), inspectQuiescence: () => true, close() {} });
 function materialize(store: ConnectorUserStore, runtime: SdkAgentId, key: string) {
-  const journal = runtime === 'ghcp' ? store.copilotJournal : store.claudeJournal;
+  const journal = runtime === 'ghcp' ? store.copilotJournal : runtime === 'antigravity' ? store.antigravityJournal : store.claudeJournal;
   const ref = { key, id: 'original-execution', epoch: 'original-epoch' };
   journal.begin(ref, ['materialize'], store.turns); journal.observeTerminal(ref, 'completed', store.turns); journal.confirmSettled(ref);
 }
@@ -28,7 +29,7 @@ function fixture(runtime: SdkAgentId) {
   const root = mkdtempSync(join(tmpdir(), 'agentopsdeck-compact-http-')), tokenFile = join(root, 'tokens.json');
   const tokens = new ConnectorTokenStore(tokenFile, 'isolated-compact-http'), actorId = tokens.authenticateAuthorization(authorization)!.tokenId;
   const store = new ConnectorUserStore(':memory:', undefined, { runtimeOwner: true });
-  const journal = runtime === 'ghcp' ? store.copilotJournal : store.claudeJournal, key = `${runtime}:original`;
+  const journal = runtime === 'ghcp' ? store.copilotJournal : runtime === 'antigravity' ? store.antigravityJournal : store.claudeJournal, key = `${runtime}:original`;
   journal.create({ key, nativeSessionId: 'native-original', title: 'Original', createdAt: 1 });
   store.turns.enqueue(runtime, { id: 'materialize', sessionKey: key, createdAt: 1, payload: { text: 'Original', actorId } });
   materialize(store, runtime, key);
@@ -54,7 +55,7 @@ function fixture(runtime: SdkAgentId) {
     async close() { await driver.close(); store.close(); rmSync(root, { recursive: true, force: true }); } };
 }
 
-for (const runtime of ['claude-code', 'ghcp'] as const) {
+for (const runtime of ['claude-code', 'ghcp', 'antigravity'] as const) {
   test(`${runtime}: compact original driver, wire, admission receipt and maintenance recovery`, async () => {
     const f = fixture(runtime);
     try {
@@ -110,24 +111,29 @@ for (const runtime of ['claude-code', 'ghcp'] as const) {
     const f = fixture(runtime), file = join(f.root, 'persistent.sqlite'), homeDirectory = join(f.root, 'home');
     mkdirSync(homeDirectory, { mode: 0o700 });
     const seed = new ConnectorUserStore(file, undefined, { runtimeOwner: true });
-    const journal = runtime === 'ghcp' ? seed.copilotJournal : seed.claudeJournal;
+    const journal = runtime === 'ghcp' ? seed.copilotJournal : runtime === 'antigravity' ? seed.antigravityJournal : seed.claudeJournal;
     journal.create({ key: f.key, nativeSessionId: 'native-persistent', title: 'Original', createdAt: 1 });
     await seed.turns.enqueueAsync(runtime, { id: 'materialize', sessionKey: f.key, createdAt: 1, payload: { text: 'Original', actorId: f.actorId } });
     materialize(seed, runtime, f.key); seed.close();
     let owner = new AsyncConnectorOwner({ file, tokenFile: f.tokenFile }, f.diagnostics); await owner.open();
     const entered = gate(), result = gate<SdkCompactRef & SdkCompactResult>(), exit = gate(); let quiet = false, calls = 0;
     let originalRef: SdkCompactRef | undefined;
-    const config = { homeDirectory, workspace: f.root, sdkDirectory: f.root, startupTimeoutMs: 5_000,
+    const config = { command: '/bin/true', homeDirectory, workspace: f.root, sdkDirectory: f.root, startupTimeoutMs: 5_000,
       apiKeyFile: join(f.root, 'absent-key'), model: 'default', baseUrl: 'http://127.0.0.1:1',
       auth: { mode: 'github' as const, credentialFile: join(f.root, 'absent-key') } };
+    const makeCompactWorker = (execution: SdkCompactRef) => {
+      calls++; originalRef = execution; entered.resolve();
+      return { result: result.promise, finished: exit.promise, inspectQuiescence: async () => quiet,
+        inspectSettlement: async () => ({ ...execution, completionEventId: 'physical-boundary', historyPersisted: true, nativeQuiescent: true }),
+        interrupt: async () => {}, close() { quiet = true; exit.resolve(); } };
+    };
     const ports = { start: () => assert.fail('No inference during explicit compact'), check: passed,
-      compact: (request: { execution: SdkCompactRef }) => {
-        calls++; originalRef = request.execution; entered.resolve();
-        return { result: result.promise, finished: exit.promise, inspectQuiescence: async () => quiet,
-          inspectSettlement: async () => ({ ...request.execution, completionEventId: 'physical-boundary', historyPersisted: true, nativeQuiescent: true }),
-          interrupt: async () => {}, close() { quiet = true; exit.resolve(); } };
-      } };
+      compact: (request: { execution: SdkCompactRef }) => makeCompactWorker(request.execution) };
     const original = await (runtime === 'ghcp' ? createAsyncCopilotOwnedRuntime({ owner, config, diagnostics: f.diagnostics }, ports)
+      : runtime === 'antigravity' ? createAsyncAntigravityOwnedRuntime({ owner, config, diagnostics: f.diagnostics }, {
+        start: () => assert.fail('No inference during explicit compact'), check: passed,
+        compact: execution => makeCompactWorker(execution),
+      })
       : createAsyncClaudeOwnedRuntime({ owner, config, diagnostics: f.diagnostics }, ports));
     const pending = new Set<Promise<unknown>>();
     try {

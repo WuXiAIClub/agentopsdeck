@@ -212,7 +212,7 @@ export function registerApplicationMessagesHttp(app: Hono, deps: {
   // authority and close/drain as messages. No detached route lifetime.
   const compactRuntime = (key: string) => {
     const runtime = sessionRuntimeId(key);
-    return runtime === 'openclaw' || runtime === 'claude-code' || runtime === 'ghcp' ? runtime : undefined;
+    return runtime === 'openclaw' || runtime === 'claude-code' || runtime === 'ghcp' || runtime === 'antigravity' ? runtime : undefined;
   };
   const compactRead = (request: Request, runtime: NonNullable<ReturnType<typeof compactRuntime>>, scope: Scope) =>
     deps.commands.run(request, { action: 'compact', runtime, resource: scope.key, commandKey: scope.commandKey, payloadDigest: readDigest },
