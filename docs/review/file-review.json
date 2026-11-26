@@ -59304,8 +59304,8 @@
     },
     {
       "path": "docs/api/openapi.json",
-      "size": 529653,
-      "sha256": "0ab328bce0934a2592c0062b54dab857f6e44b8dedc3e2cc006b6325047e1902",
+      "size": 529654,
+      "sha256": "2901675e0bdc0187bc565319ba90e4f7d225034bf1714cf2f80823799743c595",
       "module": "release-boundary",
       "kind": "config",
       "depth": "structural",
