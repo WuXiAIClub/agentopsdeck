@@ -2937,8 +2937,8 @@
     },
     {
       "path": "apps/server/src/antigravity/usage.test.ts",
-      "size": 3061,
-      "sha256": "88d2e292d711adfce7312f0e0efa8a6988c2646ad71e18d414757fb3d012b509",
+      "size": 4458,
+      "sha256": "5c75e4798819061a5a130d7584719a5495509d0ff786ab4d520c106092d9e50d",
       "module": "execution",
       "kind": "test",
       "depth": "structural",
@@ -2952,8 +2952,8 @@
     },
     {
       "path": "apps/server/src/antigravity/usage.ts",
-      "size": 3601,
-      "sha256": "9b814b60f19e8f096796f350c627af879f821c6186b2618611383d6eb099691b",
+      "size": 3885,
+      "sha256": "be5f19a96f57061b5076a5505da182111abc0b2e3ca3086190ca54468a169495",
       "module": "execution",
       "kind": "runtime",
       "depth": "structural",
@@ -44982,8 +44982,8 @@
     },
     {
       "path": "apps/web/src/components/AntigravityUsagePanel.tsx",
-      "size": 4726,
-      "sha256": "fea75366e96501ba753f83336b4c5be15520282f09ab9bf6dd6517aad85d3df8",
+      "size": 5351,
+      "sha256": "b3f7b571d445104de2dedcc2a959467dca4937a9009ef8144c78237a34a8e81c",
       "module": "web-ui",
       "kind": "runtime",
       "depth": "structural",

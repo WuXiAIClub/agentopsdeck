@@ -7,10 +7,26 @@ import { ResourceAction, ResourceTitle, ResourceToolbar } from './ResourceToolba
 import { CardKindIcon } from './CardKindIcon';
 import './antigravity-quota-card.css';
 
+const AUTO_REFRESH_INTERVAL_MS = 60_000;
+
 export default function AntigravityUsagePanel({ scope }: { scope: string }) {
   const { t, locale } = useI18n();
   const [generation, setGeneration] = useState(0);
   const [result, setResult] = useState<{ generation: number; usage: AntigravityUsage | null | undefined }>();
+  useEffect(() => {
+    if (!scope || scope !== recoveryScope()) return;
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === 'visible') setGeneration(value => value + 1);
+    }, AUTO_REFRESH_INTERVAL_MS);
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') setGeneration(value => value + 1);
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, [scope]);
   useEffect(() => {
     if (!scope || scope !== recoveryScope()) return;
     const controller = new AbortController();
@@ -22,7 +38,7 @@ export default function AntigravityUsagePanel({ scope }: { scope: string }) {
   }, [scope, generation]);
   if (!scope || scope !== recoveryScope()) return null;
   const busy = result?.generation !== generation;
-  const usage = busy ? undefined : result?.usage;
+  const usage = result?.usage;
   const percent = new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 1 });
   return <section className="antigravity-quota-card" aria-label={t('Antigravity account quota')} aria-busy={busy}>
     <ResourceTitle>{t('Antigravity account quota')}</ResourceTitle>
@@ -34,7 +50,7 @@ export default function AntigravityUsagePanel({ scope }: { scope: string }) {
         <span className="workspace-glass-emblem"><CardKindIcon kind="antigravity-quota" /></span>
         <div><span>{t('Status cards')}</span><strong>{t('Quota remaining')}</strong></div>
       </div>
-      {busy && <p role="status">{t('Loading…')}</p>}
+      {busy && usage === undefined && <p role="status">{t('Loading…')}</p>}
       {!busy && usage === undefined && <p role="alert">{t('Antigravity quota unavailable. Try refreshing.')}</p>}
       {usage === null && <p>{t('Antigravity is not configured on this server.')}</p>}
       {usage && <>

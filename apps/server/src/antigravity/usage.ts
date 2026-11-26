@@ -40,13 +40,19 @@ export function parseAntigravityUsage(stdout: string, sampledAt: number): Antigr
   }) };
 }
 
-export function createAntigravityUsageReader(config: AntigravityConfig) {
+export const ANTIGRAVITY_USAGE_CACHE_TTL_MS = 30_000;
+const FAILURE_BACKOFF_MS = 5_000;
+
+export function createAntigravityUsageReader(config: AntigravityConfig, now: () => number = () => performance.now()) {
   let inflight: Promise<AntigravityUsage> | undefined;
-  let cached: { expiresAt: number; value?: AntigravityUsage } | undefined;
+  let cached: { expiresAt: number; value: AntigravityUsage } | undefined;
+  let retryAfter = 0;
   return async (): Promise<AntigravityUsage> => {
     if (inflight) return inflight;
-    if (cached && performance.now() < cached.expiresAt) {
-      if (cached.value) return cached.value;
+    const current = now();
+    if (cached && current < cached.expiresAt) return cached.value;
+    if (current < retryAfter) {
+      if (cached) return cached.value;
       throw unavailable();
     }
     inflight = Promise.resolve().then(async () => {
@@ -57,10 +63,12 @@ export function createAntigravityUsageReader(config: AntigravityConfig) {
           maxBuffer: 128 * 1024, killSignal: 'SIGKILL',
         });
         const value = parseAntigravityUsage(stdout, Date.now());
-        cached = { value, expiresAt: performance.now() + 30_000 };
+        cached = { value, expiresAt: now() + ANTIGRAVITY_USAGE_CACHE_TTL_MS };
+        retryAfter = 0;
         return value;
       } catch {
-        cached = { expiresAt: performance.now() + 5_000 };
+        retryAfter = now() + FAILURE_BACKOFF_MS;
+        if (cached) return cached.value;
         throw unavailable();
       } finally { inflight = undefined; }
     });

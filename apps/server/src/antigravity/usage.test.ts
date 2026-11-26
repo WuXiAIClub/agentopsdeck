@@ -38,3 +38,25 @@ test('quota queries run in the verified private home and share one bounded cache
   await assert.rejects(createAntigravityUsageReader({ homeDirectory, command: `${command}-missing`, workspace, startupTimeoutMs: 15_000 })(),
     { message: 'antigravity_usage_unavailable' });
 });
+
+test('quota reader serves last known cached usage on transient refresh failure after TTL', { skip: process.platform !== 'linux' }, async context => {
+  const homeDirectory = await mkdtemp(join(tmpdir(), 'aod-agy-usage-stale-'));
+  context.after(() => rm(homeDirectory, { recursive: true, force: true }));
+  const command = join(homeDirectory, 'agy-fixture'), workspace = join(homeDirectory, 'workspace');
+  for (const name of ['config', 'cache', 'data', 'tmp', 'workspace']) await mkdir(join(homeDirectory, name), { mode: 0o700 });
+  await writeFile(command, `#!${process.execPath}\nconst fs = require('node:fs');\n`
+    + `const count = fs.existsSync('calls') ? fs.readFileSync('calls', 'utf8').split('\\n').filter(Boolean).length : 0;\n`
+    + `fs.appendFileSync('calls', '1\\n');\n`
+    + `if (count > 0) process.exit(1);\n`
+    + `console.log(${JSON.stringify(payload(weekly))});\n`, { mode: 0o700 });
+  let clock = 1000;
+  const reader = createAntigravityUsageReader({ homeDirectory, command, workspace, startupTimeoutMs: 15_000 }, () => clock);
+  const first = await reader();
+  assert.equal(first.groups[0]?.name, 'Gemini Models');
+  clock += 35_000;
+  const fallback = await reader();
+  assert.deepEqual(fallback, first);
+  clock += 1_000;
+  assert.deepEqual(await reader(), first);
+  assert.equal((await readFile(join(homeDirectory, 'calls'), 'utf8')).trim().split('\n').length, 2);
+});
