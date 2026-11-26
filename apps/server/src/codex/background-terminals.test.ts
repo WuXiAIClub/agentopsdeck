@@ -838,3 +838,77 @@ test('stopOwnedBackgroundTerminals terminates owned post-turn terminals and refu
   await setup.runtime.turnWorker.options.reconcile(setup.key);
   assert.equal(setup.database.codexExecutions.get(setup.key)?.nativeHistory?.state, 'verified');
 });
+
+test('queued continuation on loaded background-work uses fast verification without re-reading unchanged rollout', async context => {
+  const setup = fixture(context);
+  const directory = mkdtempSync(join(tmpdir(), 'aod-bg-queued-fast-'));
+  context.after(() => rmSync(directory, { recursive: true, force: true }));
+  const rolloutPath = join(directory, 'rollout.jsonl');
+  writeFileSync(rolloutPath, JSON.stringify({ timestamp: '2026-10-23T00:00:00.000Z', type: 'event_msg', payload: { type: 'task_complete', turn_id: 'original-run' } }) + '\n');
+  setup.turn.status = 'completed';
+  (setup.history.thread as any).path = rolloutPath;
+  setup.runtime.loadedThreadIds.add('synthetic');
+  let active = true;
+  let starts = 0;
+  setup.runtime.request = async (method: string) => {
+    if (method === 'thread/read') return setup.history;
+    if (method === 'thread/goal/get') return { goal: null };
+    if (method === 'thread/backgroundTerminals/list') return { data: active ? [terminal] : [] };
+    if (method === 'turn/start') {
+      starts++;
+      return { turn: { id: 'successor' } };
+    }
+    throw new Error(`unexpected RPC method: ${method}`);
+  };
+  let rolloutReads = 0;
+  const originalRead = setup.runtime.rolloutReader.read.bind(setup.runtime.rolloutReader);
+  setup.runtime.rolloutReader.read = async (...args: any[]) => {
+    rolloutReads++;
+    return originalRead(...args);
+  };
+
+  await setup.codex.send(setup.key, 'follow up while terminal runs');
+  setup.runtime.handleNotification('turn/completed', { threadId: 'synthetic', turn: setup.turn });
+  await setup.runtime.completingTurns.get(setup.key);
+  assert.equal(setup.database.codexExecutions.get(setup.key)?.nativeHistory?.reason, 'background-work');
+  const initialRolloutReads = rolloutReads;
+
+  await setup.runtime.turnWorker.options.reconcile(setup.key);
+  await setup.runtime.turnWorker.options.reconcile(setup.key);
+  assert.equal(rolloutReads, initialRolloutReads, 'queued continuation should not re-read unchanged rollout while background terminal is still running');
+  assert.equal(starts, 0);
+
+  active = false;
+  await setup.runtime.turnWorker.options.reconcile(setup.key);
+  assert.equal(starts, 1, 'queued continuation dispatches immediately once background terminal exits');
+});
+
+test('stopOwnedBackgroundTerminals allows active thread status when all native turns are terminal', async context => {
+  const setup = fixture(context);
+  setup.turn.status = 'completed';
+  setup.history.thread.status = { type: 'active' } as any;
+  setup.runtime.loadedThreadIds.add('synthetic');
+  let activeTerminals = [terminal];
+  const terminated: string[] = [];
+  setup.runtime.request = async (method: string, params: any) => {
+    if (method === 'thread/read') return setup.history;
+    if (method === 'thread/goal/get') return { goal: null };
+    if (method === 'thread/backgroundTerminals/list') return { data: activeTerminals };
+    if (method === 'thread/backgroundTerminals/terminate') {
+      terminated.push(params.processId);
+      activeTerminals = [];
+      setup.history.thread.status = { type: 'idle' };
+      return { terminated: true };
+    }
+    throw new Error(`unexpected RPC method: ${method}`);
+  };
+
+  setup.runtime.handleNotification('turn/completed', { threadId: 'synthetic', turn: setup.turn });
+  await setup.runtime.completingTurns.get(setup.key);
+  assert.equal(setup.database.codexExecutions.get(setup.key)?.nativeHistory?.reason, 'background-work');
+
+  assert.equal(await setup.codex.stopOwnedBackgroundTerminals(setup.key, 'original-run'), true);
+  assert.deepEqual(terminated, ['process']);
+  await setup.runtime.turnWorker.options.reconcile(setup.key);
+  assert.equal(setup.database.codexExecutions.get(setup.key)?.nativeHistory?.state, 'verified');
+});
