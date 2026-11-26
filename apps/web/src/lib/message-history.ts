@@ -36,3 +36,18 @@ export function prependHistory(current: ChatMessage[], page: Page, before: strin
   if (page.messages.some(item => ids.has(item.id))) return undefined;
   return { items: [...page.messages, ...current], hiddenCount: page.hiddenCount ?? 0, historyExpanded: true };
 }
+
+export function shouldTriggerHistoryLoadAtTop(input: {
+  scrollTop: number;
+  visibleCount: number;
+  totalCount: number;
+  hiddenCount: number;
+  hasLoadMore: boolean;
+  pending: boolean;
+  loading: boolean;
+}) {
+  if (input.scrollTop > 0) return { trigger: false, pauseFollowing: false };
+  const hasOlder = input.visibleCount < input.totalCount || (input.hasLoadMore && input.hiddenCount > 0);
+  if (!hasOlder) return { trigger: false, pauseFollowing: false };
+  return { trigger: true, pauseFollowing: !input.pending && !input.loading };
+}

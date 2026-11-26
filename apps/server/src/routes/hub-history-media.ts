@@ -9,7 +9,7 @@ import { HubRequestWork } from '../hub/async-request-work.js';
 import { legacyHubConnectionProxyDeps, resolveHubConnectionProxyClient, validateHubConnectionProxyRouteDeps, type HubConnectionProxyRouteDeps } from '../hub/connection-proxy-route-deps.js';
 import { ConnectorClientError } from '../hub/connector-client.js';
 import { decodeHubSessionId, encodeHubSessionId } from '../hub/session-id.js';
-import { mergeMessageIdentities } from '../messages/identity.js';
+import { dedupeMessageIdentitiesInOrder } from '../messages/identity.js';
 import { createConditionalHistory } from '../messages/conditional-history.js';
 import { stableGatewayRowsRevision } from '../refresh/signature.js';
 import { HistoryDiagnostics, timeHistoryAsync, timeHistorySync } from '../storage/history-diagnostics.js';
@@ -161,7 +161,7 @@ export function registerHubHistoryMedia(app: Hono, deps: HubConnectionProxyRoute
       c.req.query('limit'), c.req.raw.signal, c.req.query('before'), c.req.header(HISTORY_ASYNC_HEADER) === '1', drain))); }
     catch (error) { await access.check(); throw error; }
     await access.check();
-    const messages = timeHistorySync('wrap', () => mergeMessageIdentities(body.messages).map(message => deps.wrap(message, id, access.connection)));
+    const messages = timeHistorySync('wrap', () => dedupeMessageIdentitiesInOrder(body.messages).map(message => deps.wrap(message, id, access.connection)));
     return conditionalHistory(c, { ...body, messages, revision: body.revision ?? stableGatewayRowsRevision(messages) });
   }));
   app.get(`${base}/sessions/:hubSessionId/messages/:messageId`, c => handle(c, async () => {
