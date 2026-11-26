@@ -14653,6 +14653,63 @@ html[data-color-mode="dark"] {
   border-top: 1px solid var(--aod-ctx-divider);
 }
 
+.session-workspace-presets > .session-workspace-preset-menu,
+.workspace-context-menu:has(> .session-workspace-preset-menu) {
+  width: min(380px, calc(100vw - 24px));
+}
+
+.session-workspace-preset-menu .workspace-menu-group {
+  display: grid;
+  gap: 2px;
+  padding: 5px 0;
+}
+
+.session-workspace-preset-menu .workspace-menu-group + .workspace-menu-group {
+  border-top: 1px solid var(--aod-ctx-divider);
+}
+
+.session-workspace-preset-menu .workspace-menu-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.session-workspace-preset-menu .workspace-menu-group-title {
+  grid-column: 1 / -1;
+  padding: 2px 10px 3px;
+  color: var(--aod-ctx-muted);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.session-workspace-preset-menu .workspace-menu-group button {
+  min-width: 0;
+  min-height: 34px;
+  align-items: center;
+  padding: 6px 9px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--aod-ctx-ink);
+  text-align: start;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}
+
+.session-workspace-preset-menu .workspace-menu-group button:is(:hover, :focus-visible):not(:disabled) {
+  background: var(--aod-ctx-hover-bg);
+  color: var(--aod-ctx-hover-ink);
+}
+
+.session-workspace-preset-menu .workspace-menu-group button:focus-visible {
+  outline: 2px solid var(--aod-ctx-hover-icon);
+  outline-offset: -2px;
+}
+
+@media (pointer: coarse) {
+  .session-workspace-preset-menu .workspace-menu-group button {
+    min-height: 44px;
+  }
+}
+
 .workspace-context-menu .saved-layout-menu-title {
   display: block;
   max-width: 100%;

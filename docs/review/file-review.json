@@ -17,13 +17,13 @@
     "Native devices, providers, full backend, browser accessibility, artifacts and redistribution rights remain unaccepted."
   ],
   "summary": {
-    "totalFiles": 3599,
+    "totalFiles": 3600,
     "byKind": {
       "config": 57,
       "docs": 55,
       "asset": 8,
       "test": 1753,
-      "runtime": 1712,
+      "runtime": 1713,
       "generated": 14
     },
     "byModule": {
@@ -42,6 +42,7 @@
       "api-completion": 7,
       "hub": 552,
       "web-ui": 405,
+      "web": 1,
       "web-state": 383,
       "web-menu-tests": 1,
       "web-menu": 1,
@@ -54,13 +55,13 @@
       "external": 2
     },
     "byDepth": {
-      "semantic": 3554,
+      "semantic": 3552,
       "asset": 19,
-      "structural": 26
+      "structural": 29
     },
     "byDisposition": {
-      "no-finding": 3573,
-      "pending": 26
+      "no-finding": 3571,
+      "pending": 29
     },
     "completedSemanticOrAssetFiles": 3565,
     "remainingFiles": 15,
@@ -44952,17 +44953,17 @@
     },
     {
       "path": "apps/web/src/components/AntigravityUsagePanel.tsx",
-      "size": 3216,
-      "sha256": "b85b4b207fcfb0f6522dacd147c838c3ba77b0bbbace7f06b6b2031ef54b106b",
+      "size": 3713,
+      "sha256": "38367e1981fab497e73ee0ca2cbf804925762e9f0a3fd6ca883aea4fb32bac50",
       "module": "web-ui",
       "kind": "runtime",
       "depth": "structural",
       "disposition": "pending",
       "checks": [
-        "standalone-antigravity-quota-targeted-review",
+        "workspace-quota-appearance-targeted-review",
         "exact-file-sha256-and-size"
       ],
-      "notes": "Reviewed the existing scoped quota read and cancellation, accessible progress and status, and the new title and refresh action. No authenticated browser or live CLI acceptance.",
+      "notes": "Reviewed label hierarchy, percentage and date formatting, low-quota cue with numerical equivalent, and retained scope and cancellation behavior. No authenticated live quota acceptance.",
       "findings": []
     },
     {
@@ -46359,17 +46360,17 @@
     },
     {
       "path": "apps/web/src/components/SessionWorkspaceView.tsx",
-      "size": 124535,
-      "sha256": "a41d3711e7a37ab4906992210ac05d0ecb7c6285203c4fdc3073d2b4c70ff72b",
+      "size": 126017,
+      "sha256": "e66ddf2fb57111d524d762a6bb40c27a6062dfbc7f3bfd362ccd0b97b16bc8e5",
       "module": "web-ui",
       "kind": "runtime",
       "depth": "structural",
       "disposition": "pending",
       "checks": [
-        "standalone-antigravity-quota-targeted-review",
+        "workspace-quota-appearance-targeted-review",
         "exact-file-sha256-and-size"
       ],
-      "notes": "Traced dedicated rendering, scope guard, singleton activation, and classic and desktop entry points through the existing layout machinery. No live browser, keyboard or touch acceptance.",
+      "notes": "Checked menu grouping and unchanged action wiring for both entry points, focus return for the anchored quota action, and retention of the shared menu lifecycle. Targeted workspace tests passed; touch and assistive-device acceptance pending.",
       "findings": []
     },
     {
@@ -47525,6 +47526,21 @@
         "line-by-line-semantic-audit"
       ],
       "notes": "[\"全文检查 epoch/connection latest 与 abort 读取；pause 需 released、resume 需 paused+同 fence；unknown 阻止新操作，系统状态文字走 t。\",\"maintenance/command identity helper 与服务端 fence 语义在清单外，未调用实际维护 API。\"]",
+      "findings": []
+    },
+    {
+      "path": "apps/web/src/components/antigravity-quota-card.css",
+      "size": 1998,
+      "sha256": "356001c2dfcc65d2a3a37ba143b2ae1797e0fa8e511da278268a76ca7f1e0d47",
+      "module": "web",
+      "kind": "runtime",
+      "depth": "structural",
+      "disposition": "pending",
+      "checks": [
+        "workspace-quota-appearance-targeted-review",
+        "exact-file-sha256-and-size"
+      ],
+      "notes": "Reviewed fluid progress groups, theme tokens, text wrapping, and forced-color fallback. No assistive-device acceptance.",
       "findings": []
     },
     {
@@ -53552,17 +53568,17 @@
     },
     {
       "path": "apps/web/src/lib/translations.ts",
-      "size": 290588,
-      "sha256": "96a8a6cfd5b4c4a3f5fa25fe1cf7916b7d129e511aa4be8e334835e2b8f8b9b8",
+      "size": 290733,
+      "sha256": "9e0de41c48f502b1cc1b88d84c0fa4aab73f007917b0ca5add2543832f09980a",
       "module": "web-state",
       "kind": "runtime",
       "depth": "structural",
       "disposition": "pending",
       "checks": [
-        "antigravity-account-quota-targeted-source-review",
+        "workspace-quota-appearance-targeted-review",
         "exact-file-sha256-and-size"
       ],
-      "notes": "Checked new EN/CN quota copy, percentage placeholder and model group labels. Catalog gate verifies key validity, not full linguistic or screen-reader acceptance.",
+      "notes": "Checked the new Simplified Chinese group labels, reused existing translations, and passed both static i18n guards. Full catalog semantic review not repeated.",
       "findings": []
     },
     {
@@ -55098,13 +55114,12 @@
       "disposition": "no-finding",
       "findings": [],
       "checks": [
-        "current-source-sha256-and-size",
-        "2026-11-25-antigravity-connector-review",
-        "typecheck-and-targeted-tests"
+        "workspace-quota-appearance-targeted-review",
+        "exact-file-sha256-and-size"
       ],
-      "notes": "Reviewed Web UI Antigravity runtime wiring, i18n labels, session creation entry, and capability-gated affordances (attachments/compact/modelOverride/interactions disabled). Typechecked and verified with session-runtime-ui tests.",
-      "sha256": "d8bf0067754b5b31352826b20490927fae1e336a9002b808c18610c06a035d66",
-      "size": 554417,
+      "notes": "Checked grouped menu grid and focus styles, viewport-constrained width and coarse pointer target rules while retaining popover positioning. Full stylesheet semantic review not repeated.",
+      "sha256": "723a262c15390bc804e72be4c714b2ba66dec007aa705fdc74f857a4cdbfc679",
+      "size": 555868,
       "module": "web-style-entry-completion",
       "historicalFindingReferences": [
         "WEB-STYLEENTRY-003"
@@ -58921,19 +58936,17 @@
     },
     {
       "path": "apps/web/tests/workspace-polish.browser.mjs",
-      "size": 17208,
-      "sha256": "4aa4d785d9dfbe44d427ae9b0de62567602024f0837371bdc267836e1cf8b3f8",
+      "size": 18805,
+      "sha256": "bf2b45548fc98f637a94ec479522cff57912573597d2c2c587d611e74996ee87",
       "module": "web-ui",
       "kind": "test",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "inventory-sha256-size",
-        "typescript-ast-structure-not-semantic",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "workspace-quota-appearance-targeted-review",
+        "exact-file-sha256-and-size"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic review for apps/web/tests/workspace-polish.browser.mjs (web-ui/test); verified test/fixture assertions, isolation, and absence of credentials or host paths.",
+      "notes": "Added isolated keyboard and synthetic quota progress assertions against production assets. Attempted the fixture without querying the running instance; Chromium was unavailable at launch. Browser acceptance remains pending.",
       "findings": []
     },
     {

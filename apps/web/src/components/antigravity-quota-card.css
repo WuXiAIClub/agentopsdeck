@@ -1,0 +1,65 @@
+.antigravity-quota-card {
+  --quota-track: var(--aod-ctx-surface-subtle);
+  --quota-fill: var(--aod-ctx-hover-icon);
+  --quota-meta: var(--aod-ctx-icon);
+  background: var(--surface-solid);
+}
+
+.antigravity-quota-group + .antigravity-quota-group { margin-top: 14px; }
+.antigravity-quota-group h3 { margin: 0 0 6px; font-size: 12px; font-weight: 650; }
+.antigravity-quota-card .antigravity-quota-group ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  gap: 6px 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.antigravity-quota-group li {
+  min-width: 0;
+  display: grid;
+  align-content: start;
+  gap: 5px;
+  padding: 7px 0;
+  border-top: 1px solid var(--line);
+}
+.antigravity-quota-reading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.antigravity-quota-reading strong {
+  flex: none;
+  font-size: 21px;
+  font-weight: 650;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.antigravity-quota-group progress {
+  width: 100%;
+  height: 6px;
+  appearance: none;
+  overflow: hidden;
+  border: 0;
+  border-radius: 99px;
+  accent-color: var(--quota-fill);
+  background: var(--quota-track);
+}
+.antigravity-quota-group progress[data-low] { --quota-fill: var(--aod-ctx-warn-hover-ink); }
+.antigravity-quota-group progress::-webkit-progress-bar { background: var(--quota-track); }
+.antigravity-quota-group progress::-webkit-progress-value { border-radius: 99px; background: var(--quota-fill); }
+.antigravity-quota-group progress::-moz-progress-bar { border-radius: 99px; background: var(--quota-fill); }
+.antigravity-quota-group small, .antigravity-quota-card .antigravity-quota-sample {
+  color: var(--quota-meta);
+  font-size: 11px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.antigravity-quota-card .antigravity-quota-sample { margin: 12px 0 0; }
+
+@media (forced-colors: active) {
+  .antigravity-quota-group progress { appearance: auto; }
+}

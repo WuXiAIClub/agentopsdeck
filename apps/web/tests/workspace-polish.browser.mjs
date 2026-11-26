@@ -29,7 +29,7 @@ hub.layouts.save('default', 'current', { revision: 0, content: JSON.stringify(la
 hub.layouts.save('default', 'saved', { revision: 0, content: JSON.stringify(saved) });
 const text = `# Wrapping\n\nhttps://example.invalid/${'long'.repeat(120)}\n\n\`\`\`text\n${'code'.repeat(150)}\n\`\`\`\n\n| Column | Other |\n| --- | --- |\n| ${'cell'.repeat(100)} | value |\n\n- [ ] Task\n\n${Array.from({ length: 90 }, (_, i) => `Paragraph ${i} — scroll without chrome.`).join('\n\n')}`;
 hub.notebooks.save('default', { resourceId: '["hub-notebook",1]', text, revision: 0 });
-const server = await createServer({ root: fileURLToPath(new URL('../dist', import.meta.url)), configFile: false, envFile: false,
+const server = await createServer({ root: process.env.AOD_TEST_WEB_DIST || fileURLToPath(new URL('../dist', import.meta.url)), configFile: false, envFile: false,
   logLevel: 'error', server: { host: '127.0.0.1', port: 0 } });
 let browser;
 try {
@@ -56,6 +56,10 @@ try {
     if (url.pathname.endsWith('/messages')) return json({ limits: { maxMessageChars: 100000 }, revision: '1', totalCount: 1, hiddenCount: 0, messages: [{ id: 'message', role: 'assistant', text: 'Stable history', createdAt: 1, status: 'sent' }] });
     if (url.pathname.endsWith('/queue')) return json({ items: [], nextCursor: null });
     if (url.pathname === '/api/agents') return json({ agents: [] });
+    if (url.pathname === '/api/antigravity/usage') return json({ usage: { sampledAt: 1795680000000, groups: [
+      { name: 'Gemini Models', windows: [{ id: 'short', window: '5h', remainingFraction: 0.75, resetAt: 1795683600000 },
+        { id: 'long', window: 'weekly', remainingFraction: 0.15, resetAt: null }] },
+    ] } });
     if (url.pathname === '/api/gateway/status') return json({ connected: true });
     return route.fulfill({ status: 404, json: {} });
   });
@@ -115,6 +119,22 @@ try {
   await secondPane.locator('.desktop-composer-textarea').evaluate(el => el.blur());
   const before = await docked.evaluateAll(nodes => nodes.map(node => ({ rect: node.getBoundingClientRect().toJSON(), id: node.dataset.remotePane })));
   await page.evaluate(() => { window.retainedHosts = [...document.querySelectorAll('[data-workspace-pane]')]; });
+  const presetTrigger = page.getByLabel('Layout presets', { exact: true });
+  await presetTrigger.focus();
+  await page.keyboard.press('Enter');
+  const quotaEntry = page.getByRole('group', { name: 'Status cards', exact: true }).getByRole('button', { name: 'Antigravity account quota', exact: true });
+  await quotaEntry.waitFor();
+  await page.keyboard.press('Tab');
+  assert.equal(await quotaEntry.evaluate(button => button === document.activeElement), true, 'quota is the first keyboard stop in the menu');
+  await page.keyboard.press('Enter');
+  const quotaCard = page.getByRole('region', { name: 'Antigravity account quota', exact: true });
+  const bars = quotaCard.getByRole('progressbar');
+  await bars.last().waitFor();
+  assert.deepEqual(await bars.evaluateAll(nodes => nodes.map(node => [node.value, node.hasAttribute('data-low')])), [[0.75, false], [0.15, true]]);
+  assert.equal(await bars.first().getAttribute('aria-valuetext'), 'Remaining: 75%');
+  assert.equal(await quotaCard.getByText('Quota reset time unavailable').count(), 1);
+  await page.locator('[data-workspace-pane]').filter({ has: quotaCard }).getByRole('button', { name: 'Close pane', exact: true }).click();
+  await quotaCard.waitFor({ state: 'detached' });
   for (const name of ['Browser card', 'Connector terminal']) {
     await page.getByLabel('Layout presets', { exact: true }).click();
     await page.getByRole('button', { name, exact: true }).click();
