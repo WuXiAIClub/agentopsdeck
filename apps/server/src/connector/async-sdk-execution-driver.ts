@@ -61,6 +61,7 @@ export class AsyncSdkExecutionDriver<T extends SdkOwnedTurn> {
       runtime: options.runtime, interactions: options.interactions }) : undefined;
     this.projection = new AsyncSdkProjection({ owner: options.owner, runtime: options.runtime,
       ...(options.diagnostics ? { diagnostics: options.diagnostics } : {}), changed: key => this.notify(key),
+      unknown: ref => this.markUnknown(ref),
       faulted: ref => { this.fence(1); this.markUnknown(ref); } });
     this.adapter = options.adapter({ epoch: randomUUID(),
       start: (execution, text, context, attachments, interaction) => {
@@ -75,7 +76,7 @@ export class AsyncSdkExecutionDriver<T extends SdkOwnedTurn> {
         intent.turn = turn;
         intent.cleanup = Promise.resolve(turn.finished).then(async () => {
           try {
-            if (await turn.inspectQuiescence() === true) {
+            if (await (turn.inspectCleaned ? turn.inspectCleaned() : turn.inspectQuiescence()) === true) {
               await this.interactions?.release(intent.ref);
               intent.cleaned = true;
             } else { this.cleanupUnconfirmed = true; this.fence(3); this.markUnknown(intent.ref); }
@@ -114,6 +115,9 @@ export class AsyncSdkExecutionDriver<T extends SdkOwnedTurn> {
       retainedIntents: this.intents.size, admissionInFlight: this.pumps.size + this.scans.size,
       admissionPaused: this.paused, cleanupUnconfirmed: this.cleanupUnconfirmed,
       faulted: this.faulted, closed: this.closed, persistence: this.projection.snapshot() };
+  }
+  isOccupied(key: string): boolean {
+    return this.intents.has(key) || Boolean(this.compaction?.has(key)) || this.pumps.has(key);
   }
   private ref(ref: SdkCompactRef): SdkCompactRef {
     return { key: ref.key, id: ref.id, epoch: ref.epoch, nativeSessionId: ref.nativeSessionId };

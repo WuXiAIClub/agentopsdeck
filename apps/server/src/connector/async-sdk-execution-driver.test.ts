@@ -586,13 +586,14 @@ for (const runtime of ['claude-code', 'ghcp'] as const) {
     try {
       await f.send('first'); await appended.promise;
       await until(async () => (await f.snapshot()).execution?.phase === 'running');
-      await f.send('waiting'); failedAck.release(); await until(() => f.driver.inspect().faulted);
+      await f.send('waiting'); failedAck.release();
+      await until(async () => (await f.snapshot()).execution?.phase === 'unknown');
       f.calls[0]!.finish();
       await until(async () => (await f.snapshot()).execution?.phase === 'unknown');
       await f.driver.wake(f.key); assert.equal(f.calls.length, 1);
-      const lease = f.driver.pauseQueueWorker(); await lease.drained; assert.equal(lease.resume(), false);
-      await assert.rejects(f.driver.close(), /cleanup could not be confirmed/);
-      assert.ok(f.logs.some(line => line.includes('sdk-async-driver')));
+      assert.equal(f.driver.inspect().faulted, false);
+      const lease = f.driver.pauseQueueWorker(); await lease.drained; assert.equal(lease.resume(), true);
+      await f.driver.close();
       assert.ok(!f.logs.join('').includes('secret native'));
     } finally { failedAck.release(); await f.dispose(); }
   });
@@ -610,8 +611,7 @@ for (const runtime of ['claude-code', 'ghcp'] as const) {
       await until(async () => (await f.snapshot()).execution?.phase === 'running');
       await f.send('waiting'); f.calls[0]!.finish();
       await until(async () => (await f.snapshot()).execution?.phase === 'unknown');
-      let closed = false; const closing = assert.rejects(f.driver.close(), /cleanup could not be confirmed/)
-        .then(() => { closed = true; });
+      let closed = false; const closing = f.driver.close().then(() => { closed = true; });
       await delay(10); assert.equal(closed, false); assert.equal(f.calls.length, 1);
       hold = false; appendAck.release(); await closing;
       assert.equal((await f.snapshot()).execution?.phase, 'unknown');

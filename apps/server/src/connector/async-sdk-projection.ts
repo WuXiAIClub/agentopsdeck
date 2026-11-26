@@ -29,7 +29,7 @@ export class AsyncSdkProjection {
   private faulted = false;
   private closing: Promise<boolean> | undefined;
   constructor(private readonly options: { owner: Pick<AsyncConnectorOwner, 'command'>; runtime: SdkAgentId;
-    changed?: (key: string) => void; faulted?: (ref: SdkCompactRef) => void; diagnostics?: PerformanceDiagnostics }) {}
+    changed?: (key: string) => void; unknown?: (ref: SdkCompactRef) => void; faulted?: (ref: SdkCompactRef) => void; diagnostics?: PerformanceDiagnostics }) {}
   snapshot() { return { executions: this.lanes.size, pending: this.pending, inputBytes: this.bytes, accepting: this.accepting,
     failed: [...this.lanes.values()].filter(l => l.failed).length, faulted: this.faulted }; }
   private lane(ref: SdkCompactRef): Lane {
@@ -89,8 +89,11 @@ export class AsyncSdkProjection {
     try {
       const body = encodeConnectorOwnerJson(input, connectorOwnerCommandBytes(kind));
       fixed = JSON.parse(body); size = Buffer.byteLength(body);
-      if (!validConnectorOwnerInput(kind, fixed) || this.pending >= CONNECTOR_PENDING_LIMIT
-        || this.bytes + size > CONNECTOR_PENDING_INPUT_BYTES) throw Error('connector_storage_unavailable');
+      if (!validConnectorOwnerInput(kind, fixed)) throw Error('connector_storage_unavailable');
+      if (this.pending >= CONNECTOR_PENDING_LIMIT || this.bytes + size > CONNECTOR_PENDING_INPUT_BYTES) {
+        if (kind === 'sdkTranscriptStream') return;
+        throw Error('connector_storage_unavailable');
+      }
     } catch { this.fail(lane, connectorOwnerSteps[kind]); return; }
     this.pending++; this.bytes += size;
     lane.tail = lane.tail.then(async () => {
@@ -109,7 +112,11 @@ export class AsyncSdkProjection {
       // does not discard a durable final or imply persistence has failed.
       // Metric observations are idempotent/monotonic: duplicate event ids and
       // old sequences return false in the original journal, not a failed write.
-      if (!applied && kind !== 'sdkTranscriptStream' && kind !== 'sdkMetricsObserve') throw Error('connector_storage_unavailable');
+      if (!applied && kind !== 'sdkTranscriptStream' && kind !== 'sdkMetricsObserve') {
+        lane.failed = true;
+        try { this.options.unknown?.({ ...lane.ref }); } catch { /* Observations cannot release protection. */ }
+        return;
+      }
       if (applied) { try { this.options.changed?.(lane.ref.key); } catch { /* View is recoverable from original facts. */ } }
     }).catch(() => this.fail(lane, connectorOwnerSteps[kind])).finally(() => { this.pending--; this.bytes -= size; });
   }
@@ -136,7 +143,7 @@ export class AsyncSdkProjection {
   close(): Promise<boolean> {
     if (this.closing) return this.closing;
     this.accepting = false;
-    this.closing = Promise.all([...this.lanes.values()].map(lane => this.release(lane.ref))).then(values => values.every(Boolean) && !this.faulted);
+    this.closing = Promise.all([...this.lanes.values()].map(lane => this.release(lane.ref))).then(() => !this.faulted);
     return this.closing;
   }
 }

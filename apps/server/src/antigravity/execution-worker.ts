@@ -3,7 +3,7 @@ import { AntigravityAcpClient, type AntigravityHandshake, type AntigravityPrompt
 import type { AntigravityConfig } from './config.js';
 import type { AntigravityExecutionWorker } from './owned-execution.js';
 
-export const ANTIGRAVITY_DRAIN_GRACE_MS = 2_000;
+export const ANTIGRAVITY_DRAIN_GRACE_MS = 10_000;
 export const ANTIGRAVITY_DRAIN_KILL_MS = 5_000;
 const failure = () => Error('Antigravity worker lifecycle is invalid');
 

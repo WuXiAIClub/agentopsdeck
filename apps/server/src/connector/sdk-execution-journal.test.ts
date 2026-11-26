@@ -346,3 +346,32 @@ test('SDK runtimes isolate identical native and execution IDs and refuse malform
     assert.throws(() => f.journal.create({ key: 'claude-code:duplicate', nativeSessionId: 'allocated-native-id', title: '', createdAt: 1 }), /UNIQUE/);
   } finally { f.db.close(); }
 });
+
+for (const runtime of ['claude-code', 'ghcp', 'antigravity'] as const) {
+  test(`SDK ${runtime} recoverUnknownSession explicitly resolves unknown execution and settles claimed turns`, () => {
+    const f = fixture(runtime);
+    try {
+      f.enqueue('one');
+      assert.equal(f.journal.begin(f.ref, ['one'], f.turns)?.nativeMode, 'create');
+      f.journal.markUnknown(f.ref, f.turns);
+      assert.equal(f.journal.canStart(f.key), false);
+      assert.equal(f.journal.recoverUnknownSession(f.key, 'wrong-run', f.turns, false), false);
+      assert.equal(f.journal.recoverUnknownSession(f.key, f.ref.id, f.turns, false), true);
+      assert.equal(f.journal.current(f.key)?.phase, 'failed');
+      assert.equal(f.journal.session(f.key)?.nativeState, 'allocated');
+      assert.equal(f.turns.head(runtime, f.key), undefined);
+      assert.equal(f.journal.canStart(f.key), true);
+
+      const second = { ...f.ref, id: 'execution-2' };
+      f.enqueue('two');
+      assert.equal(f.journal.begin(second, ['two'], f.turns)?.nativeMode, 'create');
+      assert.equal(f.journal.acknowledge(second, 'native-req-2', f.turns), true);
+      assert.equal(f.journal.requestStop(second), true);
+      f.journal.markUnknown(second, f.turns);
+      assert.equal(f.journal.recoverUnknownSession(f.key, second.id, f.turns, true), true);
+      assert.equal(f.journal.current(f.key)?.phase, 'interrupted');
+      assert.equal(f.journal.session(f.key)?.nativeState, 'ready');
+      assert.equal(f.journal.canStart(f.key), true);
+    } finally { f.db.close(); }
+  });
+}

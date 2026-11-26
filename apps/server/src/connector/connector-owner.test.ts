@@ -35,9 +35,9 @@ const fakeOwner = (file: string, fake: FakeWorker, diagnostics = silence, warnin
   new AsyncConnectorOwner({ file }, diagnostics, () => fake as unknown as Worker, warningMs);
 
 test('fixed Connector commands do not expose SQL, dispatch or mutable diagnostic numbers', () => {
-  assert.equal(connectorOwnerKinds.length, 366);
+  assert.equal(connectorOwnerKinds.length, 367);
   assert.deepEqual(Object.values(connectorOwnerSteps).sort((a, b) => a - b),
-    [...Array.from({ length: 344 }, (_, i) => i + 1), 346, 347, ...Array.from({ length: 20 }, (_, i) => 351 + i)]);
+    [...Array.from({ length: 344 }, (_, i) => i + 1), 346, 347, ...Array.from({ length: 21 }, (_, i) => 351 + i)]);
   assert.equal(new Set(Object.values(connectorOwnerSteps)).size, connectorOwnerKinds.length);
   assert.deepEqual([connectorOwnerSteps.codexOwnedLoadBegin, connectorOwnerSteps.codexOwnedLoadAcknowledge,
     connectorOwnerSteps.codexOwnedLoadFinish], [366, 367, 368]);
