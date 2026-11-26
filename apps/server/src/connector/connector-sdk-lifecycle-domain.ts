@@ -124,8 +124,14 @@ export async function executeConnectorSdkLifecycle<K extends ConnectorSdkLifecyc
     else if (actor.tokenId.startsWith('actor_') || !actor.scopes.includes('messages:read') || actor.scopes.includes('execution:delegate')) value = { error: 403 };
     else if (!owner.sdkCommandAdmissionOpen) value = { error: 409 };
     else if (owner.commands.sessionDeletion(v.key) || !journal.session(v.key) || journal.deletion(v.key)?.phase === 'deleted') value = { error: 404 };
-    else value = journal.recoverUnknownSession(v.key, v.expectedRunId, owner.turns, v.hasNativeBinding)
-      ? { requested: true } : { error: 409 };
+    else if (journal.recoverUnknownSession(v.key, v.expectedRunId, owner.turns, v.hasNativeBinding)) {
+      for (const scope of owner.interactions.unresolvedScopes(v.key)) {
+        if (scope.nodeId === owner.nodeId && scope.runId === v.expectedRunId) {
+          owner.interactions.retireRun(scope, Date.now());
+        }
+      }
+      value = { requested: true };
+    } else value = { error: 409 };
   } else if (kind === 'sdkLifecycleRead') {
     // No await: journal and bounded transcript share the original worker event.
     const snapshot = journal.readSnapshot(input.key);

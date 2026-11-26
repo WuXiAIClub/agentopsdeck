@@ -327,3 +327,28 @@ test('Antigravity Connector dynamically discovers models (including Claude) via 
     await fixture.close();
   }
 });
+
+test('antigravitySubagentObservation projects ACP subagent tool calls to CodexSubagentObservation', async () => {
+  const { antigravitySubagentObservation } = await import('./sdk-runtime.js');
+  assert.deepEqual(
+    antigravitySubagentObservation('Run invoke_subagent', 'call_1', 'running', 1000),
+    {
+      action: 'spawnAgent',
+      source: 'live',
+      observedAt: 1000,
+      agents: [{ id: 'call_1', path: 'Run invoke_subagent', status: 'running' }],
+    },
+  );
+  assert.deepEqual(
+    antigravitySubagentObservation('Run invoke_subagent', 'call_1', 'completed', 2000, '  OK  '),
+    {
+      action: 'spawnAgent',
+      source: 'live',
+      observedAt: 2000,
+      agents: [{ id: 'call_1', path: 'Run invoke_subagent', status: 'completed', latestText: 'OK' }],
+    },
+  );
+  assert.equal(antigravitySubagentObservation('Run send_message', 'call_2', 'running', 3000)?.action, 'sendInput');
+  assert.equal(antigravitySubagentObservation('Run manage_subagents', 'call_3', 'errored', 4000)?.action, 'closeAgent');
+  assert.equal(antigravitySubagentObservation('Read', 'call_4', 'running', 5000), undefined);
+});

@@ -19,7 +19,7 @@ export function prepareHermesMessageAdmission(context: { journal: HermesJournal;
     requiredSynchronousEffectAuthority(context.assertAvailable);
     if (context.journal.deletion(key)) throw new SessionDeletionConflict();
     if (!context.journal.session(key)) throw new Error('Hermes session not found');
-    if (context.journal.current(key)?.phase === 'unknown') throw new Error('Hermes execution outcome is unknown; automatic resend is disabled');
+    if (context.journal.current(key)?.phase === 'unknown') throw new SessionDeletionConflict('Hermes execution outcome is unknown; automatic resend is disabled');
     if (!context.journal.checkPermission(context.authorize, [])) throw new TurnAuthorizationError();
   };
   check();

@@ -670,4 +670,30 @@ for (const runtime of ['claude-code', 'ghcp'] as const) {
       assert.ok(!f.logs.join('').includes('secret native close error'));
     } finally { await f.dispose(); }
   });
+
+  test(`${runtime}: in-process recovery releases cleaned unknown intent, projection lane and adapter slot for successor turns`, async () => {
+    const f = await fixture(runtime);
+    try {
+      await f.send('first'); await until(async () => (await f.snapshot()).execution?.phase === 'running');
+      const failedRun = (await f.snapshot()).execution!;
+      f.calls[0]!.fail();
+      await until(async () => (await f.snapshot()).execution?.phase === 'unknown' && f.driver.canRecover(f.key, failedRun.id));
+      assert.equal(f.driver.inspect().retainedIntents, 1);
+      assert.equal(f.driver.isOccupied(f.key), true);
+      assert.equal(f.driver.canRecover(f.key, 'wrong-run-id'), false);
+      const recovered = await f.owner.command('sdkSessionRecover', { runtime, key: f.key, authorization, expectedRunId: failedRun.id });
+      assert.deepEqual(recovered, { requested: true });
+      await f.driver.releaseRecovered(f.key, failedRun.id);
+      assert.equal(f.driver.inspect().retainedIntents, 0);
+      assert.equal(f.driver.isOccupied(f.key), false);
+      await f.send('after recovery');
+      await until(async () => f.calls.length === 2 && (await f.snapshot()).execution?.phase === 'running');
+      assert.equal(f.calls[1]!.text, 'after recovery');
+      f.calls[1]!.finish();
+      await until(() => f.driver.inspect().retainedIntents === 0);
+      assert.equal((await f.snapshot()).execution?.phase, 'completed');
+      assert.equal(f.driver.inspect().faulted, false);
+      await f.driver.close();
+    } finally { await f.dispose(); }
+  });
 }

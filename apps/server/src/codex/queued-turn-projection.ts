@@ -11,8 +11,11 @@ export function codexQueueDisposition(id: string, facts: Pick<CodexQueueDisplayF
   if (facts.executionCommandId === id) return 'preparing';
   const runtime = current?.runtime;
   const blocking = runtime
-    ? ['starting', 'running', 'waiting', 'finalizing'].includes(runtime.phase)
-      || ['running', 'waiting'].includes(runtime.threadActivity ?? '')
+    ? ['starting', 'running', 'waiting', 'finalizing', 'unknown'].includes(runtime.phase)
+      || ['running', 'waiting', 'unknown'].includes(runtime.threadActivity ?? '')
+      || runtime.sync !== 'current'
+      || runtime.executionProtection?.state === 'blocked'
+      || runtime.connection === 'disconnected'
     : current?.hasActiveRun || current?.status === 'running' || current?.status === 'waiting';
   return blocking ? 'waiting' : 'preparing';
 }
@@ -20,7 +23,10 @@ export function codexQueueDisposition(id: string, facts: Pick<CodexQueueDisplayF
 export function codexQueuedTurnMessage(entry: QueuedTurn<CodexStartupPayload>, facts: CodexQueueDisplayFacts,
   current: SessionSummary | undefined, updatedAt = Date.now()): ChatMessage {
   return { id: entry.id, sessionKey: entry.sessionKey, role: 'user', text: entry.payload.text,
-    queueVersion: facts.version, queueDisposition: codexQueueDisposition(entry.id, facts, current),
+    queueVersion: facts.version,
+    queueDisposition: entry.state === 'outcome_unknown' && facts.executionCommandId !== entry.id
+      ? 'waiting'
+      : codexQueueDisposition(entry.id, facts, current),
     status: entry.state === 'blocked' ? 'failed' : entry.state === 'queued' ? 'queued' : 'outcome_unknown',
     ...(entry.state === 'blocked' ? { failureReason: new TurnAuthorizationError().message } : {}),
     createdAt: entry.createdAt, updatedAt,
