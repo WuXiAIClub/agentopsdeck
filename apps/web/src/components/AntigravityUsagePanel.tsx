@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Clock3, RefreshCw } from 'lucide-react';
 import type { AntigravityUsage } from '@agentopsdeck/shared';
 import { api, recoveryScope } from '../api';
+import { isEmptyQuotaFraction, isLowQuotaFraction, resolveQuotaSampleGroupIndex } from '../lib/antigravity-quota';
 import { useI18n } from '../lib/i18n';
 import { ResourceAction, ResourceTitle, ResourceToolbar } from './ResourceToolbar';
 import './antigravity-quota-card.css';
@@ -39,12 +40,7 @@ export default function AntigravityUsagePanel({ scope }: { scope: string }) {
   const busy = result?.generation !== generation;
   const usage = result?.usage;
   const percent = new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 1 });
-  const sampleGroupIndex = usage?.groups.length
-    ? (() => {
-        const index = usage.groups.findIndex(group => group.name === 'Gemini Models');
-        return index >= 0 ? index : 0;
-      })()
-    : -1;
+  const sampleGroupIndex = usage ? resolveQuotaSampleGroupIndex(usage.groups) : -1;
   const sampledAt = usage ? <div className="antigravity-quota-sample" role="status"><Clock3 size={13} aria-hidden="true" /><span>{t('Quota checked at')} · <time dateTime={new Date(usage.sampledAt).toISOString()}>{new Date(usage.sampledAt).toLocaleString(locale)}</time></span></div> : null;
   return <section className="antigravity-quota-card" aria-label={t('Antigravity account quota')} aria-busy={busy}>
     <ResourceTitle>{t('Antigravity account quota')}</ResourceTitle>
@@ -70,12 +66,13 @@ export default function AntigravityUsagePanel({ scope }: { scope: string }) {
             <ul role="list">{group.windows.map(bucket => {
               const windowLabel = bucket.window === '5h' ? t('5-hour quota') : bucket.window === 'weekly' ? t('Weekly quota') : bucket.window;
               const remaining = percent.format(bucket.remainingFraction);
-              const low = bucket.remainingFraction <= 0.2;
+              const low = isLowQuotaFraction(bucket.remainingFraction);
+              const empty = isEmptyQuotaFraction(bucket.remainingFraction);
               return <li key={bucket.id} data-low={low || undefined}>
                 <div className="antigravity-quota-dial" aria-hidden="true">
                   <svg viewBox="0 0 72 72" focusable="false">
                     <circle cx="36" cy="36" r="31" />
-                    <circle className="antigravity-quota-arc" cx="36" cy="36" r="31" pathLength="100" strokeDasharray={`${bucket.remainingFraction * 100} 100`} data-empty={bucket.remainingFraction <= 0 || undefined} />
+                    <circle className="antigravity-quota-arc" cx="36" cy="36" r="31" pathLength="100" strokeDasharray={`${bucket.remainingFraction * 100} 100`} data-empty={empty || undefined} />
                   </svg>
                   <strong>{remaining}</strong>
                 </div>
