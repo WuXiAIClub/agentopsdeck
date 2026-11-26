@@ -14,13 +14,15 @@ import type { PrivateWorkerDeletion } from './private-worker-preflight.js';
 import type { AgentReadiness } from '@agentopsdeck/shared';
 
 type PrivateConfig = { homeDirectory: string; startupTimeoutMs: number; model?: string; modelChoices?: string[]; dynamicModels?: boolean };
-type OwnedDriver = Pick<SdkExecutionDriver<SdkOwnedTurn>, 'inspect' | 'wake' | 'interrupt' | 'pauseQueueWorker' | 'close'> & Partial<Pick<SdkExecutionDriver<SdkOwnedTurn>, 'compact'>>;
+type OwnedDriver = Pick<SdkExecutionDriver<SdkOwnedTurn>, 'inspect' | 'wake' | 'interrupt' | 'pauseQueueWorker' | 'close'>
+  & Partial<Pick<SdkExecutionDriver<SdkOwnedTurn>, 'compact' | 'canRecover' | 'releaseRecovered'>>;
 export type SdkPreflight = { ready: Promise<boolean>; finished: Promise<void>; inspectQuiescence(): boolean; close(): void };
 export type SdkOwnedProjection = { publish(key: string, ready: boolean): unknown; publishSummary(key: string, ready: boolean): void };
 export type SdkOwnedOptions<R extends SdkAgentId, C extends PrivateConfig, D extends OwnedDriver> = {
   runtime: R; store: ConnectorUserStore; journal: SdkExecutionJournal; config: C;
   authorize: SdkCommandOptions<R>['authorize']; changed?: ((key: string) => void) | undefined;
   projection?: SdkOwnedProjection | undefined;
+  hasNativeBinding?: (config: C, nativeSessionId: string) => boolean;
   check: (config: C) => SdkPreflight;
   deleteNative: (config: C, request: PrivateWorkerDeletion) => SdkPreflight;
   driver: (hooks: { admissionReady: () => boolean; assertOwnership: () => void; changed: (key: string) => void }) => D;
@@ -160,6 +162,33 @@ export class SdkOwnedRuntime<R extends SdkAgentId, C extends PrivateConfig, D ex
   }
 
   isSessionHistoryReady(key: string) { return !this.closing && this.historyReady.has(key); }
+
+  recoverSession(key: string, expectedRunId: string): boolean {
+    const { store, journal } = this.options;
+    if (!this.ready || this.closing || this.maintenancePause || this.driver.inspect().admissionPaused
+      || !store.sdkCommandAdmissionOpen || store.runtimeOwnerFile !== this.ownerFile) return false;
+    try { this.lease.assertHeld(); } catch { return false; }
+    if (this.driver.canRecover && !this.driver.canRecover(key, expectedRunId)) return false;
+    const session = journal.session(key);
+    if (!session || store.commands.sessionDeletion(key) || journal.deletion(key)?.phase === 'deleted') return false;
+    let hasNativeBinding: boolean | undefined;
+    if (this.options.hasNativeBinding) {
+      try { hasNativeBinding = this.options.hasNativeBinding(structuredClone(this.config), session.nativeSessionId); }
+      catch { hasNativeBinding = false; }
+    }
+    if (!journal.recoverUnknownSession(key, expectedRunId, store.turns, hasNativeBinding)) return false;
+    for (const scope of store.interactions.unresolvedScopes(key)) {
+      if (scope.nodeId === store.nodeId && scope.runId === expectedRunId) {
+        store.interactions.retireRun(scope, Date.now());
+      }
+    }
+    this.driver.releaseRecovered?.(key, expectedRunId);
+    this.historyReady.delete(key);
+    try { this.projection?.publish(key, this.ready); this.historyReady.add(key); } catch { /* durable recovery survives projection failure */ }
+    try { this.options.changed?.(key); } catch { /* durable recovery survives observer failure */ }
+    void this.driver.wake(key);
+    return true;
+  }
 
   remove(key: string, authorize: () => void, acknowledge: () => void): Promise<void> {
     const job = this.removeOwned(key, authorize, acknowledge);

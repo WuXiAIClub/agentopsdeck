@@ -23,7 +23,7 @@ export type SdkDriverOptions<T extends SdkOwnedTurn> = {
     epoch: string; start: (execution: SdkExecution, text: string, context?: SdkTurnContext) => T;
     terminal: (ref: SdkExecutionRef, outcome: SdkTerminalOutcome) => boolean | Promise<boolean>;
     unknown: (ref: SdkExecutionRef) => void; drained: (ref: SdkExecutionRef) => void;
-  }) => SdkDispatchAdapter & { close(): void };
+  }) => SdkDispatchAdapter & { close(): void; releaseRecovered?(ref: SdkExecutionRef): void };
 };
 
 /** Internal execution composition behind the owner-authorized runtime routes.
@@ -33,7 +33,7 @@ export type SdkDriverOptions<T extends SdkOwnedTurn> = {
  * Native completion wakes the next FIFO batch without polling or re-sending
  * unknown work. A browser history request is not needed to advance the queue. */
 export class SdkExecutionDriver<T extends SdkOwnedTurn> {
-  private readonly adapter: SdkDispatchAdapter & { close(): void };
+  private readonly adapter: SdkDispatchAdapter & { close(): void; releaseRecovered?(ref: SdkExecutionRef): void };
   private readonly dispatch: SdkDispatch;
   private readonly compactDispatch: SdkCompactDispatch;
   private readonly compactWorkers = new Map<string, SdkOwnedCompactWorker>();
@@ -41,6 +41,7 @@ export class SdkExecutionDriver<T extends SdkOwnedTurn> {
   private readonly pumps = new Map<string, Promise<void>>();
   private readonly requested = new Set<string>();
   private readonly workers = new Set<T>();
+  private readonly intents = new Map<string, { ref: SdkExecutionRef; cleaned: boolean }>();
   private paused = false;
   private pauseLease: AdmissionPause | undefined;
   private closing: Promise<void> | undefined;
@@ -61,17 +62,23 @@ export class SdkExecutionDriver<T extends SdkOwnedTurn> {
     this.adapter = options.adapter({ epoch: randomUUID(),
       start: (execution, text, context) => {
         const turn = options.start(execution, text, () => this.notify(execution.key), context);
+        const ref: SdkExecutionRef = { key: execution.key, id: execution.id, epoch: execution.epoch };
+        const intent = { ref, cleaned: false };
+        this.intents.set(execution.key, intent);
         this.workers.add(turn);
         // Cleanup is still verified by the turn/adapter before settlement.
         // finished can reject; never create an unhandled rejection here.
         void turn.finished.then(async () => {
-          try { if (!await (turn.inspectCleaned ? turn.inspectCleaned() : turn.inspectQuiescence())) this.cleanupUnconfirmed = true; }
+          try {
+            if (await (turn.inspectCleaned ? turn.inspectCleaned() : turn.inspectQuiescence())) intent.cleaned = true;
+            else this.cleanupUnconfirmed = true;
+          }
           catch { this.cleanupUnconfirmed = true; }
           finally {
-            this.finishWorker(turn, execution);
+            this.finishWorker(turn, execution, intent);
           }
         }, () => {
-          this.cleanupUnconfirmed = true; this.finishWorker(turn, execution);
+          this.cleanupUnconfirmed = true; this.finishWorker(turn, execution, intent);
         });
         return turn;
       },
@@ -218,6 +225,20 @@ export class SdkExecutionDriver<T extends SdkOwnedTurn> {
     return lease;
   }
 
+  canRecover(key: string, expectedRunId: string): boolean {
+    if (this.compactWorkers.has(key) || this.pumps.has(key)) return false;
+    const intent = this.intents.get(key);
+    if (!intent) return true;
+    return intent.ref.id === expectedRunId && intent.cleaned === true;
+  }
+
+  releaseRecovered(key: string, expectedRunId: string): void {
+    const intent = this.intents.get(key);
+    if (!intent || intent.ref.id !== expectedRunId || !intent.cleaned) return;
+    this.adapter.releaseRecovered?.(intent.ref);
+    if (this.intents.get(key) === intent) this.intents.delete(key);
+  }
+
   close(): Promise<void> {
     if (this.closing) return this.closing;
     this.closed = true; this.paused = true; this.dispatch.pause(); this.requested.clear();
@@ -227,7 +248,7 @@ export class SdkExecutionDriver<T extends SdkOwnedTurn> {
     this.closing = (async () => {
       const results = await Promise.allSettled([...this.compactJobs, ...this.pumps.values(), ...[...this.workers].map(async turn => {
         await turn.finished;
-        if (!await turn.inspectQuiescence()) throw new Error('SDK worker cleanup is unconfirmed');
+        if (!await (turn.inspectCleaned ? turn.inspectCleaned() : turn.inspectQuiescence())) throw new Error('SDK worker cleanup is unconfirmed');
       })]);
       if (this.cleanupUnconfirmed || results.some(result => result.status === 'rejected')) throw new Error('SDK worker cleanup is unconfirmed');
     })();
@@ -240,12 +261,20 @@ export class SdkExecutionDriver<T extends SdkOwnedTurn> {
     try { this.options.changed?.(key); } catch { /* never expose subscriber errors/native content */ }
   }
 
-  private finishWorker(turn: T, execution: SdkExecutionRef) {
+  private finishWorker(turn: T, execution: SdkExecutionRef, intent: { ref: SdkExecutionRef; cleaned: boolean }) {
     // Projection failures must not leak a rejected promise or leave a dead
     // worker in maintenance counts. Fence admission without inventing a new
     // terminal outcome for an already durable execution.
     try { this.options.endStreams(execution); }
     catch { this.faulted = true; this.paused = true; this.dispatch.pause(); }
-    finally { this.workers.delete(turn); this.notify(execution.key); }
+    finally {
+      this.workers.delete(turn);
+      const current = this.options.journal.current(execution.key);
+      if (intent.cleaned && current?.id === execution.id && ['completed', 'failed', 'interrupted'].includes(current.phase)
+        && this.intents.get(execution.key) === intent) {
+        this.intents.delete(execution.key);
+      }
+      this.notify(execution.key);
+    }
   }
 }

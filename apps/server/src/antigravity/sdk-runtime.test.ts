@@ -11,7 +11,8 @@ import { ConnectorUserStore } from '../connector/connector-user-store.js';
 import { loadConfig } from '../config.js';
 import { DeckStore } from '../projection/deck-store.js';
 import { registerConnectorRoutes } from '../routes/connector.js';
-import { AntigravityConnectorRuntime, AntigravityOwnedRuntime } from './sdk-runtime.js';
+import { AntigravityConnectorRuntime, AntigravityOwnedRuntime, AntigravitySdkTurn } from './sdk-runtime.js';
+import { AntigravityProcessWorker } from './execution-worker.js';
 
 const fixturePath = join(dirname(fileURLToPath(import.meta.url)), 'acp-fixture.mjs');
 
@@ -351,4 +352,144 @@ test('antigravitySubagentObservation projects ACP subagent tool calls to CodexSu
   assert.equal(antigravitySubagentObservation('Run send_message', 'call_2', 'running', 3000)?.action, 'sendInput');
   assert.equal(antigravitySubagentObservation('Run manage_subagents', 'call_3', 'errored', 4000)?.action, 'closeAgent');
   assert.equal(antigravitySubagentObservation('Read', 'call_4', 'running', 5000), undefined);
+});
+
+test('Antigravity Connector settles clean ACP error after tool calls as failed without wedging session', async () => {
+  const fixture = await createConnectorFixture();
+  try {
+    const created = await fixture.request('/agents/antigravity/sessions', 'POST', { title: 'ACP Error Isolation' }, { 'idempotency-key': 'agy-create-acp-err' });
+    assert.equal(created.status, 201);
+    const { key } = await created.json() as { key: string };
+    const encodedKey = encodeURIComponent(key);
+
+    const failedSend = await fixture.request(`/sessions/${encodedKey}/messages`, 'POST', {
+      message: 'acp-error-after-tool',
+      idempotencyKey: 'agy-acp-err-1',
+    });
+    assert.equal(failedSend.status, 200);
+
+    await waitFor(async () => {
+      const execution = fixture.users.antigravityJournal.current(key);
+      return execution?.phase === 'failed' ? execution : undefined;
+    });
+    assert.equal(fixture.users.antigravityJournal.canStart(key), true);
+
+    const historyAfterFailure = await fixture.request(`/sessions/${encodedKey}/messages`);
+    assert.equal(historyAfterFailure.status, 200);
+    const failedPayload = await historyAfterFailure.json() as { messages: Array<{ role: string; text: string; toolPhase?: string }> };
+    assert.ok(failedPayload.messages.some(item => item.role === 'tool' && item.toolPhase === 'call'));
+    assert.ok(failedPayload.messages.some(item => item.role === 'assistant' && item.text.includes('partial before upstream error')));
+
+    const followUp = await fixture.request(`/sessions/${encodedKey}/messages`, 'POST', {
+      message: 'follow up after clean error',
+      idempotencyKey: 'agy-acp-err-2',
+    });
+    assert.equal(followUp.status, 200);
+    await waitFor(async () => {
+      const response = await fixture.request(`/sessions/${encodedKey}/messages`);
+      const payload = await response.json() as { messages: Array<{ role: string; text: string }> };
+      return payload.messages.some(item => item.role === 'assistant' && item.text.includes('你好，ACP')) ? true : undefined;
+    });
+    await waitFor(async () => (fixture.users.antigravityJournal.canStart(key) ? true : undefined));
+  } finally {
+    await fixture.close();
+  }
+});
+
+test('Antigravity Connector recovers unknown session in-process via POST /recovery and returns 409 before recovery', async () => {
+  const fixture = await createConnectorFixture();
+  try {
+    const created = await fixture.request('/agents/antigravity/sessions', 'POST', { title: 'ACP Recovery' }, { 'idempotency-key': 'agy-create-recover' });
+    assert.equal(created.status, 201);
+    const { key } = await created.json() as { key: string };
+    const encodedKey = encodeURIComponent(key);
+
+    // Establish an initial completed turn so native session binding exists.
+    const first = await fixture.request(`/sessions/${encodedKey}/messages`, 'POST', {
+      message: 'hello before disconnect',
+      idempotencyKey: 'agy-rec-1',
+    });
+    assert.equal(first.status, 200);
+    await waitFor(async () => (fixture.users.antigravityJournal.canStart(key) ? true : undefined));
+
+    // Trigger hard mid-turn process disconnect -> enters unknown phase.
+    const crashed = await fixture.request(`/sessions/${encodedKey}/messages`, 'POST', {
+      message: 'disconnect',
+      idempotencyKey: 'agy-rec-2',
+    });
+    assert.equal(crashed.status, 200);
+    const unknownRunId = await waitFor(async () => {
+      const execution = fixture.users.antigravityJournal.current(key);
+      return execution?.phase === 'unknown' ? execution.id : undefined;
+    });
+
+    // Sending while unknown returns clean 409 Conflict instead of 503.
+    const blockedSend = await fixture.request(`/sessions/${encodedKey}/messages`, 'POST', {
+      message: 'blocked while unknown',
+      idempotencyKey: 'agy-rec-blocked',
+    });
+    assert.equal(blockedSend.status, 409);
+
+    // Explicit owner-authorized in-process recovery unblocks the session.
+    const recovered = await waitFor(async () => {
+      const response = await fixture.request(`/sessions/${encodedKey}/recovery`, 'POST', { expectedRunId: unknownRunId });
+      return response.status === 200 ? response : undefined;
+    });
+    assert.deepEqual(await recovered.json(), { requested: true });
+    assert.equal(fixture.users.antigravityJournal.canStart(key), true);
+
+    // Subsequent turn dispatches and completes cleanly without restarting the connector.
+    const resumed = await fixture.request(`/sessions/${encodedKey}/messages`, 'POST', {
+      message: 'hello after recovery',
+      idempotencyKey: 'agy-rec-3',
+    });
+    assert.equal(resumed.status, 200);
+    await waitFor(async () => {
+      const execution = fixture.users.antigravityJournal.current(key);
+      return execution?.phase === 'completed' && fixture.users.antigravityJournal.canStart(key) ? true : undefined;
+    });
+  } finally {
+    await fixture.close();
+  }
+});
+
+test('AntigravitySdkTurn settles completed turn when forced cleanup empties lingering descendant process group', async () => {
+  const root = realpathSync(mkdtempSync(join(tmpdir(), 'agentopsdeck-antigravity-lingering-')));
+  try {
+    const homeDirectory = join(root, 'private');
+    const workspace = join(root, 'workspace');
+    mkdirSync(homeDirectory, { mode: 0o700 });
+    for (const name of ['config', 'cache', 'data', 'tmp']) mkdirSync(join(homeDirectory, name), { mode: 0o700 });
+    mkdirSync(workspace, { mode: 0o700 });
+    const command = createExecutableWrapper(root);
+    const config = { command, homeDirectory, workspace, startupTimeoutMs: 5_000 };
+    const execution = {
+      id: 'exec-lingering-1',
+      key: 'antigravity:lingering-test',
+      epoch: 'epoch-1',
+      kind: 'message' as const,
+      nativeSessionId: '11111111-1111-4111-8111-111111111111',
+      nativeMode: 'create' as const,
+      phase: 'running' as const,
+      members: ['cmd-1'],
+      stopRequested: false,
+      createdAt: 1,
+      updatedAt: 1,
+    };
+    const turn = new AntigravitySdkTurn({
+      config,
+      execution,
+      text: 'lingering-descendant',
+      projection: { project: () => {}, stream: () => {} },
+      assertOwnership: () => {},
+      createWorker: options => new AntigravityProcessWorker({ ...options, drainGraceMs: 120, drainKillMs: 500 }),
+    });
+    await turn.admitted;
+    await turn.finished;
+    assert.equal(turn.terminalOutcome(), 'completed');
+    assert.equal(await turn.inspectCleaned(), true);
+    assert.deepEqual(await turn.inspectSettlement(), { historyPersisted: true, nativeQuiescent: true });
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
 });

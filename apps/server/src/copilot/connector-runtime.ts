@@ -68,6 +68,7 @@ export class CopilotConnectorRuntime implements ConnectorAgentLifecycle {
     await this.owned.refreshSession(key, options);
   }
   isSessionHistoryReady(key: string) { return !this.closed && !!this.owned?.isSessionHistoryReady(key); }
+  recoverSession(key: string, expectedRunId: string) { return !this.closed && !this.failed && !!this.owned?.recoverSession(key, expectedRunId); }
 
   pauseQueueWorker(): AdmissionPause {
     if (this.closed) throw unavailable();

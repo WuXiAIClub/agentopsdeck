@@ -54,12 +54,17 @@ Connector。未启用时返回 `{ "usage": null }`，无权访问时返回 `403`
   尚未实现 Windows 原生执行。
 - 复用 `PrivateAgentHomeLease`，使用 Antigravity 专用 owner 和 binding 标记，
   将专属 HOME 绑定到精确的 Connector 数据库和节点；即使 Claude/Copilot 已正常退出，
-  也拒绝复用其 HOME。绝不自动回收遗留 owner 标记。
+  也拒绝复用其 HOME。同次启动内的遗留 owner 标记绝不自动回收；在 Linux 上，仅当
+  owner 标记记录了先前的内核 `boot_id` 且持久 binding 与 `nodeId` 均精确匹配时，
+  才会在跨系统重启后自动回收。
 - 使用不可变的 AOD 会话/执行/owner epoch 标识约束执行。在异步初始化后重新验证
   恢复会话的归属，先绑定并持久化意图再投递，拒绝其他会话及收尾后的转录更新。
 - 在持久化终态及释放 HOME 前排空 worker。无法证明物理清理或结算失败时，保留 owner
-  防护标记。强制清理会将供应商完成降级为 `unknown`；初始化或持久化期间取消，不会
-  伪造供应商停止证明，也不触发重放。
+  防护标记。在 `AntigravitySdkTurn` 中，一旦 ACP 返回已校验终态或干净的
+  `AntigravityAcpError` 且 `stopAndDrain()` 证明整个进程组已清空（`cleaned === true`），
+  即完成正常结算而不卡死会话。硬断连或结果未确认的回合仍保留 `unknown`，可通过
+  owner 显式触发的进程内恢复（`POST .../recovery`）在校验清理与原生绑定后解除阻塞；
+  初始化或持久化期间取消不会伪造供应商停止证明，也不触发重放。
 
 `assertOwnership` 和 `persistIntent` 是集成边界，不是已经实现的日志或权限系统。
 ACP 取消结果及 `inspectTransportClosed()` 都不能证明历史已持久化，

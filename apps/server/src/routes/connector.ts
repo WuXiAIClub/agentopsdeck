@@ -331,7 +331,29 @@ export function registerConnectorRoutes(app: Hono, deps: {
       await next();
     });
   }
-  app.post(`${base}/sessions/:sessionKey/recovery`, c => c.json({ error: 'Session recovery is unavailable on this Connector' }, 409));
+  app.post(`${base}/sessions/:sessionKey/recovery`, async c => {
+    const sessionKey = c.req.param('sessionKey')!;
+    const runtime = sessionRuntimeId(sessionKey);
+    if (runtime === 'claude-code' || runtime === 'ghcp' || runtime === 'antigravity') {
+      if (!requireScope(c.req.raw, deps.tokens, 'messages:read')) return c.json({ error: 'Session recovery access denied' }, 403);
+      let body: unknown;
+      try { body = await c.req.json(); } catch { return c.json({ error: 'Invalid execution identity' }, 400); }
+      if (!body || typeof body !== 'object' || Array.isArray(body) || Object.keys(body).length !== 1
+        || !('expectedRunId' in body) || typeof body.expectedRunId !== 'string' || !body.expectedRunId.length
+        || body.expectedRunId.length > 512 || /[\x00-\x1f\x7f]/.test(body.expectedRunId)) {
+        return c.json({ error: 'Invalid execution identity' }, 400);
+      }
+      const owned = sdk(runtime);
+      if (!owned?.ready) return c.json({ error: 'Agent is not ready; recovery unavailable' }, 409);
+      if (!sdkJournal(runtime).session(sessionKey) || sdkJournal(runtime).deletion(sessionKey)?.phase === 'deleted') {
+        return c.json({ error: 'Session not found' }, 404);
+      }
+      return owned.recoverSession(sessionKey, body.expectedRunId)
+        ? c.json({ requested: true })
+        : c.json({ error: 'Execution changed or recovery unavailable; refresh session state' }, 409);
+    }
+    return c.json({ error: 'Session recovery is unavailable on this Connector' }, 409);
+  });
   const machine = registerConnectorMachineHttp(app, deps.tokens, deps.config);
   if (deps.interactions) registerInteractions(app, { runtime: deps.interactions, users: deps.connectorUsers, tokens: deps.tokens,
     exists: key => {
@@ -1060,7 +1082,7 @@ export function registerConnectorRoutes(app: Hono, deps: {
             c.get('commandKey'), { status: 200, body: { ok: true, ...result } }),
         }, attachments) });
       } catch (error) {
-        return c.json({ error: 'Agent command unavailable' }, error instanceof TurnAuthorizationError ? 403 : error instanceof RunControlConflict ? 409 : 503);
+        return c.json({ error: 'Agent command unavailable' }, error instanceof TurnAuthorizationError ? 403 : error instanceof RunControlConflict || error instanceof SessionDeletionConflict ? 409 : 503);
       }
     }
     if (sessionRuntimeId(sessionKey) === 'hermes') {
@@ -1079,7 +1101,7 @@ export function registerConnectorRoutes(app: Hono, deps: {
             c.get('commandKey'), { status: 200, body: { ok: true, ...result } }),
         }) });
       } catch (error) {
-        return c.json({ error: deps.normalizeError(error) }, error instanceof TurnAuthorizationError ? 403 : error instanceof RunControlConflict ? 409 : 503);
+        return c.json({ error: deps.normalizeError(error) }, error instanceof TurnAuthorizationError ? 403 : error instanceof RunControlConflict || error instanceof SessionDeletionConflict ? 409 : 503);
       }
     }
     if (sessionKey.startsWith('codex:') || deps.codex?.owns(sessionKey)) {
