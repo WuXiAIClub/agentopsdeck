@@ -123,7 +123,23 @@ test('canStopSessionBackgroundTerminals only enables on idle connected owner Cod
   assert.equal(canStopSessionBackgroundTerminals({
     ...blocked(),
     runtime: { ...blocked().runtime!, threadActivity: 'running' },
+  }), true);
+  assert.equal(canRequestSessionRecovery({
+    ...blocked(),
+    runtime: { ...blocked().runtime!, threadActivity: 'running' },
+  }), true);
+  assert.equal(canStopSessionBackgroundTerminals({
+    ...blocked(),
+    runtime: {
+      ...blocked().runtime!,
+      threadActivity: 'running',
+      executionProtection: { state: 'blocked', nativeTurnId: 'successor', reason: 'background-work' },
+    },
   }), false);
+  const directCodex: SessionSummary = { ...blocked(), source: 'codex' };
+  delete directCodex.sessionRef;
+  assert.equal(canStopSessionBackgroundTerminals(directCodex), true);
+  assert.equal(canRequestSessionRecovery(directCodex), true);
   assert.equal(canStopSessionBackgroundTerminals({
     ...blocked(),
     status: 'running',

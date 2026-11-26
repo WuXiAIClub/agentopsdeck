@@ -48,14 +48,31 @@ async function inspectProcessGroup(groupId: number) {
   return false;
 }
 
-export async function waitForLinuxProcessGroupExit(groupId: number) {
+export const LINUX_PROCESS_GROUP_SIGKILL_GRACE_MS = 10_000;
+
+export async function waitForLinuxProcessGroupExit(
+  groupId: number,
+  options: { sigkillAfterMs?: number; pollMs?: number } = {},
+) {
+  const sigkillAfterMs = options.sigkillAfterMs ?? LINUX_PROCESS_GROUP_SIGKILL_GRACE_MS;
+  const pollMs = options.pollMs ?? 50;
+  const startedAt = Date.now();
   let warned = false;
+  let escalated = false;
   for (;;) {
     try { if (!await linuxProcessGroupRunning(groupId)) return; }
     catch {
       if (!warned) console.warn('[codex] Cannot verify native process group drain; retaining runtime ownership');
       warned = true;
     }
-    await new Promise(resolve => setTimeout(resolve, 50));
+    if (!escalated && sigkillAfterMs >= 0 && Date.now() - startedAt >= sigkillAfterMs) {
+      escalated = true;
+      console.warn(`[codex] Native process group ${groupId} did not exit after ${sigkillAfterMs}ms; escalating to SIGKILL`);
+      try { process.kill(-groupId, 'SIGKILL'); }
+      catch (error) {
+        if ((error as NodeJS.ErrnoException).code === 'ESRCH') return;
+      }
+    }
+    await new Promise(resolve => setTimeout(resolve, pollMs));
   }
 }

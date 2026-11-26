@@ -46,3 +46,30 @@ test('Unproven Antigravity cleanup retains its non-expiring owner fence', suppor
   assert.ok(existsSync(join(original.home, '.agentopsdeck-antigravity-owner')));
   assert.throws(original.acquire);
 });
+
+test('Linux owner lock from a prior OS boot is reclaimed only when binding and nodeId match', supported, async context => {
+  const original = fixture(context);
+  const first = original.acquire();
+  const lockPath = join(original.home, '.agentopsdeck-antigravity-owner');
+  const recorded = JSON.parse(readFileSync(lockPath, 'utf8'));
+  assert.match(recorded.bootId, /^[0-9a-f-]{36}$/i);
+  await first.releaseAfter(async () => {});
+
+  // Simulate an abandoned lock left behind by a previous OS boot.
+  const priorBootId = '00000000-0000-4000-8000-000000000001';
+  assert.notEqual(priorBootId, recorded.bootId);
+  writeFileSync(lockPath, JSON.stringify({ format: 1, token: randomUUID(), pid: 999999, nodeId: original.nodeId, bootId: priorBootId }), { mode: 0o600 });
+  const reclaimed = original.acquire();
+  reclaimed.assertHeld();
+  assert.equal(JSON.parse(readFileSync(lockPath, 'utf8')).bootId, recorded.bootId);
+  await reclaimed.releaseAfter(async () => {});
+
+  // Legacy lock without bootId is never silently reclaimed.
+  writeFileSync(lockPath, JSON.stringify({ format: 1, token: randomUUID(), pid: 999999, nodeId: original.nodeId }), { mode: 0o600 });
+  assert.throws(original.acquire);
+  rmSync(lockPath);
+
+  // Stale lock from a foreign nodeId is never reclaimed even with a prior bootId.
+  writeFileSync(lockPath, JSON.stringify({ format: 1, token: randomUUID(), pid: 999999, nodeId: `node_${randomUUID()}`, bootId: priorBootId }), { mode: 0o600 });
+  assert.throws(original.acquire);
+});
