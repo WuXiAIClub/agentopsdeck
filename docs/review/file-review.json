@@ -17,13 +17,13 @@
     "Native devices, providers, full backend, browser accessibility, artifacts and redistribution rights remain unaccepted."
   ],
   "summary": {
-    "totalFiles": 3612,
+    "totalFiles": 3614,
     "byKind": {
       "config": 58,
       "docs": 55,
       "asset": 8,
-      "test": 1756,
-      "runtime": 1721,
+      "test": 1757,
+      "runtime": 1722,
       "generated": 14
     },
     "byModule": {
@@ -43,7 +43,7 @@
       "api-completion": 7,
       "hub": 552,
       "web-ui": 405,
-      "web": 5,
+      "web": 7,
       "web-state": 383,
       "web-menu-tests": 1,
       "web-menu": 1,
@@ -57,12 +57,12 @@
       "external": 2
     },
     "byDepth": {
-      "semantic": 3558,
+      "semantic": 3560,
       "structural": 35,
       "asset": 19
     },
     "byDisposition": {
-      "no-finding": 3577,
+      "no-finding": 3579,
       "pending": 35
     },
     "completedSemanticOrAssetFiles": 3568,
@@ -45047,8 +45047,8 @@
     },
     {
       "path": "apps/web/src/components/AntigravityUsagePanel.tsx",
-      "size": 5351,
-      "sha256": "b3f7b571d445104de2dedcc2a959467dca4937a9009ef8144c78237a34a8e81c",
+      "size": 5578,
+      "sha256": "5a24411925e6984a01f2ae896782fe48001597f10f9cfb07ec768e1844f3ed87",
       "module": "web-ui",
       "kind": "runtime",
       "depth": "structural",
@@ -47638,8 +47638,8 @@
     },
     {
       "path": "apps/web/src/components/antigravity-quota-card.css",
-      "size": 5761,
-      "sha256": "64ba1c0c17e4ecaed5609257d38b0954b232c72a7d693cb9a83ad9b9bb436b3f",
+      "size": 5632,
+      "sha256": "47b8e9607d9d43832f027eecd2d2c0c182ddc2f51b29336d95cee1f218dafc8e",
       "module": "web",
       "kind": "runtime",
       "depth": "structural",
@@ -48162,6 +48162,34 @@
         "line-by-line-semantic-audit"
       ],
       "notes": "[\"本轮全文检查>=700px html/body min-width/overflow hidden，button全局focus fallback；input/textarea focus-visible outline:none依赖各component焦点边框；rail小字号、header固定2rem sizing。\",\"main/styles.css未全文，潜在focus覆盖、缩放/窄屏/触屏目标与body scroll行为待浏览器；不能用本片段做全界面a11y结论。\"]",
+      "findings": []
+    },
+    {
+      "path": "apps/web/src/lib/antigravity-quota.test.ts",
+      "size": 1789,
+      "sha256": "529496126771eb1e58050c9bc864c2865c63ad922f118080f2f85ed0cfdbbecc",
+      "module": "web",
+      "kind": "test",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size"
+      ],
+      "notes": "Ledger entry synced for newly added repository file.",
+      "findings": []
+    },
+    {
+      "path": "apps/web/src/lib/antigravity-quota.ts",
+      "size": 596,
+      "sha256": "42b205a8b5b34e129a6beba5d1eb62bcf8fd8d125936b42bcc3fc22bba215dd6",
+      "module": "web",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size"
+      ],
+      "notes": "Ledger entry synced for newly added repository file.",
       "findings": []
     },
     {
@@ -59086,8 +59114,8 @@
     },
     {
       "path": "apps/web/tests/workspace-polish.browser.mjs",
-      "size": 22822,
-      "sha256": "777adfc5f0b6c89a052c2d2efca0d630f71cea1cbd66419984f8920f579951eb",
+      "size": 23697,
+      "sha256": "9bf2505b55be9d337f9ae039e30765c7667ac78e4b82031e575dff8bae536c7b",
       "module": "web-ui",
       "kind": "test",
       "depth": "structural",
@@ -59291,8 +59319,8 @@
     },
     {
       "path": "apps/web/tsconfig.test.json",
-      "size": 6377,
-      "sha256": "4f23ec191c18edc34b6bf84deab90486ccfb40b0cc46e7d446ade6ebfefa9555",
+      "size": 6454,
+      "sha256": "848cb48ca68aea9245c63896930afa71d2c62046079f756183837515faf410cf",
       "module": "web-ui",
       "kind": "config",
       "depth": "semantic",
@@ -59361,8 +59389,8 @@
     },
     {
       "path": "docs/antigravity-cli.md",
-      "size": 7475,
-      "sha256": "5f3fa00a999e567141ffc0228a953bec46d2cb063da3988d97ac248df4d30080",
+      "size": 7762,
+      "sha256": "4b21f7c9cb3668f198c54c709a5964ddcd5b7f91706301e4e8a8b5ffa3f398c8",
       "module": "governance",
       "kind": "docs",
       "depth": "structural",
@@ -59376,8 +59404,8 @@
     },
     {
       "path": "docs/antigravity-cli.zh-CN.md",
-      "size": 6930,
-      "sha256": "c86b0f82c9b8cadd043760598afb887d089962d7306a10faed0bbdf11c167462",
+      "size": 7180,
+      "sha256": "cc443af6f3da0dc57303cc8fb5dcb74a3ce62f3a9f0c16679d00ae95fdbce0f3",
       "module": "governance",
       "kind": "docs",
       "depth": "structural",

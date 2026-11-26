@@ -164,6 +164,8 @@
     "src/lib/font-preferences.ts",
     "src/lib/font-scale-css.ts",
     "src/lib/font-preferences.test.ts",
+    "src/lib/antigravity-quota.ts",
+    "src/lib/antigravity-quota.test.ts",
     "src/lib/request-governor.ts",
     "src/lib/request-governor.test.ts"
   ],
