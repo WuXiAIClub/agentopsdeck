@@ -47943,8 +47943,8 @@
     },
     {
       "path": "apps/web/src/components/web-ui-findings.test.ts",
-      "size": 47438,
-      "sha256": "f8101986ec227a9316687003413f3c8823630119473a944c9d1a95bc4f76ce62",
+      "size": 50896,
+      "sha256": "f6580529ff02eddb066d69cfc4ad1072a662443feb77e4c5bddedfa6cc9a8124",
       "module": "main-integration",
       "kind": "test",
       "depth": "semantic",
@@ -55127,7 +55127,7 @@
         "line-by-line-semantic-audit"
       ],
       "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/web/src/main.tsx (web-style-entry-completion/runtime); all historical findings and license/security/correctness checks are verified.",
-      "sha256": "6efa2505314281acca1019b9ae14da7415fdcf746057225c925aaf971a291fd1",
+      "sha256": "81333f3099199a6bc78d1328182fcbfaa6b527e42d6a378ce32885accbc49ae1",
       "size": 365900,
       "module": "web-style-entry-completion",
       "historicalFindingReferences": [
