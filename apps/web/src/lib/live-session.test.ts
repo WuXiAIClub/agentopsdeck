@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import type { AgentRuntime, ChatMessage, SessionSummary } from '@agentopsdeck/shared';
-import { activeToolProgressSummary, executionProtectionLabel, hasMessageSnapshotRevision, formatElapsedDuration, hasOptimisticActiveSend, hasQueueBlockingRun, hasQueuedMessageControls, isSessionBusy, isStreamCatchup, mergeSelectedMessages, runSyncNotice, sessionRunOutcome, withOptimisticRunningState } from './live-session.js';
+import { activeToolProgressSummary, canStopSession, executionProtectionLabel, hasMessageSnapshotRevision, formatElapsedDuration, hasOptimisticActiveSend, hasQueueBlockingRun, hasQueuedMessageControls, isSessionBusy, isStreamCatchup, mergeSelectedMessages, runSyncNotice, sessionRunOutcome, withOptimisticRunningState } from './live-session.js';
 
 test('continuous Goal successors retain protection through long history verification and recovery', () => {
   for (const phase of ['completed', 'failed', 'interrupted'] as const)
@@ -79,6 +79,23 @@ test('idle admission never opens the queue dock, and unknown/sync errors are not
     assert.equal(hasQueueBlockingRun({ ...session, runtime: { phase, sync: 'error', threadActivity: 'idle', connection: 'connected', lastEventAt: 1 } }), false);
   }
   assert.equal(hasQueueBlockingRun({ ...session, runtime: { phase: 'completed', sync: 'current', threadActivity: 'running', connection: 'connected', lastEventAt: 1 } }), true);
+});
+
+test('canStopSession only enables on connected active runs and compact starting, never unknown or blocked terminals', () => {
+  const base = { sessionKey: 'codex:s', agentId: 'codex', status: 'running' } as SessionSummary;
+  assert.equal(canStopSession({ ...base, runtime: { phase: 'running', turnId: 't1', sync: 'current', threadActivity: 'running', connection: 'connected', lastEventAt: 1 } }), true);
+  assert.equal(canStopSession({ ...base, runtime: { phase: 'starting', operation: 'compact', turnId: 't1', sync: 'current', threadActivity: 'running', connection: 'connected', lastEventAt: 1 } }), true);
+  for (const runtime of [
+    { phase: 'running' as const, sync: 'current' as const, connection: 'connected' as const, lastEventAt: 1 },
+    { phase: 'running' as const, turnId: 't1', stopRequested: true, sync: 'current' as const, connection: 'connected' as const, lastEventAt: 1 },
+    { phase: 'running' as const, turnId: 't1', sync: 'current' as const, connection: 'disconnected' as const, lastEventAt: 1 },
+    { phase: 'unknown' as const, turnId: 't1', sync: 'current' as const, connection: 'connected' as const, lastEventAt: 1 },
+    { phase: 'starting' as const, turnId: 't1', sync: 'current' as const, connection: 'connected' as const, lastEventAt: 1 },
+    { phase: 'completed' as const, turnId: 't1', sync: 'current' as const, connection: 'connected' as const, lastEventAt: 1,
+      executionProtection: { state: 'blocked' as const, nativeTurnId: 't1', reason: 'background-work' as const } },
+  ]) {
+    assert.equal(canStopSession({ ...base, runtime }), false, JSON.stringify(runtime));
+  }
 });
 
 test('queue controls require an active run and a versioned user message, independent of backlog size', () => {

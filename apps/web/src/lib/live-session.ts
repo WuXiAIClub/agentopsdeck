@@ -15,6 +15,15 @@ export function isSessionBusy(session: SessionSummary) {
     : Boolean(session.hasActiveRun || ['running', 'waiting'].includes(session.structuredStatus?.displayStatus ?? session.status));
 }
 
+/** Matches server /stop eligibility so Stop is never offered in guaranteed-409 states. */
+export function canStopSession(session: SessionSummary) {
+  const runtime = session.runtime;
+  if (!runtime || !runtime.turnId || runtime.stopRequested || runtime.connection !== 'connected') return false;
+  if (runtime.executionProtection?.state === 'blocked') return false;
+  if (runtime.phase === 'running') return true;
+  return runtime.operation === 'compact' && runtime.phase === 'starting';
+}
+
 export function hasQueuedMessageControls(message: ChatMessage, activeRun: boolean) {
   return showsQueuedMessage(message, activeRun) && !!message.queueVersion;
 }

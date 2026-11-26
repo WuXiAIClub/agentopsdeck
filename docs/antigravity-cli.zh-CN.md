@@ -100,6 +100,10 @@ pnpm test:scripts documentation.test.mjs test-modules.test.mjs
 夹具仅在临时目录中启动合成本地程序。禁止将私有业务历史、共享凭据或失败的
 生产会话作为验收输入。
 
+## Subagent 观测兼容
+
+Antigravity CLI 通过 ACP 上报的 subagent 工具调用（`Run invoke_subagent`、`Run define_subagent`、`Run send_message`、`Run manage_subagents`）会投影为 `ChatMessage['codexSubagent']`（`CodexSubagentObservation`），使 Web UI 的子智能体面板可直接展示 Antigravity 的子智能体活动。
+
 ## 协议参考
 
 - [Google Antigravity CLI ACP](https://antigravity.google/docs/cli/acp)
