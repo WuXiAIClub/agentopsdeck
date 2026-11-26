@@ -3446,7 +3446,6 @@ export class CodexAppServer {
           if (this.options.store.getSession(key)?.runtime?.threadActivity) this.publishThreadActivity(key, 'unknown');
         }
         this.options.store.projectCodexConnection();
-        if (id && !this.closed) this.turnWorker.wake();
       }
     };
     const advance = (keys: string[], after: string): string | undefined => {
@@ -4057,6 +4056,7 @@ export class CodexAppServer {
       await this.request('initialize', { clientInfo: { name: 'agentopsdeck', title: AGENTOPSDECK_PRODUCT_NAME, version: AGENTOPSDECK_VERSION }, capabilities: { experimentalApi: true } });
       if (this.closed || this.child !== child || this.connectionId !== connectionId) throw new Error('Codex initialization connection changed');
       this.notify('initialized', {});
+      this.turnWorker.wake();
     } catch (error) {
       this.recycleChild(child, error instanceof Error ? error : new Error('Codex initialization failed'));
       throw error;

@@ -7432,8 +7432,8 @@
     },
     {
       "path": "apps/server/src/codex/app-server.ts",
-      "sha256": "28257ebd15e20014c0f7f56cfe862c68ce4bf4b7387c091ea856581d449995fb",
-      "size": 412624,
+      "sha256": "fe2dd853a1a28f7d4b6509e58687e739ac17e560e8b91f13a130c7ae6be4bd5c",
+      "size": 412598,
       "module": "codex",
       "kind": "runtime",
       "depth": "semantic",
