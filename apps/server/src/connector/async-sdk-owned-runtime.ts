@@ -20,7 +20,11 @@ import type { ApplicationTransactionEvidence } from '../auth/application-transac
 
 type Owner = Pick<AsyncConnectorOwner, 'command' | 'runtimeOwnerFile'>;
 type Config = { homeDirectory: string; model?: string };
-type Driver = Pick<AsyncSdkExecutionDriver<SdkOwnedTurn>, 'inspect' | 'wake' | 'pauseQueueWorker' | 'close'> & { isOccupied?: (key: string) => boolean };
+type Driver = Pick<AsyncSdkExecutionDriver<SdkOwnedTurn>, 'inspect' | 'wake' | 'pauseQueueWorker' | 'close'> & {
+  isOccupied?: (key: string) => boolean;
+  canRecover?: (key: string, expectedRunId: string) => boolean;
+  releaseRecovered?: (key: string, expectedRunId: string) => Promise<void>;
+};
 export type AsyncSdkOwnedOptions<R extends SdkAgentId, C extends Config, D extends Driver> = {
   owner: Owner; runtime: R; config: C; diagnostics?: PerformanceDiagnostics;
   projection?: Pick<DeckStore, 'upsertSession' | 'replaceMessages' | 'removeSession'>;
@@ -223,12 +227,15 @@ export class AsyncSdkOwnedRuntime<R extends SdkAgentId, C extends Config, D exte
     this.deletions.add(job); return job;
   }
   recoverSession(key: string, expectedRunId: string, authorization: string, signal?: AbortSignal): Promise<{ error: 401 | 403 | 404 | 409 } | { requested: true }> {
-    if (!this.ready || this.deleting.has(key) || this.driver.isOccupied?.(key) || this.recoveries.size >= 128 || signal?.aborted) {
+    const blocked = () => this.driver.canRecover
+      ? !this.driver.canRecover(key, expectedRunId)
+      : Boolean(this.driver.isOccupied?.(key));
+    if (!this.ready || this.deleting.has(key) || blocked() || this.recoveries.size >= 128 || signal?.aborted) {
       return Promise.reject(failed());
     }
     const job = Promise.resolve().then(async () => {
       const view = await this.options.owner.command('sdkLifecycleRead', { runtime: this.id, key, history: false });
-      if (!this.ready || this.deleting.has(key) || this.driver.isOccupied?.(key) || signal?.aborted) throw failed();
+      if (!this.ready || this.deleting.has(key) || blocked() || signal?.aborted) throw failed();
       this.assertOwnership();
       const hasNativeBinding = view.snapshot.session && this.options.hasNativeBinding
         ? this.options.hasNativeBinding(structuredClone(this.config), view.snapshot.session.nativeSessionId)
@@ -238,6 +245,7 @@ export class AsyncSdkOwnedRuntime<R extends SdkAgentId, C extends Config, D exte
         ...(hasNativeBinding === undefined ? {} : { hasNativeBinding }),
       });
       if ('requested' in result) {
+        await this.driver.releaseRecovered?.(key, expectedRunId);
         this.historyReady.delete(key);
         if (!this.closed) {
           await this.read(key, true);

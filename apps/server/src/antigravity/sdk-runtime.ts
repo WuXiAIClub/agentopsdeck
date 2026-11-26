@@ -585,6 +585,13 @@ export class AntigravityDispatchAdapter implements SdkDispatchAdapter {
     };
   }
 
+  releaseRecovered(ref: SdkExecutionRef): void {
+    const slot = this.active.get(ref.key);
+    if (!slot || slot.execution.id !== ref.id || slot.execution.epoch !== ref.epoch) return;
+    slot.failed = true;
+    this.active.delete(ref.key);
+  }
+
   close(): void {
     this.available = false;
     for (const slot of [...this.active.values()]) this.fail(slot);

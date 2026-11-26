@@ -42,6 +42,9 @@ export function sessionPresentation(session: SessionSummary, unread = false, syn
   if (outcome === 'completed') return unread
     ? { state: 'unread', label: 'Done · unread' } as const
     : { state: 'completed', label: 'Done' } as const;
+  if (!session.runtime && session.status === 'unknown') {
+    return { state: 'error', label: 'Agent runtime not ready' } as const;
+  }
   return { state: 'neutral', label: outcome === 'interrupted' ? 'Interrupted' : 'Idle' } as const;
 }
 

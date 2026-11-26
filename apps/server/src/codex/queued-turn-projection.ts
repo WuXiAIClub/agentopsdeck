@@ -11,8 +11,11 @@ export function codexQueueDisposition(id: string, facts: Pick<CodexQueueDisplayF
   if (facts.executionCommandId === id) return 'preparing';
   const runtime = current?.runtime;
   const blocking = runtime
-    ? ['starting', 'running', 'waiting', 'finalizing'].includes(runtime.phase)
-      || ['running', 'waiting'].includes(runtime.threadActivity ?? '')
+    ? ['starting', 'running', 'waiting', 'finalizing', 'unknown'].includes(runtime.phase)
+      || ['running', 'waiting', 'unknown'].includes(runtime.threadActivity ?? '')
+      || runtime.sync !== 'current'
+      || runtime.executionProtection?.state === 'blocked'
+      || runtime.connection === 'disconnected'
     : current?.hasActiveRun || current?.status === 'running' || current?.status === 'waiting';
   return blocking ? 'waiting' : 'preparing';
 }

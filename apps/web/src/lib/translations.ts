@@ -3229,6 +3229,7 @@ export const chinese = {
   "Background terminals could not be stopped · keep intended services or refresh state": "无法安全结束后台终端 · 请保留预期服务或刷新会话状态",
   "Running command": "正在执行命令",
   "Running tool": "正在调用工具",
+  "Agent runtime not ready": "Agent 运行时未就绪",
 } as const;
 
 export type TranslationKey = keyof typeof chinese;
