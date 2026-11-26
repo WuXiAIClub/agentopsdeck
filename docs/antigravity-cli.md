@@ -119,6 +119,10 @@ The fixture launches only a synthetic local executable in temporary directories.
 Do not use private business histories, shared credentials or a failed production
 session as acceptance inputs.
 
+## Subagent observation compatibility
+
+ACP `tool_call` / `tool_call_update` events for Antigravity subagent tools (`Run invoke_subagent`, `Run define_subagent`, `Run send_message`, `Run manage_subagents`) are projected onto `ChatMessage['codexSubagent']` (`CodexSubagentObservation`) so the Web UI subagent panel can display Antigravity subagent activity alongside Codex.
+
 ## Protocol references
 
 - [Google Antigravity CLI ACP](https://antigravity.google/docs/cli/acp)
