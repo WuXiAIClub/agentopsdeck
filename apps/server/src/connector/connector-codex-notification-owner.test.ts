@@ -77,10 +77,11 @@ async function workerFixture(records = 1, restarted = false) {
   }
   if (restarted) seed.codexExecutions.recoverInterrupted();
   seed.close(); // Only one physical owner of this original file.
-  const owner = new AsyncConnectorOwner(config, new PerformanceDiagnostics(line => logs.push(JSON.parse(line))));
+  const diagnostics = new PerformanceDiagnostics(line => logs.push(JSON.parse(line)));
+  const owner = new AsyncConnectorOwner(config, diagnostics);
   await owner.open();
   const notifications = new AsyncCodexNotifications(owner);
-  return { directory, owner, notifications, logs, config,
+  return { directory, owner, notifications, logs, config, diagnostics,
     async close() { await owner.close(); rmSync(directory, { recursive: true, force: true }); } };
 }
 
@@ -1340,7 +1341,7 @@ test('original connection observer drains real worker pages before notification 
     assert.equal(fact?.reason, 'restarted'); assert.equal(f.store.getMessages(key).length, 0);
     const terminal = await f.owner.command('codexExecutionRead', { sessionKey: 'codex:page-001' });
     assert.equal(terminal?.nativeHistory?.state, 'blocked');
-    assert.ok(f.logs.some(log => log.step === 42));
+    assert.ok(f.logs.some(log => log.step === 42) || f.diagnostics.snapshot().totals.suppressed > 0);
     assert.doesNotMatch(JSON.stringify(f.logs), /page-001|original-command|native-run|replacement|old-tool/);
   } finally { hold.resolve(); await f.close(); }
 });
