@@ -1,6 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readModelCatalog } from './model-catalog.js';
+import { configuredModelProvider } from './provider-model-catalog.js';
+
+test('an explicit native model catalog takes precedence over custom provider HTTP discovery', () => {
+  const effective = { config: {
+    model_provider: 'private',
+    model_catalog_json: '/synthetic/codex-home/models.json',
+    model_providers: { private: { base_url: 'http://localhost/v1', env_key: 'CATALOG_TEST_KEY' } },
+  } };
+  assert.equal(configuredModelProvider(effective, 'private', {}), undefined);
+  effective.config.model_catalog_json = '';
+  assert.throws(() => configuredModelProvider(effective, 'private', {}), /unavailable/);
+});
 
 test('native models are paginated, deduplicated and sanitized', async () => {
   const requests: unknown[] = [];

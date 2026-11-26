@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "reviewedAt": "2026-11-24",
   "sourceVersion": "1.0.0",
-  "publicationApproved": true,
+  "publicationApproved": false,
   "complete": false,
   "exclusions": [
     "docs/review/file-review.json (self-referential hash only)"
@@ -17,9 +17,9 @@
     "Native devices, providers, full backend, browser accessibility, artifacts and redistribution rights remain unaccepted."
   ],
   "summary": {
-    "totalFiles": 3602,
+    "totalFiles": 3603,
     "byKind": {
-      "config": 57,
+      "config": 58,
       "docs": 55,
       "asset": 8,
       "test": 1754,
@@ -27,7 +27,7 @@
       "generated": 14
     },
     "byModule": {
-      "governance": 263,
+      "governance": 264,
       "main": 65,
       "release-boundary": 13,
       "native": 143,
@@ -56,16 +56,16 @@
       "external": 2
     },
     "byDepth": {
-      "semantic": 3555,
-      "asset": 19,
-      "structural": 28
+      "semantic": 3549,
+      "structural": 35,
+      "asset": 19
     },
     "byDisposition": {
-      "no-finding": 3574,
-      "pending": 28
+      "no-finding": 3568,
+      "pending": 35
     },
-    "completedSemanticOrAssetFiles": 3565,
-    "remainingFiles": 15,
+    "completedSemanticOrAssetFiles": 3568,
+    "remainingFiles": 35,
     "filesWithFindings": 0
   },
   "files": [
@@ -128,6 +128,22 @@
         "notes": "main-owned；main integration will overwrite。依用户要求不重复深审主线 manifests/configs/CI/Docker/指定脚本；本分工保留 pending，主线最新修改与测试声明不作为本分工语义证据。",
         "findings": []
       }
+    },
+    {
+      "path": ".gitattributes",
+      "size": 20,
+      "sha256": "d711b6ba64c7208f3059111e2a74a2453348584bef1fec237198ad08befe28b9",
+      "module": "governance",
+      "kind": "config",
+      "depth": "structural",
+      "disposition": "pending",
+      "checks": [
+        "current-source-sha256-and-size",
+        "2026-11-26-scoped-installation-pr-review",
+        "git-check-attr-confirms-text-auto-eol-lf"
+      ],
+      "notes": "Root text auto-detection now enforces LF checkout for byte-hash review stability. Binary content remains auto-detected. Existing Android attributes remain authoritative for their subtree. Full publication/platform rereview remains pending.",
+      "findings": []
     },
     {
       "path": ".github/workflows/ci.yml",
@@ -8736,22 +8752,18 @@
     },
     {
       "path": "apps/server/src/codex/model-catalog.test.ts",
-      "size": 1216,
-      "sha256": "4cd3b9b356d864006ade78c3c4553f4d58fbe5ada4d6edd8a9c58c21b62586e6",
+      "size": 1836,
+      "sha256": "e578216d931039158ad9bf4234d03f19cb433bea7603fa7328bd2da83cfeeed1",
       "module": "execution",
       "kind": "test",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "inventory-sha256-size-recomputed",
-        "typescript-full-text-ast-structure",
-        "imports-and-declarations-indexed",
-        "sensitive-pattern-categories-only",
-        "fixture-hook-assertion-and-effect-sites-indexed-not-executed",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-26-scoped-installation-pr-review",
+        "seven-catalog-regressions-passed"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/codex/model-catalog.test.ts (execution/test); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Regression verifies explicit native catalog precedence and unchanged missing-credential failure without a catalog. Existing native pagination and provider discovery regressions passed. Full current-file semantic rereview remains pending.",
       "findings": []
     },
     {
@@ -9285,22 +9297,18 @@
     },
     {
       "path": "apps/server/src/codex/provider-model-catalog.ts",
-      "size": 5801,
-      "sha256": "a9df72fe2dbbc1c16d9d5165d01e6b929094242df138359a699a741c1d820096",
+      "size": 5908,
+      "sha256": "52f6fae553e5834524a0a97d155e7dc25e3b3e6d3342a7a54f32af4538c53d15",
       "module": "execution",
       "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "inventory-sha256-size-recomputed",
-        "typescript-full-text-ast-structure",
-        "imports-and-declarations-indexed",
-        "sensitive-pattern-categories-only",
-        "subprocess-filesystem-environment-request-stop-log-sites-indexed",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "2026-11-26-scoped-installation-pr-review",
+        "native-catalog-precedence-and-caller-inspected"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/codex/provider-model-catalog.ts (execution/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Explicit effective model_catalog_json delegates to native model/list; no-catalog credential and HTTP discovery paths remain unchanged. Seven targeted catalog tests and server typecheck passed. Full current-file security/publication rereview remains pending.",
       "findings": []
     },
     {
@@ -59536,17 +59544,18 @@
     },
     {
       "path": "docs/installation.md",
-      "size": 5084,
-      "sha256": "a036240f444c956e60517cdb7a02538291606de7447aed5e83fcc7be0d486fae",
+      "size": 6512,
+      "sha256": "897b71fa1ff5e77fdd53887fdfaf126e69a9ee072b475ad2d46c79934f886aae",
       "module": "governance",
       "kind": "docs",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
         "current-source-sha256-and-size",
-        "complete-current-source-and-relevant-contract-review"
+        "2026-11-26-scoped-installation-pr-review",
+        "paired-windows-setup-guidance-and-documentation-tests"
       ],
-      "notes": "Read complete EN/CN install steps and native/proxy/runtime boundaries against package runners and private configuration helper; disposable source setup is distinguished from accepted native distributions.",
+      "notes": "Changed Windows guidance covers tool PATH refresh, native prebuild/build prerequisites, LF checkout and process-only trusted script execution policy. Paired documentation tests passed; no complete platform acceptance or whole-file publication approval is claimed.",
       "findings": [],
       "previousReview": {
         "path": "docs/installation.md",
@@ -59566,17 +59575,18 @@
     },
     {
       "path": "docs/installation.zh-CN.md",
-      "size": 4635,
-      "sha256": "759b730049ce9f7f192a5a2d8b88cf9d6b1d0148e3ff3666d1e96f7468d54913",
+      "size": 5973,
+      "sha256": "1791afa4a308406f3fdc03fabf5454fe7d00f03be8dbb5170bf0e521aa8fea25",
       "module": "governance",
       "kind": "docs",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
         "current-source-sha256-and-size",
-        "complete-current-source-and-relevant-contract-review"
+        "2026-11-26-scoped-installation-pr-review",
+        "paired-windows-setup-guidance-and-documentation-tests"
       ],
-      "notes": "Read complete EN/CN install steps and native/proxy/runtime boundaries against package runners and private configuration helper; disposable source setup is distinguished from accepted native distributions.",
+      "notes": "Changed Windows guidance covers tool PATH refresh, native prebuild/build prerequisites, LF checkout and process-only trusted script execution policy. Paired documentation tests passed; no complete platform acceptance or whole-file publication approval is claimed.",
       "findings": [],
       "previousReview": {
         "path": "docs/installation.zh-CN.md",
@@ -59596,18 +59606,18 @@
     },
     {
       "path": "docs/integrations.md",
-      "size": 4972,
-      "sha256": "0f9d4cfe95c5795efeb6d88a058d53fa0e3a86241fa74c6519178fee9292dd6c",
+      "size": 7470,
+      "sha256": "8caa7ed3044c2a9a761c74a6815a9c5640fae197843a5d96a4206d526ea69e36",
       "module": "governance",
       "kind": "docs",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
         "current-source-sha256-and-size",
-        "2026-11-25-antigravity-connector-review",
-        "typecheck-and-targeted-tests"
+        "2026-11-26-scoped-installation-pr-review",
+        "paired-native-environment-and-bridge-contract-guidance"
       ],
-      "notes": "Reviewed paired English/Simplified Chinese Antigravity Connector documentation and navigation links. Documents AOD 1.0.0 isolation, dedicated HOME requirements, enabled Connector/Web UI capabilities, and 409-rejected unsupported capabilities.",
+      "notes": "Changed Codex guidance covers native catalog priority, dedicated executable/HOME, permitted provider variable names, loopback NO_PROXY and optional Vekil Responses-over-Chat restrictions. Full current-file security/publication rereview remains pending.",
       "findings": [],
       "previousReview": {
         "path": "docs/integrations.md",
@@ -59626,18 +59636,18 @@
     },
     {
       "path": "docs/integrations.zh-CN.md",
-      "size": 4410,
-      "sha256": "d5473b9c29d2831eaffcc2d5f06c0006d3a6411a8c00104862f55f2448cb8c6a",
+      "size": 6673,
+      "sha256": "b1b444c1b2cc86085498bf2ffaaa4dd9dfc3098623fe567d1b995b3c30ae4b53",
       "module": "governance",
       "kind": "docs",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
         "current-source-sha256-and-size",
-        "2026-11-25-antigravity-connector-review",
-        "typecheck-and-targeted-tests"
+        "2026-11-26-scoped-installation-pr-review",
+        "paired-native-environment-and-bridge-contract-guidance"
       ],
-      "notes": "Reviewed paired English/Simplified Chinese Antigravity Connector documentation and navigation links. Documents AOD 1.0.0 isolation, dedicated HOME requirements, enabled Connector/Web UI capabilities, and 409-rejected unsupported capabilities.",
+      "notes": "Changed Codex guidance covers native catalog priority, dedicated executable/HOME, permitted provider variable names, loopback NO_PROXY and optional Vekil Responses-over-Chat restrictions. Full current-file security/publication rereview remains pending.",
       "findings": [],
       "previousReview": {
         "path": "docs/integrations.zh-CN.md",
@@ -63562,18 +63572,19 @@
     },
     {
       "path": "scripts/documentation.test.mjs",
-      "sha256": "56ecc2ed6ca4fb05e98d08ad411733afc442cb25a5035c4b8c890c471c016c53",
-      "size": 9312,
+      "sha256": "774894d1ff1434f1fd1cb24b9c860ad9ab26c3f4e060ff79883b1801a3b8d493",
+      "size": 9901,
       "module": "release-boundary",
       "kind": "test",
       "depth": "structural",
       "disposition": "pending",
       "findings": [],
       "checks": [
-        "standalone-antigravity-quota-targeted-review",
-        "exact-file-sha256-and-size"
+        "current-source-sha256-and-size",
+        "2026-11-26-scoped-installation-pr-review",
+        "ten-documentation-tests-including-real-crlf-fixture-passed"
       ],
-      "notes": "Ran the existing runner with bilingual quota-entry assertions and local link checks. The steps were not exercised against a live deployment."
+      "notes": "Documentation reads normalize CRLF before multiline contract checks. A temporary CRLF file reproduces the Windows checkout regression. Ten targeted documentation tests passed. Full current-file semantic/security rereview remains pending."
     },
     {
       "path": "scripts/encrypted-stopped-backup.test.mjs",
