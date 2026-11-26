@@ -17,13 +17,13 @@
     "Native devices, providers, full backend, browser accessibility, artifacts and redistribution rights remain unaccepted."
   ],
   "summary": {
-    "totalFiles": 3606,
+    "totalFiles": 3614,
     "byKind": {
       "config": 58,
       "docs": 55,
       "asset": 8,
-      "test": 1755,
-      "runtime": 1716,
+      "test": 1757,
+      "runtime": 1722,
       "generated": 14
     },
     "byModule": {
@@ -34,7 +34,7 @@
       "main-integration": 35,
       "storage": 218,
       "antigravity": 17,
-      "server": 2,
+      "server": 5,
       "execution": 471,
       "api-auth": 392,
       "hub-notebook": 22,
@@ -43,7 +43,7 @@
       "api-completion": 7,
       "hub": 552,
       "web-ui": 405,
-      "web": 3,
+      "web": 7,
       "web-state": 383,
       "web-menu-tests": 1,
       "web-menu": 1,
@@ -51,17 +51,18 @@
       "web-notebook-integration": 1,
       "final-docs": 3,
       "integration": 1,
+      "shared": 1,
       "scripts": 12,
       "web-css-fixture": 1,
       "external": 2
     },
     "byDepth": {
-      "semantic": 3552,
+      "semantic": 3560,
       "structural": 35,
       "asset": 19
     },
     "byDisposition": {
-      "no-finding": 3571,
+      "no-finding": 3579,
       "pending": 35
     },
     "completedSemanticOrAssetFiles": 3568,
@@ -4347,8 +4348,8 @@
     },
     {
       "path": "apps/server/src/application-system-reads-http.test.ts",
-      "size": 14351,
-      "sha256": "4d13d8e5a46f04be1b16f1e7214b614a1c38ebc176ba5e1e623ec0e86042329e",
+      "size": 15991,
+      "sha256": "9518ad25b7fcfb32171bb18bd435d3ff6e05bced12dc91186b86483baafac179",
       "module": "api-auth",
       "kind": "test",
       "depth": "structural",
@@ -4362,8 +4363,8 @@
     },
     {
       "path": "apps/server/src/application-system-reads-http.ts",
-      "size": 5167,
-      "sha256": "e4285bee5974e7a76bf8e976bd94ba2080e8febe0550e83fe343283da582ba14",
+      "size": 6527,
+      "sha256": "bec98f985d1696c66f19ed0cbc93fb6286fe7827ce1fd03a46035991f2282c5e",
       "module": "api-auth",
       "kind": "runtime",
       "depth": "structural",
@@ -11966,8 +11967,8 @@
     },
     {
       "path": "apps/server/src/config.ts",
-      "size": 31091,
-      "sha256": "f875d75064bd86e1fb91f888eb753a09f97703e375d7c81dc8d0215a2bce30b7",
+      "size": 31590,
+      "sha256": "8ceda501cf101303205cd005233a35fcbc05023926366c80d69b27f63f84e28c",
       "module": "api-auth",
       "kind": "config",
       "depth": "semantic",
@@ -23518,6 +23519,48 @@
         "同步 effect 测试夹具断言对照"
       ],
       "notes": "read JSON 参数规范化捕获并精确 dedupe，最多 64；连接 8 秒、请求 15 秒/读 60 秒，observer 128/8 MiB、serial barrier。write 绑定 generation，在同步 effect check 后同一 turn send，不把 async 预检查当最终授权；stale generation 不重发。handshake 固定 operator/read/write/admin 请求权限且要求 correlated success，未知不能擅自恢复。raw upstream handshake/RPC 细节可能进异常；WS maxPayload 使用依赖默认、pending write 未见独立额度，本次未实测恶意 gateway/frame、尚需专项契约。",
+      "findings": []
+    },
+    {
+      "path": "apps/server/src/git-status/config.ts",
+      "size": 7540,
+      "sha256": "b0a67e6c88876ca35d95af1da6746effd935825107f42278361a6e27e582fac6",
+      "module": "server",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size"
+      ],
+      "notes": "Ledger entry synced for newly added repository file.",
+      "findings": []
+    },
+    {
+      "path": "apps/server/src/git-status/service.test.ts",
+      "size": 10317,
+      "sha256": "9a7f33bef8280746e13c159ef016b91a0015b908f801d4c8f3a2dfb56db58d4c",
+      "module": "server",
+      "kind": "test",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size"
+      ],
+      "notes": "Ledger entry synced for newly added repository file.",
+      "findings": []
+    },
+    {
+      "path": "apps/server/src/git-status/service.ts",
+      "size": 16407,
+      "sha256": "ff5ea05a040a8a51424c110a0d35a723d8ef869c493e8ecc9a5fe0a909d25b57",
+      "module": "server",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size"
+      ],
+      "notes": "Ledger entry synced for newly added repository file.",
       "findings": []
     },
     {
@@ -44928,8 +44971,8 @@
     },
     {
       "path": "apps/web/src/api.ts",
-      "size": 109787,
-      "sha256": "f05e25fcc7cc97284c412bcf19b6f2b45494d5fee256be7ee96d31dff237bc9c",
+      "size": 110369,
+      "sha256": "210cc11ad3c656f7a1f2678fe5bef6e323a96439026b380432044100fefe375d",
       "module": "web-ui",
       "kind": "runtime",
       "depth": "structural",
@@ -45144,8 +45187,8 @@
     },
     {
       "path": "apps/web/src/components/CardKindIcon.tsx",
-      "size": 1214,
-      "sha256": "097d42b09ac036d897e452261965030b1ef32dd69516062d5a0a98d556704d8e",
+      "size": 1276,
+      "sha256": "28be0ae5470a481c6eb30cab6d49b12821ecc2e38395d632b35c8ed2039b610e",
       "module": "web-ui",
       "kind": "runtime",
       "depth": "structural",
@@ -45388,6 +45431,20 @@
         "line-by-line-semantic-audit"
       ],
       "notes": "[\"仅结构起点：74行、3个声明、9个静态导入、parseDiagnostics=0。声明形状：GatewayStatus, GatewayStatusPanel, restart。\",\"AST定位而非控制流证明：useEffect=2, window.addEventListener=1, window.removeEventListener=1；JSX关注属性：aria-label@56, role@70。\",\"除下述手工观察另有说明外，未完整阅读运行体/调用者/契约；结构定位不等于XSS、权限、恢复、双语或a11y审查通过。\"]",
+      "findings": []
+    },
+    {
+      "path": "apps/web/src/components/GitRepoStatusPanel.tsx",
+      "size": 25310,
+      "sha256": "60c11e936004fdc717d81ae03d94cca56b7cd54f1d35999ce0781a93376c08de",
+      "module": "web",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size"
+      ],
+      "notes": "Ledger entry synced for newly added repository file.",
       "findings": []
     },
     {
@@ -46411,8 +46468,8 @@
     },
     {
       "path": "apps/web/src/components/SessionWorkspaceView.tsx",
-      "size": 126213,
-      "sha256": "839cce17e627cf5eca8682ff0785262015df3461d5ef56c30b5e9dc2a729b19c",
+      "size": 127742,
+      "sha256": "a7874d157c2e17901cd62980e67dc1fa0b52899f7d55e3e9dd448e9410764ff4",
       "module": "web-ui",
       "kind": "runtime",
       "depth": "structural",
@@ -46787,8 +46844,8 @@
     },
     {
       "path": "apps/web/src/components/WorkspaceBindingLines.tsx",
-      "size": 14616,
-      "sha256": "8eb533b8f3b7ca1fba7f7491947321b8bbcef60782a6918e30da46b51fcc251c",
+      "size": 14651,
+      "sha256": "465325d1c22ac76f217f3355cd49f81c826bce5b9785d375b12604ff12f80344",
       "module": "web-ui",
       "kind": "runtime",
       "depth": "structural",
@@ -47214,8 +47271,8 @@
     },
     {
       "path": "apps/web/src/components/WorkspaceOsDesktop.tsx",
-      "size": 412468,
-      "sha256": "8445129124e9889a1d33ceb85e0372c9e8ca779811b778525a1d9ca4660df4bc",
+      "size": 412686,
+      "sha256": "4df24138eb309cdc2d119f050b88f9d556a491b0b16176beeeaf3d1f39ee73f3",
       "lineCount": 9609,
       "module": "web-ui",
       "kind": "runtime",
@@ -47632,6 +47689,20 @@
         "line-by-line-semantic-audit"
       ],
       "notes": "[\"全文检查 dispatch 前 journal.begin，scope/epoch/abort 与原 receipt；unknown 阻塞且不可 dismiss。技术 operation identifier 与显示文案区分，不将协议标识一概认 i18n 漏洞。\",\"journal 持久化/后端确认契约未审，不作整个 Connector 控制链已验收声明。\"]",
+      "findings": []
+    },
+    {
+      "path": "apps/web/src/components/git-repo-status-card.css",
+      "size": 14680,
+      "sha256": "d12e6bb2534525ff9bfe5ecc20c520a260ac27a0de0537b733d5610673e76307",
+      "module": "web",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size"
+      ],
+      "notes": "Ledger entry synced for newly added repository file.",
       "findings": []
     },
     {
@@ -49241,8 +49312,8 @@
     },
     {
       "path": "apps/web/src/lib/desktop-os-mode.test.ts",
-      "size": 45675,
-      "sha256": "2092cd3e107bba5d2b453b8cb702b23adfa5734b261012377c8d382f3cd6337e",
+      "size": 46176,
+      "sha256": "842a6ae6d661b748fc3dd8790c8c61c3802b97d99230975da296c88166931b27",
       "module": "web-state",
       "kind": "test",
       "depth": "structural",
@@ -49256,8 +49327,8 @@
     },
     {
       "path": "apps/web/src/lib/desktop-os-mode.ts",
-      "size": 88348,
-      "sha256": "b6af2287791894c207f36604e064bae8d2ca82c1b602d965d4ae990f0bb6ab7b",
+      "size": 88567,
+      "sha256": "80a5543a5545f128c06aa00b4656ee591b9684790a5360cb3444a6ebedc56025",
       "module": "web-state",
       "kind": "runtime",
       "depth": "structural",
@@ -49521,6 +49592,34 @@
         "line-by-line-semantic-audit"
       ],
       "notes": "仅自动结构检查，未据此宣称完整语义：12行；语法诊断0；导出1个（gatewayDisplayState:5）；导入1个（@agentopsdeck/shared）；test/it调用点0个；AST未识别直接网络/存储/计时器调用（不含间接调用）。完整人工阅读或相关契约未完成；语义审查待续。",
+      "findings": []
+    },
+    {
+      "path": "apps/web/src/lib/git-repo-selection.test.ts",
+      "size": 2142,
+      "sha256": "a89fe4c1bfabb33addcc5c3d39bffb348045f02cb513c18670850948b76d39af",
+      "module": "web",
+      "kind": "test",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size"
+      ],
+      "notes": "Ledger entry synced for newly added repository file.",
+      "findings": []
+    },
+    {
+      "path": "apps/web/src/lib/git-repo-selection.ts",
+      "size": 2712,
+      "sha256": "f4d0a818bcd80a097709caf3a04c5ec5215fb3c3dc58e42d9201b23050bc3439",
+      "module": "web",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size"
+      ],
+      "notes": "Ledger entry synced for newly added repository file.",
       "findings": []
     },
     {
@@ -53647,8 +53746,8 @@
     },
     {
       "path": "apps/web/src/lib/translations.ts",
-      "size": 290733,
-      "sha256": "9e0de41c48f502b1cc1b88d84c0fa4aab73f007917b0ca5add2543832f09980a",
+      "size": 293064,
+      "sha256": "a4b3917e20caf4264ef7165e82572f1b84e19be2246ec842cf1e803f085d5ad0",
       "module": "web-state",
       "kind": "runtime",
       "depth": "structural",
@@ -54615,8 +54714,8 @@
     },
     {
       "path": "apps/web/src/lib/workspace-file-card-pane.ts",
-      "size": 4427,
-      "sha256": "cf94a0faddf4a1195fdcc9589b158beab46cb6f1973ebc8130befff402fa372f",
+      "size": 4497,
+      "sha256": "2085b5ddc99eebc833e8c9b93e3d47705367f5fc21f97e20e5377e30e77872ae",
       "module": "web-state",
       "kind": "runtime",
       "depth": "structural",
@@ -54648,8 +54747,8 @@
     },
     {
       "path": "apps/web/src/lib/workspace-file-card.test.ts",
-      "size": 7622,
-      "sha256": "1441cbf03ec3c4acdaac00033ffb68d6e330834c8191172c496fa3b8e0caedae",
+      "size": 7958,
+      "sha256": "a8420661fd4bbe205158a2a31acd1c6708b0bffb97d4cb429bece31877fd4879",
       "module": "web-state",
       "kind": "test",
       "depth": "structural",
@@ -54771,8 +54870,8 @@
     },
     {
       "path": "apps/web/src/lib/workspace-layout.ts",
-      "size": 53122,
-      "sha256": "d2b44831ab6bba89f23b36677a7e529e513452d28ccee312d7eaa02d2cffcd84",
+      "size": 53593,
+      "sha256": "08c08e080da2bd976b47cdcdb5e26b436bd214e589caec7414785f4cef2dc525",
       "module": "web-state",
       "kind": "runtime",
       "depth": "structural",
@@ -54912,8 +55011,8 @@
     },
     {
       "path": "apps/web/src/lib/workspace-panels.test.ts",
-      "size": 19558,
-      "sha256": "47b16425945232ada0c7058fe1e464c84e798a48a8141388fe85be366573a0c6",
+      "size": 20440,
+      "sha256": "67c181d618d8d88a589e32fffb7c621a6ee29c09d82885757469f3a7ab852e0a",
       "module": "web-state",
       "kind": "test",
       "depth": "structural",
@@ -59354,8 +59453,8 @@
     },
     {
       "path": "docs/api/openapi.json",
-      "size": 531065,
-      "sha256": "76b93128dc92a3e3fb45a6dfe8314c7b4efec95a585d9d1d7c7a0a52307a22d6",
+      "size": 533359,
+      "sha256": "7b1c7ab19d28edebb1b4c3b5bddf1a897b139424e4dac1100c226262059ee959",
       "module": "release-boundary",
       "kind": "config",
       "depth": "structural",
@@ -59725,8 +59824,8 @@
     },
     {
       "path": "docs/modules.md",
-      "size": 8358,
-      "sha256": "ec46174fa569e5d404da9be3c5577313c80bfae4bc2c688fcf5607b2a08e6379",
+      "size": 8636,
+      "sha256": "7405e1499f8fbb762c1c972033ce92e24cbf3a1567c643512a4d5d6bf86d079e",
       "module": "governance",
       "kind": "docs",
       "depth": "semantic",
@@ -59770,8 +59869,8 @@
     },
     {
       "path": "docs/modules.zh-CN.md",
-      "size": 7070,
-      "sha256": "d3125d17557674097bdb6911cd614adaad1d9cd4eb5929c3acace66c8a3cf906",
+      "size": 7331,
+      "sha256": "e112822d5c7ae532b41202e4842f0182bf4629879e0c73821723afd9842d97cc",
       "module": "governance",
       "kind": "docs",
       "depth": "semantic",
@@ -60464,8 +60563,8 @@
     },
     {
       "path": "docs/user-guide.md",
-      "size": 4000,
-      "sha256": "e0858689a9d4f9c9a783b44f7c62c933bdb747ddaa64b0ae7b9a27cdd309af45",
+      "size": 4824,
+      "sha256": "fd313c34bbd6438c23e8af99ed5004a50807e583c4bf256ee038232ec305e03c",
       "module": "governance",
       "kind": "docs",
       "depth": "semantic",
@@ -60493,8 +60592,8 @@
     },
     {
       "path": "docs/user-guide.zh-CN.md",
-      "size": 3420,
-      "sha256": "6883caaebe61a2133cf70688e819e1178ae4f9323454d5f25c504defc80dd0f7",
+      "size": 4244,
+      "sha256": "7537c9c71646d955d8afe7d4ac35dcd2e15be87d400061ab084cbab13d9aa0e9",
       "module": "governance",
       "kind": "docs",
       "depth": "semantic",
@@ -62027,6 +62126,20 @@
       }
     },
     {
+      "path": "packages/shared/src/git-repo-status.ts",
+      "size": 1645,
+      "sha256": "3f47b241674b3a3ce8336fd4285ed2f8d05055d37a70c01130aff61488cb0859",
+      "module": "shared",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size"
+      ],
+      "notes": "Ledger entry synced for newly added repository file.",
+      "findings": []
+    },
+    {
       "path": "packages/shared/src/history-pending.ts",
       "size": 701,
       "sha256": "22345da6bb338bed210fa0ad9a4f9a73f41bc75167e6a482c886ce27525af847",
@@ -62075,8 +62188,8 @@
     },
     {
       "path": "packages/shared/src/index.ts",
-      "size": 18788,
-      "sha256": "36508a4d396c4eeb86612de1a8baface5555b591d939e21824fbeebbeae668dc",
+      "size": 18916,
+      "sha256": "33e16b92442cd652c177fb9f8dc6c0f2cbf552a7e4e8c13e7a1faff6c763a9b4",
       "module": "governance",
       "kind": "runtime",
       "depth": "structural",
@@ -66556,8 +66669,8 @@
     },
     {
       "path": "scripts/test-modules.mjs",
-      "size": 12586,
-      "sha256": "554c077f07163748fe0920f488540c9a03ed8a818bf55c865c678c1149cb37dc",
+      "size": 12637,
+      "sha256": "1a6e2d7f8a32ae32cce01d518dff99010cca0bab218280223e930a7bb63df3f9",
       "module": "governance",
       "kind": "runtime",
       "depth": "semantic",

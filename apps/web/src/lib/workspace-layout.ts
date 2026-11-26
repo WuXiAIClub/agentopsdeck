@@ -23,6 +23,7 @@ export type DockSize = { width: number; height: number };
 export type SessionPane = { id: string; kind?: 'session'; sessionKey: string; dockSize?: DockSize };
 export type DashboardPane = { id: string; kind: 'dashboard'; resourceId: 'overview'; sessionKey?: never; dockSize?: DockSize };
 export type AntigravityQuotaPane = { id: string; kind: 'antigravity-quota'; resourceId: 'account'; sessionKey?: never; dockSize?: DockSize };
+export type GitRepoStatusPane = { id: string; kind: 'git-repo-status'; resourceId: string; sessionKey?: never; dockSize?: DockSize };
 export type NotebookPane = { id: string; kind: 'notebook'; target: 'session' | 'hub'; resourceId: string; sessionKey?: never; dockSize?: DockSize };
 export type TaskboardPane = { id: string; kind: 'taskboard' | 'statuscard'; resourceId: string; sessionKey?: never; dockSize?: DockSize };
 export type DrawingPane = { id: string; kind: 'drawing' | 'native-drawio'; resourceId: string; sessionKey?: never; dockSize?: DockSize };
@@ -37,7 +38,7 @@ export type ModeratorPane = { id: string; kind: 'moderator'; resourceId: 'contro
 export type DockerPane = { id: string; kind: 'docker'; resourceId: 'manager'; sessionKey?: never; dockSize?: DockSize };
 export type SubagentsPane = { id: string; kind: 'subagents'; resourceId: 'follow'; sessionKey?: never; dockSize?: DockSize };
 export type FilePane = { id: string; kind: 'file-browser' | 'file-editor' | 'image-viewer' | 'git-tree' | 'issue-source'; resourceId: string; sessionKey?: never; dockSize?: DockSize };
-export type Pane = (SessionPane | DashboardPane | AntigravityQuotaPane | NotebookPane | TaskboardPane | DrawingPane | MediaPane | WebsitePane | ResearchPane | TerminalPane | BrowserPane | MetricCardPane | ReportPane | ModeratorPane | DockerPane | SubagentsPane | FilePane) & { dockFrame?: PaneRect; fileLinks?: string[] };
+export type Pane = (SessionPane | DashboardPane | AntigravityQuotaPane | GitRepoStatusPane | NotebookPane | TaskboardPane | DrawingPane | MediaPane | WebsitePane | ResearchPane | TerminalPane | BrowserPane | MetricCardPane | ReportPane | ModeratorPane | DockerPane | SubagentsPane | FilePane) & { dockFrame?: PaneRect; fileLinks?: string[] };
 export const isSessionPane = (pane: Pane): pane is SessionPane => pane.kind === undefined || pane.kind === 'session';
 /** Non-session identities must never enter the message transport. The reserved
  * control prefix also keeps existing session collapse keys backward-compatible. */
@@ -58,6 +59,8 @@ export function validPane(value: unknown): value is Pane {
     && typeof pane.resourceId === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(pane.resourceId);
   if (pane.kind === 'moderator') return pane.resourceId === 'control' && pane.sessionKey === undefined;
   if (pane.kind === 'antigravity-quota') return pane.resourceId === 'account' && pane.sessionKey === undefined;
+  if (pane.kind === 'git-repo-status') return pane.sessionKey === undefined
+    && typeof pane.resourceId === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(pane.resourceId);
   if (pane.kind === 'docker') return pane.resourceId === 'manager' && pane.sessionKey === undefined;
   if (pane.kind === 'subagents') return pane.resourceId === 'follow' && pane.sessionKey === undefined;
   if (pane.kind === 'media') return pane.resourceId === 'library' && pane.sessionKey === undefined;
@@ -669,6 +672,7 @@ export function restoreWorkspace(value: unknown, allowed: ReadonlySet<string>): 
       ? { ...base, kind: 'notebook' as const, target: pane.target, resourceId: pane.resourceId }
       : pane.kind === 'moderator' ? { ...base, kind: 'moderator' as const, resourceId: 'control' as const }
       : pane.kind === 'antigravity-quota' ? { ...base, kind: pane.kind, resourceId: pane.resourceId }
+      : pane.kind === 'git-repo-status' ? { ...base, kind: pane.kind, resourceId: pane.resourceId }
       : pane.kind === 'docker' ? { ...base, kind: 'docker' as const, resourceId: 'manager' as const }
       : pane.kind === 'subagents' ? { ...base, kind: 'subagents' as const, resourceId: 'follow' as const }
       : pane.kind === 'media' ? { ...base, kind: 'media' as const, resourceId: 'library' as const }

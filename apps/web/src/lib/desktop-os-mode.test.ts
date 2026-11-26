@@ -65,8 +65,9 @@ test('buildDesktopIcons combines system desktop apps and live sessions with sear
     notebooks: [{ id: 'nb-1', title: 'Sprint Notes' }],
     completedSessionKeys: new Set(['s2']),
   });
-  // 16 system apps (no action:new-notebook or action:new-taskboard desktop icons) + 2 sessions = 18 icons
-  assert.equal(icons.length, 18);
+  // 17 system apps (no action:new-notebook or action:new-taskboard desktop icons) + 2 sessions = 19 icons
+  assert.equal(icons.length, 19);
+  assert.ok(icons.some((i) => i.id === 'app:git-repo-status' && i.kind === 'git-repo-status'));
   assert.ok(icons.some((i) => i.id === 'app:wechat-messenger' && i.kind === 'wechat-messenger'));
   assert.ok(icons.some((i) => i.id === 'app:docker' && i.kind === 'docker'));
   assert.ok(icons.some((i) => i.id === 'app:subagents' && i.kind === 'subagents'));
@@ -95,6 +96,13 @@ test('Antigravity quota has a localized standalone tools shortcut without any ta
   const icons = buildDesktopIcons({ sessions: [], notebooks: [], taskboards: [], labels: { antigravityQuota: 'Antigravity 账号额度' } });
   assert.deepEqual(icons.find(icon => icon.id === 'app:antigravity-quota'), {
     id: 'app:antigravity-quota', kind: 'antigravity-quota', title: 'Antigravity 账号额度', fenceId: 'tools-files',
+  });
+});
+
+test('Git repository status has a localized standalone tools shortcut', () => {
+  const icons = buildDesktopIcons({ sessions: [], notebooks: [], taskboards: [], labels: { gitRepoStatus: 'Git 仓库状态' } });
+  assert.deepEqual(icons.find(icon => icon.id === 'app:git-repo-status'), {
+    id: 'app:git-repo-status', kind: 'git-repo-status', title: 'Git 仓库状态', fenceId: 'tools-files',
   });
 });
 

@@ -26,6 +26,7 @@ import {
   Trash2,
   GitBranch,
   GitFork,
+  GitPullRequest,
   Globe,
   Grid2X2,
   Info,
@@ -1629,6 +1630,7 @@ export default function WorkspaceOsDesktop({
       if (p.kind === 'subagents') return 'app:subagents';
       if (p.kind === 'dashboard') return 'app:dashboard';
       if (p.kind === 'git-tree') return 'app:git-tree';
+      if (p.kind === 'git-repo-status') return 'app:git-repo-status';
       if (p.kind === 'browser') return 'app:browser';
       return null;
     };
@@ -2007,6 +2009,7 @@ export default function WorkspaceOsDesktop({
           subagents: t('Sub-agent Companion'),
           tokenDashboard: t('Token Telemetry'),
           antigravityQuota: t('Antigravity account quota'),
+          gitRepoStatus: t('Git repository status'),
           whiteboard: t('Whiteboard'),
           moderator: t('Moderator Hub'),
           gitTree: t('Git Graph'),
@@ -2185,6 +2188,8 @@ export default function WorkspaceOsDesktop({
         return <Mic size={size} />;
       case 'git-tree':
         return <GitBranch size={size} />;
+      case 'git-repo-status':
+        return <GitPullRequest size={size} />;
       case 'browser':
         return <Globe size={size} />;
       case 'system-settings':

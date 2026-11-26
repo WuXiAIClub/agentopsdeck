@@ -41,7 +41,7 @@ export const TEST_TAXONOMY = [
       { id: 'api:routes', title: 'HTTP/SSE 路由层', description: 'apps/server/src/routes/**' },
       { id: 'api:messages', title: '消息发送、归一化与工具解析', description: 'apps/server/src/{messages,tools}/**' },
       { id: 'api:commands', title: '指令队列与执行控制', description: 'apps/server/src/commands/**' },
-      { id: 'api:system', title: '系统状态、诊断与基础工具', description: 'apps/server/src/{system,diagnostics,utils}/**' },
+      { id: 'api:system', title: '系统状态、诊断与基础工具', description: 'apps/server/src/{system,diagnostics,utils,git-status}/**' },
     ],
   },
   {
@@ -86,7 +86,7 @@ export function classifyServerTest(relativePath) {
   if (normalized.startsWith('routes/')) return 'api:routes';
   if (normalized.startsWith('messages/') || normalized.startsWith('tools/')) return 'api:messages';
   if (normalized.startsWith('commands/')) return 'api:commands';
-  if (normalized.startsWith('system/') || normalized.startsWith('diagnostics/') || normalized.startsWith('utils/')) return 'api:system';
+  if (normalized.startsWith('system/') || normalized.startsWith('diagnostics/') || normalized.startsWith('utils/') || normalized.startsWith('git-status/')) return 'api:system';
 
   if (normalized.startsWith('storage/')) return 'storage:db';
   if (normalized.startsWith('auth/')) return 'storage:auth';

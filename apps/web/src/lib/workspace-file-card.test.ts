@@ -71,6 +71,12 @@ test('Antigravity quota has no file card storage identity', async () => {
   assert.equal(await fileCardPaneResource(pane), undefined);
 });
 
+test('Git repository status card has no file card storage identity', async () => {
+  const pane: Pane = { id: 'git-status', kind: 'git-repo-status', resourceId: randomUUID() };
+  assert.deepEqual(syncFileCardPaneResource(pane), { resolved: true, resource: undefined });
+  assert.equal(await fileCardPaneResource(pane), undefined);
+});
+
 test('syncFileCardPaneResource and card caches avoid layout-switch blanking while isolating scopes', async () => {
   clearCachedFileCardConfigurations();
   clearCachedSharedSnapshots();
