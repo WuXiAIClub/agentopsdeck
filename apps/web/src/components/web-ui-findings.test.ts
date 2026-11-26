@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { readdirSync, readFileSync } from 'node:fs';
+import { join, relative, resolve } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { runInNewContext } from 'node:vm';
 import ts from 'typescript';
@@ -747,4 +747,76 @@ test('WEB-COMP-003 & WEB-COMP-004 HUD 5s telemetry label and local-only Connecto
   assert.match(desktop, /t\('Hide from local list \(does not remove runtime account\)'\)/);
   assert.match(desktop, /t\('Hidden Connector user locally \(runtime account unchanged\):'\)/);
   assert.equal(translateMessage('Hide from local list (does not remove runtime account)', 'zh-CN'), '从本地列表隐藏（不会删除运行时账户）');
+});
+
+test('Rules of Hooks: no React component or hook calls use* after an early return or inside conditionals', () => {
+  const root = resolve(process.cwd(), 'src');
+  const walk = (dir: string): string[] => readdirSync(dir, { withFileTypes: true }).flatMap((ent) => {
+    const full = join(dir, ent.name);
+    if (ent.isDirectory()) return walk(full);
+    return /\.(tsx|ts)$/.test(ent.name) && !/\.test\./.test(ent.name) ? [full] : [];
+  });
+  const hookName = /^use[A-Z]/;
+  const violations: string[] = [];
+
+  for (const file of walk(root)) {
+    const code = readFileSync(file, 'utf8');
+    const sf = ts.createSourceFile(file, code, ts.ScriptTarget.Latest, true, file.endsWith('.tsx') ? ts.ScriptKind.TSX : ts.ScriptKind.TS);
+    const checkBody = (fnNode: ts.FunctionLikeDeclaration, fnName: string) => {
+      if (!fnNode.body || !ts.isBlock(fnNode.body)) return;
+      let seenReturnLine: number | undefined;
+      for (const stmt of fnNode.body.statements) {
+        let hasReturn = false;
+        const scanReturn = (n: ts.Node) => {
+          if (n !== fnNode && ts.isFunctionLike(n)) return;
+          if (ts.isReturnStatement(n)) hasReturn = true;
+          ts.forEachChild(n, scanReturn);
+        };
+        const scanHooks = (n: ts.Node) => {
+          if (n !== fnNode && ts.isFunctionLike(n)) return;
+          if (ts.isCallExpression(n)) {
+            const expr = n.expression;
+            const name = ts.isIdentifier(expr) && hookName.test(expr.text)
+              ? expr.text
+              : ts.isPropertyAccessExpression(expr) && hookName.test(expr.name.text)
+                ? expr.name.text
+                : undefined;
+            if (name) {
+              const line = sf.getLineAndCharacterOfPosition(n.getStart()).line + 1;
+              if (seenReturnLine !== undefined) {
+                violations.push(`${relative(root, file)}:${line} (${fnName}) calls ${name} after return at line ${seenReturnLine}`);
+              }
+              let p: ts.Node | undefined = n.parent;
+              while (p && p !== fnNode) {
+                if (ts.isIfStatement(p) || ts.isConditionalExpression(p) || ts.isSwitchStatement(p) || ts.isIterationStatement(p, false)) {
+                  violations.push(`${relative(root, file)}:${line} (${fnName}) calls ${name} conditionally`);
+                  break;
+                }
+                if (ts.isBinaryExpression(p) && p.right === n && [ts.SyntaxKind.AmpersandAmpersandToken, ts.SyntaxKind.BarBarToken, ts.SyntaxKind.QuestionQuestionToken].includes(p.operatorToken.kind)) {
+                  violations.push(`${relative(root, file)}:${line} (${fnName}) calls ${name} conditionally`);
+                  break;
+                }
+                p = p.parent;
+              }
+            }
+          }
+          ts.forEachChild(n, scanHooks);
+        };
+        scanHooks(stmt);
+        scanReturn(stmt);
+        if (hasReturn && seenReturnLine === undefined) {
+          seenReturnLine = sf.getLineAndCharacterOfPosition(stmt.getStart()).line + 1;
+        }
+      }
+    };
+    const visit = (n: ts.Node) => {
+      if (ts.isFunctionDeclaration(n) && n.name) checkBody(n, n.name.text);
+      else if (ts.isVariableDeclaration(n) && ts.isIdentifier(n.name) && n.initializer && ts.isFunctionLike(n.initializer)) {
+        checkBody(n.initializer, n.name.text);
+      }
+      ts.forEachChild(n, visit);
+    };
+    visit(sf);
+  }
+  assert.deepEqual(violations, []);
 });

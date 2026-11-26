@@ -1884,8 +1884,6 @@ function RunProgressNotice({ session, messages, syncError, refreshing = false, o
   const streamRecovering = streamConnection === 'reconnecting' || streamConnection === 'disconnected';
   const invalidOutput = !syncError && !streamRecovering && hasInvalidCompletedReply(session, messages);
   const visibleGoal = !syncError && !streamRecovering && runtime?.connection === 'connected' && runtime?.sync === 'current' ? session.codexGoal : undefined;
-  if (refreshing && messages.length === 0 && !syncError && !visibleGoal && !showCodexSubagentBar && !ghcpCompanion && !busy && !streamRecovering && runtime?.sync !== 'error' && runtime?.connection !== 'disconnected') return <LatestMessagesNotice active />;
-  if (!syncError && !visibleGoal && !showCodexSubagentBar && !ghcpCompanion && !compactLabel && !streamRecovering && !outcome && !busy && !runtime?.reason && !notice.executionLabel && !notice.backgroundWorkLabel && !notice.syncLabel && runtime?.sync !== 'error' && runtime?.connection !== 'disconnected') return null;
   const label = streamConnection === 'disconnected' ? 'Live connection lost · showing last known state'
     : streamConnection === 'reconnecting' ? 'Reconnecting live updates…'
     : compactLabel
@@ -1905,6 +1903,8 @@ function RunProgressNotice({ session, messages, syncError, refreshing = false, o
     () => (label === 'Agent is working…' && !streamRecovering && !syncError ? activeToolProgressSummary(session, messages) : undefined),
     [label, streamRecovering, syncError, session, messages],
   );
+  if (refreshing && messages.length === 0 && !syncError && !visibleGoal && !showCodexSubagentBar && !ghcpCompanion && !busy && !streamRecovering && runtime?.sync !== 'error' && runtime?.connection !== 'disconnected') return <LatestMessagesNotice active />;
+  if (!syncError && !visibleGoal && !showCodexSubagentBar && !ghcpCompanion && !compactLabel && !streamRecovering && !outcome && !busy && !runtime?.reason && !notice.executionLabel && !notice.backgroundWorkLabel && !notice.syncLabel && runtime?.sync !== 'error' && runtime?.connection !== 'disconnected') return null;
   const displayLabel = activeTool
     ? `${translate(activeTool.kind === 'command' ? 'Running command' : 'Running tool', locale)}: ${activeTool.detail}`
     : label ? translate(label, locale) : '';
