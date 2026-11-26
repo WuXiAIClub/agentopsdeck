@@ -2,18 +2,28 @@
   --quota-track: color-mix(in srgb, var(--aod-glass-accent) 17%, transparent);
   --quota-fill: var(--aod-glass-accent);
   --quota-meta: var(--aod-glass-muted);
-  display: flex;
-  flex-direction: column;
   height: 100%;
   overflow: auto;
-  gap: 14px;
-  padding: clamp(10px, 4%, 20px);
   color: var(--aod-ctx-ink);
   color-scheme: inherit;
   background: var(--aod-glass-light), var(--aod-glass-base);
 }
 
-.antigravity-quota-card > [role="alert"] {
+.antigravity-quota-body {
+  --quota-unit: 5px;
+  --quota-space: clamp(.5rem, calc(.375rem + var(--quota-unit)), 1.25rem);
+  display: flex;
+  flex-direction: column;
+  gap: var(--quota-space);
+  padding: clamp(.5rem, calc(.375rem + 2 * var(--quota-unit)), 1.75rem);
+}
+
+@supports (container-type: size) and (width: 1cqi) {
+  .antigravity-quota-card { container-type: size; }
+  .antigravity-quota-body { --quota-unit: min(1cqi, 1.75cqb); }
+}
+
+.antigravity-quota-body > [role="alert"] {
   padding: 10px;
   border: 1px solid var(--aod-glass-rim);
   border-radius: 10px;
@@ -27,9 +37,9 @@
   overflow: hidden;
   display: flex;
   align-items: center;
-  gap: 11px;
+  gap: var(--quota-space);
   flex: none;
-  padding: 11px 13px;
+  padding: var(--quota-space);
   border: 1px solid var(--aod-glass-rim);
   border-radius: 17px;
   background: var(--aod-glass-light), var(--aod-glass-layer);
@@ -52,14 +62,16 @@
   to { opacity: 0; transform: translateX(45%); }
 }
 
+.antigravity-quota-hero .workspace-glass-emblem { width: clamp(2rem, calc(1.5rem + 3 * var(--quota-unit)), 3.5rem); }
+.antigravity-quota-hero .workspace-glass-emblem > svg { width: 48%; height: 48%; }
 .antigravity-quota-hero div { min-width: 0; overflow-wrap: anywhere; }
-.antigravity-quota-hero span:not(.workspace-glass-emblem) { display: block; color: var(--quota-meta); font-size: 11px; font-weight: 640; }
-.antigravity-quota-hero strong { display: block; font-size: clamp(16px, 1.5em, 22px); font-weight: 700; letter-spacing: -.025em; line-height: 1.2; }
-.antigravity-quota-group h3 { margin: 0 0 6px; color: var(--quota-meta); font-size: 12px; font-weight: 680; overflow-wrap: anywhere; }
+.antigravity-quota-hero span:not(.workspace-glass-emblem) { display: block; color: var(--quota-meta); font-size: clamp(.6875rem, calc(.625rem + .45 * var(--quota-unit)), .875rem); font-weight: 640; }
+.antigravity-quota-hero strong { display: block; font-size: clamp(1rem, calc(.875rem + 1.75 * var(--quota-unit)), 2rem); font-weight: 700; letter-spacing: -.025em; line-height: 1.2; }
+.antigravity-quota-group h3 { margin: 0 0 calc(var(--quota-space) / 2); color: var(--quota-meta); font-size: clamp(.75rem, calc(.6875rem + .55 * var(--quota-unit)), 1.0625rem); font-weight: 680; overflow-wrap: anywhere; }
 .antigravity-quota-card .antigravity-quota-group ul {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
-  gap: 7px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, clamp(11.25rem, calc(9rem + 7 * var(--quota-unit)), 16rem)), 1fr));
+  gap: var(--quota-space);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -70,8 +82,8 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 7px;
-  padding: 7px;
+  gap: var(--quota-space);
+  padding: var(--quota-space);
   border: 1px solid var(--aod-glass-rim);
   border-radius: 13px;
   background: var(--aod-glass-layer);
@@ -85,7 +97,7 @@
   display: grid;
   place-items: center;
   flex: none;
-  width: min(66px, 100%);
+  width: min(100%, clamp(3rem, calc(2rem + 5 * var(--quota-unit)), 7rem));
   aspect-ratio: 1;
   border-radius: 50%;
   background: radial-gradient(circle, var(--aod-glass-layer), transparent 72%);
@@ -95,13 +107,13 @@
 .antigravity-quota-dial svg { width: 100%; transform: rotate(-90deg); overflow: visible; }
 .antigravity-quota-dial circle { fill: none; stroke: var(--quota-track); stroke-width: 5; }
 .antigravity-quota-dial .antigravity-quota-arc { stroke: var(--quota-fill); }
-.antigravity-quota-dial strong { font-size: 15px; font-weight: 720; font-variant-numeric: tabular-nums; letter-spacing: -.045em; }
-.antigravity-quota-reading { flex: 1 0 min(76px, 100%); min-width: 0; overflow-wrap: anywhere; }
-.antigravity-quota-reading strong { display: block; font-size: 12px; font-weight: 650; }
+.antigravity-quota-dial strong { font-size: clamp(.8125rem, calc(.6875rem + .8 * var(--quota-unit)), 1.625rem); font-weight: 720; font-variant-numeric: tabular-nums; letter-spacing: -.045em; }
+.antigravity-quota-reading { flex: 1 0 min(4.75rem, 100%); min-width: 0; overflow-wrap: anywhere; }
+.antigravity-quota-reading strong { display: block; font-size: clamp(.75rem, calc(.6875rem + .7 * var(--quota-unit)), 1.125rem); font-weight: 650; }
 .antigravity-quota-progress { position: absolute; width: 1px; height: 1px; clip-path: inset(50%); }
 .antigravity-quota-group small, .antigravity-quota-card .antigravity-quota-sample {
   color: var(--quota-meta);
-  font-size: 11px;
+  font-size: clamp(.6875rem, calc(.625rem + .5 * var(--quota-unit)), .9375rem);
   line-height: 1.45;
   overflow-wrap: anywhere;
 }

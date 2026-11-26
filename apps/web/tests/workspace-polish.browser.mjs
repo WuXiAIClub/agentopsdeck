@@ -154,14 +154,32 @@ try {
   assert.notEqual(...await quotaCard.locator('.antigravity-quota-dial').first().locator('circle').evaluateAll(nodes => nodes.map(node => getComputedStyle(node).stroke)), 'high contrast preserves the visual track and arc');
   await page.emulateMedia({ forcedColors: 'none', reducedMotion: 'no-preference' });
   await page.getByTestId('workspace-theme-toggle').click();
-  assert.equal(await quotaCard.evaluate(el => {
-    el.style.width = '224px';
+  const measureQuota = (width, height) => quotaCard.evaluate((el, dimensions) => {
+    el.style.width = `${dimensions.width}px`;
+    el.style.height = `${dimensions.height}px`;
     const items = [...el.querySelectorAll('li')];
-    const stacked = items[0].getBoundingClientRect().bottom <= items[1].getBoundingClientRect().top;
-    const fits = el.scrollWidth <= el.clientWidth + 1;
+    const dial = el.querySelector('.antigravity-quota-dial');
+    const result = {
+      stacked: items[0].offsetTop < items[1].offsetTop,
+      fits: el.scrollWidth <= el.clientWidth + 1,
+      dial: dial.offsetWidth,
+      title: parseFloat(getComputedStyle(el.querySelector('.antigravity-quota-hero strong')).fontSize),
+      value: parseFloat(getComputedStyle(dial.querySelector('strong')).fontSize),
+      gap: parseFloat(getComputedStyle(el.querySelector('.antigravity-quota-body')).gap),
+    };
     el.style.removeProperty('width');
-    return stacked && fits;
-  }), true, 'a narrow card stacks the quota readings without horizontal scrolling');
+    el.style.removeProperty('height');
+    return result;
+  }, { width, height });
+  const narrow = await measureQuota(224, 600);
+  const wide = await measureQuota(900, 600);
+  const short = await measureQuota(900, 220);
+  assert.ok(narrow.stacked && !wide.stacked, 'narrow readings reflow into one column');
+  for (const size of [narrow, wide, short]) assert.ok(size.fits, 'quota readings fit without horizontal scrolling');
+  for (const metric of ['dial', 'title', 'value', 'gap']) {
+    assert.ok(wide[metric] > narrow[metric], `${metric} scales with card width`);
+    assert.ok(wide[metric] > short[metric], `${metric} scales with card height`);
+  }
   const refreshed = page.waitForResponse(response => response.url().endsWith('/api/antigravity/usage') && response.ok());
   await page.locator('[data-workspace-pane]').filter({ has: quotaCard }).getByRole('button', { name: 'Refresh', exact: true }).click();
   await refreshed;
