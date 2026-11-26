@@ -9,6 +9,7 @@ type Provider = { url: string; headers: Record<string, string>; fingerprint: str
  * an endpoint/credential. Nothing from a browser request enters this resolver. */
 export function configuredModelProvider(raw: unknown, explicit?: string, env: NodeJS.ProcessEnv = process.env): Provider | undefined {
   const config = record(record(raw).config), name = explicit || config.model_provider;
+  if (typeof config.model_catalog_json === 'string' && config.model_catalog_json.trim()) return undefined;
   if (!name || name === 'openai') return undefined;
   if (typeof name !== 'string') throw unavailable();
   const provider = record(record(config.model_providers)[name]);

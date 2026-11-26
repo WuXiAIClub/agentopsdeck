@@ -32,6 +32,47 @@ Keep actual provider configuration outside source. Provider API keys referenced 
 forwarded from the service environment by listing their variable names in
 `AOD_CODEX_ENV_PASSTHROUGH`.
 
+When the effective Codex configuration sets `model_catalog_json`, AOD uses the
+native `model/list` catalog, including its visibility and display names, instead
+of querying the custom provider's `/models` endpoint. Keep the catalog in the
+dedicated native home and refresh it before starting AOD. Without an explicit
+catalog, custom-provider HTTP discovery remains unchanged.
+
+### Native environment and local provider bridges
+
+On Windows, prefer an absolute native `codex.exe` path in `AOD_CODEX_COMMAND`.
+AOD constructs a restricted child `PATH` and a dedicated `HOME`, `USERPROFILE`
+and `LOCALAPPDATA`; a user-installed wrapper that locates Codex under the
+ambient profile may therefore fail. Do not point AOD at a wrapper that imports
+another instance's settings or history.
+
+Use `AOD_*` names for AOD server configuration, not for provider secrets in
+`<AOD_CODEX_HOME>/.env`: that native file rejects `AOD_*`, `HOME`, `PATH`,
+`CODEX_HOME` and other execution-control variables. Use the provider's own
+variable name, such as `VEKIL_API_KEY`, referenced by Codex `env_key`. Store its
+value only in the private native environment file; do not publish it or reuse
+another instance's credentials. Arbitrary parent environment variables,
+including proxy settings, are not inherited; explicit provider passthrough
+must use `AOD_CODEX_ENV_PASSTHROUGH`.
+
+For an optional [Vekil](https://github.com/sozercan/vekil) bridge, install and
+authenticate it separately, restrict its listener to loopback and enable caller
+authentication. Check readiness and perform a harmless Codex turn, not only a
+model-list request. AOD supplies `NO_PROXY=localhost,127.0.0.1,::1` to Codex;
+standalone Codex may need the same loopback exclusions to avoid a Windows or
+corporate proxy returning a 502 before the request reaches Vekil. Keep unrelated
+proxy settings intact.
+
+Copilot's Gemini models can expose Chat Completions rather than native
+Responses. Codex requires Responses, so explicitly enable Vekil's
+`--responses-over-chat-models` for those public IDs. This is an adapter to
+Copilot's API, not a direct Google Gemini API connection. Follow Vekil's current
+compatibility requirements: Chat-backed models have restricted image/tool
+features, and hosted search, remote compaction, Responses Lite, Code Mode,
+freeform `apply_patch` and Responses WebSockets must not be assumed supported.
+Use its managed pinned launcher where appropriate, or apply equivalent
+safeguards to a dedicated persistent Codex configuration.
+
 Accepted approval values are `never`, `on-request` and `untrusted`; the inherited
 default is `never`. **Approval policy is not a filesystem sandbox**: the harness
 can run with the service account's filesystem access. Use OS/container boundaries
