@@ -957,6 +957,15 @@ export const api = {
   },
   antigravityUsage: (signal: AbortSignal) => readJson<{ usage: import('@agentopsdeck/shared').AntigravityUsage | null }>(
     '/api/antigravity/usage', { signal, timeoutMs: 20_000 }),
+  gitAccounts: (signal: AbortSignal) => readJson<{ accounts: import('@agentopsdeck/shared').GitRepoAccountOption[] }>(
+    '/api/git/accounts', { signal, timeoutMs: 12_000 }),
+  gitRepoStatus: (repo: string, accountId: string | undefined, signal: AbortSignal, refresh = false) => {
+    const query = new URLSearchParams({ repo });
+    if (accountId) query.set('account', accountId);
+    if (refresh) query.set('refresh', '1');
+    return readJson<{ status: import('@agentopsdeck/shared').GitRepoStatus }>(
+      `/api/git/repo-status?${query}`, { signal, timeoutMs: 20_000 });
+  },
   gatewayStatus: (maxAgeMs = 0) => {
     const scopeKey = requestKey('/api/gateway/status');
     if (forbiddenGatewayScopeKey === scopeKey || isLocalRuntimeForbiddenInStorage('gateway')) {

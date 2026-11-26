@@ -65,6 +65,22 @@ File browser, preview and write access depend on configured roots and grants.
 Defaults do not expose arbitrary host files. Configure only specific project
 directories; do not use the filesystem root or another instance's native home.
 
+## Git repository status card
+
+Open **Layout presets → Git repository status** (or the **Git repository status**
+shortcut in OS desktop mode) to monitor a GitHub repository in a standalone
+glass card. Multiple cards can be opened simultaneously for different
+repositories.
+
+- Displays open pull requests (ready and draft), pure open issue counts
+  (excluding pull requests), GitHub Actions pass rate and recent workflow runs,
+  stars/forks, and automatic 60-second refresh while visible.
+- Public repositories work out of the box by entering `owner/repo`. For private
+  repositories or higher API rate limits, configure server-side accounts with
+  `AOD_GIT_ACCOUNTS_JSON` or `AOD_GITHUB_TOKEN_FILE` / `AOD_GITHUB_DEFAULT_REPO`
+  in your private environment; tokens stay on the server and are never sent to
+  the browser.
+
 ## Before requesting support
 
 Record AOD version/source revision, affected connection and status category,

@@ -19,6 +19,7 @@ import { hermesConfig, type HermesConfig } from './hermes/config.js';
 import { claudeConfig, type ClaudeConfig } from './claude/config.js';
 import { copilotConfig, type CopilotConfig } from './copilot/config.js';
 import { antigravityConfig, type AntigravityConfig } from './antigravity/config.js';
+import { parseGitStatusAccounts, type GitStatusAccountConfig } from './git-status/config.js';
 import { AGENTOPSDECK_VERSION } from '@agentopsdeck/shared';
 import { parseLifecycleEndpoints, type LifecycleEndpoint } from './hub/lifecycle-client.js';
 import { rolloutCachePolicyFromEnv, type RolloutCachePolicy } from './codex/rollout-cache-policy.js';
@@ -33,6 +34,7 @@ export type ServerConfig = {
   claude?: ClaudeConfig;
   copilot?: CopilotConfig;
   antigravity?: AntigravityConfig;
+  gitStatusAccounts: GitStatusAccountConfig[];
   port: number;
   listenHost?: string;
   serverRole: ServerRole;
@@ -216,6 +218,7 @@ export function loadConfig(env = process.env): ServerConfig {
   const claude = claudeConfig(env);
   const copilot = copilotConfig(env);
   const antigravity = antigravityConfig(env);
+  const gitStatusAccounts = parseGitStatusAccounts(env);
   const websiteGateway = parseWebsiteGateway(env);
   const compatUpstream = env.AOD_CODEX_GEMINI_TOOL_IMAGE_UPSTREAM?.trim()
     || env.AOD_CODEX_RESPONSES_COMPAT_UPSTREAM?.trim();
@@ -232,6 +235,7 @@ export function loadConfig(env = process.env): ServerConfig {
     ...(claude ? { claude } : {}),
     ...(copilot ? { copilot } : {}),
     ...(antigravity ? { antigravity } : {}),
+    gitStatusAccounts,
     port: Number(env.AOD_PORT ?? env.PORT ?? 8890),
     ...(listenHost !== undefined ? { listenHost } : {}),
     serverRole: parseServerRole(env.AOD_SERVER_ROLE),
@@ -393,6 +397,14 @@ export function redactedConfig(config: ServerConfig) {
     localOpenClawCli: config.localOpenClawCli,
     publicBaseUrl: config.publicBaseUrl,
     allowedOrigins: config.allowedOrigins,
+    gitStatusAccounts: config.gitStatusAccounts.map(({ id, label, provider, defaultRepo, repos, token }) => ({
+      id,
+      label,
+      provider,
+      authenticated: Boolean(token),
+      ...(defaultRepo ? { defaultRepo } : {}),
+      ...(repos ? { repos } : {}),
+    })),
     mediaBridge: config.mediaBridge,
     mediaLibrary: {
       ...config.mediaLibrary,

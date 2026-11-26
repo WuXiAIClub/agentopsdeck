@@ -68,6 +68,7 @@ export type DesktopIconKind =
   | 'terminal'
   | 'dashboard'
   | 'antigravity-quota'
+  | 'git-repo-status'
   | 'drawing'
   | 'moderator'
   | 'docker'
@@ -1188,6 +1189,7 @@ export function buildDesktopIcons(input: {
     terminal?: string;
     tokenDashboard?: string;
     antigravityQuota?: string;
+    gitRepoStatus?: string;
     whiteboard?: string;
     moderator?: string;
     docker?: string;
@@ -1341,6 +1343,12 @@ export function buildDesktopIcons(input: {
       id: 'app:antigravity-quota',
       kind: 'antigravity-quota',
       title: labels.antigravityQuota ?? 'Antigravity account quota',
+      fenceId: 'tools-files',
+    },
+    {
+      id: 'app:git-repo-status',
+      kind: 'git-repo-status',
+      title: labels.gitRepoStatus ?? 'Git repository status',
       fenceId: 'tools-files',
     },
     {
