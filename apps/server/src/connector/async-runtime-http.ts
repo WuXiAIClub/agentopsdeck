@@ -25,6 +25,7 @@ import { registerSdkLocalHttp } from './sdk-local-http.js';
 import { registerSdkQueueHttp } from './sdk-queue-http.js';
 import { registerSdkDeletionHttp } from './sdk-deletion-http.js';
 import { registerSdkCompactHttp } from './sdk-compact-http.js';
+import { registerSdkRecoveryHttp } from './sdk-recovery-http.js';
 import { registerSdkInteractionsHttp } from './sdk-interactions-http.js';
 import { registerSdkHistoryHttp } from './sdk-history-http.js';
 import { registerSdkUsageHttp } from './sdk-usage-http.js';
@@ -58,6 +59,7 @@ export type AsyncRuntimeHttp = {
   sdkQueue?: Parameters<typeof registerSdkQueueHttp>[2];
   sdkDeletion?: Parameters<typeof registerSdkDeletionHttp>[2];
   sdkCompact?: Parameters<typeof registerSdkCompactHttp>[2];
+  sdkRecovery?: Parameters<typeof registerSdkRecoveryHttp>[2];
   sdkInteractions?: Parameters<typeof registerSdkInteractionsHttp>[2];
   sdkHistory?: Parameters<typeof registerSdkHistoryHttp>[2];
   sdkUsage?: Parameters<typeof registerSdkUsageHttp>[2];
@@ -104,6 +106,7 @@ export function registerAsyncRuntimeHttp(app: Hono, nodeId: string, ports: Async
   if (ports.sdkQueue) registerSdkQueueHttp(app, session, ports.sdkQueue);
   if (ports.sdkDeletion) registerSdkDeletionHttp(app, session, ports.sdkDeletion);
   if (ports.sdkCompact) registerSdkCompactHttp(app, session, ports.sdkCompact);
+  if (ports.sdkRecovery) registerSdkRecoveryHttp(app, session, ports.sdkRecovery);
   if (ports.sdkInteractions) registerSdkInteractionsHttp(app, session, ports.sdkInteractions);
   if (ports.sdkHistory) registerSdkHistoryHttp(app, session, ports.sdkHistory);
   if (ports.sdkUsage) registerSdkUsageHttp(app, session, ports.sdkUsage);

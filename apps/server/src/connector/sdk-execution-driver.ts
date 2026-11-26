@@ -8,7 +8,7 @@ import type { DatabaseSync } from 'node:sqlite';
 import { SdkCompactDispatch, type SdkCompactExecution } from './sdk-compact-dispatch.js';
 import type { SdkOwnedCompactWorker } from './sdk-compact-worker.js';
 
-export type SdkOwnedTurn = { finished: Promise<void>; inspectQuiescence(): Promise<boolean> };
+export type SdkOwnedTurn = { finished: Promise<void>; inspectQuiescence(): Promise<boolean>; inspectCleaned?(): Promise<boolean> };
 export type SdkDriverOptions<T extends SdkOwnedTurn> = {
   journal: SdkExecutionJournal; turns: TurnQueue; deadlineMs: number;
   admissionReady?: () => boolean;
@@ -65,7 +65,7 @@ export class SdkExecutionDriver<T extends SdkOwnedTurn> {
         // Cleanup is still verified by the turn/adapter before settlement.
         // finished can reject; never create an unhandled rejection here.
         void turn.finished.then(async () => {
-          try { if (!await turn.inspectQuiescence()) this.cleanupUnconfirmed = true; }
+          try { if (!await (turn.inspectCleaned ? turn.inspectCleaned() : turn.inspectQuiescence())) this.cleanupUnconfirmed = true; }
           catch { this.cleanupUnconfirmed = true; }
           finally {
             this.finishWorker(turn, execution);

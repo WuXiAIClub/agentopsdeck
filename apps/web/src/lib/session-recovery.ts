@@ -5,10 +5,17 @@ import { sessionPresentation } from './session-presentation.js';
 
 export function canRequestSessionRecovery(session: SessionSummary) {
   try {
-    return !sessionAddress(session.sessionKey).shared && session.sessionRef?.runtimeId === 'codex'
-      && sessionPresentation(session).state === 'error'
-      && !!session.runtime?.turnId && (isSessionBusy(session) || session.runtime.sync !== 'current'
-        || session.runtime.connection !== 'connected');
+    if (sessionAddress(session.sessionKey).shared || !session.runtime?.turnId) return false;
+    const runtimeId = session.sessionRef?.runtimeId;
+    if (runtimeId === 'codex') {
+      return sessionPresentation(session).state === 'error'
+        && (isSessionBusy(session) || session.runtime.sync !== 'current'
+          || session.runtime.connection !== 'connected');
+    }
+    if (runtimeId === 'claude-code' || runtimeId === 'ghcp' || runtimeId === 'antigravity') {
+      return session.runtime.phase === 'unknown' && session.runtime.connection === 'connected';
+    }
+    return false;
   } catch { return false; }
 }
 

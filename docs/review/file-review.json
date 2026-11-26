@@ -17,13 +17,13 @@
     "Native devices, providers, full backend, browser accessibility, artifacts and redistribution rights remain unaccepted."
   ],
   "summary": {
-    "totalFiles": 3603,
+    "totalFiles": 3604,
     "byKind": {
       "config": 58,
       "docs": 55,
       "asset": 8,
       "test": 1754,
-      "runtime": 1714,
+      "runtime": 1715,
       "generated": 14
     },
     "byModule": {
@@ -39,7 +39,7 @@
       "api-auth": 392,
       "hub-notebook": 22,
       "codex": 4,
-      "connector": 582,
+      "connector": 583,
       "api-completion": 7,
       "hub": 552,
       "web-ui": 405,
@@ -56,12 +56,12 @@
       "external": 2
     },
     "byDepth": {
-      "semantic": 3549,
+      "semantic": 3550,
       "structural": 35,
       "asset": 19
     },
     "byDisposition": {
-      "no-finding": 3568,
+      "no-finding": 3569,
       "pending": 35
     },
     "completedSemanticOrAssetFiles": 3568,
@@ -2669,8 +2669,8 @@
     },
     {
       "path": "apps/server/src/antigravity/acp-client.ts",
-      "size": 16555,
-      "sha256": "074829dc0b341b0f11f3ac39ce4ae1d3323653cd5ffab081da4d4f831bb8ebbc",
+      "size": 16609,
+      "sha256": "cc4c28808113badf1687e3759c9acea6798797fdc9a9cbddfab0ae673c14623a",
       "module": "antigravity",
       "kind": "runtime",
       "depth": "semantic",
@@ -2685,8 +2685,8 @@
     },
     {
       "path": "apps/server/src/antigravity/acp-fixture.mjs",
-      "size": 6233,
-      "sha256": "0b7590577819dea3305e310708621a69343198b3ca6bd500a1d78db6ffcd6f3a",
+      "size": 6229,
+      "sha256": "a47165784a0b4d89b29c1a8fb614551336a25995a1e5a17accffaffea9d86661",
       "module": "antigravity",
       "kind": "test",
       "depth": "semantic",
@@ -2765,8 +2765,8 @@
     },
     {
       "path": "apps/server/src/antigravity/execution-worker.ts",
-      "size": 4414,
-      "sha256": "dfa3c7dc56eed4368def93a38ffd7bb5c5a3e36a2453a48704b7471b5b852223",
+      "size": 4415,
+      "sha256": "9234ec90170408bed95c1a8330ba1b4d2ed24e1dc5d34ea848d401d9aab48084",
       "module": "antigravity",
       "kind": "runtime",
       "depth": "semantic",
@@ -2937,8 +2937,8 @@
     },
     {
       "path": "apps/server/src/antigravity/sdk-runtime.ts",
-      "size": 33121,
-      "sha256": "0dfe85115ba2d45960298136c097ea2ae3dcf166146b6f181260b385b229c220",
+      "size": 34498,
+      "sha256": "e9b44ee72effc12a703f82be8d76997c7f1ec410e0bccd7df306b3688f9cd1ce",
       "module": "antigravity",
       "kind": "runtime",
       "depth": "semantic",
@@ -7329,8 +7329,8 @@
     },
     {
       "path": "apps/server/src/claude/worker-turn.ts",
-      "size": 13129,
-      "sha256": "d7d8e1692ccab86eb73788635bd0b7b0f2181325ed1545f6a862c967463853a9",
+      "size": 13480,
+      "sha256": "b278aba4222b72dd55363cc66576f1813c4746bd7e8b6fdc457a7add3ef5da07",
       "module": "execution",
       "kind": "runtime",
       "depth": "semantic",
@@ -7432,8 +7432,8 @@
     },
     {
       "path": "apps/server/src/codex/app-server.ts",
-      "sha256": "523681b4c6b0fc3c6ec9af2e5c619022656850d64a9bdf62641402a469c495be",
-      "size": 411599,
+      "sha256": "28257ebd15e20014c0f7f56cfe862c68ce4bf4b7387c091ea856581d449995fb",
+      "size": 412624,
       "module": "codex",
       "kind": "runtime",
       "depth": "semantic",
@@ -14003,8 +14003,8 @@
     },
     {
       "path": "apps/server/src/connector/async-runtime-http.ts",
-      "size": 9265,
-      "sha256": "0c1d8c8c3bd23a5ce03917f06e764efd103f8b6bf8c53861bbe5e607a85e2324",
+      "size": 9477,
+      "sha256": "3945251c7cb320b34e886c7bc6d5a115fd91a11448d5f7bef229b9b0c7844358",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
@@ -14155,8 +14155,8 @@
     },
     {
       "path": "apps/server/src/connector/async-sdk-application.ts",
-      "size": 17531,
-      "sha256": "f6f08c3b99c5919ff94774e78b1eb56a3a55ee01381c8ed91e6b45977c132d8b",
+      "size": 18006,
+      "sha256": "aad019bf11114c49069107773439fe52bffaa5da1736b53863eb2445e0f014f8",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
@@ -14322,8 +14322,8 @@
     },
     {
       "path": "apps/server/src/connector/async-sdk-execution-driver.test.ts",
-      "size": 44213,
-      "sha256": "7e4f10301c1b6775942d01ded0c9886e44df8c23d94e08adb4e68ef647881ebe",
+      "size": 44122,
+      "sha256": "b84cb5cb208a427c4cf6c6fcbe3e86b8c93a8d5f038ffc20c512aac22ff9ad9c",
       "module": "connector",
       "kind": "test",
       "depth": "semantic",
@@ -14339,8 +14339,8 @@
     },
     {
       "path": "apps/server/src/connector/async-sdk-execution-driver.ts",
-      "size": 15874,
-      "sha256": "13ca602be42009450a5e1dfa69a2f41f7bc3cf07cb964de6da53b190e10d4307",
+      "size": 16103,
+      "sha256": "7b9af567b914793d8f1668f8e5256b8e8215ba89b0b4527de112868fc3ba9572",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
@@ -14626,8 +14626,8 @@
     },
     {
       "path": "apps/server/src/connector/async-sdk-owned-runtime.ts",
-      "size": 18917,
-      "sha256": "9be8c437d487718d006b033f8ceaf4711c4506be689829123a923ff3be332c8e",
+      "size": 20678,
+      "sha256": "17c795dac9ab222c6396ca6fdedc01d8ddbad732764778e36e185ab31d80204a",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
@@ -14642,8 +14642,8 @@
     },
     {
       "path": "apps/server/src/connector/async-sdk-projection.test.ts",
-      "size": 17090,
-      "sha256": "7d7a9468fc036acf273aca7dbe921a183e7abc32f219fa8ff2609941a556b271",
+      "size": 18876,
+      "sha256": "2e545e1522ccf3ec96672e0ed7059a6362689daa346dd7e4503b6574ad15585f",
       "module": "connector",
       "kind": "test",
       "depth": "semantic",
@@ -14659,8 +14659,8 @@
     },
     {
       "path": "apps/server/src/connector/async-sdk-projection.ts",
-      "size": 8898,
-      "sha256": "664108fdf8c8c7610550b27045d102c0406dcfd580824a5c796173145197ac3b",
+      "size": 9146,
+      "sha256": "92d877b10fe1efe9f0df257b219480eadbd4bfc320366f1b17e4d73ba3540125",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
@@ -17050,7 +17050,7 @@
     {
       "path": "apps/server/src/connector/connector-owner.test.ts",
       "size": 49621,
-      "sha256": "59ea7bc6afb62409d8015c4338fe146dec259064e3cb3cd4f12794ec808fc29a",
+      "sha256": "333c8ff9748e18aa65504aa2446761743e9a7a7f48b4a1a63abad9cec743e3dc",
       "module": "connector",
       "kind": "test",
       "depth": "semantic",
@@ -17324,8 +17324,8 @@
     },
     {
       "path": "apps/server/src/connector/connector-sdk-lifecycle-domain.ts",
-      "size": 16009,
-      "sha256": "896c010eac7a8e670d583d8dc6c5717073703dbce81394b896d5b6dde94b72cf",
+      "size": 17484,
+      "sha256": "d672863fbbbd25cc46cbb2a82ac035d3228f532c4ec5971ebfd6e26307408bc5",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
@@ -19880,8 +19880,8 @@
     },
     {
       "path": "apps/server/src/connector/sdk-execution-driver.ts",
-      "size": 13083,
-      "sha256": "728fcf9799989a15922378f9dd0b3b51de71f384c350d767fa2ab1ba9a64ca85",
+      "size": 13168,
+      "sha256": "f97535bde7d1a06dcb78b4b099d603010bdbe7f22d5d07f173b47229ee86f7d2",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
@@ -19898,8 +19898,8 @@
     },
     {
       "path": "apps/server/src/connector/sdk-execution-journal.test.ts",
-      "size": 21677,
-      "sha256": "c78ea51f332d1f354a1d19c67ba911b543af19c6d1fc03014d39379ad981fd28",
+      "size": 23226,
+      "sha256": "dad14d85d16426fc48311753e7e903b23d9928eaf3eee60b803873a38b734d3d",
       "module": "connector",
       "kind": "test",
       "depth": "semantic",
@@ -19916,8 +19916,8 @@
     },
     {
       "path": "apps/server/src/connector/sdk-execution-journal.ts",
-      "size": 27510,
-      "sha256": "988510bdb9dfbdb4a7f1c639be738c1307d6d9375e2405429aa71f9c7120bb40",
+      "size": 29005,
+      "sha256": "ddccb99623b66e1e5fed8af6eb50361a22f376224a81b9a535f5f068341d80ad",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
@@ -20225,6 +20225,20 @@
         "line-by-line-semantic-audit"
       ],
       "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/sdk-readiness.test.ts (connector/test); all historical findings and license/security/correctness checks are verified.",
+      "findings": []
+    },
+    {
+      "path": "apps/server/src/connector/sdk-recovery-http.ts",
+      "size": 3645,
+      "sha256": "ba249cc67160d30ed99516a7c68c0df2e08c02078bbe627ce974dfa3faca5508",
+      "module": "connector",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size"
+      ],
+      "notes": "Ledger entry synced for newly added repository file.",
       "findings": []
     },
     {
@@ -23072,8 +23086,8 @@
     },
     {
       "path": "apps/server/src/copilot/worker-turn.ts",
-      "size": 12013,
-      "sha256": "1c163622ea9fb8a4548b5cd3b49194b651147cb7fa060b9f9adac483070b9386",
+      "size": 12363,
+      "sha256": "16b7b6afb21d6796c3f273b3866cce0dbf30a1264ef1695b243d60ba36208772",
       "module": "execution",
       "kind": "runtime",
       "depth": "semantic",
@@ -23275,8 +23289,8 @@
     },
     {
       "path": "apps/server/src/diagnostics/performance.ts",
-      "size": 22180,
-      "sha256": "61df01b2299619268ec21012fc69250ef880c94798c5a98df014b71aa9895424",
+      "size": 22201,
+      "sha256": "b86e7375eba29af73b4ace98f1ed43831d5efd87eb1cac0702dfff89d14a2060",
       "module": "storage",
       "kind": "runtime",
       "depth": "semantic",
@@ -38416,8 +38430,8 @@
     },
     {
       "path": "apps/server/src/routes/connector.ts",
-      "sha256": "3a9396ed3014d0d3788cf704288a9d1a075b926e2dc05809bca48730975c138d",
-      "size": 91918,
+      "sha256": "1ab367f270c7a731b39842f6abae058512b342056e0f3aa67ad3e145d8684bab",
+      "size": 92203,
       "module": "api-completion",
       "kind": "runtime",
       "depth": "semantic",
@@ -52644,8 +52658,8 @@
     },
     {
       "path": "apps/web/src/lib/session-recovery.test.ts",
-      "size": 6040,
-      "sha256": "1bd6bb4fb310681e0f7145e7aab96da2738fa8239dab55bf818adfeb778c692e",
+      "size": 6930,
+      "sha256": "71847d68cbb32383e1163e2e49070f6a8b54a3df315b59f23f35358883983c7f",
       "module": "web-state",
       "kind": "test",
       "depth": "semantic",
@@ -52663,8 +52677,8 @@
     },
     {
       "path": "apps/web/src/lib/session-recovery.ts",
-      "size": 1855,
-      "sha256": "f704127cdc63ef6ac8a084fe6e25c3cef549591af73f8796cbe3afe0ea644bd6",
+      "size": 2134,
+      "sha256": "3f67ab68c028a4c0baa760f270d03a719719d3778a49927fcc53bef731802a71",
       "module": "web-state",
       "kind": "runtime",
       "depth": "semantic",
@@ -59312,8 +59326,8 @@
     },
     {
       "path": "docs/api/openapi.json",
-      "size": 529654,
-      "sha256": "2901675e0bdc0187bc565319ba90e4f7d225034bf1714cf2f80823799743c595",
+      "size": 531065,
+      "sha256": "76b93128dc92a3e3fb45a6dfe8314c7b4efec95a585d9d1d7c7a0a52307a22d6",
       "module": "release-boundary",
       "kind": "config",
       "depth": "structural",
