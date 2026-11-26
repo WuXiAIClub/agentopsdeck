@@ -50,6 +50,14 @@ inputs.on('line', line => {
     const text = input.params.prompt[0].text;
     promptId = input.id;
     if (text === 'disconnect') { process.exit(1); }
+    if (text === 'acp-error-after-tool') {
+      write({ jsonrpc: '2.0', method: 'session/update', params: {
+        sessionId, update: { sessionUpdate: 'tool_call', toolCallId: 'tool-before-error', title: 'Read', status: 'completed', kind: 'read' },
+      } });
+      update('partial before upstream error');
+      write({ jsonrpc: '2.0', id: input.id, error: { code: -32603, message: 'synthetic upstream rate limit' } });
+      return;
+    }
     if (text === 'hang-after-response') {
       setInterval(() => {}, 10_000);
       response(input.id, { stopReason: 'end_turn' });

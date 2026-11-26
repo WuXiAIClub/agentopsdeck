@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import fs from 'node:fs/promises';
 import { syncBuiltinESMExports } from 'node:module';
-import { linuxProcessGroupRunning } from './process-group.js';
+import { linuxProcessGroupRunning, waitForLinuxProcessGroupExit } from './process-group.js';
 
 test('absent native process group drains without requiring global proc visibility', async t => {
   t.mock.method(process, 'kill', (pid: number, signal: number) => {
@@ -96,4 +96,25 @@ test('live group member is positive evidence despite unrelated unreadable entrie
   syncBuiltinESMExports();
   t.after(() => { t.mock.restoreAll(); syncBuiltinESMExports(); });
   assert.equal(await linuxProcessGroupRunning(1234), true);
+});
+
+test('waitForLinuxProcessGroupExit escalates to SIGKILL after grace period when group ignores SIGTERM', async t => {
+  let alive = true;
+  const signals: Array<number | string> = [];
+  t.mock.method(process, 'kill', (pid: number, signal: number | NodeJS.Signals) => {
+    assert.equal(pid, -4321);
+    signals.push(signal);
+    if (signal === 'SIGKILL') {
+      alive = false;
+      return true;
+    }
+    if (!alive) throw Object.assign(new Error('Gone'), { code: 'ESRCH' });
+    return true;
+  });
+  t.mock.method(fs, 'readdir', async () => ['1']);
+  t.mock.method(fs, 'readFile', async () => '1 (hung-descendant) S 0 4321 0');
+  syncBuiltinESMExports();
+  t.after(() => { t.mock.restoreAll(); syncBuiltinESMExports(); });
+  await waitForLinuxProcessGroupExit(4321, { sigkillAfterMs: 15, pollMs: 5 });
+  assert.ok(signals.includes('SIGKILL'), 'hung process group must escalate to SIGKILL');
 });

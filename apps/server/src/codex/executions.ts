@@ -255,13 +255,14 @@ export class CodexExecutions {
   }
 
   // This opt-in is only for a queued user message after a fresh native proof.
-  // It never makes a blocked goal generally idle/compactable/maintenance-ready.
+  // It never makes a blocked goal or background-work session generally
+  // idle/compactable/maintenance-ready.
   canStart(sessionKey: string, blockedGoalInput = false) {
     if (this.deletionAccepted(sessionKey) || this.nativeResumes.pending(sessionKey)) return false;
     const fact = this.read(sessionKey);
     return !fact || (!fact.fenced && !!fact.runId && terminal(fact.phase) && fact.sync === 'current'
       && (!fact.nativeHistory || fact.nativeHistory.state === 'verified'
-        || blockedGoalInput && fact.nativeHistory.reason === 'goal-blocked'));
+        || blockedGoalInput && (fact.nativeHistory.reason === 'goal-blocked' || fact.nativeHistory.reason === 'background-work')));
   }
 
   maintenancePending(options: { historyRecovery?: boolean } = {}): number {

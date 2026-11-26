@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { closeSync, constants, fsyncSync, fstatSync, lstatSync, openSync, readSync,
+import { closeSync, constants, fsyncSync, fstatSync, lstatSync, openSync, readFileSync, readSync,
   unlinkSync, writeSync, type Stats } from 'node:fs';
 import { isAbsolute, join } from 'node:path';
 import { pathsOverlap } from '../claude/config.js';
@@ -12,6 +12,27 @@ const names = {
   antigravity: { lock: '.agentopsdeck-antigravity-owner', binding: '.agentopsdeck-antigravity-binding' },
 } as const;
 const failed = () => new Error('Private Agent home ownership is unconfirmed; keep state and use offline recovery');
+const BOOT_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+function readLinuxBootId(): string | undefined {
+  if (process.platform !== 'linux') return undefined;
+  try {
+    const value = readFileSync('/proc/sys/kernel/random/boot_id', 'utf8').trim();
+    return BOOT_ID_RE.test(value) ? value : undefined;
+  } catch { return undefined; }
+}
+function readVerifiedPrivateText(path: string, maxBytes: number): { stat: Stats; text: string } | undefined {
+  let fd: number | undefined;
+  try {
+    fd = openSync(path, constants.O_RDONLY | fileFlags);
+    const before = fstatSync(fd);
+    if (!validPrivateFile(before, path) || before.size <= 0 || before.size > maxBytes) return undefined;
+    const bytes = Buffer.alloc(before.size + 1);
+    const length = readSync(fd, bytes, 0, bytes.length, 0), after = fstatSync(fd);
+    if (length !== before.size || before.mtimeMs !== after.mtimeMs || before.ctimeMs !== after.ctimeMs) return undefined;
+    return { stat: before, text: bytes.subarray(0, length).toString('utf8') };
+  } catch { return undefined; }
+  finally { if (fd !== undefined) closeSync(fd); }
+}
 function assertNoForeignRuntime(home: string, runtime: Runtime) {
   for (const [other, files] of Object.entries(names)) {
     if (other === runtime) continue;
@@ -70,12 +91,37 @@ export class PrivateAgentHomeLease {
       directoryFd = process.platform === 'win32' ? -1 : openSync(home, constants.O_RDONLY | constants.O_DIRECTORY | fileFlags);
       if (directoryFd >= 0 && !sameFile(homeStat, fstatSync(directoryFd))) throw failed();
       assertNoForeignRuntime(home, runtime);
-      // EEXIST (including incomplete or malformed records) is never reclaimed.
-      lockFd = openSync(join(home, lockName), constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL | fileFlags, 0o600);
+      const lockPath = join(home, lockName);
+      const binding = JSON.stringify({ format: 1, nodeId, storeFile });
+      const bindingPath = join(home, bindingName);
+      const bootId = readLinuxBootId();
+      // EEXIST is never reclaimed within the same OS boot. On Linux, an owner
+      // marker recorded under a different kernel boot_id proves every prior
+      // process and native descendant died at reboot; reclaim only when the
+      // persistent binding and marker nodeId both match this exact owner.
+      try {
+        lockFd = openSync(lockPath, constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL | fileFlags, 0o600);
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== 'EEXIST' || !bootId || directoryFd < 0) throw error;
+        const existingBinding = readVerifiedPrivateText(bindingPath, 8192);
+        const existingLock = readVerifiedPrivateText(lockPath, 4096);
+        if (!existingBinding || existingBinding.text !== binding || !existingLock) throw error;
+        let parsed: Record<string, unknown>;
+        try { parsed = JSON.parse(existingLock.text) as Record<string, unknown>; }
+        catch { throw error; }
+        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)
+          || parsed.format !== 1 || parsed.nodeId !== nodeId
+          || typeof parsed.bootId !== 'string' || !BOOT_ID_RE.test(parsed.bootId)
+          || parsed.bootId === bootId) throw error;
+        if (!sameFile(lstatSync(home), fstatSync(directoryFd)) || !sameFile(lstatSync(lockPath), existingLock.stat)) throw error;
+        unlinkSync(lockPath);
+        syncDirectory(directoryFd);
+        lockFd = openSync(lockPath, constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL | fileFlags, 0o600);
+      }
       const lockStat = fstatSync(lockFd);
       ownedStat = lockStat;
-      if (!validPrivateFile(lockStat, join(home, lockName))) throw failed();
-      const marker = JSON.stringify({ format: 1, token: randomUUID(), pid: process.pid, nodeId });
+      if (!validPrivateFile(lockStat, lockPath)) throw failed();
+      const marker = JSON.stringify({ format: 1, token: randomUUID(), pid: process.pid, nodeId, ...(bootId ? { bootId } : {}) });
       if (writeSync(lockFd, marker) !== Buffer.byteLength(marker)) throw failed();
       fsyncSync(lockFd); syncDirectory(directoryFd);
       // Both runtimes check before and after their exclusive marker. A
@@ -83,8 +129,7 @@ export class PrivateAgentHomeLease {
       assertNoForeignRuntime(home, runtime);
       // Persistent binding prevents a second Connector DB from adopting this
       // HOME after a clean stop. Rebinding/restoring must be an explicit task.
-      const binding = JSON.stringify({ format: 1, nodeId, storeFile });
-      const path = join(home, bindingName);
+      const path = bindingPath;
       let bindingFd: number | undefined;
       try {
         try {

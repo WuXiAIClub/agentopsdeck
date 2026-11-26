@@ -32,13 +32,24 @@ time and a synthetic example; diagnose request compatibility separately from lif
 1. Confirm connection/agent and distinguish execution failure, history sync failure,
    background activity and unconfirmed outcomes.
 2. Once completion, history and no-background-work are proven, the UI may allow a
-   next message. Do not overwrite execution identities.
-3. If recovery is offered, follow its inspection workflow; refusal/503 can mean
-   runtime proof is unavailable, not permission to force idle.
+   next message. For Codex sessions whose finished turn left owned background
+   terminals running (`background-work`), explicit user-queued follow-up messages
+   are permitted when the thread accepts input while compaction and maintenance
+   remain protected; use **Stop background terminals** (`POST .../background-terminals/stop`)
+   to terminate owned post-turn terminals without disturbing active turns.
+3. If recovery is offered (`POST .../recovery` for Codex, Claude Code, Copilot or
+   Antigravity), follow its inspection workflow; SDK in-process recovery requires
+   confirmed physical process cleanup (`cleaned`) and releases retained driver
+   intents without restarting the Connector. Refusal/409/503 means runtime proof
+   is unavailable, not permission to force idle.
 4. Preserve accepted/queued receipts; do not resend after lost responses or disconnects.
    Old events must not become evidence of a new run.
 5. Preserve `outcome_unknown`; escalate exact-identity observation. Time elapsed,
-   empty history and process restarts are not termination proof.
+   empty history and process restarts are not termination proof. On Linux, Codex
+   process-group drain escalates from `SIGTERM` to `SIGKILL` after a 10s grace
+   period, and `PrivateAgentHomeLease` reclaims stale owner locks across an OS
+   reboot only when the recorded kernel `boot_id` differs and the persistent
+   binding matches.
 
 A separately authorized new session for a different task is a workaround, not old
 session repair. Never automatically repeat a possibly executed business action.

@@ -333,7 +333,7 @@ export class AntigravityAcpClient {
   close(): void {
     if (!this.failed) this.fail();
     this.child.stdin.destroy();
-    if (!this.terminationRequested && this.child.pid) {
+    if (this.child.pid) {
       this.terminationRequested = true;
       try { process.kill(-this.child.pid, 'SIGKILL'); }
       catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ESRCH') throw failure(); }

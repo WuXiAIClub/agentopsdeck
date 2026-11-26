@@ -65,15 +65,22 @@ structured `/usage` JSON). Responses are not cached by browsers.
   `AOD_ANTIGRAVITY_` prefix. Windows native execution is not implemented.
 - Reuse `PrivateAgentHomeLease` with Antigravity-specific owner and binding
   markers. Bind the dedicated HOME to an exact Connector database and node;
-  reject Claude/Copilot homes even after their clean shutdown. Never reclaim
-  a stale owner marker automatically.
+  reject Claude/Copilot homes even after their clean shutdown. Same-boot owner
+  markers are never reclaimed automatically; on Linux, an owner marker recorded
+  with a prior kernel `boot_id` is reclaimed only when both the persistent
+  binding and `nodeId` match the exact owner.
 - Gate execution on an immutable AOD session/execution/owner-epoch identity.
   Recheck owned resume bindings after asynchronous setup, bind and persist intent
   before transmission, and reject foreign or late transcript updates.
 - Drain the worker before durable terminal settlement and HOME release. Missing
-  physical cleanup or failed settlement retains the owner fence. Forced cleanup
-  downgrades a provider completion to `unknown`; cancellation during setup or
-  persistence does not manufacture provider stop proof or trigger replay.
+  physical cleanup or failed settlement retains the owner fence. In
+  `AntigravitySdkTurn`, verified ACP terminal outcomes and clean
+  `AntigravityAcpError` replies settle without wedging the session once
+  `stopAndDrain()` proves the process group is empty (`cleaned === true`). Hard
+  transport crashes or unconfirmed outcomes remain `unknown` until explicit
+  owner-authorized in-process recovery (`POST .../recovery`), which verifies
+  cleanup and native binding before releasing the session; cancellation during
+  setup or persistence does not manufacture provider stop proof or trigger replay.
 - Preserve the Connector's canonical history page order (`sequence`-ordered
   durable transcript rows followed by active stream and queued rows) across Hub
   message proxy, workspace sync, and shared read routes so `before` pagination

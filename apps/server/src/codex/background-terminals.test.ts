@@ -146,7 +146,20 @@ for (const outcome of ['completed', 'failed', 'interrupted'] as const) {
     const ids = [first.idempotencyKey, second.idempotencyKey];
     setup.runtime.handleNotification('turn/completed', { threadId: 'synthetic', turn: setup.turn });
     await setup.runtime.completingTurns.get(setup.key);
+    const ownedNonInterruptedContinuation = evidence === 'history-item' && outcome !== 'interrupted';
     await setup.runtime.drainQueuedTurn(setup.key);
+    if (ownedNonInterruptedContinuation) {
+      // Option A: owned completed/failed background terminal allows explicit user-queued follow-up.
+      assert.equal(starts.length, 1);
+      assert.equal(starts[0].clientUserMessageId, ids[0]);
+      assert.match(starts[0].input[0].text, /queued first[\s\S]*queued second/);
+      assert.equal(setup.database.turns.list('codex', setup.key).length, 0);
+      const messages = setup.store.getMessages(setup.key).filter(message => ids.includes(message.id));
+      assert.deepEqual(messages.map(message => [message.id, message.text, message.status, message.turnId]), [
+        [ids[0], 'queued first', 'sent', 'successor'], [ids[1], 'queued second', 'sent', 'successor'],
+      ]);
+      return;
+    }
     assert.equal(starts.length, 0);
     assert.deepEqual(setup.database.turns.list('codex', setup.key).map(row => row.id), ids);
     active = false;
@@ -281,6 +294,13 @@ for (const failure of ['still-running', 'list-failed', 'revoked', 'revoke-during
       catch (error) { assert.match(String(error), /background terminals|synthetic list unavailable/); }
       await setup.runtime.drainQueuedTurn(setup.key);
     }
+    if (failure === 'still-running' && evidence === 'history-item') {
+      // Option A: owned post-turn background terminal permits explicit user follow-up once.
+      assert.equal(starts, 1);
+      assert.equal(setup.database.turns.list('codex', setup.key).length, 0);
+      assert.equal(setup.database.codexExecutions.canStart(setup.key), false);
+      return;
+    }
     assert.equal(starts, failure === 'lost-start-ack' ? 1 : 0);
     const rows = setup.database.turns.list<{ text: string }>('codex', setup.key);
     assert.equal(rows.length, 1);
@@ -300,9 +320,7 @@ for (const lostAck of [false, true]) {
     let database: ConnectorUserStore | undefined, codex: CodexAppServer | undefined;
     context.after(async () => { await codex?.close(); database?.close(); rmSync(directory, { recursive: true, force: true }); });
     let active = true, starts = 0;
-    const turn = { id: 'original-run', status: 'completed', items: [
-      { type: 'commandExecution', id: 'tool', status: 'completed', command: 'synthetic', exitCode: 0 },
-    ] };
+    const turn = { id: 'original-run', status: 'completed', items: [] as any[] };
     const history = { thread: { id: 'restart-terminal', status: { type: 'idle' }, canAcceptDirectInput: true, turns: [turn] } };
     const open = (connectionId: string) => {
       database = new ConnectorUserStore(file);
@@ -839,7 +857,7 @@ test('stopOwnedBackgroundTerminals terminates owned post-turn terminals and refu
   assert.equal(setup.database.codexExecutions.get(setup.key)?.nativeHistory?.state, 'verified');
 });
 
-test('queued continuation on loaded background-work uses fast verification without re-reading unchanged rollout', async context => {
+test('queued continuation on loaded unowned background-work uses fast verification without re-reading unchanged rollout', async context => {
   const setup = fixture(context);
   const directory = mkdtempSync(join(tmpdir(), 'aod-bg-queued-fast-'));
   context.after(() => rmSync(directory, { recursive: true, force: true }));
@@ -848,12 +866,13 @@ test('queued continuation on loaded background-work uses fast verification witho
   setup.turn.status = 'completed';
   (setup.history.thread as any).path = rolloutPath;
   setup.runtime.loadedThreadIds.add('synthetic');
+  const unownedTerminal = { processId: 'process', itemId: 'other-tool' };
   let active = true;
   let starts = 0;
   setup.runtime.request = async (method: string) => {
     if (method === 'thread/read') return setup.history;
     if (method === 'thread/goal/get') return { goal: null };
-    if (method === 'thread/backgroundTerminals/list') return { data: active ? [terminal] : [] };
+    if (method === 'thread/backgroundTerminals/list') return { data: active ? [unownedTerminal] : [] };
     if (method === 'turn/start') {
       starts++;
       return { turn: { id: 'successor' } };
@@ -911,4 +930,82 @@ test('stopOwnedBackgroundTerminals allows active thread status when all native t
   assert.deepEqual(terminated, ['process']);
   await setup.runtime.turnWorker.options.reconcile(setup.key);
   assert.equal(setup.database.codexExecutions.get(setup.key)?.nativeHistory?.state, 'verified');
+});
+
+test('stopOwnedBackgroundTerminals handles active thread status, earlier-turn commands, outputDelta noise and reconnects', async context => {
+  const setup = fixture(context);
+  setup.turn.status = 'completed';
+  setup.turn.items = [];
+  setup.history.thread.status = { type: 'active' };
+  setup.history.thread.turns = [
+    { id: 'earlier-run', status: 'completed', items: [{ id: 'tool', type: 'commandExecution', command: 'dev-server', status: 'completed' }] } as any,
+    setup.turn,
+  ];
+  setup.runtime.loadedThreadIds.add('synthetic');
+  let activeTerminals = [terminal];
+  let stopping = false;
+  const terminated: string[] = [];
+  setup.runtime.request = async (method: string, params: any) => {
+    if (method === 'thread/read') return setup.history;
+    if (method === 'thread/goal/get') return { goal: null };
+    if (method === 'thread/backgroundTerminals/list') {
+      if (stopping) {
+        setup.runtime.handleNotification('item/commandExecution/outputDelta', {
+          threadId: 'synthetic', turnId: 'earlier-run', itemId: 'tool', delta: 'server log line\n',
+        });
+      }
+      return { data: activeTerminals };
+    }
+    if (method === 'thread/backgroundTerminals/terminate') {
+      terminated.push(params.processId);
+      activeTerminals = [];
+      return { terminated: true };
+    }
+    throw new Error(`unexpected RPC method: ${method}`);
+  };
+  setup.runtime.handleNotification('turn/completed', { threadId: 'synthetic', turn: setup.turn });
+  await setup.runtime.completingTurns.get(setup.key);
+  assert.equal(setup.database.codexExecutions.get(setup.key)?.nativeHistory?.reason, 'background-work');
+
+  // Reconnect changes runtime.connectionId; after re-settlement on the new connection,
+  // fact.connectionId is the original connection while nativeHistory.connectionId is current.
+  setup.runtime.connectionId = 'reconnected';
+  const currentFact = setup.database.codexExecutions.get(setup.key)!;
+  setup.database.codexExecutions.settleNativeHistory(currentFact, {
+    ...currentFact.nativeHistory!,
+    connectionId: 'reconnected',
+  });
+  stopping = true;
+  assert.equal(await setup.codex.stopOwnedBackgroundTerminals(setup.key, 'original-run'), true);
+  assert.deepEqual(terminated, ['process']);
+});
+
+test('background-work keeps maintenance blocked while allowing explicit user-queued follow-up when thread accepts input', async context => {
+  const setup = fixture(context);
+  setup.turn.status = 'completed';
+  setup.history.thread.status = { type: 'active' };
+  (setup.history.thread as any).canAcceptDirectInput = true;
+  setup.runtime.loadedThreadIds.add('synthetic');
+  const startedPrompts: string[] = [];
+  setup.runtime.request = async (method: string, params: any) => {
+    if (method === 'thread/read') return setup.history;
+    if (method === 'thread/goal/get') return { goal: null };
+    if (method === 'thread/backgroundTerminals/list') return { data: [terminal] };
+    if (method === 'turn/start') {
+      startedPrompts.push(String(params?.input?.[0]?.text ?? ''));
+      return { turn: { id: 'follow-up-run' } };
+    }
+    throw new Error(`unexpected RPC method: ${method}`);
+  };
+  setup.runtime.handleNotification('turn/completed', { threadId: 'synthetic', turn: setup.turn });
+  await setup.runtime.completingTurns.get(setup.key);
+  assert.equal(setup.database.codexExecutions.get(setup.key)?.nativeHistory?.reason, 'background-work');
+  // Maintenance / compaction / non-user admission stays strictly blocked.
+  assert.equal(setup.database.codexExecutions.canStart(setup.key), false);
+  // Explicit user-queued continuation is permitted once fresh native proof confirms all turns are terminal.
+  assert.equal(setup.database.codexExecutions.canStart(setup.key, true), true);
+  await setup.codex.send(setup.key, 'continue while dev server runs');
+  await setup.runtime.drainQueuedTurn(setup.key);
+  assert.equal(startedPrompts.length, 1);
+  assert.match(startedPrompts[0]!, /continue while dev server runs/);
 });

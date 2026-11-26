@@ -307,11 +307,13 @@ export class AntigravitySdkTurn implements SdkOwnedTurn {
       this.flushStream();
       if (update.sessionUpdate === 'usage_update') {
         const metricSequence = ++this.sequence;
-        projection.metrics?.({
-          sequence: metricSequence,
-          eventId: sanitizeId(`evt_${execution.id}_usage_${metricSequence}`),
-          context: { used: update.used, limit: update.size, basis: 'native-context' },
-        });
+        try {
+          projection.metrics?.({
+            sequence: metricSequence,
+            eventId: sanitizeId(`evt_${execution.id}_usage_${metricSequence}`),
+            context: { used: update.used, limit: update.size, basis: 'native-context' },
+          });
+        } catch { /* Advisory usage telemetry must never abort an active turn. */ }
         return;
       }
       const toolCallId = sanitizeId(update.toolCallId);
@@ -468,8 +470,23 @@ export class AntigravitySdkTurn implements SdkOwnedTurn {
       clearTimeout(this.streamTimer);
       this.streamTimer = undefined;
       this.streamDirty = false;
-      if (error instanceof AntigravityAcpError && this.promptAdmitted && this.seenTools.size === 0 && !this.failed) {
-        this.outcome = 'failed';
+      if (error instanceof AntigravityAcpError && this.promptAdmitted && !this.failed) {
+        if (this.assistantText.length > 0) {
+          try {
+            projection.project({
+              nativeEventId: sanitizeId(`evt_${execution.id}_assistant`),
+              role: 'assistant',
+              messageId: assistantMessageId,
+              text: this.assistantText,
+              truncated: this.assistantTruncated,
+              createdAt: this.now(),
+            });
+          } catch {
+            this.failed = true;
+            this.admitReject(error);
+          }
+        }
+        if (!this.failed) this.outcome = 'failed';
       } else {
         this.failed = true;
         this.admitReject(error instanceof Error ? error : failure());
@@ -501,10 +518,12 @@ export class AntigravitySdkTurn implements SdkOwnedTurn {
     try {
       const bound = readAntigravitySessionBinding(this.options.config, this.options.execution.nativeSessionId);
       const validBinding = Boolean(bound && this.agySessionId && bound === this.agySessionId);
-      const quiescent = this.cleaned && (this.quiescent || this.stopRequested);
+      // Once ACP returned a verified terminal result (or clean AntigravityAcpError)
+      // and stopAndDrain() confirmed the process group is empty (this.cleaned),
+      // forced cleanup of a lingering post-turn descendant must not wedge the session.
       return Promise.resolve({
         historyPersisted: !this.failed && validBinding && this.outcome !== undefined,
-        nativeQuiescent: quiescent,
+        nativeQuiescent: this.cleaned,
       });
     } catch {
       return Promise.resolve({ historyPersisted: false, nativeQuiescent: false });
@@ -709,6 +728,10 @@ export class AntigravityOwnedRuntime extends SdkOwnedRuntime<'antigravity', Anti
       config: ownedConfig,
       runtime: 'antigravity',
       journal: options.store.antigravityJournal,
+      hasNativeBinding: (value, nativeSessionId) => {
+        try { return Boolean(readAntigravitySessionBinding(value, nativeSessionId)); }
+        catch { return false; }
+      },
       check,
       deleteNative,
       projection: options.projection ? new AntigravitySessionProjection(options.store, options.projection, config.model) : undefined,
@@ -793,6 +816,7 @@ export class AntigravityConnectorRuntime implements ConnectorAgentLifecycle {
     await this.owned.refreshSession(key, options);
   }
   isSessionHistoryReady(key: string) { return !this.closed && !!this.owned?.isSessionHistoryReady(key); }
+  recoverSession(key: string, expectedRunId: string) { return !this.closed && !this.failed && !!this.owned?.recoverSession(key, expectedRunId); }
 
   pauseQueueWorker(): AdmissionPause {
     if (this.closed) throw unavailable();
@@ -850,7 +874,10 @@ export async function createAsyncAntigravityOwnedRuntime(options: AsyncAntigravi
     ...options,
     config,
     runtime: 'antigravity',
-    hasNativeBinding: (value, nativeSessionId) => Boolean(readAntigravitySessionBinding(value, nativeSessionId)),
+    hasNativeBinding: (value, nativeSessionId) => {
+      try { return Boolean(readAntigravitySessionBinding(value, nativeSessionId)); }
+      catch { return false; }
+    },
     check: ports.check ?? (value => new AntigravityWorkerPreflight(value)),
     deleteNative: ports.deleteNative ?? ((value, request) => new AntigravityWorkerDeletion(value, request)),
     driver: hooks => new AsyncAntigravityExecutionDriver({

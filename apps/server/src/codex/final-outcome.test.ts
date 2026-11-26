@@ -1543,3 +1543,76 @@ test('owned-journal reloadJournaledErroredTerminal settles journal without wedgi
     f.runtime.options.nativeJournal = undefined;
   }
 });
+
+test('owned-journal reloadJournaledErroredTerminal recovers completed cross-connection systemError with historical child work and resets on manual recovery', async t => {
+  const f = failedReloadFixture(t);
+  const resumes = f.users.codexExecutions.nativeResumes;
+  const outcomes: string[] = [];
+  // Replace execution fact with a completed turn from an earlier connection.
+  f.users.codexExecutions.settleHistory(f.users.codexExecutions.get(f.key)!, 'current');
+  assert.ok(f.users.codexExecutions.begin(f.key, 'completed-cmd', 'old-connection'));
+  assert.equal(f.users.codexExecutions.acknowledge(f.key, 'completed-cmd', 'old-connection', 'completed-turn', () => {}), true);
+  assert.equal(f.users.codexExecutions.observe(f.key, 'old-connection', 'completed-turn', 'completed'), true);
+  assert.equal(f.users.codexExecutions.settleHistory(f.users.codexExecutions.get(f.key)!, 'error'), true);
+  f.runtime.options.nativeJournal = {
+    readHistory: async (sessionKey: string) => ({
+      execution: f.users.codexExecutions.get(sessionKey),
+      deleted: f.users.codexExecutions.isDeletedTerminal(sessionKey),
+      outcomeUnknown: resumes.pending(sessionKey),
+    }),
+    prepareResume: async (input: NativeResumeInput) => resumes.prepare(input, () => true),
+    beginResume: async (receipt: NativeResumeReceipt) => resumes.begin(receipt, () => true),
+    finishResume: async (receipt: NativeResumeReceipt, outcome: 'acknowledged' | 'not_dispatched') => {
+      outcomes.push(outcome);
+      return resumes.finish(receipt, outcome);
+    },
+  };
+  let failOnce = true;
+  let resumed = false;
+  const snapshotWithHistoricalChild = (status: 'systemError' | 'idle') => ({
+    thread: {
+      id: 'synthetic',
+      path: f.snapshot().thread.path,
+      status: { type: status },
+      turns: [
+        { id: 'old-turn', status: 'completed', items: [{ id: 'child-call', type: 'collabAgentToolCall', receiverThreadIds: ['child-1'], status: 'completed' }] },
+        { id: 'completed-turn', status: 'completed', items: [{ id: 'reply', type: 'agentMessage', text: 'Done' }] },
+      ],
+    },
+  });
+  f.runtime.request = async (method: string, _params: any, _timeout?: number, _goal?: unknown, beforeDispatch?: () => void) => {
+    if (method === 'thread/goal/get') return { threadId: 'synthetic', goal: null };
+    if (method === 'thread/backgroundTerminals/list') return { data: [], nextCursor: null };
+    if (method === 'thread/unsubscribe') { beforeDispatch?.(); return { status: 'unsubscribed' }; }
+    if (method === 'thread/archive') { beforeDispatch?.(); return {}; }
+    if (method === 'thread/unarchive') { beforeDispatch?.(); return { thread: { id: 'synthetic', status: { type: 'notLoaded' } } }; }
+    if (method === 'thread/resume') {
+      beforeDispatch?.();
+      if (failOnce) return { thread: { id: 'synthetic', status: { type: 'systemError' }, turns: [] } };
+      resumed = true;
+      return { thread: { id: 'synthetic', status: { type: 'idle' }, turns: [] } };
+    }
+    if (method === 'thread/read') return snapshotWithHistoricalChild(resumed ? 'idle' : 'systemError');
+    throw new Error(`unexpected method ${method}`);
+  };
+  try {
+    await assert.rejects(
+      f.runtime.reloadJournaledErroredTerminal(f.key, snapshotWithHistoricalChild('systemError')),
+      /Codex thread unavailable/,
+    );
+    // Automatic retry stays single-attempt.
+    const blocked = await f.runtime.reloadJournaledErroredTerminal(f.key, snapshotWithHistoricalChild('systemError'));
+    assert.equal(blocked.thread.status.type, 'systemError');
+    // Explicit owner recovery clears the single-attempt gate so manual retry succeeds.
+    failOnce = false;
+    f.runtime.turnWorker.wake = () => true;
+    assert.equal(await f.codex.requestSessionRecovery(f.key, 'completed-turn'), true);
+    const recovered = await f.runtime.reloadJournaledErroredTerminal(f.key, snapshotWithHistoricalChild('systemError'));
+    assert.equal(recovered.thread.status.type, 'idle');
+    assert.deepEqual(outcomes, ['acknowledged', 'acknowledged']);
+    assert.equal(resumes.pending(f.key), false);
+    assert.equal(f.runtime.executionUnavailable, false);
+  } finally {
+    f.runtime.options.nativeJournal = undefined;
+  }
+});

@@ -75,7 +75,7 @@ import { observeCompaction, type CompactionEvidence } from './compaction.js';
 import { backgroundTerminals, BackgroundTerminalDrainError, terminateBackgroundTerminals } from './background-terminals.js';
 import { requireInterruptedDispatchSettled, InterruptedDispatchUnconfirmed } from './interrupted-dispatch.js';
 import { inspectCodexMaintenance } from './maintenance.js';
-import { waitForLinuxProcessGroupExit } from './process-group.js';
+import { LINUX_PROCESS_GROUP_SIGKILL_GRACE_MS, waitForLinuxProcessGroupExit } from './process-group.js';
 import { describeBatch, waitingBatch, type CodexBatch } from './queued-batch.js';
 import { expandCodexHistory, type CodexHistoryPlan, type CodexHistoryReader } from './history-plan.js';
 import { codexContextUsage, codexCumulativeUsage, createRolloutUsageAccumulator } from './usage.js';
@@ -292,7 +292,7 @@ export class CodexAppServer {
   private readonly terminalHistoryObservers = new Set<(method: string, params: any) => void>();
   private child: ChildProcessWithoutNullStreams | undefined;
   private toolImageRelay: Awaited<ReturnType<typeof createToolImageCompatibilityRelay>> | undefined;
-  private childLifetimes = new Map<ChildProcessWithoutNullStreams, { closed: Promise<void>; stopRequested: boolean; job?: WindowsProcessJob }>();
+  private childLifetimes = new Map<ChildProcessWithoutNullStreams, { closed: Promise<void>; stopRequested: boolean; job?: WindowsProcessJob; sigkillTimer?: NodeJS.Timeout | undefined }>();
   private starting: Promise<void> | undefined;
   private initializing: Promise<void> | undefined;
   private initializationDrain: Promise<void> | undefined;
@@ -457,7 +457,7 @@ export class CodexAppServer {
       // Only failed no-checkpoint cold loading is throttled here. In particular,
       // ordinary sync errors waiting for a terminal's natural exit stay prompt.
       const coldFailure = readable?.coldFailure;
-      if (coldFailure && pending?.sync === 'error' && !pending.nativeHistory
+      if (coldFailure && pending?.sync === 'error'
         && pending.revision === coldFailure.revision && this.connectionId === coldFailure.connectionId
         && coldFailure.current() && Date.now() >= coldFailure.at
         && Date.now() - coldFailure.at < CODEX_RUNNING_RECOVERY_INTERVAL_MS) return;
@@ -497,8 +497,8 @@ export class CodexAppServer {
       if (continuation && !await options.scheduling!.recheck({ sessionKey,
         executionRevision: pending?.revision ?? null, ...continuation })) return;
       if (this.closed || this.executionUnavailable) return;
-      const coldActivity = pending?.sync === 'error' && !pending.nativeHistory && pending.runId
-        && !pending.preparation && !pending.reason && ['completed', 'failed'].includes(pending.phase)
+      const coldActivity = pending?.sync === 'error' && pending.runId
+        && !pending.preparation && !pending.reason && ['completed', 'failed', 'interrupted'].includes(pending.phase)
         ? this.nativeHistoryActivityGuard(this.threadId(sessionKey)) : undefined;
       const coldConnection = this.connectionId;
       const canFastVerifyBlockedDisplay = (candidate: CodexExecution | undefined) => !this.threadRefreshInflight.has(sessionKey)
@@ -610,6 +610,8 @@ export class CodexAppServer {
       delete readable.recoveryAt;
       delete readable.coldFailure;
     }
+    const reload = this.erroredThreadReloads.get(sessionKey);
+    if (!observed.outcomeUnknown && reload && !reload.reloading) this.erroredThreadReloads.delete(sessionKey);
     return this.turnWorker.wake();
   }
 
@@ -621,41 +623,52 @@ export class CodexAppServer {
     if (!connection || this.closed || this.executionUnavailable || !expectedRunId) return false;
     const initial = await this.readHistoryFact(sessionKey);
     const fact = initial.execution;
-    const validFact = (observed: typeof initial) => {
+    const validFact = (observed: typeof initial, allowOutputInvalidation = false) => {
       const current = observed.execution;
       return !observed.deleted && !observed.outcomeUnknown && !!current && !current.preparation
         && current.commandId === fact?.commandId && current.runId === expectedRunId
-        && current.connectionId === connection
         && ['completed', 'failed', 'interrupted'].includes(current.phase)
         && current.nativeHistory?.state === 'blocked'
-        && current.nativeHistory.reason === 'background-work'
+        && (current.nativeHistory.reason === 'background-work'
+          || (allowOutputInvalidation && current.nativeHistory.reason === 'changed'))
         && current.nativeHistory.turnId === expectedRunId
         && current.nativeHistory.connectionId === connection;
     };
     if (!validFact(initial)) return false;
     const threadId = this.threadId(sessionKey);
-    const activity = this.nativeHistoryActivityGuard(threadId);
+    let structuralActivity = false;
+    const observe = (method: string, params: any) => {
+      // Background terminals emit outputDelta / terminalInteraction while live
+      // or draining on SIGTERM; those must not abort owner-requested cleanup.
+      if (method === 'item/commandExecution/outputDelta' || method === 'item/commandExecution/terminalInteraction') return;
+      const target = nativeNotificationThread(params);
+      if (!target || target === threadId || conflictingNativeNotificationIdentity(params)) structuralActivity = true;
+    };
+    this.terminalHistoryObservers.add(observe);
+    const request = this.request.bind(this);
     const check = async () => {
-      if (this.closed || this.executionUnavailable || connection !== this.connectionId || !activity.current()) throw new RunControlConflict();
+      if (this.closed || this.executionUnavailable || connection !== this.connectionId || structuralActivity) throw new RunControlConflict();
       const latest = await this.readHistoryFact(sessionKey);
-      if (this.closed || this.executionUnavailable || connection !== this.connectionId || !activity.current() || !validFact(latest)) {
+      if (this.closed || this.executionUnavailable || connection !== this.connectionId || structuralActivity || !validFact(latest, true)) {
         throw new RunControlConflict();
       }
     };
     try {
       await check();
-      const thread = historyThread(await activity.request('thread/read', { threadId, includeTurns: true }), threadId);
+      const thread = historyThread(await request('thread/read', { threadId, includeTurns: true }), threadId);
       await check();
-      const latestTurn = arrayValue(thread.turns).at(-1);
-      const allTurnsTerminal = arrayValue(thread.turns).every(turn => ['completed', 'failed', 'interrupted'].includes(turn.status));
+      const turns = arrayValue(thread.turns);
+      const latestTurn = turns.at(-1);
       if (!['idle', 'active'].includes(thread.status?.type)
-        || (thread.status?.type === 'active' && !allTurnsTerminal)
+        || turns.some(turn => !['completed', 'failed', 'interrupted'].includes(turn.status))
         || latestTurn?.id !== expectedRunId || latestTurn.status !== fact!.phase) return false;
       const itemIds = new Set<string>([
-        ...arrayValue(latestTurn.items).filter(item => item.type === 'commandExecution').map(item => String(item.id)),
+        ...turns.flatMap(turn => arrayValue(turn.items)
+          .filter(item => item.type === 'commandExecution' && typeof item.id === 'string')
+          .map(item => String(item.id))),
         ...(fact!.pendingCommandTools ?? []),
       ]);
-      await terminateBackgroundTerminals(activity.request, threadId, () => new Set(itemIds), check);
+      await terminateBackgroundTerminals(request, threadId, () => new Set(itemIds), check);
       await check();
       const readable = this.threadRefreshResult.get(sessionKey);
       if (readable) {
@@ -666,6 +679,8 @@ export class CodexAppServer {
       return true;
     } catch {
       return false;
+    } finally {
+      this.terminalHistoryObservers.delete(observe);
     }
   }
 
@@ -2192,7 +2207,12 @@ export class CodexAppServer {
     }
     if (!current) throw new Error('Codex session projection could not be restored');
     // Loading may yield to another read or invalidation after the worker's read.
-    if (!this.isSessionHistoryReady(sessionKey) || (!this.legacyExecutions.get(sessionKey) && this.activeTurnIds.has(sessionKey)) || runtimeBusy(current.runtime) || (current.runtime && current.runtime.sync !== 'current') || current.hasActiveRun || current.status === 'running') {
+    const allowBgContinuation = blockedGoalInput
+      && current.runtime?.executionProtection?.state === 'blocked'
+      && current.runtime.executionProtection.reason === 'background-work'
+      && !runtimeBusy(current.runtime) && current.runtime.sync === 'current'
+      && current.runtime.connection === 'connected';
+    if (!this.isSessionHistoryReady(sessionKey) || (!this.legacyExecutions.get(sessionKey) && this.activeTurnIds.has(sessionKey)) || runtimeBusy(current.runtime) || (current.runtime && current.runtime.sync !== 'current') || (!allowBgContinuation && (current.hasActiveRun || current.status === 'running'))) {
       return { runId: queuedId, status: 'queued' as const, idempotencyKey: queuedId, media: images.map((image) => image.media) };
     }
     const recoveryContext = await this.recoverPayloadTooLargeThread(sessionKey, threadId, queuedId, actorId, executionGrant, batch, admission);
@@ -2541,8 +2561,10 @@ export class CodexAppServer {
   private async recoverPayloadTooLargeThread(sessionKey: string, threadId: string, commandId: string, actorId?: string, executionGrant?: ExecutionGrantAuthority, batch?: CodexBatch, admission?: QueuedAdmission) {
     const latestFailure = [...this.options.store.getMessages(sessionKey)].reverse().find((message) => message.status === 'failed');
     if (!isPayloadTooLargeError(latestFailure?.failureReason ?? latestFailure?.text)) return;
-    // User continuation of a blocked goal is not permission to compact/rollback.
-    if (this.legacyExecutions.get(sessionKey)?.nativeHistory?.reason === 'goal-blocked'
+    // User continuation of a blocked goal or background-work session is not
+    // permission to compact/rollback.
+    const blockedReason = this.legacyExecutions.get(sessionKey)?.nativeHistory?.reason;
+    if ((blockedReason === 'goal-blocked' || blockedReason === 'background-work')
       && !this.legacyExecutions.canStart(sessionKey)) throw new TurnStartDeferred();
     const connectionId = this.connectionId;
     let execution = this.legacyExecutions.get(sessionKey), preparing = false;
@@ -2702,10 +2724,15 @@ export class CodexAppServer {
       const beforeClaim = () => {
         beforeEffect();
         const current = this.options.store.getSession(sessionKey);
+        const allowBgContinuation = blockedGoalInput
+          && current?.runtime?.executionProtection?.state === 'blocked'
+          && current.runtime.executionProtection.reason === 'background-work'
+          && !runtimeBusy(current.runtime) && current.runtime.sync === 'current'
+          && current.runtime.connection === 'connected';
         if (!current || !this.isSessionHistoryReady(sessionKey) || version !== this.projectionVersion(sessionKey)
           || goal !== this.goalExecutionVersions.get(sessionKey) || !activity.current()
           || runtimeBusy(current.runtime) || current.runtime && current.runtime.sync !== 'current'
-          || current.hasActiveRun || current.status === 'running') throw new TurnStartDeferred();
+          || (!allowBgContinuation && (current.hasActiveRun || current.status === 'running'))) throw new TurnStartDeferred();
       };
       beforeClaim();
       const previous = await this.options.credentialExecutionReader.get(sessionKey);
@@ -2716,11 +2743,11 @@ export class CodexAppServer {
       if (previous?.nativeHistory) {
         // A persisted verified checkpoint is necessary, but never sufficient:
         // repeat the ORIGINAL native proof before replacing the predecessor.
-        // A blocked Goal may accept an ORIGINAL authorized queued input, but
-        // only after the same fresh terminal/child/process proof as legacy
-        // dispatch. Never clear the checkpoint or admit other blocked reasons.
+        // A blocked Goal or background-work checkpoint may accept an ORIGINAL
+        // authorized queued input, but only after a fresh turn/goal/child/cleanup
+        // proof. Never clear the checkpoint or admit other blocked reasons.
         const blockedContinuation = blockedGoalInput && previous.nativeHistory.state === 'blocked'
-          && previous.nativeHistory.reason === 'goal-blocked';
+          && (previous.nativeHistory.reason === 'goal-blocked' || previous.nativeHistory.reason === 'background-work');
         if (previous.nativeHistory.state !== 'verified' && !blockedContinuation
           || previous.nativeHistory.connectionId !== connectionId)
           throw new TurnStartDeferred();
@@ -3569,7 +3596,8 @@ export class CodexAppServer {
       { stage: 'terminal-reload', fault, gate });
     const hasResumeJournal = Boolean(this.maintenanceRecovery.getStore()?.resumes ?? this.options.nativeJournal?.prepareResume);
     if (hasResumeJournal || observed.deleted || observed.outcomeUnknown || !expected?.runId || !connectionId
-      || expected.connectionId !== connectionId || expected.phase !== 'failed'
+      || !['completed', 'failed', 'interrupted'].includes(expected.phase)
+      || expected.nativeHistory?.reason === 'cleanup-unconfirmed'
       || expected.preparation || expected.reason || !expected.completedAt) { report('protected'); return result; }
     const identity = `${connectionId}:${expected.runId}`;
     gate = 'single-attempt';
@@ -3605,11 +3633,13 @@ export class CodexAppServer {
       gate = 'path';
       if (typeof before.path !== 'string' || !before.path.trim()) return skip();
       gate = 'head';
-      if (head?.id !== expected.runId || head.status !== expected.phase) return skip();
+      const ownedIndex = before.turns.findIndex((turn: any) => turn.id === expected.runId);
+      const expectedHeadId = expected.nativeHistory?.turnId ?? expected.runId;
+      if (ownedIndex < 0 || before.turns[ownedIndex]?.status !== expected.phase || head?.id !== expectedHeadId) return skip();
       gate = 'active-history';
-      if (before.turns.some((turn: any) => !['completed', 'failed', 'interrupted'].includes(turn.status))) return skip();
+      if (before.turns.slice(ownedIndex).some((turn: any) => !['completed', 'failed', 'interrupted'].includes(turn.status))) return skip();
       gate = 'child-work';
-      if (before.turns.some((turn: any) => hasNativeChildWork(turn.items, threadId))) return skip();
+      if (before.turns.slice(ownedIndex).some((turn: any) => hasNativeChildWork(turn.items, threadId))) return skip();
       gate = 'goal';
       const goal = nativeGoalEvidence(await read('thread/goal/get', { threadId }), threadId);
       if (nativeGoalProtection(goal.status)) return skip();
@@ -3673,7 +3703,8 @@ export class CodexAppServer {
     const report = (fault: string) => this.historyDiagnostics.failure('recovery', sessionKey, connectionId, expected?.runId,
       { stage: 'terminal-reload', fault, gate });
     if (!journal?.prepareResume || observed.deleted || observed.outcomeUnknown || !expected?.runId || !connectionId
-      || expected.connectionId !== connectionId || expected.phase !== 'failed'
+      || !['completed', 'failed', 'interrupted'].includes(expected.phase)
+      || expected.nativeHistory?.reason === 'cleanup-unconfirmed'
       || expected.preparation || expected.reason || !expected.completedAt || this.authorizingEffects.size >= 128) {
       report('protected'); return result;
     }
@@ -3711,11 +3742,13 @@ export class CodexAppServer {
       gate = 'path';
       if (typeof before.path !== 'string' || !before.path.trim()) return skip();
       gate = 'head';
-      if (head?.id !== expected.runId || head.status !== expected.phase) return skip();
+      const ownedIndex = before.turns.findIndex((turn: any) => turn.id === expected.runId);
+      const expectedHeadId = expected.nativeHistory?.turnId ?? expected.runId;
+      if (ownedIndex < 0 || before.turns[ownedIndex]?.status !== expected.phase || head?.id !== expectedHeadId) return skip();
       gate = 'active-history';
-      if (before.turns.some((turn: any) => !['completed', 'failed', 'interrupted'].includes(turn.status))) return skip();
+      if (before.turns.slice(ownedIndex).some((turn: any) => !['completed', 'failed', 'interrupted'].includes(turn.status))) return skip();
       gate = 'child-work';
-      if (before.turns.some((turn: any) => hasNativeChildWork(turn.items, threadId))) return skip();
+      if (before.turns.slice(ownedIndex).some((turn: any) => hasNativeChildWork(turn.items, threadId))) return skip();
       gate = 'goal';
       const goal = nativeGoalEvidence(await read('thread/goal/get', { threadId }), threadId);
       if (nativeGoalProtection(goal.status)) return skip();
@@ -4001,6 +4034,8 @@ export class CodexAppServer {
     let windowsLaunchAuthorized = false;
     let stdoutDrain = Promise.resolve();
     const closed = new Promise<void>(resolve => child.once('close', () => {
+      const lifetime = this.childLifetimes.get(child);
+      if (lifetime?.sigkillTimer) { clearTimeout(lifetime.sigkillTimer); lifetime.sigkillTimer = undefined; }
       this.stopChild(child);
       // A dormant bootstrap cannot have native descendants. Losing assignment
       // before sending launch must not wedge all future starts. Once launch is
@@ -5529,8 +5564,12 @@ export class CodexAppServer {
         read, check, undefined, new Set<string>(thread.turns.map((turn: any) => turn.id))); }
       catch { check(); return blocked('subagent-review'); }
     }
+    const backgroundContinuation = blockedGoalInput && before.status !== 'blocked'
+      && execution.nativeHistory?.state === 'blocked'
+      && execution.nativeHistory.reason === 'background-work';
     const available = (value: any) => value.status?.type === 'notLoaded'
-      || value.status?.type === 'idle' && value.canAcceptDirectInput === true;
+      || (value.status?.type === 'idle' || backgroundContinuation && value.status?.type === 'active')
+        && value.canAcceptDirectInput === true;
     if (!available(thread)) return checkpoint;
     try {
       if (blockedGoalInput && before.status === 'blocked') {
@@ -5552,10 +5591,40 @@ export class CodexAppServer {
                 proofCheck();
               }
             });
-        } catch { check(); return blocked('cleanup-unconfirmed'); }
+        } catch (error) { check(); return blocked(error instanceof BackgroundTerminalDrainError ? 'background-work' : 'cleanup-unconfirmed'); }
         check();
+      } else if (backgroundContinuation) {
+        // Allow user-queued follow-up while owned post-turn background terminals
+        // are alive, but never bypass unconfirmed interrupted-turn cleanup proof.
+        const interruptedTurns = thread.turns.slice(start).filter((turn: any) => turn.status === 'interrupted');
+        if (interruptedTurns.length) {
+          if (typeof thread.path !== 'string' || !thread.path.trim()) return blocked('cleanup-unconfirmed');
+          try {
+            await this.rolloutReader.projectTurnsAndDisposeWithin(thread.path, interruptedTurns.map((turn: any) => String(turn.id)),
+              this.options.requestTimeoutMs ?? CODEX_HISTORY_VERIFICATION_TIMEOUT_MS, async (rollout, expired) => {
+                const proofCheck = () => { check(); if (expired()) throw new RunControlConflict(); };
+                proofCheck();
+                for (const turn of interruptedTurns) {
+                  proofCheck();
+                  await this.requireInterruptedTurnSettled(thread.id, turn, proofCheck, rollout);
+                  proofCheck();
+                }
+              });
+          } catch { check(); return blocked('cleanup-unconfirmed'); }
+          check();
+        }
       }
-      if ((await backgroundTerminals(read, thread.id, check)).length) return blocked('background-work');
+      const liveTerminals = await backgroundTerminals(read, thread.id, check);
+      if (liveTerminals.length) {
+        if (!backgroundContinuation) return blocked('background-work');
+        const ownedItemIds = new Set<string>([
+          ...thread.turns.flatMap((turn: any) => arrayValue(turn.items)
+            .filter((item: any) => item.type === 'commandExecution' && typeof item.id === 'string')
+            .map((item: any) => String(item.id))),
+          ...(execution.pendingCommandTools ?? []),
+        ]);
+        if (liveTerminals.some(terminal => !ownedItemIds.has(terminal.itemId))) return blocked('background-work');
+      }
       const latest = historyThread(await read('thread/read', { threadId: thread.id, includeTurns: true }), thread.id);
       check();
       const after = await goal();
@@ -5577,6 +5646,7 @@ export class CodexAppServer {
         || this.legacyExecutions.get(sessionKey)?.revision !== execution.revision
         || this.projectionVersion(sessionKey) !== version || !activity.current()) throw new TurnStartDeferred();
     };
+    let preserveBlocked = false;
     try {
       check();
       if (!this.legacyExecutions.canStart(sessionKey, blockedGoalInput) || execution.nativeHistory.connectionId !== connectionId) throw new TurnStartDeferred();
@@ -5587,14 +5657,18 @@ export class CodexAppServer {
       // native availability, goal, terminal-list and snapshot checks at send.
       const proof = await this.inspectNativeHistory(thread, execution, check, false, blockedGoalInput, activity.request);
       check();
-      if (proof.state !== 'verified') throw new TurnStartDeferred();
+      if (proof.state !== 'verified') {
+        if (proof.state === 'blocked' && proof.reason === execution.nativeHistory.reason
+          && proof.fingerprint === execution.nativeHistory.fingerprint) preserveBlocked = true;
+        throw new TurnStartDeferred();
+      }
       // The caller must check once more after its await resumes, in the same
       // synchronous turn as resume/start/compact. A notification can invalidate
       // the proof in that last microtask gap as well as during native reads.
       return check;
     } catch {
       // Invalidate only the predecessor inspected here, not a newly begun run.
-      if (this.legacyExecutions.get(sessionKey)?.revision === execution.revision) {
+      if (!preserveBlocked && this.legacyExecutions.get(sessionKey)?.revision === execution.revision) {
         this.legacyExecutions.invalidateNativeHistory(sessionKey);
         this.threadRefreshResult.delete(sessionKey);
       }
@@ -5617,7 +5691,12 @@ export class CodexAppServer {
     if (this.blockUnauthorizedHead(sessionKey)) return;
     if (!this.legacyExecutions.canStart(sessionKey, true)) return;
     const current = this.options.store.getSession(sessionKey);
-    if (!current || runtimeBusy(current.runtime) || (current.runtime && current.runtime.sync !== 'current') || current.hasActiveRun
+    const allowBgContinuation = current?.runtime?.executionProtection?.state === 'blocked'
+      && current.runtime.executionProtection.reason === 'background-work'
+      && !runtimeBusy(current.runtime) && current.runtime.sync === 'current'
+      && current.runtime.connection === 'connected';
+    if (!current || runtimeBusy(current.runtime) || (current.runtime && current.runtime.sync !== 'current')
+      || (!allowBgContinuation && current.hasActiveRun)
       || (!this.legacyExecutions.get(sessionKey) && this.activeTurnIds.has(sessionKey))) return;
     const entries = waitingBatch(this.legacyTurnQueue.list<CodexQueuedPayload>('codex', sessionKey, 16),
       entry => this.authorized(sessionKey, entry.payload.actorId, entry.payload.executionGrant));
@@ -6081,10 +6160,25 @@ export class CodexAppServer {
         if (lifetime.job) lifetime.job.stop();
         else child.kill(); // dormant bootstrap only; assignment still owns the lifetime fence
       } else if (process.platform === 'linux') {
-        try { process.kill(-child.pid, 'SIGTERM'); }
+        const pid = child.pid;
+        try { process.kill(-pid, 'SIGTERM'); }
         catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ESRCH') throw error; }
+        lifetime.sigkillTimer = setTimeout(() => {
+          lifetime.sigkillTimer = undefined;
+          if (child.exitCode !== null || child.signalCode !== null) return;
+          console.warn(`[codex] App Server process group ${pid} did not exit after ${LINUX_PROCESS_GROUP_SIGKILL_GRACE_MS}ms; escalating to SIGKILL`);
+          try { process.kill(-pid, 'SIGKILL'); } catch { /* already gone or EPERM */ }
+        }, LINUX_PROCESS_GROUP_SIGKILL_GRACE_MS);
+        lifetime.sigkillTimer.unref();
       } else if (!child.kill('SIGTERM')) {
         console.warn('[codex] Could not signal App Server; still waiting for child close');
+      } else {
+        lifetime.sigkillTimer = setTimeout(() => {
+          lifetime.sigkillTimer = undefined;
+          if (child.exitCode !== null || child.signalCode !== null) return;
+          try { child.kill('SIGKILL'); } catch { /* already gone */ }
+        }, LINUX_PROCESS_GROUP_SIGKILL_GRACE_MS);
+        lifetime.sigkillTimer.unref();
       }
     } catch {
       console.warn('[codex] Could not stop App Server; still waiting for child close');

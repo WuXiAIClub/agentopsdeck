@@ -494,11 +494,11 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/routes/connector.ts",
-            "line": 1196
+            "line": 1218
           },
           {
             "file": "apps/server/src/routes/connector.ts",
-            "line": 1212
+            "line": 1234
           }
         ],
         "x-aod-raw-path": "/api/connector/v1/agents/:agentId/sessions",
@@ -522,7 +522,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/routes/connector.ts",
-            "line": 1188
+            "line": 1210
           }
         ],
         "x-aod-raw-path": "/api/connector/v1/agents/antigravity/sessions",
@@ -546,7 +546,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/routes/connector.ts",
-            "line": 1188
+            "line": 1210
           }
         ],
         "x-aod-raw-path": "/api/connector/v1/agents/claude-code/sessions",
@@ -570,7 +570,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/routes/connector.ts",
-            "line": 1188
+            "line": 1210
           }
         ],
         "x-aod-raw-path": "/api/connector/v1/agents/ghcp/sessions",
@@ -598,7 +598,7 @@
           },
           {
             "file": "apps/server/src/routes/connector.ts",
-            "line": 434
+            "line": 456
           }
         ],
         "x-aod-raw-path": "/api/connector/v1/capabilities",
@@ -872,7 +872,7 @@
           },
           {
             "file": "apps/server/src/routes/connector.ts",
-            "line": 461
+            "line": 483
           }
         ],
         "x-aod-raw-path": "/api/connector/v1/gateway/model-set",
@@ -900,7 +900,7 @@
           },
           {
             "file": "apps/server/src/routes/connector.ts",
-            "line": 467
+            "line": 489
           }
         ],
         "x-aod-raw-path": "/api/connector/v1/gateway/model-set/reconcile",
@@ -928,7 +928,7 @@
           },
           {
             "file": "apps/server/src/routes/connector.ts",
-            "line": 416
+            "line": 438
           }
         ],
         "x-aod-raw-path": "/api/connector/v1/health",
@@ -956,7 +956,7 @@
           },
           {
             "file": "apps/server/src/routes/connector.ts",
-            "line": 362
+            "line": 384
           }
         ],
         "x-aod-raw-path": "/api/connector/v1/identity",
@@ -984,7 +984,7 @@
           },
           {
             "file": "apps/server/src/routes/connector.ts",
-            "line": 396
+            "line": 418
           }
         ],
         "x-aod-raw-path": "/api/connector/v1/info",
@@ -1130,7 +1130,7 @@
           },
           {
             "file": "apps/server/src/routes/connector.ts",
-            "line": 506
+            "line": 528
           }
         ],
         "x-aod-raw-path": "/api/connector/v1/models/:runtime",
@@ -1268,7 +1268,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/routes/connector.ts",
-            "line": 643
+            "line": 665
           }
         ],
         "x-aod-raw-path": "/api/connector/v1/sessions/:sessionKey",
@@ -1301,7 +1301,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/routes/connector.ts",
-            "line": 608
+            "line": 630
           }
         ],
         "x-aod-raw-path": "/api/connector/v1/sessions/:sessionKey/archive",
@@ -1334,7 +1334,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/routes/connector.ts",
-            "line": 959
+            "line": 981
           }
         ],
         "x-aod-raw-path": "/api/connector/v1/sessions/:sessionKey/compact",
@@ -1367,7 +1367,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/routes/connector.ts",
-            "line": 790
+            "line": 812
           }
         ],
         "x-aod-raw-path": "/api/connector/v1/sessions/:sessionKey/files",
@@ -1400,7 +1400,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/routes/connector.ts",
-            "line": 835
+            "line": 857
           }
         ],
         "x-aod-raw-path": "/api/connector/v1/sessions/:sessionKey/files/rebuild",
@@ -1441,7 +1441,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/routes/connector.ts",
-            "line": 836
+            "line": 858
           }
         ],
         "x-aod-raw-path": "/api/connector/v1/sessions/:sessionKey/files/rebuild/:jobId",
@@ -1480,7 +1480,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/routes/connector.ts",
-            "line": 837
+            "line": 859
           }
         ],
         "x-aod-raw-path": "/api/connector/v1/sessions/:sessionKey/files/rebuild/:jobId",
@@ -1620,7 +1620,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/routes/connector.ts",
-            "line": 839
+            "line": 861
           }
         ],
         "x-aod-raw-path": "/api/connector/v1/sessions/:sessionKey/messages",
@@ -1651,11 +1651,11 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/routes/connector.ts",
-            "line": 982
+            "line": 1004
           },
           {
             "file": "apps/server/src/routes/connector.ts",
-            "line": 1003
+            "line": 1025
           }
         ],
         "x-aod-raw-path": "/api/connector/v1/sessions/:sessionKey/messages",
@@ -1696,7 +1696,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/routes/connector.ts",
-            "line": 897
+            "line": 919
           }
         ],
         "x-aod-raw-path": "/api/connector/v1/sessions/:sessionKey/messages/:messageId",
@@ -1778,7 +1778,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/routes/connector.ts",
-            "line": 621
+            "line": 643
           }
         ],
         "x-aod-raw-path": "/api/connector/v1/sessions/:sessionKey/pin",
@@ -1844,7 +1844,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/routes/connector.ts",
-            "line": 769
+            "line": 791
           }
         ],
         "x-aod-raw-path": "/api/connector/v1/sessions/:sessionKey/skills",
@@ -1877,7 +1877,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/routes/connector.ts",
-            "line": 689
+            "line": 711
           }
         ],
         "x-aod-raw-path": "/api/connector/v1/sessions/:sessionKey/state",
@@ -1910,7 +1910,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/routes/connector.ts",
-            "line": 702
+            "line": 724
           }
         ],
         "x-aod-raw-path": "/api/connector/v1/sessions/:sessionKey/token-usage",
@@ -1943,7 +1943,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/routes/connector.ts",
-            "line": 702
+            "line": 724
           }
         ],
         "x-aod-raw-path": "/api/connector/v1/sessions/:sessionKey/token-usage/export",
@@ -1967,7 +1967,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/routes/connector.ts",
-            "line": 571
+            "line": 593
           }
         ],
         "x-aod-raw-path": "/api/connector/v1/sessions/directory",
@@ -1991,7 +1991,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/routes/connector.ts",
-            "line": 583
+            "line": 605
           }
         ],
         "x-aod-raw-path": "/api/connector/v1/sessions/state",
