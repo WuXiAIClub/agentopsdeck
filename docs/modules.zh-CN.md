@@ -33,6 +33,7 @@
 | [`apps/server/src/diagnostics`](../apps/server/src/diagnostics) | 有界性能/受保护诊断；不要公开未脱敏请求。 |
 | [`apps/server/src/execution`](../apps/server/src/execution) | 智能体适配器共用的独立原生进程环境，以及有界、脱敏的诊断。 |
 | [`apps/server/src/gateway`](../apps/server/src/gateway) | Gateway RPC、发现和资源/执行集成；地址与凭据来自私有设置。 |
+| [`apps/server/src/git-status`](../apps/server/src/git-status) | 操作者配置的 GitHub 账号定义与只读仓库状态聚合（PR 列表、开启 Issue 数量与 GitHub Actions 运行状态），带缓存、并发去重及严格 URL/仓库名校验。 |
 | [`apps/server/src/hermes`](../apps/server/src/hermes) | Hermes 执行和历史集成；需独立配置原生目录，默认关闭。 |
 | [`apps/server/src/hub`](../apps/server/src/hub) | 存储/worker、成员身份、连接授权、共享会话、执行连续性、队列、看板/卡片/布局、文件绑定、浏览/研究和用量；权限版本必须有效。 |
 | [`apps/server/src/lifecycle`](../apps/server/src/lifecycle) | 请求排空、暂停/恢复、独立维护及关闭归属；经过时间不是执行结束证明。 |

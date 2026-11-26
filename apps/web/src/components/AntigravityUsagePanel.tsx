@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { Clock3, RefreshCw } from 'lucide-react';
 import type { AntigravityUsage } from '@agentopsdeck/shared';
 import { api, recoveryScope } from '../api';
+import { isEmptyQuotaFraction, isLowQuotaFraction, resolveQuotaSampleGroupIndex } from '../lib/antigravity-quota';
 import { useI18n } from '../lib/i18n';
 import { ResourceAction, ResourceTitle, ResourceToolbar } from './ResourceToolbar';
-import { CardKindIcon } from './CardKindIcon';
 import './antigravity-quota-card.css';
 
 const AUTO_REFRESH_INTERVAL_MS = 60_000;
@@ -40,34 +40,39 @@ export default function AntigravityUsagePanel({ scope }: { scope: string }) {
   const busy = result?.generation !== generation;
   const usage = result?.usage;
   const percent = new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 1 });
+  const sampleGroupIndex = usage ? resolveQuotaSampleGroupIndex(usage.groups) : -1;
+  const sampledAt = usage ? <div className="antigravity-quota-sample" role="status"><Clock3 size={13} aria-hidden="true" /><span>{t('Quota checked at')} · <time dateTime={new Date(usage.sampledAt).toISOString()}>{new Date(usage.sampledAt).toLocaleString(locale)}</time></span></div> : null;
   return <section className="antigravity-quota-card" aria-label={t('Antigravity account quota')} aria-busy={busy}>
     <ResourceTitle>{t('Antigravity account quota')}</ResourceTitle>
     <ResourceToolbar>
       <ResourceAction label={t('Refresh')} disabled={busy || usage === null} onClick={() => setGeneration(value => value + 1)}><RefreshCw size={15} className={busy ? 'antigravity-quota-refreshing' : undefined} /></ResourceAction>
     </ResourceToolbar>
     <div className="antigravity-quota-body">
-      <div className="antigravity-quota-hero" aria-hidden="true">
-        <span className="workspace-glass-emblem"><CardKindIcon kind="antigravity-quota" /></span>
-        <div><span>{t('Status cards')}</span><strong>{t('Quota remaining')}</strong></div>
-      </div>
       {busy && usage === undefined && <p role="status">{t('Loading…')}</p>}
       {!busy && usage === undefined && <p role="alert">{t('Antigravity quota unavailable. Try refreshing.')}</p>}
       {usage === null && <p>{t('Antigravity is not configured on this server.')}</p>}
       {usage && <>
-        {!usage.groups.length && <p>{t('Antigravity reported no quota windows.')}</p>}
-        {usage.groups.map(group => {
+        {!usage.groups.length && <>
+          <p>{t('Antigravity reported no quota windows.')}</p>
+          {sampledAt}
+        </>}
+        {usage.groups.map((group, index) => {
           const name = group.name === 'Gemini Models' ? t('Gemini Models') : group.name === 'Claude and GPT models' ? t('Claude and GPT models') : group.name;
           return <div className="antigravity-quota-group" key={group.name} role="group" aria-label={name}>
-            <h3>{name}</h3>
+            <div className="antigravity-quota-group-header">
+              <h3>{name}</h3>
+              {index === sampleGroupIndex && sampledAt}
+            </div>
             <ul role="list">{group.windows.map(bucket => {
               const windowLabel = bucket.window === '5h' ? t('5-hour quota') : bucket.window === 'weekly' ? t('Weekly quota') : bucket.window;
               const remaining = percent.format(bucket.remainingFraction);
-              const low = bucket.remainingFraction <= 0.2;
+              const low = isLowQuotaFraction(bucket.remainingFraction);
+              const empty = isEmptyQuotaFraction(bucket.remainingFraction);
               return <li key={bucket.id} data-low={low || undefined}>
                 <div className="antigravity-quota-dial" aria-hidden="true">
                   <svg viewBox="0 0 72 72" focusable="false">
                     <circle cx="36" cy="36" r="31" />
-                    <circle className="antigravity-quota-arc" cx="36" cy="36" r="31" pathLength="100" strokeDasharray={`${bucket.remainingFraction * 100} 100`} />
+                    <circle className="antigravity-quota-arc" cx="36" cy="36" r="31" pathLength="100" strokeDasharray={`${bucket.remainingFraction * 100} 100`} data-empty={empty || undefined} />
                   </svg>
                   <strong>{remaining}</strong>
                 </div>
@@ -80,7 +85,6 @@ export default function AntigravityUsagePanel({ scope }: { scope: string }) {
             })}</ul>
           </div>;
         })}
-        <div className="antigravity-quota-sample" role="status"><Clock3 size={13} aria-hidden="true" /><span>{t('Quota checked at')} · <time dateTime={new Date(usage.sampledAt).toISOString()}>{new Date(usage.sampledAt).toLocaleString(locale)}</time></span></div>
       </>}
     </div>
   </section>;

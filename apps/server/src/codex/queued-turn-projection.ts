@@ -23,7 +23,10 @@ export function codexQueueDisposition(id: string, facts: Pick<CodexQueueDisplayF
 export function codexQueuedTurnMessage(entry: QueuedTurn<CodexStartupPayload>, facts: CodexQueueDisplayFacts,
   current: SessionSummary | undefined, updatedAt = Date.now()): ChatMessage {
   return { id: entry.id, sessionKey: entry.sessionKey, role: 'user', text: entry.payload.text,
-    queueVersion: facts.version, queueDisposition: codexQueueDisposition(entry.id, facts, current),
+    queueVersion: facts.version,
+    queueDisposition: entry.state === 'outcome_unknown' && facts.executionCommandId !== entry.id
+      ? 'waiting'
+      : codexQueueDisposition(entry.id, facts, current),
     status: entry.state === 'blocked' ? 'failed' : entry.state === 'queued' ? 'queued' : 'outcome_unknown',
     ...(entry.state === 'blocked' ? { failureReason: new TurnAuthorizationError().message } : {}),
     createdAt: entry.createdAt, updatedAt,

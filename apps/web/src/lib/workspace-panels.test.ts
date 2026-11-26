@@ -57,6 +57,18 @@ test('Antigravity account quota restores as one standalone pane without a sessio
   assert.equal(reactivated.panes, layout.panes);
   assert.deepEqual(restoreWorkspace(JSON.parse(JSON.stringify(layout)), new Set()), layout);
 });
+test('Git repository status panes restore independently without session identities', () => {
+  const first = { id: 'git-1', kind: 'git-repo-status', resourceId: '11111111-1111-4111-8111-111111111111' } as const;
+  const second = { id: 'git-2', kind: 'git-repo-status', resourceId: '22222222-2222-4222-8222-222222222222' } as const;
+  let layout = openResourcePane(open(), first, 1800, 1000);
+  layout = openResourcePane(layout, second, 1800, 1000);
+  assert.equal(validWorkspace(layout), true);
+  assert.equal(isSessionPane(first), false);
+  assert.equal(layout.panes.filter(pane => pane.kind === 'git-repo-status').length, 2);
+  assert.equal(validPane({ ...first, sessionKey: session.sessionKey }), false);
+  assert.equal(validPane({ ...first, resourceId: '../not-a-uuid' }), false);
+  assert.deepEqual(restoreWorkspace(JSON.parse(JSON.stringify(layout)), new Set()), layout);
+});
 test('resources dock with a separate budget and never evict sessions at capacity', () => {
   let layout = presetWorkspace([session], 'single');
   for (let i = 0; i < 4; i++) layout = selectWorkspaceSession(layout, `s${i}`, undefined, `s${i}`, 1800, 1000);

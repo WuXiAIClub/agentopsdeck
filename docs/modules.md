@@ -35,6 +35,7 @@ admission timeouts proof of execution termination.
 | [`apps/server/src/diagnostics`](../apps/server/src/diagnostics) | Bounded performance/guarded traces and operational diagnostics. Do not attach unredacted provider requests to public reports. |
 | [`apps/server/src/execution`](../apps/server/src/execution) | Independent native-process environments and bounded, redacted diagnostics shared by agent adapters. |
 | [`apps/server/src/gateway`](../apps/server/src/gateway) | Gateway RPC, discovery and configured resource/execution integration; addresses and credentials come from private settings. |
+| [`apps/server/src/git-status`](../apps/server/src/git-status) | Operator-configured GitHub account definitions and read-only repository status aggregation (pull requests, open issue counts, and GitHub Actions runs) with caching, singleflight and strict URL/slug validation. |
 | [`apps/server/src/hermes`](../apps/server/src/hermes) | Hermes execution/history integration; opt-in adapter with separately provisioned native home. |
 | [`apps/server/src/hub`](../apps/server/src/hub) | Hub stores/workers, member identity, connection grants, shared sessions, execution continuity, queues, workspace boards/cards/layouts, file binding, browser/research and usage; authorization versions are authoritative. |
 | [`apps/server/src/lifecycle`](../apps/server/src/lifecycle) | Drain, pause/resume, independent maintenance and shutdown ownership; elapsed time is not an execution completion certificate. |

@@ -95,11 +95,11 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/application-system-reads-http.ts",
-            "line": 72
+            "line": 76
           },
           {
             "file": "apps/server/src/application-system-reads-http.ts",
-            "line": 77
+            "line": 99
           }
         ],
         "x-aod-raw-path": "/api/antigravity/usage",
@@ -433,7 +433,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/application-system-reads-http.ts",
-            "line": 77
+            "line": 99
           },
           {
             "file": "apps/server/src/routes/system.ts",
@@ -3478,7 +3478,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/application-system-reads-http.ts",
-            "line": 78
+            "line": 100
           },
           {
             "file": "apps/server/src/routes/system.ts",
@@ -3506,7 +3506,7 @@
         "x-aod-sources": [
           {
             "file": "apps/server/src/application-system-reads-http.ts",
-            "line": 77
+            "line": 99
           },
           {
             "file": "apps/server/src/routes/system.ts",
@@ -3514,6 +3514,62 @@
           }
         ],
         "x-aod-raw-path": "/api/gateway/status",
+        "x-aod-authorization": "Unspecified in inventory; route-specific authentication and grants are required where enforced by the implementation."
+      }
+    },
+    "/api/git/accounts": {
+      "get": {
+        "operationId": "route_bc6d472c67104133",
+        "summary": "GET /api/git/accounts",
+        "tags": [
+          "Application"
+        ],
+        "description": "Source route inventory, not a complete request/response or authorization contract. Read x-aod-sources and the bilingual API guide before calling. Role-specific and internal registrations can share this path.",
+        "parameters": [],
+        "responses": {
+          "default": {
+            "description": "Implementation-defined status, payload and streaming behavior; inspect the linked source and route tests."
+          }
+        },
+        "x-aod-sources": [
+          {
+            "file": "apps/server/src/application-system-reads-http.ts",
+            "line": 81
+          },
+          {
+            "file": "apps/server/src/application-system-reads-http.ts",
+            "line": 99
+          }
+        ],
+        "x-aod-raw-path": "/api/git/accounts",
+        "x-aod-authorization": "Unspecified in inventory; route-specific authentication and grants are required where enforced by the implementation."
+      }
+    },
+    "/api/git/repo-status": {
+      "get": {
+        "operationId": "route_8b4d867de25474e4",
+        "summary": "GET /api/git/repo-status",
+        "tags": [
+          "Application"
+        ],
+        "description": "Source route inventory, not a complete request/response or authorization contract. Read x-aod-sources and the bilingual API guide before calling. Role-specific and internal registrations can share this path.",
+        "parameters": [],
+        "responses": {
+          "default": {
+            "description": "Implementation-defined status, payload and streaming behavior; inspect the linked source and route tests."
+          }
+        },
+        "x-aod-sources": [
+          {
+            "file": "apps/server/src/application-system-reads-http.ts",
+            "line": 84
+          },
+          {
+            "file": "apps/server/src/application-system-reads-http.ts",
+            "line": 99
+          }
+        ],
+        "x-aod-raw-path": "/api/git/repo-status",
         "x-aod-authorization": "Unspecified in inventory; route-specific authentication and grants are required where enforced by the implementation."
       }
     },
@@ -3538,7 +3594,7 @@
           },
           {
             "file": "apps/server/src/application-system-reads-http.ts",
-            "line": 77
+            "line": 99
           },
           {
             "file": "apps/server/src/application.ts",
@@ -13249,7 +13305,7 @@
       }
     }
   },
-  "x-aod-static-registrations": 490,
+  "x-aod-static-registrations": 494,
   "x-aod-unresolved-registrations": [
     {
       "method": "patch",

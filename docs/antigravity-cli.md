@@ -26,9 +26,13 @@ On the AOD instance that runs the CLI, open **Layout presets → Antigravity acc
 in the workspace, or open **Antigravity account quota** from the desktop's tools.
 No task board is needed. The standalone card reads `agy --output-format json -p '/usage'`
 using the configured AOD Antigravity home, and shows the remaining percentage
-and reported reset time for each model group and quota window. This is account
-quota, not per-session token usage or billing. Open the card to check it or use
-**Refresh**; the server shares a successful snapshot for up to 30 seconds.
+and reported reset time for each model group and quota window. The card opens
+directly to the model groups (without a duplicate top banner) and places the
+quota check timestamp inline on the Gemini Models group header row (falling back
+to the first group when Gemini Models is not present). This is account quota,
+not per-session token usage or billing. Open the card to check it or use
+**Refresh**; the card auto-refreshes every 60 seconds while visible and the
+server shares a successful snapshot for up to 30 seconds.
 
 The local administrator endpoint `GET /api/antigravity/usage` does not accept
 connector transport grants or a remote connector selector. It returns
