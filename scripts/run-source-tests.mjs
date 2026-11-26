@@ -45,9 +45,22 @@ export function selectTests(sources, requested = []) {
   return requested.length ? [...new Set(requested)].sort() : sources;
 }
 
-export function testArguments(target, files) {
-  if (target === 'server') return ['--import', 'tsx', '--test', '--test-reporter=tap', '--test-concurrency=4', ...files];
-  if (target === 'web') return ['--test', '--test-reporter=tap', '--test-concurrency=2', ...files];
+export function resolveTestConcurrency(target, environment = process.env) {
+  const fallback = target === 'server' ? 4 : target === 'web' ? 2 : null;
+  if (fallback === null) throw new Error('Unknown test target');
+  const raw = environment?.AOD_TEST_CONCURRENCY;
+  if (raw === undefined || raw === '') return fallback;
+  const parsed = Number(raw);
+  if (!Number.isInteger(parsed) || parsed < 1 || parsed > fallback) {
+    throw new Error(`Invalid AOD_TEST_CONCURRENCY=${raw}; expected integer 1..${fallback}`);
+  }
+  return parsed;
+}
+
+export function testArguments(target, files, environment = process.env) {
+  const concurrency = resolveTestConcurrency(target, environment);
+  if (target === 'server') return ['--import', 'tsx', '--test', '--test-reporter=tap', `--test-concurrency=${concurrency}`, ...files];
+  if (target === 'web') return ['--test', '--test-reporter=tap', `--test-concurrency=${concurrency}`, ...files];
   throw new Error('Unknown test target');
 }
 

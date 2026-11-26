@@ -38,6 +38,10 @@ test('both source lanes use bounded workers and retain every exact manifest path
   assert.deepEqual(runner.testArguments('server', files), ['--import', 'tsx', '--test', '--test-reporter=tap', '--test-concurrency=4', ...files]);
   const compiled = ['/fresh/lib/a.test.js', '/fresh/nested/b.test.js'];
   assert.deepEqual(runner.testArguments('web', compiled), ['--test', '--test-reporter=tap', '--test-concurrency=2', ...compiled]);
+  assert.deepEqual(runner.testArguments('server', files, { AOD_TEST_CONCURRENCY: '2' }), ['--import', 'tsx', '--test', '--test-reporter=tap', '--test-concurrency=2', ...files]);
+  assert.deepEqual(runner.testArguments('web', compiled, { AOD_TEST_CONCURRENCY: '1' }), ['--test', '--test-reporter=tap', '--test-concurrency=1', ...compiled]);
+  assert.throws(() => runner.testArguments('server', files, { AOD_TEST_CONCURRENCY: '5' }), /Invalid AOD_TEST_CONCURRENCY/);
+  assert.throws(() => runner.testArguments('server', files, { AOD_TEST_CONCURRENCY: '0' }), /Invalid AOD_TEST_CONCURRENCY/);
   assert.throws(() => runner.testArguments('other', files), /Unknown test target/);
   const source = readFileSync(new URL('./run-source-tests.mjs', import.meta.url), 'utf8');
   assert.ok(source.includes('run(testArguments(target, selected.map(source => join(sourceRoot, source))), 900_000)'));
