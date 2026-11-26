@@ -469,7 +469,7 @@ export function registerConnectorRoutes(app: Hono, deps: {
         ghcp: { enabled: !!deps.copilot, ready: deps.copilot?.ready === true, status: deps.copilot?.status ?? 'disabled', ownerOnly: true,
           features: { text: true, queue: true, interrupt: true, history: true, attachments: true, compact: true, delete: true, modelOverride: true, interactions: sdkHttp.sdkInteractions ? sdkHttp.sdkInteractions.ready('ghcp') === true : !!deps.interactions && deps.copilot?.ready === true } },
         antigravity: { enabled: !!deps.antigravity, ready: deps.antigravity?.ready === true, status: deps.antigravity?.status ?? 'disabled', ownerOnly: true,
-          features: { text: true, queue: true, interrupt: true, history: true, attachments: false, compact: false, delete: true, modelOverride: true, interactions: false } } },
+          features: { text: true, queue: true, interrupt: true, history: true, attachments: false, compact: true, delete: true, modelOverride: true, interactions: false } } },
       scopes: principal.scopes,
       limits: { maxMessageChars: MAX_MESSAGE_CHARS, maxRequestsPerMinute: 120, maxSseConnections: 2 },
       // Capabilities must not depend on an optional OpenClaw model lookup.
@@ -980,7 +980,7 @@ export function registerConnectorRoutes(app: Hono, deps: {
   });
   app.post(`${base}/sessions/:sessionKey/compact`, async c => {
     const sessionKey = c.req.param('sessionKey'), runtime = sessionRuntimeId(sessionKey), owned = sdk(runtime);
-    if (runtime !== 'claude-code' && runtime !== 'ghcp') return c.json({ error: 'Dedicated compact control is not supported for this runtime' }, 409);
+    if (runtime !== 'claude-code' && runtime !== 'ghcp' && runtime !== 'antigravity') return c.json({ error: 'Dedicated compact control is not supported for this runtime' }, 409);
     if (!owned?.ready) return c.json({ error: 'Agent is not ready; command was not admitted', code: 'agent_not_ready' }, 409);
     if (!sdkJournal(runtime).session(sessionKey)) return c.json({ error: 'session not found' }, 404);
     // registerCompactReceipts has already consumed and strictly validated the

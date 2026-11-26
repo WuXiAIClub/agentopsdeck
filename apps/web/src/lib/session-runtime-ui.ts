@@ -18,7 +18,7 @@ export function sessionRuntimeUi(session: Pick<SessionSummary, 'source' | 'contr
   return {
     sdk, configuredModel,
     attachments: sdk ? session.controlCapabilities?.attachments === true : !configuredModel,
-    compact: source === 'antigravity' ? false : sdk ? session.controlCapabilities?.compact === true : !configuredModel,
+    compact: sdk ? session.controlCapabilities?.compact === true : !configuredModel,
     deleteSession: true,
     modelCatalog: configuredModel ? undefined : sdk ? source : source === 'codex' ? 'codex' : 'openclaw',
   };

@@ -11,7 +11,9 @@ import type { PrivateWorkerDeletion } from '../connector/private-worker-prefligh
 import type { SdkInputAttachment } from '../connector/sdk-attachment-input.js';
 import type { SdkDispatchAdapter, SdkSettlement } from '../connector/sdk-dispatch.js';
 import { SdkExecutionDriver, type SdkDriverOptions, type SdkOwnedTurn } from '../connector/sdk-execution-driver.js';
-import type { SdkExecution, SdkExecutionRef, SdkTerminalOutcome } from '../connector/sdk-execution-journal.js';
+import type { SdkExecution, SdkExecutionRef, SdkCompactRef, SdkCompactResult, SdkCompactSettlement, SdkTerminalOutcome } from '../connector/sdk-execution-journal.js';
+import type { SdkCompactExecution } from '../connector/sdk-compact-dispatch.js';
+import { validateCompactExecution, type SdkOwnedCompactWorker } from '../connector/sdk-compact-worker.js';
 import { SdkOwnedRuntime, type SdkPreflight } from '../connector/sdk-owned-runtime.js';
 import { sdkModelAllowed } from '../connector/sdk-models.js';
 import type { SdkTurnContext } from '../connector/sdk-turn-context.js';
@@ -209,6 +211,156 @@ export class AntigravityWorkerDeletion implements SdkPreflight {
   }
 
   close(): void {}
+}
+
+export class AntigravityCompactWorker implements SdkOwnedCompactWorker {
+  private readonly worker: ReturnType<AntigravityWorkerFactory>;
+  private readonly timer: ReturnType<typeof setTimeout>;
+  readonly finished: Promise<void>;
+  readonly result: Promise<SdkCompactRef & SdkCompactResult>;
+  private cleaned = false;
+  private drained = false;
+  private failed = false;
+  private stopRequested = false;
+  private promptAdmitted = false;
+  private agySessionId: string | undefined;
+  private proof: (SdkCompactRef & SdkCompactResult) | undefined;
+  private resolveFinished!: () => void;
+
+  constructor(private readonly options: {
+    config: AntigravityConfig;
+    execution: SdkCompactExecution;
+    assertOwnership: () => void;
+    createWorker?: AntigravityWorkerFactory;
+    timeoutMs?: number;
+  }) {
+    validateCompactExecution(options.execution, 'antigravity');
+    const timeoutMs = options.timeoutMs ?? options.config.compactTimeoutMs ?? 600_000;
+    if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 2_147_483_647) throw failure();
+    const createWorker = options.createWorker ?? defaultWorkerFactory;
+    this.worker = createWorker({
+      config: options.config,
+      assertOwnership: options.assertOwnership,
+      update: event => this.handleUpdate(event),
+    });
+    this.finished = new Promise(resolve => { this.resolveFinished = resolve; });
+    this.timer = setTimeout(() => this.close(), timeoutMs);
+    this.result = this.run();
+    void this.result.catch(() => {});
+  }
+
+  private handleUpdate(event: AntigravitySessionUpdate): void {
+    if (this.failed || !this.agySessionId || event.sessionId !== this.agySessionId) {
+      this.failed = true;
+    }
+  }
+
+  private async run(): Promise<SdkCompactRef & SdkCompactResult> {
+    const { config, execution, assertOwnership } = this.options;
+    let outcome: SdkTerminalOutcome | undefined;
+    try {
+      assertOwnership();
+      const bound = readAntigravitySessionBinding(config, execution.nativeSessionId);
+      if (!bound) throw failure();
+      await this.worker.initialize();
+      if (this.failed) throw failure();
+      assertOwnership();
+      await this.worker.resumeOwnedSession(bound, resumedId => {
+        if (resumedId !== bound) throw failure();
+      });
+      this.agySessionId = bound;
+      if (this.failed) throw failure();
+      const targetModel = execution.model && execution.model !== 'default'
+        ? execution.model
+        : config.model && config.model !== 'default'
+          ? config.model
+          : undefined;
+      if (targetModel) {
+        await this.worker.setModel(targetModel);
+      }
+      if (this.failed) throw failure();
+      if (this.stopRequested) {
+        outcome = 'interrupted';
+      } else {
+        const promptResult = await this.worker.prompt('/compact', async sessionId => {
+          assertOwnership();
+          if (this.failed || !this.agySessionId || sessionId !== this.agySessionId) throw failure();
+          this.promptAdmitted = true;
+        });
+        if (this.failed) throw failure();
+        if (promptResult.stopReason === 'end_turn') {
+          outcome = this.stopRequested ? 'interrupted' : 'completed';
+        } else if (promptResult.stopReason === 'cancelled' && this.stopRequested) {
+          outcome = 'interrupted';
+        } else {
+          throw failure();
+        }
+      }
+    } catch (error) {
+      if (error instanceof AntigravityAcpError && this.promptAdmitted && !this.failed) {
+        outcome = 'failed';
+      } else {
+        this.failed = true;
+      }
+    } finally {
+      clearTimeout(this.timer);
+      const drained = await this.worker.stopAndDrain();
+      this.cleaned = drained.cleaned;
+      this.drained = true;
+      this.resolveFinished();
+    }
+    if (this.failed || !outcome || !this.cleaned) throw failure();
+    const suffix = outcome === 'completed' ? '' : `_${outcome}`;
+    const proof: SdkCompactRef & SdkCompactResult = {
+      id: execution.id,
+      key: execution.key,
+      epoch: execution.epoch,
+      nativeSessionId: execution.nativeSessionId,
+      nativeRequestId: execution.id,
+      completionEventId: sanitizeId(`compact_${execution.id}${suffix}`),
+      outcome,
+    };
+    this.proof = proof;
+    return structuredClone(proof);
+  }
+
+  async interrupt(): Promise<void> {
+    if (this.failed || this.drained || this.proof || this.stopRequested) throw failure();
+    this.stopRequested = true;
+    if (this.promptAdmitted) {
+      this.worker.cancel();
+    }
+  }
+
+  async inspectQuiescence(): Promise<boolean> {
+    return this.drained && this.cleaned;
+  }
+
+  async inspectSettlement(): Promise<SdkCompactSettlement> {
+    const proof = await this.result;
+    const bound = readAntigravitySessionBinding(this.options.config, this.options.execution.nativeSessionId);
+    const validBinding = Boolean(bound && this.agySessionId && bound === this.agySessionId);
+    return {
+      id: proof.id,
+      key: proof.key,
+      epoch: proof.epoch,
+      nativeSessionId: proof.nativeSessionId,
+      completionEventId: proof.completionEventId,
+      historyPersisted: validBinding && !this.failed,
+      nativeQuiescent: await this.inspectQuiescence(),
+    };
+  }
+
+  close(): void {
+    clearTimeout(this.timer);
+    if (this.drained) return;
+    this.failed = true;
+    void this.worker.stopAndDrain().then(drained => {
+      this.cleaned = drained.cleaned;
+      this.drained = true;
+      this.resolveFinished();
+    });
+  }
 }
 
 export class AntigravitySdkTurn implements SdkOwnedTurn {
@@ -670,7 +822,7 @@ export class AntigravityDispatchAdapter implements SdkDispatchAdapter {
 }
 
 export class AntigravityExecutionDriver extends SdkExecutionDriver<AntigravitySdkTurn> {
-  constructor(options: Pick<SdkDriverOptions<AntigravitySdkTurn>, 'deadlineMs' | 'admissionReady' | 'authorize' | 'changed' | 'turnContext'> & {
+  constructor(options: Pick<SdkDriverOptions<AntigravitySdkTurn>, 'deadlineMs' | 'admissionReady' | 'authorize' | 'changed' | 'startCompact' | 'compactTimeoutMs' | 'turnContext'> & {
     store: Pick<ConnectorUserStore, 'turns' | 'antigravityJournal' | 'antigravityTranscript'>;
     start: (execution: SdkExecution, text: string, projection: AntigravityProjection, context?: SdkTurnContext) => AntigravitySdkTurn;
   }) {
@@ -720,7 +872,8 @@ export class AntigravityOwnedRuntime extends SdkOwnedRuntime<'antigravity', Anti
   constructor(options: AntigravityOwnedOptions,
     start?: AntigravityStarter,
     check: (config: AntigravityConfig) => SdkPreflight = value => new AntigravityWorkerPreflight(value),
-    deleteNative: (config: AntigravityConfig, request: PrivateWorkerDeletion) => SdkPreflight = (value, request) => new AntigravityWorkerDeletion(value, request)) {
+    deleteNative: (config: AntigravityConfig, request: PrivateWorkerDeletion) => SdkPreflight = (value, request) => new AntigravityWorkerDeletion(value, request),
+    compact?: (execution: SdkCompactExecution, assertOwnership: () => void) => SdkOwnedCompactWorker) {
     const config = structuredClone(options.config);
     const ownedConfig = { ...config, model: config.model ?? 'default', ...(!config.modelChoices ? { dynamicModels: true } : {}) };
     super({
@@ -739,11 +892,22 @@ export class AntigravityOwnedRuntime extends SdkOwnedRuntime<'antigravity', Anti
         store: options.store,
         deadlineMs: config.startupTimeoutMs,
         ...(options.turnContext ? { turnContext: options.turnContext } : {}),
-        authorize: (key, actor, action) => action !== 'runs:compact'
-          && (action === 'runs:interrupt' || sdkModelAllowed(ownedConfig, options.store.antigravityJournal.session(key)?.model))
+        authorize: (key, actor, action) => (action === 'runs:interrupt'
+          || sdkModelAllowed(ownedConfig, options.store.antigravityJournal.session(key)?.model))
           && options.authorize(key, actor, action),
         admissionReady: hooks.admissionReady,
         changed: hooks.changed,
+        compactTimeoutMs: config.compactTimeoutMs ?? 600_000,
+        startCompact: execution => {
+          hooks.assertOwnership();
+          if (compact) return compact(execution, hooks.assertOwnership);
+          return new AntigravityCompactWorker({
+            config: structuredClone(config),
+            execution,
+            assertOwnership: hooks.assertOwnership,
+            timeoutMs: config.compactTimeoutMs ?? 600_000,
+          });
+        },
         start: (execution, text, projection) => {
           hooks.assertOwnership();
           if (start) return start(execution, text, projection, hooks.assertOwnership);
@@ -862,6 +1026,7 @@ export type AsyncAntigravityOwnedOptions = Pick<AsyncLifecycle, 'owner' | 'confi
   & Pick<AsyncSdkDriverOptions<AntigravitySdkTurn>, 'turnContext'>;
 export type AsyncAntigravityOwnedPorts = Partial<Pick<AsyncLifecycle, 'check' | 'deleteNative'>> & {
   start?: ConstructorParameters<typeof AsyncAntigravityExecutionDriver>[0]['start'];
+  compact?: (execution: SdkCompactExecution, assertOwnership: () => void) => SdkOwnedCompactWorker;
 };
 
 export function createAsyncAntigravityConnectorRuntime(options: AsyncAntigravityOwnedOptions, ports: AsyncAntigravityOwnedPorts = {}) {
@@ -870,6 +1035,10 @@ export function createAsyncAntigravityConnectorRuntime(options: AsyncAntigravity
 
 export async function createAsyncAntigravityOwnedRuntime(options: AsyncAntigravityOwnedOptions, ports: AsyncAntigravityOwnedPorts = {}) {
   const config = structuredClone(options.config);
+  const compactModels = {
+    model: config.model ?? 'default',
+    ...(config.modelChoices ? { modelChoices: config.modelChoices } : { dynamicModels: true }),
+  };
   return AsyncSdkOwnedRuntime.create({
     ...options,
     config,
@@ -887,6 +1056,20 @@ export async function createAsyncAntigravityOwnedRuntime(options: AsyncAntigravi
       ...(options.diagnostics ? { diagnostics: options.diagnostics } : {}),
       admissionReady: hooks.admissionReady,
       changed: hooks.changed,
+      compact: {
+        models: compactModels,
+        timeoutMs: config.compactTimeoutMs ?? 600_000,
+        start: execution => {
+          hooks.assertOwnership();
+          if (ports.compact) return ports.compact(execution, hooks.assertOwnership);
+          return new AntigravityCompactWorker({
+            config: structuredClone(config),
+            execution,
+            assertOwnership: hooks.assertOwnership,
+            timeoutMs: config.compactTimeoutMs ?? 600_000,
+          });
+        },
+      },
       start: (execution, text, projection, context, attachments, interaction) => {
         hooks.assertOwnership();
         if (ports.start) return ports.start(execution, text, projection, context, attachments, interaction);

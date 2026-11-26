@@ -32,7 +32,7 @@ export function registerSdkCompactHttp(app: Hono, path: string, deps: SdkCompact
   let bodyReaders = 0;
   const scope = (c: Context) => {
     const key = c.req.param('sessionKey')!, runtime = sessionRuntimeId(key);
-    return runtime === 'claude-code' || runtime === 'ghcp' ? { runtime, key } : undefined;
+    return runtime === 'claude-code' || runtime === 'ghcp' || runtime === 'antigravity' ? { runtime, key } : undefined;
   };
   const authority = (c: Context) => {
     const authorization = c.req.raw.headers.get('authorization') ?? '';

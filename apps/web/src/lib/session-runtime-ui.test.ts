@@ -31,11 +31,14 @@ test('existing Codex/OpenClaw and Hermes affordances remain unchanged', () => {
   assert.equal(hermes.attachments, false);
 });
 
-test('SDK attachment controls require explicit current Connector capability', () => {
+test('SDK attachment and compact controls require explicit current Connector capability', () => {
   for (const source of ['claude-code', 'ghcp', 'antigravity'] as const) {
     assert.equal(sessionRuntimeUi({ source }).attachments, false);
+    assert.equal(sessionRuntimeUi({ source }).compact, false);
     assert.equal(sessionRuntimeUi({ source, controlCapabilities: { compact: false, attachments: true } }).attachments, true);
     assert.equal(sessionRuntimeUi({ source, controlCapabilities: { compact: false, attachments: false } }).attachments, false);
+    assert.equal(sessionRuntimeUi({ source, controlCapabilities: { compact: true, attachments: false } }).compact, true);
+    assert.equal(sessionRuntimeUi({ source, controlCapabilities: { compact: false, attachments: true } }).compact, false);
   }
 });
 

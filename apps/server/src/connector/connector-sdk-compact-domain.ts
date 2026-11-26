@@ -28,7 +28,7 @@ const fields = (v: unknown, required: string[], optional: string[] = []): v is R
   && Object.keys(v).every(k => required.includes(k) || optional.includes(k));
 const id = (v: unknown): v is string => typeof v === 'string' && !!v && Buffer.byteLength(v) <= 512 && !/[\u0000-\u001f\u007f]/.test(v);
 const commandKey = (v: unknown): v is string => typeof v === 'string' && /^[A-Za-z0-9._:-]{1,200}$/.test(v);
-const runtime = (v: unknown): v is SdkAgentId => v === 'claude-code' || v === 'ghcp';
+const runtime = (v: unknown): v is SdkAgentId => v === 'claude-code' || v === 'ghcp' || v === 'antigravity';
 const key = (v: unknown, r?: unknown): v is string => id(v) && runtime(sessionRuntimeId(v))
   && v !== `${sessionRuntimeId(v)}:` && (r === undefined || sessionRuntimeId(v) === r);
 const ref = (v: unknown, r?: unknown): v is SdkCompactRef => fields(v, ['key', 'id', 'epoch', 'nativeSessionId'])
@@ -88,7 +88,7 @@ export async function executeConnectorSdkCompact<K extends ConnectorSdkCompactKi
   request: ConnectorSdkCompactCommands[K]['input'], owner: ConnectorUserStore, tokens?: ConnectorTokenStore,
   applicationTransactions?: ApplicationTransactionClient): Promise<ConnectorSdkCompactCommands[K]['output']> {
   if (!tokens || !validConnectorSdkCompactInput(kind, request)) throw Error('connector_storage_unavailable');
-  const input = structuredClone(request), journal = input.runtime === 'claude-code' ? owner.claudeJournal : owner.copilotJournal;
+  const input = structuredClone(request), journal = input.runtime === 'claude-code' ? owner.claudeJournal : input.runtime === 'ghcp' ? owner.copilotJournal : owner.antigravityJournal;
   const actor = tokens.authenticateAuthorization(input.authorization);
   const actorId = actor?.tokenId;
   const bindings = active.get(owner) ?? new Map<string, Binding>(); active.set(owner, bindings);

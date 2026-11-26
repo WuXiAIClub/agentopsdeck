@@ -50,6 +50,26 @@ inputs.on('line', line => {
     const text = input.params.prompt[0].text;
     promptId = input.id;
     if (text === 'disconnect') { process.exit(1); }
+    if (text === '/compact') {
+      if (mode === 'compact-error') {
+        write({ jsonrpc: '2.0', id: input.id, error: { code: -32603, message: 'synthetic compact error' } });
+        return;
+      }
+      if (mode === 'compact-cancel') {
+        write({ jsonrpc: '2.0', method: 'session/update', params: {
+          sessionId, update: { sessionUpdate: 'usage_update', used: 4096, size: 1048576 },
+        } });
+        return;
+      }
+      write({ jsonrpc: '2.0', method: 'session/update', params: {
+        sessionId, update: { sessionUpdate: 'usage_update', used: 2048, size: 1048576 },
+      } });
+      response(input.id, {
+        stopReason: 'end_turn',
+        usage: { inputTokens: 1024, outputTokens: 256, totalTokens: 1280 },
+      });
+      return;
+    }
     if (text === 'acp-error-after-tool') {
       write({ jsonrpc: '2.0', method: 'session/update', params: {
         sessionId, update: { sessionUpdate: 'tool_call', toolCallId: 'tool-before-error', title: 'Read', status: 'completed', kind: 'read' },

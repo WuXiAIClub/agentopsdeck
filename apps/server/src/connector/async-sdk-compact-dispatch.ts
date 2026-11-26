@@ -18,15 +18,17 @@ export class AsyncSdkCompactDispatch {
   private paused = false;
   private readonly dispatching = new Set<string>();
   private readonly settling = new Map<string, { ref: SdkCompactRef; task: Promise<boolean> }>();
-  private readonly models: { model: string; modelChoices: string[] };
+  private readonly models: { model: string; modelChoices?: string[]; dynamicModels?: boolean };
   constructor(private readonly options: {
     owner: Pick<AsyncConnectorOwner, 'command'>; adapter: SdkCompactAdapter; deadlineMs: number;
     admissionReady?: () => boolean;
-    models: { model: string; modelChoices?: readonly string[] }; diagnostics?: PerformanceDiagnostics;
+    models: { model: string; modelChoices?: readonly string[]; dynamicModels?: boolean }; diagnostics?: PerformanceDiagnostics;
   }) {
     if (!Number.isSafeInteger(options.deadlineMs) || options.deadlineMs < 1 || options.deadlineMs > 2_147_483_647
-      || !['claude-code', 'ghcp'].includes(options.adapter.runtime)) throw Error('Invalid async SDK compact dispatcher');
-    this.models = { model: options.models.model, modelChoices: sdkModelChoices(options.models.model, options.models.modelChoices) };
+      || !['claude-code', 'ghcp', 'antigravity'].includes(options.adapter.runtime)) throw Error('Invalid async SDK compact dispatcher');
+    this.models = options.models.dynamicModels
+      ? { model: options.models.model, dynamicModels: true }
+      : { model: options.models.model, modelChoices: sdkModelChoices(options.models.model, options.models.modelChoices) };
   }
   pause() { this.paused = true; }
   resume() { this.paused = false; }

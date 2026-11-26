@@ -36,6 +36,10 @@ test('Antigravity validates startup bounds without printing supplied values', ()
     });
   }
   assert.equal(antigravityConfig({ ...valid(), AOD_ANTIGRAVITY_STARTUP_TIMEOUT_MS: '120000' })?.startupTimeoutMs, 120000);
+  assert.equal(antigravityConfig(valid())?.compactTimeoutMs, 600000);
+  assert.equal(antigravityConfig({ ...valid(), AOD_ANTIGRAVITY_COMPACT_TIMEOUT_MS: '180000' })?.compactTimeoutMs, 180000);
+  assert.throws(() => antigravityConfig({ ...valid(), AOD_ANTIGRAVITY_COMPACT_TIMEOUT_MS: '500' }),
+    /AOD_ANTIGRAVITY_COMPACT_TIMEOUT_MS must be between 1000 and 1800000/);
   assert.equal(antigravityConfig(valid())?.permissionMode, 'allow');
   assert.equal(antigravityConfig({ ...valid(), AOD_ANTIGRAVITY_PERMISSION_MODE: 'deny' })?.permissionMode, 'deny');
   assert.throws(() => antigravityConfig({ ...valid(), AOD_ANTIGRAVITY_PERMISSION_MODE: 'invalid' }),

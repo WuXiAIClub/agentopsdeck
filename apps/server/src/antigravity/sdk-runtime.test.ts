@@ -11,7 +11,9 @@ import { ConnectorUserStore } from '../connector/connector-user-store.js';
 import { loadConfig } from '../config.js';
 import { DeckStore } from '../projection/deck-store.js';
 import { registerConnectorRoutes } from '../routes/connector.js';
-import { AntigravityConnectorRuntime, AntigravityOwnedRuntime, AntigravitySdkTurn } from './sdk-runtime.js';
+import { AsyncConnectorOwner } from '../connector/async-connector-owner.js';
+import { registerSdkCompactHttp } from '../connector/sdk-compact-http.js';
+import { AntigravityConnectorRuntime, AntigravityOwnedRuntime, AntigravitySdkTurn, createAsyncAntigravityOwnedRuntime } from './sdk-runtime.js';
 import { AntigravityProcessWorker } from './execution-worker.js';
 
 const fixturePath = join(dirname(fileURLToPath(import.meta.url)), 'acp-fixture.mjs');
@@ -33,10 +35,10 @@ async function waitFor<T>(check: () => Promise<T | undefined>, timeoutMs = 8_000
   throw new Error('Timed out waiting for Antigravity connector state');
 }
 
-async function createConnectorFixture(extraEnv: Record<string, string> = {}) {
+async function createConnectorFixture(extraEnv: Record<string, string> = {}, workspaceName = 'workspace') {
   const root = realpathSync(mkdtempSync(join(tmpdir(), 'agentopsdeck-antigravity-connector-')));
   const homeDirectory = join(root, 'private');
-  const workspace = join(root, 'workspace');
+  const workspace = join(root, workspaceName);
   mkdirSync(homeDirectory, { mode: 0o700 });
   for (const name of ['config', 'cache', 'data', 'tmp']) {
     mkdirSync(join(homeDirectory, name), { mode: 0o700 });
@@ -490,6 +492,243 @@ test('AntigravitySdkTurn settles completed turn when forced cleanup empties ling
     assert.equal(await turn.inspectCleaned(), true);
     assert.deepEqual(await turn.inspectSettlement(), { historyPersisted: true, nativeQuiescent: true });
   } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('Antigravity Connector supports dedicated manual compaction, metrics update, and idempotent receipts', async () => {
+  const fixture = await createConnectorFixture();
+  try {
+    const capabilitiesRes = await fixture.request('/capabilities');
+    assert.equal(capabilitiesRes.status, 200);
+    const capabilities = await capabilitiesRes.json() as { runtimes: { antigravity: { features: { compact: boolean } } } };
+    assert.equal(capabilities.runtimes.antigravity.features.compact, true);
+
+    const created = await fixture.request('/agents/antigravity/sessions', 'POST', { title: 'ACP Compact' }, { 'idempotency-key': 'agy-create-compact' });
+    assert.equal(created.status, 201);
+    const { key } = await created.json() as { key: string };
+    const encodedKey = encodeURIComponent(key);
+
+    // Unmaterialized (allocated) session cannot compact yet.
+    const earlyCompact = await fixture.request(`/sessions/${encodedKey}/compact`, 'POST', {}, { 'idempotency-key': 'agy-compact-early' });
+    assert.equal(earlyCompact.status, 409);
+
+    // First chat turn materializes the native session binding.
+    const firstTurn = await fixture.request(`/sessions/${encodedKey}/messages`, 'POST', {
+      message: 'initial message before compact',
+      idempotencyKey: 'agy-compact-msg-1',
+    });
+    assert.equal(firstTurn.status, 200);
+    await waitFor(async () => (fixture.users.antigravityJournal.canStart(key) && fixture.users.antigravityJournal.session(key)?.nativeState === 'ready' ? true : undefined));
+
+    const beforeMessages = (await (await fixture.request(`/sessions/${encodedKey}/messages`)).json() as { messages: Array<{ id: string }> }).messages;
+
+    // Explicit dedicated compact control succeeds and runs ACP /compact via session/resume.
+    const compactRes = await fixture.request(`/sessions/${encodedKey}/compact`, 'POST', {}, { 'idempotency-key': 'agy-compact-run-1' });
+    assert.equal(compactRes.status, 200);
+    const compactBody = await compactRes.json() as { ok: boolean; status: string; runId: string };
+    assert.equal(compactBody.ok, true);
+    assert.equal(compactBody.status, 'compacting');
+    assert.ok(compactBody.runId);
+
+    // Receipt lookup returns the accepted command.
+    const receiptRes = await fixture.request(`/sessions/${encodedKey}/compact-commands/agy-compact-run-1`);
+    assert.equal(receiptRes.status, 200);
+    const receiptBody = await receiptRes.json() as { command: { state: string } };
+    assert.equal(receiptBody.command.state, 'accepted');
+
+    // Wait for compaction to settle cleanly.
+    await waitFor(async () => {
+      const execution = fixture.users.antigravityJournal.current(key);
+      return execution?.kind === 'compact' && execution.id === compactBody.runId && execution.phase === 'completed'
+        && fixture.users.antigravityJournal.canStart(key) ? execution : undefined;
+    });
+
+    const sessionAfter = fixture.users.antigravityJournal.session(key)!;
+    assert.equal(sessionAfter.nativeState, 'ready');
+    assert.equal(sessionAfter.metrics?.compactionCount, 1);
+    assert.equal(sessionAfter.metrics?.context?.basis, 'post-compaction');
+
+    // Compaction does not inject spurious /compact user/assistant chat messages.
+    const afterMessages = (await (await fixture.request(`/sessions/${encodedKey}/messages`)).json() as { messages: Array<{ id: string; text: string }> }).messages;
+    assert.equal(afterMessages.length, beforeMessages.length);
+    assert.equal(afterMessages.some(item => item.text.includes('/compact')), false);
+
+    const rpcLog = readFileSync(join(fixture.workspace, 'requests.ndjson'), 'utf8');
+    assert.match(rpcLog, /"method":"session\/resume"/);
+    assert.match(rpcLog, /"text":"\/compact"/);
+
+    // Subsequent chat turn runs cleanly after compaction.
+    const nextTurn = await fixture.request(`/sessions/${encodedKey}/messages`, 'POST', {
+      message: 'follow up after compaction',
+      idempotencyKey: 'agy-compact-msg-2',
+    });
+    assert.equal(nextTurn.status, 200);
+    await waitFor(async () => {
+      const execution = fixture.users.antigravityJournal.current(key);
+      return execution?.kind === 'message' && execution.phase === 'completed' && fixture.users.antigravityJournal.canStart(key) ? true : undefined;
+    });
+  } finally {
+    await fixture.close();
+  }
+});
+
+test('Antigravity Connector settles clean ACP compact error as failed and supports /stop cancellation during compact', async () => {
+  // 1) Clean AntigravityAcpError during /compact settles as failed without wedging.
+  const errFixture = await createConnectorFixture({}, 'compact-error');
+  try {
+    const created = await errFixture.request('/agents/antigravity/sessions', 'POST', { title: 'Compact Error' }, { 'idempotency-key': 'agy-ce-create' });
+    assert.equal(created.status, 201);
+    const { key } = await created.json() as { key: string };
+    const encodedKey = encodeURIComponent(key);
+
+    assert.equal((await errFixture.request(`/sessions/${encodedKey}/messages`, 'POST', { message: 'seed', idempotencyKey: 'agy-ce-1' })).status, 200);
+    await waitFor(async () => (errFixture.users.antigravityJournal.canStart(key) ? true : undefined));
+
+    const compactRes = await errFixture.request(`/sessions/${encodedKey}/compact`, 'POST', {}, { 'idempotency-key': 'agy-ce-compact' });
+    assert.equal(compactRes.status, 200);
+    const { runId } = await compactRes.json() as { runId: string };
+
+    await waitFor(async () => {
+      const execution = errFixture.users.antigravityJournal.current(key);
+      return execution?.kind === 'compact' && execution.id === runId && execution.phase === 'failed'
+        && errFixture.users.antigravityJournal.canStart(key) ? execution : undefined;
+    });
+    assert.equal(errFixture.users.antigravityJournal.session(key)?.metrics?.compactionCount, 0);
+  } finally {
+    await errFixture.close();
+  }
+
+  // 2) /stop interrupts an in-flight Antigravity compaction via session/cancel without wedging.
+  const cancelFixture = await createConnectorFixture({}, 'compact-cancel');
+  try {
+    const created = await cancelFixture.request('/agents/antigravity/sessions', 'POST', { title: 'Compact Cancel' }, { 'idempotency-key': 'agy-cc-create' });
+    assert.equal(created.status, 201);
+    const { key } = await created.json() as { key: string };
+    const encodedKey = encodeURIComponent(key);
+
+    assert.equal((await cancelFixture.request(`/sessions/${encodedKey}/messages`, 'POST', { message: 'seed', idempotencyKey: 'agy-cc-1' })).status, 200);
+    await waitFor(async () => (cancelFixture.users.antigravityJournal.canStart(key) ? true : undefined));
+
+    const compactRes = await cancelFixture.request(`/sessions/${encodedKey}/compact`, 'POST', {}, { 'idempotency-key': 'agy-cc-compact' });
+    assert.equal(compactRes.status, 200);
+    const { runId } = await compactRes.json() as { runId: string };
+
+    await waitFor(async () => {
+      const log = readFileSync(join(cancelFixture.workspace, 'requests.ndjson'), 'utf8');
+      return log.includes('"text":"/compact"') ? true : undefined;
+    });
+
+    const stopRes = await cancelFixture.request(`/sessions/${encodedKey}/messages`, 'POST', {
+      message: '/stop',
+      expectedRunId: runId,
+      idempotencyKey: 'agy-cc-stop',
+    });
+    assert.equal(stopRes.status, 200);
+
+    await waitFor(async () => {
+      const execution = cancelFixture.users.antigravityJournal.current(key);
+      return execution?.kind === 'compact' && execution.id === runId && execution.phase === 'interrupted'
+        && cancelFixture.users.antigravityJournal.canStart(key) ? execution : undefined;
+    });
+    assert.match(readFileSync(join(cancelFixture.workspace, 'requests.ndjson'), 'utf8'), /"method":"session\/cancel"/);
+  } finally {
+    await cancelFixture.close();
+  }
+});
+
+test('Async Antigravity owned runtime runs manual compaction with dynamic model overrides over ACP', async () => {
+  const root = realpathSync(mkdtempSync(join(tmpdir(), 'agentopsdeck-antigravity-async-compact-')));
+  const homeDirectory = join(root, 'private');
+  const workspace = join(root, 'workspace');
+  mkdirSync(homeDirectory, { mode: 0o700 });
+  for (const name of ['config', 'cache', 'data', 'tmp']) mkdirSync(join(homeDirectory, name), { mode: 0o700 });
+  mkdirSync(workspace, { mode: 0o700 });
+  const command = createExecutableWrapper(root);
+  const tokenFile = join(root, 'tokens.json');
+  const dbFile = join(root, 'connector.sqlite');
+  const tokens = new ConnectorTokenStore(tokenFile);
+  const ownerToken = tokens.create({ label: 'async-compact-owner', scopes: ['sessions:create', 'sessions:read', 'messages:read', 'messages:send'] }).token;
+  const authorization = `Bearer ${ownerToken}`;
+
+  const owner = new AsyncConnectorOwner({
+    file: dbFile,
+    tokenFile,
+    sdkModels: { antigravity: { model: 'default', dynamicModels: true } },
+  });
+  await owner.open();
+  const runtime = await createAsyncAntigravityOwnedRuntime({
+    owner,
+    config: { command, homeDirectory, workspace, startupTimeoutMs: 5_000, compactTimeoutMs: 10_000 },
+  });
+  const app = new Hono();
+  registerSdkCompactHttp(app, '/api/connector/v1/sessions/:sessionKey', {
+    owner,
+    ready: () => runtime.ready,
+    compact: (_runtime, key, commandKey, auth, signal) => runtime.driver.compact(key, commandKey, auth, signal),
+  });
+
+  try {
+    assert.equal(await runtime.initialize(), true);
+    const created = await owner.command('sdkSessionCreate', {
+      runtime: 'antigravity',
+      authorization,
+      commandKey: 'async-create-1',
+      payloadJson: JSON.stringify({ title: 'Async Compact' }),
+    });
+    assert.ok(!('error' in created) && created.key);
+    const key = created.key;
+
+    // Select a dynamically discovered model (not in any static modelChoices list).
+    const modelUpdated = await owner.command('sdkModelUpdate', {
+      runtime: 'antigravity',
+      key,
+      authorization,
+      commandKey: 'async-model-1',
+      payloadJson: JSON.stringify({ model: 'claude-opus-5-5-high' }),
+    });
+    assert.ok(!('error' in modelUpdated) && modelUpdated.receipt.state === 'accepted');
+
+    // Send an initial turn to materialize the session binding.
+    const sent = await owner.command('sdkMessageSend', {
+      runtime: 'antigravity',
+      key,
+      authorization,
+      commandKey: 'async-msg-1',
+      payloadJson: JSON.stringify({ message: 'seed async session' }),
+    });
+    assert.ok(!('error' in sent));
+    await runtime.driver.wake(key);
+    await waitFor(async () => {
+      const snap = await owner.command('sdkSnapshotRead', { runtime: 'antigravity', key });
+      return snap.canStart && snap.session?.nativeState === 'ready' ? snap : undefined;
+    });
+
+    // Trigger manual compaction through registerSdkCompactHttp.
+    const res = await app.request(`/api/connector/v1/sessions/${encodeURIComponent(key)}/compact`, {
+      method: 'POST',
+      headers: { authorization, 'content-type': 'application/json', 'idempotency-key': 'async-compact-1' },
+      body: '{}',
+    });
+    assert.equal(res.status, 200);
+    const body = await res.json() as { ok: boolean; status: string; runId: string };
+    assert.equal(body.ok, true);
+    assert.equal(body.status, 'compacting');
+
+    const finalSnap = await waitFor(async () => {
+      const snap = await owner.command('sdkSnapshotRead', { runtime: 'antigravity', key });
+      return snap.execution?.kind === 'compact' && snap.execution.id === body.runId && snap.execution.phase === 'completed'
+        && snap.canStart ? snap : undefined;
+    });
+    assert.equal(finalSnap.session?.metrics?.compactionCount, 1);
+    assert.equal(finalSnap.session?.metrics?.context?.basis, 'post-compaction');
+
+    const rpcLog = readFileSync(join(workspace, 'requests.ndjson'), 'utf8');
+    assert.match(rpcLog, /"modelId":"claude-opus-5-5-high"/);
+    assert.match(rpcLog, /"text":"\/compact"/);
+  } finally {
+    await runtime.close().catch(() => {});
+    await owner.closeForShutdown().catch(() => {});
     rmSync(root, { recursive: true, force: true });
   }
 });
