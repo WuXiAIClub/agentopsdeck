@@ -1,6 +1,6 @@
-import { MAX_MESSAGE_CHARS, type ChatMessage, type SessionExecutionSnapshot, type SessionHistoryStatus } from '@agentopsdeck/shared';
+import { MAX_MESSAGE_CHARS, sessionRuntimeId, type ChatMessage, type SessionExecutionSnapshot, type SessionHistoryStatus } from '@agentopsdeck/shared';
 import type { AsyncConnectorOwner } from './async-connector-owner.js';
-import { ConnectorOwnerUnavailable } from './connector-owner-domain.js';
+import { ConnectorOwnerUnavailable, validConnectorOwnerOutput } from './connector-owner-domain.js';
 import { validRuntimeReadOutput, type RuntimeReadScope, type PublicReadRuntime } from './connector-runtime-read-domain.js';
 import type { DeckStore } from '../projection/deck-store.js';
 import type { EventSnapshotRead } from '../routes/events.js';
@@ -26,6 +26,7 @@ export type AsyncRuntimeReadsOptions = {
   historyReady(key: string): boolean;
   display?(key: string): Promise<DisplayProof | undefined>;
   requestRecovery?(key: string, expectedRunId: string): Promise<boolean>;
+  stopBackgroundTerminals?(key: string, expectedRunId: string): Promise<boolean>;
   /** Only the latest authorized text projection, never detail/older pages or
    * execution admission. No claim that native reconciliation has finished. */
   allowRecentProjection?: boolean;
@@ -69,6 +70,22 @@ export class AsyncRuntimeReads {
       return requested ? { requested: true as const } : { error: 409 as const };
     })).value;
   }
+  async stopBackgroundTerminals(input: RuntimeReadScope & { expectedRunId: string }, request: Request) {
+    const original = { key: input.key, authorization: input.authorization }, expectedRunId = input.expectedRunId;
+    return (await this.reads.run(request, async context => {
+      const { value: authorized } = await context.stage(87, () => this.authorizeInterrupt(original));
+      if ('error' in authorized) return authorized;
+      if (!this.options.stopBackgroundTerminals) return { error: 409 as const };
+      const { value: checked } = await context.stage(89, () => this.authorizeInterrupt(original, authorized.actorId));
+      if ('error' in checked) return checked;
+      context.check();
+      const { value: stopped } = await context.stage(95, () => this.options.stopBackgroundTerminals!(original.key, expectedRunId));
+      const { value: delivered } = await context.stage(93, () => this.authorizeInterrupt(original, authorized.actorId));
+      if ('error' in delivered) return delivered;
+      context.check();
+      return stopped ? { stopped: true as const } : { error: 409 as const };
+    })).value;
+  }
   page(input: RuntimeReadScope & { limit: number; before?: string; asynchronous?: boolean }, request: Request) {
     return this.read('page', { key: input.key, authorization: input.authorization }, { limit: input.limit,
       ...(input.before === undefined ? {} : { before: input.before }),
@@ -76,6 +93,22 @@ export class AsyncRuntimeReads {
   }
   message(input: RuntimeReadScope & { messageId: string }, request: Request) {
     return this.read('message', { key: input.key, authorization: input.authorization }, { messageId: input.messageId }, request);
+  }
+  private async authorizeInterrupt(input: RuntimeReadScope, actorId?: string) {
+    if (typeof input.key !== 'string' || !input.key.length || Buffer.byteLength(input.key) > 512
+      || /[\x00-\x1f\x7f]/.test(input.key) || sessionRuntimeId(input.key) !== this.runtime) throw new ConnectorOwnerUnavailable();
+    if (typeof input.authorization !== 'string' || Buffer.byteLength(input.authorization) > 4096
+      || /[\x00-\x1f\x7f]/.test(input.authorization)) return { error: 403 as const };
+    const actor = await this.owner.command('tokenAuthenticate', { authorization: input.authorization });
+    if (!validConnectorOwnerOutput('tokenAuthenticate', actor)) throw new ConnectorOwnerUnavailable();
+    // Direct non-delegated interrupt authority maps to messages:send + messages:read without execution:delegate.
+    if (!actor || actor.tokenId.startsWith('actor_') || actor.scopes.includes('execution:delegate')
+      || !actor.scopes.includes('messages:send') || !actor.scopes.includes('messages:read')) return { error: 403 as const };
+    if (actorId !== undefined && actor.tokenId !== actorId) return { error: 409 as const };
+    const deleted = await this.owner.command('receiptDeletion', { sessionKey: input.key });
+    if (!validConnectorOwnerOutput('receiptDeletion', deleted)) throw new ConnectorOwnerUnavailable();
+    if (deleted !== null) return { error: 404 as const };
+    return { key: input.key, actorId: actor.tokenId };
   }
   private async command(input: RuntimeReadScope | RuntimeReadScope & { readerId: string }) {
     const value = 'readerId' in input

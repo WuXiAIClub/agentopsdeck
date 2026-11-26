@@ -85,6 +85,16 @@ export function registerHubSessionAuxiliary(app: Hono, deps: HubConnectionProxyR
       || !('requested' in result) || result.requested !== true) throw new ConnectorClientError(502, 'Invalid recovery response');
     return c.json({ requested: true });
   }));
+  app.post(`${base}/background-terminals/stop`, c => handle(c, async () => {
+    const access = await begin(c), body = await readJsonBody(c.req.raw, 1024);
+    if (!body || typeof body !== 'object' || Array.isArray(body) || Object.keys(body).length !== 1
+      || !('expectedRunId' in body) || typeof body.expectedRunId !== 'string' || !body.expectedRunId.length
+      || body.expectedRunId.length > 512 || /[\x00-\x1f\x7f]/.test(body.expectedRunId)) return c.json({ error: 'Invalid execution identity' }, 400);
+    const result = await access.json<unknown>('/background-terminals/stop', { method: 'POST', body: JSON.stringify(body) });
+    if (!result || typeof result !== 'object' || Array.isArray(result) || Object.keys(result).length !== 1
+      || !('stopped' in result) || result.stopped !== true) throw new ConnectorClientError(502, 'Invalid background terminal stop response');
+    return c.json({ stopped: true });
+  }));
   app.get(`${base}/interactions`, c => handle(c, async () => {
     const access = await begin(c), body = readInteractionSnapshot(await access.json<unknown>('/interactions'));
     if (!body || body.requests.some(v => v.request.sessionKey !== access.decoded.remoteSessionKey

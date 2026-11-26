@@ -773,6 +773,10 @@ export const api = {
     json<{ requested: true }>(`${ownerSessionPath(sessionKey)}/recovery`, {
       method: 'POST', body: JSON.stringify({ expectedRunId }), signal, timeoutMs: 12_000,
     }),
+  stopSessionBackgroundTerminals: (sessionKey: string, expectedRunId: string, signal: AbortSignal) =>
+    json<{ stopped: true }>(`${ownerSessionPath(sessionKey)}/background-terminals/stop`, {
+      method: 'POST', body: JSON.stringify({ expectedRunId }), signal, timeoutMs: 32_000,
+    }),
   sessionFileIndexAvailable: async (sessionKey: string, signal: AbortSignal) => {
     const address = sessionAddress(sessionKey);
     // Shared sessions and standalone/legacy addresses keep the loaded-message

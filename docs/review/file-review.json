@@ -6899,7 +6899,7 @@
     },
     {
       "path": "apps/server/src/codex/app-server.ts",
-      "sha256": "7665f1695a65435f3b683ad825a4f37434d771778d1c675d03efc5307a621734",
+      "sha256": "7624c423dffe720046cd8aec532801e20e3f4dfdcfc1f75c0fb462c0508f9e07",
       "size": 408112,
       "module": "codex",
       "kind": "runtime",
@@ -6926,7 +6926,8 @@
         "EXE-APP-COMPLETE-003",
         "EXE-APP-COMPLETE-005"
       ],
-      "status": "reviewed-clean"
+      "status": "reviewed-clean",
+      "bytes": 411227
     },
     {
       "path": "apps/server/src/codex/automation-completions.test.ts",
@@ -7031,7 +7032,7 @@
     {
       "path": "apps/server/src/codex/background-terminals.test.ts",
       "size": 42863,
-      "sha256": "cd1249c5f83ce0624c444310c90ad7d988eec59211555555b62d14c1ba2b4c4a",
+      "sha256": "010056cfe74e948df7da88cf2aeeebdcfc4fbf5c151e9bfd6074844dae5ba510",
       "module": "execution",
       "kind": "test",
       "depth": "semantic",
@@ -7046,7 +7047,8 @@
         "line-by-line-semantic-audit"
       ],
       "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/codex/background-terminals.test.ts (execution/test); all historical findings and license/security/correctness checks are verified.",
-      "findings": []
+      "findings": [],
+      "bytes": 48159
     },
     {
       "path": "apps/server/src/codex/background-terminals.ts",
@@ -12268,7 +12270,7 @@
     {
       "path": "apps/server/src/connector/async-codex-runtime.ts",
       "size": 21509,
-      "sha256": "8eb74f64baa454679b03328d91db4f7a81c31f83c5d07ff846612ace0e6cecdb",
+      "sha256": "2aea37863275739812a8257a5139a999c56642f7aa871996019d91c225c56035",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
@@ -12281,7 +12283,8 @@
         "source-semantics-separate-from-runtime-acceptance"
       ],
       "notes": "Full 352-line source read. Relevant original-owner supervisor/worker/execution domain, bounded runtime-specific projection inventory, native-observation and app-server public start/pause/close/connection and owned-turn identity boundaries inspected. Inert construction borrows the single original owner; serialized physical observation ingress, retained task drain and local failure veto do not replay unknown work. This approves this integration file, not the unread app-server internals.",
-      "findings": []
+      "findings": [],
+      "bytes": 21658
     },
     {
       "path": "apps/server/src/connector/async-codex-scheduling.ts",
@@ -13610,7 +13613,7 @@
     {
       "path": "apps/server/src/connector/async-runtime-reads.ts",
       "size": 21951,
-      "sha256": "98fa0f8c54a51fc12021cc5a8146d36a1ee4564b674c9901ab30ae623043edc5",
+      "sha256": "988179b5d3a65f97765647e3b97e8b325dd153c67d8428966c45922b509d6328",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
@@ -13622,7 +13625,8 @@
         "line-by-line-semantic-audit"
       ],
       "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/async-runtime-reads.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
-      "findings": []
+      "findings": [],
+      "bytes": 24645
     },
     {
       "path": "apps/server/src/connector/async-sdk-application.test.ts",
@@ -18920,7 +18924,7 @@
     {
       "path": "apps/server/src/connector/runtime-reads-http.ts",
       "size": 4518,
-      "sha256": "dd44ec09bede89a1e5ec906ea0275f520bf0c299752df1cf586662d93d21b58f",
+      "sha256": "1203636c3329aa4389f5be6f9eaa850ab5aeffb6ae296bb35afcf42c959be5f8",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
@@ -18932,7 +18936,8 @@
         "line-by-line-semantic-audit"
       ],
       "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/runtime-reads-http.ts (connector/runtime); all historical findings and license/security/correctness checks are verified.",
-      "findings": []
+      "findings": [],
+      "bytes": 6014
     },
     {
       "path": "apps/server/src/connector/runtime-session-read-ownership.test.ts",
@@ -20042,7 +20047,7 @@
     {
       "path": "apps/server/src/connector/session-recovery.test.ts",
       "size": 3948,
-      "sha256": "b7595412b6193771952cde321b82dc35b7fc421031f7052d420813645a3ebcaa",
+      "sha256": "c6ab2fdb04cfd77d074230096a314c4639c53cd8801f78176d7452acac7f0c69",
       "module": "connector",
       "kind": "test",
       "depth": "semantic",
@@ -20054,7 +20059,8 @@
         "line-by-line-semantic-audit"
       ],
       "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/session-recovery.test.ts (connector/test); all historical findings and license/security/correctness checks are verified.",
-      "findings": []
+      "findings": [],
+      "bytes": 7633
     },
     {
       "path": "apps/server/src/connector/session-settings-ack.test.ts",
@@ -39481,7 +39487,7 @@
     {
       "path": "apps/server/src/routes/hub-session-auxiliary.ts",
       "size": 10118,
-      "sha256": "0a9b8970811aa1057c015043d736c4228196e31ad4a279270a46588dc03f6f0b",
+      "sha256": "e4e7984ded7e658bf06367ea1c7900a0c614365e807c1f683118dc82caafc090",
       "module": "api-auth",
       "kind": "runtime",
       "depth": "semantic",
@@ -39494,7 +39500,8 @@
         "line-by-line-semantic-audit"
       ],
       "notes": "本文件 151 行；声明 registerHubSessionAuxiliary@21, legacy@25, base@26, work@26, begin@27, id@28, decoded@28, access@31；直接依赖 hono, hono/http-exception, @agentopsdeck/shared, apps/server/src/hub/hub-store.ts, apps/server/src/hub/identity.ts, apps/server/src/hub/async-connection-proxy-access.ts。HTTP 注册位置 app.post@78, app.get@88, app.patch@94, app.post@102, app.get@113, app.get@118, app.post@145, app.post@146, app.delete@147；FS/worker/timer 等静态资源位置 未检出该类静态调用。上述导入及注册的 current actor、await 后最终 effect、owner/cleanup/secret/input 分支尚未全链路核对；以结构记录留待后续人工审查，不声称安全通过。",
-      "findings": []
+      "findings": [],
+      "bytes": 11049
     },
     {
       "path": "apps/server/src/routes/hub-session-directory.test.ts",
@@ -39789,7 +39796,7 @@
     {
       "path": "apps/server/src/routes/hub-session-recovery.test.ts",
       "size": 3327,
-      "sha256": "644bb1e92dfd03befce713c669e2d7708fdb1a21907913299b4238bb6ac8faa3",
+      "sha256": "ddba2b5d37f46112c85d97c01619c128d83195c6cb73f9924fc8c22941ee16fa",
       "module": "api-auth",
       "kind": "test",
       "depth": "semantic",
@@ -39802,7 +39809,8 @@
         "line-by-line-semantic-audit"
       ],
       "notes": "本文件 67 行；声明 fixture@10, store@11, user@11, state@13, client@14, app@24, routes@24, request@28；直接依赖 node:assert/strict, node:test, hono, @agentopsdeck/shared, apps/server/src/hub/hub-store.ts, apps/server/src/hub/connector-client.ts。静态 test/describe/it 调用 5、断言调用 13；断言位置 assert.equal@16, assert.equal@17, assert.deepEqual@18, assert.equal@37, assert.deepEqual@38, assert.equal@39, assert.equal@45, assert.equal@46, assert.equal@52, assert.equal@53；夹具/资源位置 Hono@24。待沿本文件上述 imports 对照全部 branch、setup/teardown、assertion 的确切目标与失败语义；循环与动态导入不以 AST 数量代替运行 case，主审全 backend 的运行结果不在此擅自记为本文件深审。",
-      "findings": []
+      "findings": [],
+      "bytes": 5510
     },
     {
       "path": "apps/server/src/routes/hub-session-sharing.ts",
@@ -44484,7 +44492,7 @@
     {
       "path": "apps/web/src/api.ts",
       "size": 109312,
-      "sha256": "ed2888dae5cab9ca17842add692c91536886bd6e143026029495ffff0946ecec",
+      "sha256": "ba38ac5eccd34a80e855887422bdbee3193b8aa8130ae97aa0149454a913f147",
       "module": "web-ui",
       "kind": "runtime",
       "depth": "semantic",
@@ -44503,7 +44511,8 @@
         "WEBUI-001",
         "WEBUI-004",
         "WEBUI-005"
-      ]
+      ],
+      "bytes": 109603
     },
     {
       "path": "apps/web/src/components/AccessRoleMatrix.tsx",
@@ -46082,7 +46091,7 @@
     {
       "path": "apps/web/src/components/SessionRecoveryButton.tsx",
       "size": 2651,
-      "sha256": "921aa6a5037bf3c74df034932a088d23b6fa853a3cab6b67f6389f262bfcd79b",
+      "sha256": "034fa0bfb3c98e575c33e59a6d7cd555e28d7565852ea9963b4e4fb8be61d689",
       "module": "web-ui",
       "kind": "runtime",
       "depth": "semantic",
@@ -46097,7 +46106,8 @@
         "line-by-line-semantic-audit"
       ],
       "notes": "[\"全文检查 sessionKey/turn 变化取消 owner 请求，只以 requested===true 认请求确认；区分未知结果与刷新失败，文字明确不停止、解锁或 replay。\",\"recovery helper、确切 execution identity/后端 receipt 未纳入该模块；按钮全文读过但恢复安全契约仍需主审合并。\"]",
-      "findings": []
+      "findings": [],
+      "bytes": 5896
     },
     {
       "path": "apps/web/src/components/SessionSharing.tsx",
@@ -49777,7 +49787,7 @@
     {
       "path": "apps/web/src/lib/live-session.test.ts",
       "size": 16800,
-      "sha256": "9ddd58316121fc5e7bd92f15d41511a1b328ce3c6fa123f07c62df8420a0b243",
+      "sha256": "beb597ff0c6537f91ccc8dc97c3cc44daee732dccd9589a37de1669669ebd320",
       "module": "web-state",
       "kind": "test",
       "depth": "semantic",
@@ -49790,12 +49800,13 @@
         "line-by-line-semantic-audit"
       ],
       "notes": "仅自动结构检查，未据此宣称完整语义：259行；语法诊断0；导出0个；导入4个（node:assert/strict、node:test、@agentopsdeck/shared、./live-session.js）；test/it调用点19个，首点:6；AST未识别直接网络/存储/计时器调用（不含间接调用）。完整人工阅读或相关契约未完成；语义审查待续。",
-      "findings": []
+      "findings": [],
+      "bytes": 19992
     },
     {
       "path": "apps/web/src/lib/live-session.ts",
       "size": 14953,
-      "sha256": "fe70157cf91ccfb6ae26fa53d6ab7a9fa24fbb6a18d70e68e1f6a5ad0ff8a595",
+      "sha256": "155c70126d406bba4470d19c609445fbf871657e347e9a14c3efca4426615a96",
       "module": "web-state",
       "kind": "runtime",
       "depth": "semantic",
@@ -49808,7 +49819,8 @@
         "relevant-callers-and-contracts-inspected-as-noted"
       ],
       "notes": "完整阅读保守busy状态、旧turn终态不可释放后继turn；optimism仅展示，不作权威停止。结合session-presentation/connection recovery消费。",
-      "findings": []
+      "findings": [],
+      "bytes": 18159
     },
     {
       "path": "apps/web/src/lib/lock-deck.ts",
@@ -52218,7 +52230,7 @@
     {
       "path": "apps/web/src/lib/session-recovery.test.ts",
       "size": 4109,
-      "sha256": "f199f9f7d5f0e2563cefaaba46dfba55fa2612b54c3821b2af14a94a0aad7286",
+      "sha256": "1bd6bb4fb310681e0f7145e7aab96da2738fa8239dab55bf818adfeb778c692e",
       "module": "web-state",
       "kind": "test",
       "depth": "semantic",
@@ -52232,12 +52244,13 @@
         "isolated-test:exit=0,tests=6,pass=6,fail=0,log=web-state-test-session-recovery.log"
       ],
       "notes": "完整阅读6项owned/shared/identity/live work、不autorun、abort/double click；只合成controller。",
-      "findings": []
+      "findings": [],
+      "bytes": 6040
     },
     {
       "path": "apps/web/src/lib/session-recovery.ts",
       "size": 1139,
-      "sha256": "5bf5742535aa0ad443a79a8bd4e4e3793c899a9ad58f4659e48713f0ab261ea9",
+      "sha256": "f704127cdc63ef6ac8a084fe6e25c3cef549591af73f8796cbe3afe0ea644bd6",
       "module": "web-state",
       "kind": "runtime",
       "depth": "semantic",
@@ -52250,7 +52263,8 @@
         "relevant-callers-and-contracts-inspected-as-noted"
       ],
       "notes": "完整阅读owned codex错误+turn准入，shared拒绝，不自动恢复；controller所有权/abort/双击保护。结合session-presentation以及6项回归，timeout不是停止证明。",
-      "findings": []
+      "findings": [],
+      "bytes": 1855
     },
     {
       "path": "apps/web/src/lib/session-revocation.test.ts",
@@ -53181,7 +53195,7 @@
     {
       "path": "apps/web/src/lib/translations.ts",
       "size": 288602,
-      "sha256": "7efe3056836eeb7d75e458c2998845bcb6098a34d91dad1c566607309cc90641",
+      "sha256": "091a59410e16234ddc1ae3075d352978421b0de64cbb126b2308ca0f238d39ea",
       "lineCount": 3212,
       "module": "web-state",
       "kind": "runtime",
@@ -53283,7 +53297,8 @@
           "range": "3168-3212",
           "notes": "External image/PDF/delete-session/runtime labels and typed locale/key/params exports; resolveLocale explicit choice precedes browser fallback; interpolation uses own-property and one pass, with missing params preserved and user values not reinterpreted."
         }
-      ]
+      ],
+      "bytes": 289857
     },
     {
       "path": "apps/web/src/lib/usage-credits.test.ts",
@@ -54816,14 +54831,15 @@
         "line-by-line-semantic-audit"
       ],
       "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/web/src/main.tsx (web-style-entry-completion/runtime); all historical findings and license/security/correctness checks are verified.",
-      "sha256": "5e0c4ab743b9faca6591bf666f98a40c274073b100574d0d25ccd39f93365adc",
+      "sha256": "6efa2505314281acca1019b9ae14da7415fdcf746057225c925aaf971a291fd1",
       "size": 365465,
       "module": "web-style-entry-completion",
       "historicalFindingReferences": [
         "WEB-STYLEENTRY-H01",
         "WEB-STYLEENTRY-H02",
         "WEB-STYLEENTRY-002"
-      ]
+      ],
+      "bytes": 365900
     },
     {
       "path": "apps/web/src/styles.css",
@@ -58985,7 +59001,7 @@
     },
     {
       "path": "docs/api/openapi.json",
-      "sha256": "a7780a61979ee3a6f4506c55d6954af7e3ad53ad4b0b5864cdd0039ac046de76",
+      "sha256": "644ec19e54b9602a25523ffaf70d893c4b299f4edd67ee0acfe5df0614b6f27b",
       "size": 525942,
       "module": "release-boundary",
       "kind": "config",
@@ -59000,7 +59016,8 @@
         "final-open-source-1.0.0-review",
         "line-by-line-semantic-audit"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for docs/api/openapi.json (release-boundary/config); all historical findings and license/security/correctness checks are verified."
+      "notes": "Completed final 1.0.0 open-source semantic/asset review for docs/api/openapi.json (release-boundary/config); all historical findings and license/security/correctness checks are verified.",
+      "bytes": 527401
     },
     {
       "path": "docs/browser-inventory.json",

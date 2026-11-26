@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import type { AgentRuntime, ChatMessage, SessionSummary } from '@agentopsdeck/shared';
-import { executionProtectionLabel, hasMessageSnapshotRevision, formatElapsedDuration, hasOptimisticActiveSend, hasQueueBlockingRun, hasQueuedMessageControls, isSessionBusy, isStreamCatchup, mergeSelectedMessages, runSyncNotice, sessionRunOutcome, withOptimisticRunningState } from './live-session.js';
+import { activeToolProgressSummary, executionProtectionLabel, hasMessageSnapshotRevision, formatElapsedDuration, hasOptimisticActiveSend, hasQueueBlockingRun, hasQueuedMessageControls, isSessionBusy, isStreamCatchup, mergeSelectedMessages, runSyncNotice, sessionRunOutcome, withOptimisticRunningState } from './live-session.js';
 
 test('continuous Goal successors retain protection through long history verification and recovery', () => {
   for (const phase of ['completed', 'failed', 'interrupted'] as const)
@@ -255,4 +255,107 @@ test('formatElapsedDuration and runSyncNotice convert elapsed seconds to m and h
   };
   assert.equal(runSyncNotice(running, 96_000).elapsed, '1m 35s');
   assert.equal(runSyncNotice(running, 3_931_000).elapsed, '1h 5m');
+});
+
+test('activeToolProgressSummary surfaces in-flight command or tool calls and ignores completed, prior-turn or wait calls', () => {
+  const running: SessionSummary = {
+    ...session,
+    status: 'running',
+    runtime: { turnId: 'turn-2', phase: 'running', threadActivity: 'running', sync: 'current', connection: 'connected', lastEventAt: 2_000 },
+  };
+  const priorCall: ChatMessage = {
+    id: 'm1',
+    sessionKey: running.sessionKey,
+    role: 'tool',
+    turnId: 'turn-1',
+    toolCallId: 'old-call',
+    toolPhase: 'call',
+    toolName: 'exec_command',
+    text: '[tool exec_command]\ntool input:\n{"cmd":"sleep 999"}',
+    createdAt: 500,
+  };
+  const userPrompt: ChatMessage = {
+    id: 'm2',
+    sessionKey: running.sessionKey,
+    role: 'user',
+    text: 'run build',
+    createdAt: 1_000,
+  };
+  const commandCall: ChatMessage = {
+    id: 'm3',
+    sessionKey: running.sessionKey,
+    role: 'tool',
+    turnId: 'turn-2',
+    toolCallId: 'call-1',
+    toolPhase: 'call',
+    toolName: 'exec_command',
+    text: '[tool exec_command]\ntool input:\n{"cmd":"pnpm test:module   agent:codex"}',
+    createdAt: 1_100,
+  };
+  const queuedFollowup: ChatMessage = {
+    id: 'm4',
+    sessionKey: running.sessionKey,
+    role: 'user',
+    status: 'queued',
+    text: 'next instruction',
+    createdAt: 1_200,
+  };
+  const subagentWait: ChatMessage = {
+    id: 'm5',
+    sessionKey: running.sessionKey,
+    role: 'tool',
+    turnId: 'turn-2',
+    toolCallId: 'call-wait',
+    toolPhase: 'call',
+    toolName: 'multi_agent_v1__wait_agent',
+    codexSubagent: { action: 'wait', source: 'live', agents: [{ id: 'sub-1', status: 'running' }] },
+    text: '[tool multi_agent_v1__wait_agent]\ntool input:\n{"targets":["sub-1"]}',
+    createdAt: 1_300,
+  };
+
+  assert.deepEqual(
+    activeToolProgressSummary(running, [priorCall, userPrompt, commandCall, queuedFollowup, subagentWait]),
+    { kind: 'command', detail: 'pnpm test:module agent:codex' },
+  );
+
+  const commandResult: ChatMessage = {
+    id: 'm6',
+    sessionKey: running.sessionKey,
+    role: 'tool',
+    turnId: 'turn-2',
+    toolCallId: 'call-1',
+    toolPhase: 'result',
+    toolName: 'exec_command',
+    text: 'ok',
+    createdAt: 1_400,
+  };
+  assert.equal(
+    activeToolProgressSummary(running, [priorCall, userPrompt, commandCall, commandResult, queuedFollowup, subagentWait]),
+    undefined,
+  );
+
+  const customToolCall: ChatMessage = {
+    id: 'm7',
+    sessionKey: running.sessionKey,
+    role: 'tool',
+    turnId: 'turn-2',
+    toolCallId: 'call-2',
+    toolPhase: 'call',
+    toolName: 'agentopsdeck_board_read',
+    text: '[tool agentopsdeck_board_read]\ntool input:\n{"status":"todo"}',
+    createdAt: 1_500,
+  };
+  assert.deepEqual(
+    activeToolProgressSummary(running, [userPrompt, customToolCall]),
+    { kind: 'tool', detail: 'agentopsdeck_board_read' },
+  );
+
+  assert.equal(
+    activeToolProgressSummary({ ...running, runtime: { ...running.runtime!, sync: 'error' } }, [userPrompt, commandCall]),
+    undefined,
+  );
+  assert.equal(
+    activeToolProgressSummary({ ...running, runtime: { ...running.runtime!, phase: 'completed' } }, [userPrompt, commandCall]),
+    undefined,
+  );
 });
