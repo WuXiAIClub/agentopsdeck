@@ -7,7 +7,7 @@ import { resolveMessageLimits } from '@agentopsdeck/shared';
 import { ConnectorClientError, type ConnectorClientResolver } from '../hub/connector-client.js';
 import type { HubStore } from '../hub/hub-store.js';
 import type { HubPrincipal } from '../hub/identity.js';
-import { mergeMessageIdentities } from '../messages/identity.js';
+import { dedupeMessageIdentitiesInOrder } from '../messages/identity.js';
 import { createConditionalHistory } from '../messages/conditional-history.js';
 import { projectMessageMedia } from '../hub/message-projection.js';
 import { sharedSessionAccess } from './hub-shared-access.js';
@@ -118,7 +118,7 @@ export function registerHubSharedReadRoutes(app: Hono, deps: SharedReadDeps) {
         : await connector.messages(auth.resource.sessionKey, limit, signal(c), c.req.query('before'), asynchronous);
       await auth.read();
       // Explicit envelope: no arbitrary upstream identity/owner fields.
-      const messages = mergeMessageIdentities(page.messages).map(message => wrap(message, auth));
+      const messages = dedupeMessageIdentitiesInOrder(page.messages).map(message => wrap(message, auth));
       const access = await auth.hints();
       return conditionalHistory(c, { messages, totalCount: page.totalCount, hiddenCount: page.hiddenCount, updatedAt: page.updatedAt, revision: page.revision, sourceCursor: page.sourceCursor,
         ...(page.historyStatus === 'cached' || page.historyStatus === 'verified-session' ? { historyStatus: page.historyStatus } : {}), limits: resolveMessageLimits(page.limits), access });

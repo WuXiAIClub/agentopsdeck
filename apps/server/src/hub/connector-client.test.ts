@@ -9,7 +9,7 @@ import { ConnectorTokenStore } from '../auth/connector-token.js';
 import { ConnectorClient, createConnectorClientResolver, HistoryPreparing } from './connector-client.js';
 import { HISTORY_ASYNC_HEADER, historyPendingBody } from '@agentopsdeck/shared';
 import { HubStore } from './hub-store.js';
-import { mergeMessageIdentities } from '../messages/identity.js';
+import { dedupeMessageIdentitiesInOrder, mergeMessageIdentities } from '../messages/identity.js';
 import { EXPECTED_NODE_HEADER, NODE_ID_HEADER } from '../connector/node-identity.js';
 import { fileResponse } from '../utils/file-response.js';
 import { createConditionalHistoryCache, HISTORY_DELTA_HEADER } from '@agentopsdeck/shared';
@@ -506,6 +506,16 @@ test('identity merge keeps distinct same-text turns and selects latest version p
   const first = { id: 'a', sessionKey: 's', role: 'assistant' as const, text: 'same', createdAt: 1, updatedAt: 1 };
   const second = { ...first, id: 'b', createdAt: 900, updatedAt: 900 };
   assert.deepEqual(mergeMessageIdentities([first, second, { ...first, text: 'corrected', updatedAt: 2 }, first]).map((row) => [row.id, row.text]), [['a', 'corrected'], ['b', 'same']]);
+  // Connector-paginated pages must retain their canonical sequence -> live -> pending order
+  // even when a live stream or queued input carries an earlier createdAt than newer tool rows.
+  const tool = { id: 'tool-new', sessionKey: 's', role: 'tool' as const, text: 'read', createdAt: 5000 };
+  const live = { id: 'assistant-live', sessionKey: 's', role: 'assistant' as const, text: 'streaming', createdAt: 100 };
+  const queued = { id: 'queued-user', sessionKey: 's', role: 'user' as const, text: 'next', createdAt: 200, status: 'queued' as const };
+  assert.deepEqual(dedupeMessageIdentitiesInOrder([tool, live, queued, { ...live, text: 'streaming v2', updatedAt: 6000 }]).map((row) => [row.id, row.text]), [
+    ['tool-new', 'read'],
+    ['assistant-live', 'streaming v2'],
+    ['queued-user', 'next'],
+  ]);
 });
 
 test('maintenance credentials never fall back to daily credentials in either transport', async () => {
