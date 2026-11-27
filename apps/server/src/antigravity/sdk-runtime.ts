@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { existsSync, lstatSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import type { AgentReadiness, CodexSubagentObservation } from '@agentopsdeck/shared';
+import { nativeModelId, parseAntigravityQuotaWait, type AgentReadiness, type AntigravityQuotaWaitState, type CodexSubagentObservation } from '@agentopsdeck/shared';
 import type { AdmissionPause } from '../lifecycle/request-drain.js';
 import type { ConnectorAgentLifecycle } from '../connector/agent-runtimes.js';
 import type { ConnectorUserStore } from '../connector/connector-user-store.js';
@@ -31,6 +31,14 @@ import { AntigravityAcpError, type AntigravityPromptBlock, type AntigravitySessi
 import type { AntigravityConfig } from './config.js';
 import { verifyAntigravityEnvironment } from './environment.js';
 import { AntigravityProcessWorker } from './execution-worker.js';
+import { AntigravityQuotaRetryManager } from './quota-retry.js';
+import {
+  classifyAntigravityTool,
+  extractAntigravitySourceFiles,
+  formatAntigravityToolCallDetail,
+  formatAntigravityToolResultDetail,
+  type AntigravityToolMeta,
+} from './tool-formatting.js';
 
 const failure = () => new Error('Antigravity execution could not be confirmed');
 const unavailable = () => new Error('Antigravity runtime unavailable; inspect local configuration and ownership');
@@ -384,6 +392,8 @@ export class AntigravitySdkTurn implements SdkOwnedTurn {
   private readonly seenTools = new Set<string>();
   private readonly completedTools = new Set<string>();
   private readonly toolTitles = new Map<string, string>();
+  private readonly toolMetas = new Map<string, AntigravityToolMeta>();
+  private detectedQuotaWait: AntigravityQuotaWaitState | undefined;
 
   constructor(private readonly options: {
     config: AntigravityConfig;
@@ -394,6 +404,7 @@ export class AntigravitySdkTurn implements SdkOwnedTurn {
     projection: AntigravityProjection;
     assertOwnership: () => void;
     createWorker?: AntigravityWorkerFactory;
+    onQuotaWait?: (wait: AntigravityQuotaWaitState, resumePrompt: string) => void;
     now?: () => number;
   }) {
     const { execution, text } = options;
@@ -474,10 +485,10 @@ export class AntigravitySdkTurn implements SdkOwnedTurn {
       const eventIndex = ++this.sequence;
       if (!this.seenTools.has(toolCallId)) {
         this.seenTools.add(toolCallId);
-        const toolName = sanitizeToolName(update.kind ?? 'antigravity_tool');
-        const detail = toolTitle
-          ? { text: toolTitle, truncated: false }
-          : undefined;
+        const meta = classifyAntigravityTool(update, toolTitle);
+        this.toolMetas.set(toolCallId, meta);
+        const toolName = sanitizeToolName(meta.toolName);
+        const detail = formatAntigravityToolCallDetail(meta, update, toolTitle);
         const subagent = antigravitySubagentObservation(toolTitle, toolCallId, 'running', this.now());
         projection.project({
           nativeEventId: sanitizeId(`evt_${execution.id}_call_${eventIndex}`),
@@ -493,10 +504,10 @@ export class AntigravitySdkTurn implements SdkOwnedTurn {
       }
       if ((update.status === 'completed' || update.status === 'failed') && !this.completedTools.has(toolCallId)) {
         this.completedTools.add(toolCallId);
+        const meta = this.toolMetas.get(toolCallId) ?? classifyAntigravityTool(update, toolTitle);
         const resultIndex = ++this.sequence;
-        const resultDetail = update.outputText !== undefined
-          ? { text: update.outputText, truncated: Boolean(update.outputTruncated) }
-          : undefined;
+        const resultDetail = formatAntigravityToolResultDetail(meta, update);
+        const sourceFiles = extractAntigravitySourceFiles(meta, update, this.options.config.workspace);
         const subagent = antigravitySubagentObservation(
           toolTitle,
           toolCallId,
@@ -513,6 +524,7 @@ export class AntigravitySdkTurn implements SdkOwnedTurn {
           truncated: false,
           toolError: update.status === 'failed',
           createdAt: this.now(),
+          ...(sourceFiles.length ? { sourceFiles } : {}),
           ...(subagent ? { codexSubagent: subagent } : {}),
         }, resultDetail);
       }
@@ -592,9 +604,11 @@ export class AntigravitySdkTurn implements SdkOwnedTurn {
       this.streamDirty = false;
       if (result.usage) {
         const metricSequence = ++this.sequence;
+        const metricModel = targetModel && nativeModelId(targetModel) ? targetModel : undefined;
         projection.metrics?.({
           sequence: metricSequence,
           eventId: sanitizeId(`evt_${execution.id}_turn_usage`),
+          ...(metricModel ? { model: metricModel } : {}),
           usage: {
             scope: 'last-turn',
             inputTokens: result.usage.inputTokens,
@@ -617,6 +631,9 @@ export class AntigravitySdkTurn implements SdkOwnedTurn {
           createdAt: this.now(),
         });
       }
+      if (!this.stopRequested) {
+        this.detectedQuotaWait = parseAntigravityQuotaWait(this.assistantText, this.now());
+      }
       this.outcome = this.stopRequested ? 'interrupted' : 'completed';
     } catch (error) {
       clearTimeout(this.streamTimer);
@@ -638,7 +655,12 @@ export class AntigravitySdkTurn implements SdkOwnedTurn {
             this.admitReject(error);
           }
         }
-        if (!this.failed) this.outcome = 'failed';
+        if (!this.failed) {
+          if (!this.stopRequested) {
+            this.detectedQuotaWait = error.quotaWait ?? parseAntigravityQuotaWait(this.assistantText, this.now());
+          }
+          this.outcome = 'failed';
+        }
       } else {
         this.failed = true;
         this.admitReject(error instanceof Error ? error : failure());
@@ -649,6 +671,16 @@ export class AntigravitySdkTurn implements SdkOwnedTurn {
       const drained = await this.worker.stopAndDrain();
       this.cleaned = drained.cleaned;
       this.quiescent = drained.cleaned && drained.quiescent;
+      if (this.detectedQuotaWait && !this.failed && !this.stopRequested) {
+        const resumePrompt = this.seenTools.size > 0
+          ? 'Continue from where you stopped.'
+          : this.options.text;
+        try {
+          this.options.onQuotaWait?.(this.detectedQuotaWait, resumePrompt);
+        } catch {
+          /* Quota retry scheduling must never abort turn cleanup. */
+        }
+      }
     }
   }
 
@@ -836,6 +868,7 @@ export class AntigravityExecutionDriver extends SdkExecutionDriver<AntigravitySd
       start: (execution, text, changed, context) => options.start(execution, text, {
         project: (row, detail) => { store.antigravityTranscript.append(execution, row, text, detail); changed(); },
         stream: snapshot => { if (store.antigravityTranscript.updateStream(execution, snapshot)) changed(); },
+        metrics: sample => { if (store.antigravityJournal.recordMetrics(execution, sample)) changed(); },
       }, context),
     });
   }
@@ -869,6 +902,8 @@ export type AntigravityStarter = (execution: SdkExecution, text: string, project
   assertOwnership: () => void) => AntigravitySdkTurn;
 
 export class AntigravityOwnedRuntime extends SdkOwnedRuntime<'antigravity', AntigravityConfig, AntigravityExecutionDriver> {
+  private readonly quotaRetries: AntigravityQuotaRetryManager;
+
   constructor(options: AntigravityOwnedOptions,
     start?: AntigravityStarter,
     check: (config: AntigravityConfig) => SdkPreflight = value => new AntigravityWorkerPreflight(value),
@@ -876,6 +911,15 @@ export class AntigravityOwnedRuntime extends SdkOwnedRuntime<'antigravity', Anti
     compact?: (execution: SdkCompactExecution, assertOwnership: () => void) => SdkOwnedCompactWorker) {
     const config = structuredClone(options.config);
     const ownedConfig = { ...config, model: config.model ?? 'default', ...(!config.modelChoices ? { dynamicModels: true } : {}) };
+    const lastActors = new Map<string, { actorId: string }>();
+    let notifyChanged: ((key: string) => void) | undefined;
+    let wakeSession: ((key: string) => void) | undefined;
+    const quotaRetries = new AntigravityQuotaRetryManager({
+      onChange: key => notifyChanged?.(key),
+    });
+    const projection = options.projection
+      ? new AntigravitySessionProjection(options.store, options.projection, config.model, key => quotaRetries.get(key))
+      : undefined;
     super({
       ...options,
       config: ownedConfig,
@@ -887,40 +931,81 @@ export class AntigravityOwnedRuntime extends SdkOwnedRuntime<'antigravity', Anti
       },
       check,
       deleteNative,
-      projection: options.projection ? new AntigravitySessionProjection(options.store, options.projection, config.model) : undefined,
-      driver: hooks => new AntigravityExecutionDriver({
-        store: options.store,
-        deadlineMs: config.startupTimeoutMs,
-        ...(options.turnContext ? { turnContext: options.turnContext } : {}),
-        authorize: (key, actor, action) => (action === 'runs:interrupt'
-          || sdkModelAllowed(ownedConfig, options.store.antigravityJournal.session(key)?.model))
-          && options.authorize(key, actor, action),
-        admissionReady: hooks.admissionReady,
-        changed: hooks.changed,
-        compactTimeoutMs: config.compactTimeoutMs ?? 600_000,
-        startCompact: execution => {
-          hooks.assertOwnership();
-          if (compact) return compact(execution, hooks.assertOwnership);
-          return new AntigravityCompactWorker({
-            config: structuredClone(config),
-            execution,
-            assertOwnership: hooks.assertOwnership,
-            timeoutMs: config.compactTimeoutMs ?? 600_000,
-          });
-        },
-        start: (execution, text, projection) => {
-          hooks.assertOwnership();
-          if (start) return start(execution, text, projection, hooks.assertOwnership);
-          return new AntigravitySdkTurn({
-            config: structuredClone(config),
-            execution,
-            text,
-            projection,
-            assertOwnership: hooks.assertOwnership,
-          });
-        },
-      }),
+      projection,
+      driver: hooks => {
+        notifyChanged = hooks.changed;
+        const driver = new AntigravityExecutionDriver({
+          store: options.store,
+          deadlineMs: config.startupTimeoutMs,
+          ...(options.turnContext ? { turnContext: options.turnContext } : {}),
+          authorize: (key, actor, action) => {
+            if (action === 'messages:send' && actor.actorId) {
+              lastActors.set(key, { actorId: actor.actorId });
+            }
+            return (action === 'runs:interrupt'
+              || sdkModelAllowed(ownedConfig, options.store.antigravityJournal.session(key)?.model))
+              && options.authorize(key, actor, action);
+          },
+          admissionReady: hooks.admissionReady,
+          changed: hooks.changed,
+          compactTimeoutMs: config.compactTimeoutMs ?? 600_000,
+          startCompact: execution => {
+            hooks.assertOwnership();
+            quotaRetries.cancel(execution.key);
+            if (compact) return compact(execution, hooks.assertOwnership);
+            return new AntigravityCompactWorker({
+              config: structuredClone(config),
+              execution,
+              assertOwnership: hooks.assertOwnership,
+              timeoutMs: config.compactTimeoutMs ?? 600_000,
+            });
+          },
+          start: (execution, text, turnProjection) => {
+            hooks.assertOwnership();
+            quotaRetries.cancel(execution.key);
+            if (start) return start(execution, text, turnProjection, hooks.assertOwnership);
+            return new AntigravitySdkTurn({
+              config: structuredClone(config),
+              execution,
+              text,
+              projection: turnProjection,
+              assertOwnership: hooks.assertOwnership,
+              onQuotaWait: (wait, resumePrompt) => {
+                quotaRetries.schedule(execution.key, wait, resumePrompt, (key, prompt) => {
+                  const actor = lastActors.get(key);
+                  if (!actor || !hooks.admissionReady()) return;
+                  if (!options.store.antigravityJournal.canStart(key) || options.store.turns.hasPending('antigravity', key)) return;
+                  if (!options.authorize(key, { text: prompt, actorId: actor.actorId, images: [] }, 'messages:send')) return;
+                  options.store.turns.enqueue('antigravity', {
+                    id: randomUUID(),
+                    sessionKey: key,
+                    createdAt: Date.now(),
+                    payload: { text: prompt, actorId: actor.actorId, images: [] },
+                  });
+                  wakeSession?.(key);
+                });
+              },
+            });
+          },
+        });
+        wakeSession = key => { void driver.wake(key); };
+        return driver;
+      },
     });
+    this.quotaRetries = quotaRetries;
+  }
+
+  getQuotaWait(key: string): AntigravityQuotaWaitState | undefined {
+    return this.quotaRetries.get(key);
+  }
+
+  cancelQuotaWait(key: string): boolean {
+    return this.quotaRetries.cancel(key);
+  }
+
+  override close(): Promise<void> {
+    this.quotaRetries.close();
+    return super.close();
   }
 }
 
@@ -1039,50 +1124,72 @@ export async function createAsyncAntigravityOwnedRuntime(options: AsyncAntigravi
     model: config.model ?? 'default',
     ...(config.modelChoices ? { modelChoices: config.modelChoices } : { dynamicModels: true }),
   };
-  return AsyncSdkOwnedRuntime.create({
+  let notifyChanged: ((key: string) => void) | undefined;
+  const quotaRetries = new AntigravityQuotaRetryManager({
+    onChange: key => notifyChanged?.(key),
+  });
+  const owned = await AsyncSdkOwnedRuntime.create({
     ...options,
     config,
     runtime: 'antigravity',
+    getQuotaWait: key => quotaRetries.get(key),
     hasNativeBinding: (value, nativeSessionId) => {
       try { return Boolean(readAntigravitySessionBinding(value, nativeSessionId)); }
       catch { return false; }
     },
     check: ports.check ?? (value => new AntigravityWorkerPreflight(value)),
     deleteNative: ports.deleteNative ?? ((value, request) => new AntigravityWorkerDeletion(value, request)),
-    driver: hooks => new AsyncAntigravityExecutionDriver({
-      owner: options.owner,
-      deadlineMs: config.startupTimeoutMs,
-      ...(options.turnContext ? { turnContext: options.turnContext } : {}),
-      ...(options.diagnostics ? { diagnostics: options.diagnostics } : {}),
-      admissionReady: hooks.admissionReady,
-      changed: hooks.changed,
-      compact: {
-        models: compactModels,
-        timeoutMs: config.compactTimeoutMs ?? 600_000,
-        start: execution => {
+    driver: hooks => {
+      notifyChanged = hooks.changed;
+      return new AsyncAntigravityExecutionDriver({
+        owner: options.owner,
+        deadlineMs: config.startupTimeoutMs,
+        ...(options.turnContext ? { turnContext: options.turnContext } : {}),
+        ...(options.diagnostics ? { diagnostics: options.diagnostics } : {}),
+        admissionReady: hooks.admissionReady,
+        changed: hooks.changed,
+        compact: {
+          models: compactModels,
+          timeoutMs: config.compactTimeoutMs ?? 600_000,
+          start: execution => {
+            hooks.assertOwnership();
+            quotaRetries.cancel(execution.key);
+            if (ports.compact) return ports.compact(execution, hooks.assertOwnership);
+            return new AntigravityCompactWorker({
+              config: structuredClone(config),
+              execution,
+              assertOwnership: hooks.assertOwnership,
+              timeoutMs: config.compactTimeoutMs ?? 600_000,
+            });
+          },
+        },
+        start: (execution, text, projection, context, attachments, interaction) => {
           hooks.assertOwnership();
-          if (ports.compact) return ports.compact(execution, hooks.assertOwnership);
-          return new AntigravityCompactWorker({
+          quotaRetries.cancel(execution.key);
+          if (ports.start) return ports.start(execution, text, projection, context, attachments, interaction);
+          return new AntigravitySdkTurn({
             config: structuredClone(config),
             execution,
+            text,
+            ...(context ? { context } : {}),
+            ...(attachments?.length ? { attachments } : {}),
+            projection,
             assertOwnership: hooks.assertOwnership,
-            timeoutMs: config.compactTimeoutMs ?? 600_000,
+            onQuotaWait: (wait, resumePrompt) => {
+              quotaRetries.schedule(execution.key, wait, resumePrompt, () => {
+                // Async worker mode notifies subscribers when wait expires so
+                // either the active client or next turn continues seamlessly.
+              });
+            },
           });
         },
-      },
-      start: (execution, text, projection, context, attachments, interaction) => {
-        hooks.assertOwnership();
-        if (ports.start) return ports.start(execution, text, projection, context, attachments, interaction);
-        return new AntigravitySdkTurn({
-          config: structuredClone(config),
-          execution,
-          text,
-          ...(context ? { context } : {}),
-          ...(attachments?.length ? { attachments } : {}),
-          projection,
-          assertOwnership: hooks.assertOwnership,
-        });
-      },
-    }),
+      });
+    },
   });
+  const originalClose = owned.close.bind(owned);
+  owned.close = () => {
+    quotaRetries.close();
+    return originalClose();
+  };
+  return owned;
 }

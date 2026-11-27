@@ -247,3 +247,30 @@ test('readGitRepoStatus classifies 404, 429 rate limits, 403 auth, and degrades 
   assert.equal(degraded.actions.totalRecent, 0);
   assert.equal(degraded.actions.latestStatus, 'none');
 });
+
+test('readGitRepoStatus backs off after 429 rate limit instead of hammering GitHub API', async () => {
+  let clock = 50_000;
+  let calls = 0;
+  const readLimited = createGitRepoStatusReader(
+    [{ id: 'public', label: 'Public', provider: 'github', apiOrigin: 'https://api.github.com' }],
+    {
+      now: () => clock,
+      fetcher: async () => {
+        calls += 1;
+        return jsonResponse({ message: 'rate limit' }, 403, { 'x-ratelimit-remaining': '0', 'retry-after': '120' });
+      },
+    },
+  );
+  await assert.rejects(
+    readLimited({ repo: 'owner/repo' }),
+    (error: unknown) => error instanceof GitRepoStatusError && error.code === 'git_rate_limited' && error.status === 429,
+  );
+  assert.equal(calls, 1);
+
+  clock += 30_000;
+  await assert.rejects(
+    readLimited({ repo: 'owner/repo' }),
+    (error: unknown) => error instanceof GitRepoStatusError && error.code === 'git_rate_limited' && error.status === 429,
+  );
+  assert.equal(calls, 1, 'subsequent automatic reads during rate-limit backoff must not call upstream');
+});

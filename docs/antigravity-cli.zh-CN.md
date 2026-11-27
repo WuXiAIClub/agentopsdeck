@@ -11,8 +11,12 @@ Connector 运行时接线与 Web UI 入口已在 `apps/server/src/antigravity/`�
 配置 `AOD_ANTIGRAVITY_ENABLED=true`、`AOD_ANTIGRAVITY_DEDICATED=true`、
 `AOD_ANTIGRAVITY_COMMAND`、`AOD_ANTIGRAVITY_HOME` 与 `AOD_ANTIGRAVITY_WORKSPACE`
 即可在 Connector 与界面中启用 owner-only 的 `antigravity` 运行时。
-已支持图片/文本附件（`attachments`）、有界工具输出详情、上下文与 token 用量统计
-（`usage_update` / `session/prompt` `usage`）、通过 `agy models` 动态发现模型目录与按会话切模型
+已支持图片/文本附件（`attachments`）、对齐 Codex 的结构化工具分类与展示
+（`read_file`、`edit_file`、`write_file`、`search_files`、`git`、`commandExecution`、
+差异对比视图与 `sourceFiles` 文件变更追踪）、完整的会话状态指标（消息条数、压缩次数、
+单轮精确 token 与累计 session 总消耗，支持打开原生 Token 用量面板）、额度耗尽提示
+重置时间后的自动等待模式与定时继续（如 `Individual quota reached ... Resets in ...`）、
+通过 `agy models` 动态发现模型目录与按会话切模型
 （支持可选的 `AOD_ANTIGRAVITY_MODEL` 默认模型与 `AOD_ANTIGRAVITY_MODEL_CHOICES` 白名单覆盖 + `session/set_model`）
 以及看板上下文透传，并已支持专用的手动上下文压缩能力（通过 `POST .../compact`
 在 `session/resume` 后执行 ACP `/compact`，支持 `AOD_ANTIGRAVITY_COMPACT_TIMEOUT_MS`
@@ -29,7 +33,9 @@ Connector 运行时接线与 Web UI 入口已在 `apps/server/src/antigravity/`�
 （不重复渲染顶部标题横幅），并将额度查询时间放在 Gemini 模型分组标题行内
 （若未返回 Gemini 模型分组则回退到首个分组标题行）。这里显示的是账号额度，
 不是单会话 token 用量或账单。打开卡片即可查询，也可点击 **刷新**；卡片可见时每
-60 秒自动刷新，服务端最多复用 30 秒内的成功快照。
+60 秒自动刷新，服务端最多复用 30 秒内的成功快照。卡片右上角工具栏提供可开关的
+**额度消耗动效**，开启后当工作区中的 Antigravity 会话完成工具调用或回复消息时，会有
+轻柔的微光粒子飘向额度表盘；该动效仅作视觉展示、自动遵循系统减少动态效果设置，可随时关闭且不影响任何会话功能。
 
 本机管理员接口 `GET /api/antigravity/usage` 不接受 Connector 传输授权，也不能指定远程
 Connector。未启用时返回 `{ "usage": null }`，无权访问时返回 `403`，无法查询额度时

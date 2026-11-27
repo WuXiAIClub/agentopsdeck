@@ -218,7 +218,7 @@ export class SdkExecutionJournal {
       this.db.prepare('INSERT INTO sdk_agent_executions(runtime, id, session_key, phase, data) VALUES (?, ?, ?, ?, ?)')
         .run(this.runtime, execution.id, execution.key, execution.phase, JSON.stringify(execution));
       this.saveSession({ ...session, nativeState: 'starting', metrics: {
-        ...session.metrics, ...(session.nativeState === 'allocated' ? { compactionCount: 0 } : {}),
+        ...session.metrics, ...(session.nativeState === 'allocated' || (this.runtime === 'antigravity' && session.metrics?.compactionCount === undefined) ? { compactionCount: 0 } : {}),
         executionId: execution.id, sequence: 0,
       } });
       return execution;
@@ -315,6 +315,25 @@ export class SdkExecutionJournal {
       else if (sample.compacted) metrics.context = { used: null, basis: 'post-compaction' };
       if (sample.usage) {
         metrics.usage = sample.usage;
+        const prevTotals = metrics.totals;
+        const nextInput = (prevTotals?.inputTokens ?? 0) + sample.usage.inputTokens;
+        const nextOutput = (prevTotals?.outputTokens ?? 0) + sample.usage.outputTokens;
+        const nextTotal = nextInput + nextOutput;
+        if (Number.isSafeInteger(nextInput) && Number.isSafeInteger(nextOutput) && Number.isSafeInteger(nextTotal)) {
+          const nextCacheRead = sample.usage.cacheReadTokens !== undefined
+            ? (prevTotals?.cacheReadTokens ?? 0) + sample.usage.cacheReadTokens
+            : prevTotals?.cacheReadTokens;
+          const nextCacheWrite = sample.usage.cacheWriteTokens !== undefined
+            ? (prevTotals?.cacheWriteTokens ?? 0) + sample.usage.cacheWriteTokens
+            : prevTotals?.cacheWriteTokens;
+          metrics.totals = {
+            inputTokens: nextInput,
+            outputTokens: nextOutput,
+            totalTokens: nextTotal,
+            ...(nextCacheRead !== undefined && Number.isSafeInteger(nextCacheRead) ? { cacheReadTokens: nextCacheRead } : {}),
+            ...(nextCacheWrite !== undefined && Number.isSafeInteger(nextCacheWrite) ? { cacheWriteTokens: nextCacheWrite } : {}),
+          };
+        }
         // Reconciled calls are observed together in one result, not at each
         // SQLite insert. A minute boundary must not split that observation.
         const observedAt = this.now();

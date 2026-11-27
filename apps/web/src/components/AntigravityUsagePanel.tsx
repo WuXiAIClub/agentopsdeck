@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Clock3, RefreshCw } from 'lucide-react';
+import { Clock3, RefreshCw, Sparkles } from 'lucide-react';
 import type { AntigravityUsage } from '@agentopsdeck/shared';
 import { api, recoveryScope } from '../api';
 import { isEmptyQuotaFraction, isLowQuotaFraction, resolveQuotaSampleGroupIndex } from '../lib/antigravity-quota';
+import { useAntigravityQuotaFxEnabled } from '../lib/antigravity-quota-fx';
 import { useI18n } from '../lib/i18n';
 import { ResourceAction, ResourceTitle, ResourceToolbar } from './ResourceToolbar';
 import './antigravity-quota-card.css';
@@ -11,6 +12,7 @@ const AUTO_REFRESH_INTERVAL_MS = 60_000;
 
 export default function AntigravityUsagePanel({ scope }: { scope: string }) {
   const { t, locale } = useI18n();
+  const [fxEnabled, setFxEnabled] = useAntigravityQuotaFxEnabled();
   const [generation, setGeneration] = useState(0);
   const [result, setResult] = useState<{ generation: number; usage: AntigravityUsage | null | undefined }>();
   useEffect(() => {
@@ -45,6 +47,13 @@ export default function AntigravityUsagePanel({ scope }: { scope: string }) {
   return <section className="antigravity-quota-card" aria-label={t('Antigravity account quota')} aria-busy={busy}>
     <ResourceTitle>{t('Antigravity account quota')}</ResourceTitle>
     <ResourceToolbar>
+      <ResourceAction
+        label={t(fxEnabled ? 'Quota flow animation: On' : 'Quota flow animation: Off')}
+        aria-pressed={fxEnabled}
+        onClick={() => setFxEnabled(!fxEnabled)}
+      >
+        <Sparkles size={14} className={fxEnabled ? 'antigravity-quota-fx-on' : 'antigravity-quota-fx-off'} />
+      </ResourceAction>
       <ResourceAction label={t('Refresh')} disabled={busy || usage === null} onClick={() => setGeneration(value => value + 1)}><RefreshCw size={15} className={busy ? 'antigravity-quota-refreshing' : undefined} /></ResourceAction>
     </ResourceToolbar>
     <div className="antigravity-quota-body">

@@ -14,6 +14,7 @@ import { CardConnectionsButton } from './CardConnectionsButton';
 import { fileEditorsReady } from '../lib/file-editor-guard';
 const WorkspaceFiles = lazy(() => import('./WorkspaceFiles'));
 const WorkspaceBindingLines = lazy(() => import('./WorkspaceBindingLines'));
+const AntigravityQuotaFlowOverlay = lazy(() => import('./AntigravityQuotaFlowOverlay'));
 import { focusedPaneRect } from '../lib/pane-focus-geometry';
 import { setDockFrame, projectWorkspace, resizePaneEdge, findWorkspaceDrop, paneMinimum, dockFitsWorkspace, type PaneResizeEdge } from '../lib/workspace-layout';
 import { alignWorkspaceRect, type AlignmentGuide, type SnapEdge } from '../lib/workspace-snap';
@@ -55,6 +56,7 @@ const WorkspaceTaskboard = lazy(() => import('./WorkspaceTaskboard'));
 const WorkspaceStatusCard = lazy(() => import('./WorkspaceStatusCard'));
 const AntigravityUsagePanel = lazy(() => import('./AntigravityUsagePanel'));
 const GitRepoStatusPanel = lazy(() => import('./GitRepoStatusPanel'));
+const WorkspaceSessionHub = lazy(() => import('./WorkspaceSessionHub'));
 const WorkspaceDrawing = lazy(() => import('./WorkspaceDrawing'));
 const WorkspaceNativeDrawio = lazy(() => import('./WorkspaceNativeDrawio'));
 const WorkspaceWebsite = lazy(() => import('./WorkspaceWebsite'));
@@ -380,7 +382,7 @@ function SessionWorkspace({ selected, selectedKey, sessions, dismissed, sourceSt
     if (next === current && !current.panes.some(pane => pane.kind === kind && pane.resourceId === resourceId)) setLayoutNotice(t('Workspace resource limit reached. Close a panel before opening another.'));
     else setLayout(next);
   };
-  const visible = current.panes.flatMap<{ id: string; sessionKey: string; files?: 'file-browser' | 'file-editor' | 'image-viewer'; session?: SessionSummary; browser?: boolean; report?: { resourceId: string }; media?: boolean; moderator?: boolean; docker?: boolean; subagents?: boolean; research?: boolean; terminal?: boolean; antigravityQuota?: boolean; gitRepoStatus?: { resourceId: string }; metricCard?: { resourceId: string }; website?: { resourceId: string }; notebook?: NotebookPane; drawing?: { resourceId: string }; nativeDrawio?: { resourceId: string }; board?: { kind: 'taskboard' | 'statuscard'; resourceId: string }; title: string }>(pane => {
+  const visible = current.panes.flatMap<{ id: string; sessionKey: string; files?: 'file-browser' | 'file-editor' | 'image-viewer'; session?: SessionSummary; browser?: boolean; report?: { resourceId: string }; media?: boolean; moderator?: boolean; docker?: boolean; subagents?: boolean; research?: boolean; terminal?: boolean; antigravityQuota?: boolean; gitRepoStatus?: { resourceId: string }; sessionHub?: { resourceId: string }; metricCard?: { resourceId: string }; website?: { resourceId: string }; notebook?: NotebookPane; drawing?: { resourceId: string }; nativeDrawio?: { resourceId: string }; board?: { kind: 'taskboard' | 'statuscard'; resourceId: string }; title: string }>(pane => {
     if (pane.kind === 'file-browser' || pane.kind === 'file-editor' || pane.kind === 'image-viewer') return [{ id: pane.id, sessionKey: paneKey(pane), files: pane.kind, title: t(fileCardLabel(pane.kind)) }];
     if (pane.kind === 'report') return [{ id: pane.id, sessionKey: paneKey(pane), report: pane, title: t('Report') }];
     if (pane.kind === 'git-tree') return [{ id: pane.id, sessionKey: paneKey(pane), title: t('Repository tree') }];
@@ -389,6 +391,7 @@ function SessionWorkspace({ selected, selectedKey, sessions, dismissed, sourceSt
     if (pane.kind === 'metric-card') return [{ id: pane.id, sessionKey: paneKey(pane), metricCard: pane, title: t('Custom status card') }];
     if (pane.kind === 'antigravity-quota') return [{ id: pane.id, sessionKey: paneKey(pane), antigravityQuota: true, title: t('Antigravity account quota') }];
     if (pane.kind === 'git-repo-status') return [{ id: pane.id, sessionKey: paneKey(pane), gitRepoStatus: pane, title: t('Git repository status') }];
+    if (pane.kind === 'session-hub') return [{ id: pane.id, sessionKey: paneKey(pane), sessionHub: pane, title: t('Multi-session switcher') }];
     if (pane.kind === 'terminal') return [{ id: pane.id, sessionKey: paneKey(pane), terminal: true, title: t('Connector terminal') }];
     if (pane.kind === 'research') return [{ id: pane.id, sessionKey: paneKey(pane), research: true, title: t('Search and sources · Preview') }];
     if (pane.kind === 'website') return [{ id: pane.id, sessionKey: paneKey(pane), website: pane, title: t('Connector website · Preview') }];
@@ -649,7 +652,7 @@ function SessionWorkspace({ selected, selectedKey, sessions, dismissed, sourceSt
   }, []);
   useEffect(() => { cancelPlacement(); }, [size.width, size.height, visibleKeys]);
   function beginPlacement(event: PointerEvent<HTMLElement>, id: string, sessionKey: string, rect: PaneRect) {
-    if (locked || event.button !== 0 || maximized) return;
+    if (locked || event.button !== 0 || maximized || event.detail >= 2) return;
     event.preventDefault();
     event.currentTarget.closest('.session-pane-caption')?.querySelector<HTMLButtonElement>('.session-pane-drag')?.focus({ preventScroll: true });
     event.currentTarget.setPointerCapture(event.pointerId);
@@ -1076,6 +1079,12 @@ function SessionWorkspace({ selected, selectedKey, sessions, dismissed, sourceSt
     setLayout(value => openResourcePane(value, pane, size.width, size.height));
   }, [scope, size.width, size.height]);
 
+  const openSessionHub = useCallback(() => {
+    if (!scope) return;
+    const pane = { id: `pane:${crypto.randomUUID()}`, kind: 'session-hub', resourceId: crypto.randomUUID() } as const;
+    setLayout(value => openResourcePane(value, pane, size.width, size.height));
+  }, [scope, size.width, size.height]);
+
   const handleOpenDesktopIcon = useCallback((item: DesktopIconItem) => {
     if (item.kind === "antigravity-quota") {
       openAntigravityQuota();
@@ -1199,6 +1208,7 @@ function SessionWorkspace({ selected, selectedKey, sessions, dismissed, sourceSt
   const renderPaneBody = (pane: typeof visible[number], collapsed: boolean) => (
     pane.antigravityQuota ? <Suspense fallback={<p role="status">{t('Loading…')}</p>}><AntigravityUsagePanel key={scope} scope={scope ?? ''} /></Suspense> :
     pane.gitRepoStatus ? <Suspense fallback={<p role="status">{t('Loading…')}</p>}><GitRepoStatusPanel key={`${scope}:${pane.gitRepoStatus.resourceId}`} scope={scope ?? ''} cardId={pane.gitRepoStatus.resourceId} /></Suspense> :
+    pane.sessionHub ? <Suspense fallback={<p role="status">{t('Loading…')}</p>}><WorkspaceSessionHub key={`${scope}:${pane.sessionHub.resourceId}`} scope={scope ?? ''} cardId={pane.sessionHub.resourceId} sessions={overviewSessions} completedSessionKeys={osDesktopCompletedSet} initialSessionKey={selected?.sessionKey} renderPane={renderPane} onOpenStandalone={openSession} onCreateSession={onCreateSession} /></Suspense> :
     pane.session ? <WorkspaceSessionContent session={pane.session} renderPane={renderPane} /> : pane.website ? <Suspense fallback={<p role="status">{t("Loading…")}</p>}><WorkspaceWebsite key={`${scope}:${pane.website.resourceId}`} scope={scope ?? ""} resourceId={pane.website.resourceId} onOpen={openBoardResource} /></Suspense> : pane.nativeDrawio ? <Suspense fallback={<p role="status">{t("Loading…")}</p>}><WorkspaceNativeDrawio key={`${scope}:${pane.nativeDrawio.resourceId}`} scope={scope ?? ""} resourceId={pane.nativeDrawio.resourceId} onOpen={openBoardResource} /></Suspense> : pane.drawing ? <Suspense fallback={<p role="status">{t("Loading…")}</p>}><WorkspaceDrawing key={`${scope}:${pane.drawing.resourceId}`} scope={scope ?? ""} resourceId={pane.drawing.resourceId} onOpen={openBoardResource} /></Suspense> : pane.board ? <Suspense fallback={<p role="status">{t("Loading…")}</p>}>{pane.board.kind === "taskboard"
       ? <WorkspaceTaskboard key={`${scope}:${pane.board.resourceId}`} scope={scope ?? ""} resourceId={pane.board.resourceId} onOpen={openBoardResource} />
       : <WorkspaceStatusCard key={`${scope}:${pane.board.resourceId}`} scope={scope ?? ""} resourceId={pane.board.resourceId} onOpen={openBoardResource} />}</Suspense> : pane.notebook ? (
@@ -1273,6 +1283,12 @@ function SessionWorkspace({ selected, selectedKey, sessions, dismissed, sourceSt
       </div>
       <div className="workspace-menu-group" role="group" aria-label={t('Sessions')}>
         <div className="workspace-menu-group-title" aria-hidden="true">{t('Sessions')}</div>
+        <button type="button" className="workspace-menu-feature" disabled={!scope || resourceCapacityFull} onClick={event => {
+          openSessionHub();
+          const menu = event.currentTarget.closest('details');
+          if (menu) { menu.open = false; presetSummaryRef.current?.focus(); }
+          closeContextMenu();
+        }}><span className="workspace-glass-emblem"><CardKindIcon kind="session-hub" /></span><span>{t('Multi-session switcher')}</span><ArrowUpRight className="workspace-menu-feature-arrow" size={16} aria-hidden="true" /></button>
         {onCreateSession && <button type="button" onClick={event => { onCreateSession(); event.currentTarget.closest('details')?.removeAttribute('open'); }}><CardKindIcon kind="session" />{t('New session')}</button>}
         <label className="workspace-add-session">{t('Add session card')}<select name="sessionworkspaceview-select-1" aria-label={t('Add session card')} value="" onChange={event => {
           const key = event.target.value;
@@ -1499,6 +1515,7 @@ function SessionWorkspace({ selected, selectedKey, sessions, dismissed, sourceSt
       ) : (<>
       {!visible.length && emptyState}
       {scope && <Suspense fallback={null}><WorkspaceBindingLines key={scope} surface={surface} panes={current.panes.filter(pane => visible.some(item => item.id === pane.id))} scope={scope} /></Suspense>}
+      {scope && <Suspense fallback={null}><AntigravityQuotaFlowOverlay surface={surface} /></Suspense>}
       {maximized ? <button type="button" className="pane-maximize-scrim" aria-label={t('Restore pane')} onClick={() => setMaximizedId(undefined)} /> : null}
       {[...geometry.empty].map(([id, rect]) => <div key={id} className="session-workspace-vacancy" style={{ left: rect.x, top: rect.y, width: rect.width, height: rect.height }}><span>{t('Drop a session here')}</span></div>)}
       {visible.map(pane => {
@@ -1525,7 +1542,7 @@ function SessionWorkspace({ selected, selectedKey, sessions, dismissed, sourceSt
         const resizeEdge = floating ? resizeFloating : resizeDocked;
         const resizeCorner = (dx: number, dy: number) => resizeEdge('bottom-right', dx, dy);
         const running = !!pane.session && hasQueueBlockingRun(pane.session) && pane.session.runtime?.operation !== 'compact';
-        return <PaneToolbarScope key={pane.id}>{(slot, statusSlot, titleSlot) => <div className="session-workspace-pane" data-workspace-pane data-pane-kind={pane.subagents ? 'subagents' : pane.session ? 'session' : (current.panes.find(p => p.id === pane.id)?.kind ?? 'workspace')} data-running={running} data-resource-card={!pane.session || undefined} data-completion-effect={completionEffect} data-maximized={enlarged} data-notebook={!!pane.notebook} data-completed={completed.has(pane.sessionKey)} data-completion-sequence={completed.get(pane.sessionKey)} data-active={active?.id === pane.id} data-dragging={placement?.id === pane.id} data-floating={!!floating} data-collapsed={collapsed} data-dimmed={!enlarged && !!floating && !pane.subagents && dockIds.includes(active?.id ?? '')} data-dense={!!rect && rect.height < 600}
+        return <PaneToolbarScope key={pane.id}>{(slot, statusSlot, titleSlot) => <div className="session-workspace-pane" data-workspace-pane data-pane-kind={pane.subagents ? 'subagents' : pane.session ? 'session' : (current.panes.find(p => p.id === pane.id)?.kind ?? 'workspace')} data-session-key={pane.session?.sessionKey} data-running={running} data-resource-card={!pane.session || undefined} data-completion-effect={completionEffect} data-maximized={enlarged} data-notebook={!!pane.notebook} data-completed={completed.has(pane.sessionKey)} data-completion-sequence={completed.get(pane.sessionKey)} data-active={active?.id === pane.id} data-dragging={placement?.id === pane.id} data-floating={!!floating} data-collapsed={collapsed} data-dimmed={!enlarged && !!floating && !pane.subagents && dockIds.includes(active?.id ?? '')} data-dense={!!rect && rect.height < 600}
           data-remote-pane={pane.id} style={{ '--pane-composer-max-height': `${Math.min(400, (rect?.height ?? 600) * .4)}px`, left: rect?.x, top: rect?.y, width: rect?.width, height: collapsed ? 34 : rect?.height, zIndex: enlarged ? 40 : maximized && (pane.notebook || pane.subagents) && floating ? 45 : pane.subagents && floating ? 30 : completed.has(pane.sessionKey) && completionEffect !== 'off' ? 25 : floating ? 10 + (active?.id === pane.id ? current.floating.length : current.floating.indexOf(floating)) : active?.id === pane.id ? 2 : 1 } as CSSProperties}
           onPointerMoveCapture={event => { if (pane.session) hoverFocus.move(event, !!drag.current || !!gesture.current, () => activate(pane)); }}
           onWheelCapture={event => hoverFocus.wheel(event, () => activate(pane))} onKeyDownCapture={hoverFocus.key}

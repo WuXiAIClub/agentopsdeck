@@ -1,5 +1,6 @@
 export * from './agent-interaction.js';
 export type { AntigravityQuotaWindow, AntigravityUsage } from './antigravity-usage.js';
+export { parseAntigravityQuotaWait, parseQuotaDurationMs, formatQuotaCountdown, type AntigravityQuotaWaitState } from './antigravity-quota-wait.js';
 export type { GitRepoAccountOption, GitRepoPullRequestSummary, GitRepoStatus, GitRepoWorkflowRun } from './git-repo-status.js';
 export * from './shared-message-input.js';
 export { readCodexGoal, type CodexGoal } from './codex-goal.js';
@@ -125,6 +126,7 @@ export type SessionSummary = {
   nativeUsage?: { scope: 'last-turn' | 'last-call'; inputTokens: number; outputTokens: number;
     cacheReadTokens?: number; cacheWriteTokens?: number };
   compactionCount?: number;
+  quotaWait?: import('./antigravity-quota-wait.js').AntigravityQuotaWaitState;
   rolloutBytes?: number;
   lastTurnCompactions?: number;
   maxTurnCompactions?: number;

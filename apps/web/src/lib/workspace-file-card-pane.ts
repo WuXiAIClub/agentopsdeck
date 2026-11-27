@@ -26,7 +26,7 @@ export function syncFileCardPaneResource(pane: Pane): { resolved: boolean; resou
   }
   if (isSessionPane(pane)) return { resolved: true, resource: undefined };
   if (pane.kind === 'notebook') return { resolved: true, resource: workspaceFileCardResource('notebook', `${pane.target}:${pane.resourceId}`) };
-  if (pane.kind === 'antigravity-quota' || pane.kind === 'git-repo-status' || (pane.kind === 'metric-card' && pane.resourceId === 'catalog')) return { resolved: true, resource: undefined };
+  if (pane.kind === 'antigravity-quota' || pane.kind === 'git-repo-status' || pane.kind === 'session-hub' || (pane.kind === 'metric-card' && pane.resourceId === 'catalog')) return { resolved: true, resource: undefined };
   if (!fileConfigurationKinds.has(pane.kind)) return { resolved: true, resource: workspaceFileCardResource(pane.kind, pane.resourceId) };
   const digestKey = JSON.stringify(['agentopsdeck.workspace-file-pane', 1, pane.kind, pane.id]);
   const cached = paneDigestCache.get(digestKey);
@@ -62,7 +62,7 @@ registerCacheCleaner(clearCachedFileCardConfigurations);
 export async function fileCardPaneResource(pane: Pane): Promise<string | undefined> {
   const sync = syncFileCardPaneResource(pane);
   if (sync.resolved || !pane.kind || isSessionPane(pane)) return sync.resource;
-  if (pane.kind === 'antigravity-quota' || pane.kind === 'git-repo-status' || pane.kind === 'moderator' || pane.kind === 'docker' || pane.kind === 'subagents' || pane.kind === 'file-browser' || pane.kind === 'file-editor' || pane.kind === 'image-viewer' || pane.kind === 'git-tree' || pane.kind === 'issue-source') return undefined;
+  if (pane.kind === 'antigravity-quota' || pane.kind === 'git-repo-status' || pane.kind === 'session-hub' || pane.kind === 'moderator' || pane.kind === 'docker' || pane.kind === 'subagents' || pane.kind === 'file-browser' || pane.kind === 'file-editor' || pane.kind === 'image-viewer' || pane.kind === 'git-tree' || pane.kind === 'issue-source') return undefined;
   const digestKey = JSON.stringify(['agentopsdeck.workspace-file-pane', 1, pane.kind, pane.id]);
   const data = new TextEncoder().encode(digestKey);
   const hash = new Uint8Array(await crypto.subtle.digest('SHA-256', data));

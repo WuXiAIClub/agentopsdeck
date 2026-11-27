@@ -14,6 +14,7 @@ type Claim = Scope & { authorization: string; commandKey: string };
 type Ref = Scope & { intent: SdkDeletion; receiptId: string };
 type Failure = { error: 401 | 403 | 409 | 503 };
 export type SdkLifecycleView = Scope & { snapshot: SdkJournalSnapshot;
+  messageCount?: number;
   page: { messages: ChatMessage[]; totalCount: number; hiddenCount: number } | null };
 export type SdkDeletionAdmission = Scope & { receipt: CommandReceipt; intent: SdkDeletion | null; admitted: boolean; nativeRequired: boolean };
 export type SdkDeletionReceipt = Scope & { commandKey: string; receipt: CommandReceipt | null };
@@ -86,7 +87,8 @@ export function validConnectorSdkLifecycleOutput(k: ConnectorSdkLifecycleKind, v
     return receipt && (v.admitted ? r.state === 'outcome_unknown' && intent(v.intent, v.key) && v.intent.id === r.id
       : v.intent === null && v.nativeRequired === false);
   }
-  if (!fields(v, ['runtime', 'key', 'snapshot', 'page']) || !scope(v) || !validSdkJournalSnapshot(v.snapshot)
+  if (!fields(v, ['runtime', 'key', 'snapshot', 'page'], ['messageCount']) || !scope(v) || !validSdkJournalSnapshot(v.snapshot)
+    || (v.messageCount !== undefined && !integer(v.messageCount))
     || [v.snapshot.session, v.snapshot.execution, v.snapshot.deletion].some(r => r && r.key !== v.key)) return false;
   if (v.page === null) return true;
   return !!v.snapshot.session && fields(v.page, ['messages', 'totalCount', 'hiddenCount']) && integer(v.page.totalCount)
@@ -136,7 +138,12 @@ export async function executeConnectorSdkLifecycle<K extends ConnectorSdkLifecyc
     // No await: journal and bounded transcript share the original worker event.
     const snapshot = journal.readSnapshot(input.key);
     const history = (input as ConnectorSdkLifecycleCommands['sdkLifecycleRead']['input']).history;
-    const view: SdkLifecycleView = { runtime: input.runtime, key: input.key, snapshot, page: history && snapshot.session
+    const messageCount = input.runtime === 'antigravity' && snapshot.session
+      ? owner.antigravityTranscript.count(input.key)
+      : undefined;
+    const view: SdkLifecycleView = { runtime: input.runtime, key: input.key, snapshot,
+      ...(messageCount !== undefined ? { messageCount } : {}),
+      page: history && snapshot.session
       ? (input.runtime === 'ghcp' ? copilotHistoryPage(owner, input.key) : input.runtime === 'antigravity' ? antigravityHistoryPage(owner, input.key) : claudeHistoryPage(owner, input.key)) ?? null : null };
     // The original history budget excludes the worker envelope/snapshot. Trim
     // oldest rows, retaining truthful hidden counts, to fit the existing RPC

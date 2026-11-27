@@ -155,8 +155,21 @@
 @keyframes antigravity-quota-refresh { to { transform: rotate(360deg); } }
 .antigravity-quota-refreshing { animation: antigravity-quota-refresh .65s ease-in-out 2; }
 
+.antigravity-quota-fx-on { color: var(--aod-glass-accent); }
+.antigravity-quota-fx-off { opacity: .48; }
+
+.antigravity-quota-dial[data-quota-sip="true"] {
+  animation: antigravity-quota-sip-pulse 420ms cubic-bezier(.22, .61, .36, 1);
+}
+
+@keyframes antigravity-quota-sip-pulse {
+  0% { transform: scale(1); filter: brightness(1); }
+  40% { transform: scale(1.03); filter: brightness(1.08); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .antigravity-quota-group li, .antigravity-quota-refreshing { animation: none; }
+  .antigravity-quota-group li, .antigravity-quota-refreshing, .antigravity-quota-dial[data-quota-sip="true"] { animation: none; }
   .antigravity-quota-dial .antigravity-quota-arc { transition: none; }
 }
 

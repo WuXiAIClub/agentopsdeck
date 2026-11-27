@@ -167,6 +167,59 @@
   color: var(--accent, #3976de);
 }
 
+/* Integrated top-right caption placement for Notebook cards */
+.workspace-cobound-bar--caption {
+  padding: 0;
+  border-bottom: 0;
+  background: transparent;
+  min-height: 0;
+  gap: 3px;
+}
+.workspace-cobound-bar--caption .workspace-cobound-pills {
+  flex-wrap: nowrap;
+  gap: 3px;
+  width: auto;
+}
+.workspace-cobound-bar--caption .workspace-cobound-pill {
+  height: 22px;
+  min-width: 0;
+  padding: 0 6px;
+  font-size: 10.5px;
+  line-height: 1;
+  white-space: nowrap;
+}
+.workspace-cobound-bar--caption .workspace-cobound-manage-btn {
+  margin-left: 0;
+  height: 22px;
+  min-width: 0;
+  padding: 0 6px;
+  font-size: 10.5px;
+  line-height: 1;
+  white-space: nowrap;
+}
+.notebook-caption-title {
+  display: inline-block;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: text;
+}
+.notebook-caption-title-input {
+  width: 100%;
+  min-width: 80px;
+  height: 22px;
+  padding: 0 4px;
+  border: 1px solid var(--accent, #3976de);
+  border-radius: 5px;
+  background: var(--surface-solid, #ffffff);
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
 
 /* Windows Explorer-style File Browser Command Bar, Split Inspector & Status Bar */
 .workspace-files-nav-btns {

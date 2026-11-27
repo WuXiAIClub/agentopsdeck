@@ -3271,6 +3271,20 @@ export const chinese = {
   "Skipped": "已跳过",
   "Status checked at": "状态检查于",
   "API remaining: {remaining}/{limit}": "API 剩余额度：{remaining}/{limit}",
+  "Repository settings": "仓库设置",
+  "Multi-session switcher": "多会话切换卡片",
+  "Show session list": "显示会话列表",
+  "Hide session list": "隐藏会话列表",
+  "Pop out to standalone card": "弹出为独立卡片",
+  "Filter sessions": "筛选会话",
+  "Waiting for Antigravity quota reset": "等待 Antigravity 额度恢复",
+  "Auto-continues at {time}": "将在 {time} 自动继续",
+  "Retry now": "立即重试",
+  "Cancel auto-retry": "取消自动继续",
+  "Quota flow animation: On": "额度消耗动效：开",
+  "Quota flow animation: Off": "额度消耗动效：关",
+  "Total usage": "累计消耗",
+  "Total": "总计",
 } as const;
 
 export type TranslationKey = keyof typeof chinese;

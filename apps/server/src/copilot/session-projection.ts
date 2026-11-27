@@ -1,3 +1,4 @@
+import type { AntigravityQuotaWaitState } from '@agentopsdeck/shared';
 import type { ConnectorUserStore } from '../connector/connector-user-store.js';
 import type { DeckStore } from '../projection/deck-store.js';
 import { sdkSessionView } from '../connector/sdk-session-view.js';
@@ -46,7 +47,8 @@ export class AntigravitySessionProjection {
   private readonly projected = new Map<string, string>();
   constructor(private readonly source: Pick<ConnectorUserStore, 'antigravityJournal' | 'antigravityTranscript'>,
     private readonly target: Pick<DeckStore, 'upsertSession' | 'replaceMessages' | 'removeSession'>,
-    private readonly configuredModel?: string) {}
+    private readonly configuredModel?: string,
+    private readonly getQuotaWait?: (key: string) => AntigravityQuotaWaitState | undefined) {}
 
   publishSummary(key: string, ready: boolean) {
     const deletion = this.source.antigravityJournal.deletion(key);
@@ -54,7 +56,12 @@ export class AntigravitySessionProjection {
     const session = this.source.antigravityJournal.session(key);
     if (!session) throw new Error('Antigravity session does not exist');
     if (deletion) session.nativeState = 'unknown';
-    const summary = sdkSessionView('antigravity', session, this.source.antigravityJournal.current(key), ready);
+    const messageCount = this.source.antigravityTranscript.count(key);
+    const quotaWait = this.getQuotaWait?.(key);
+    const summary = sdkSessionView('antigravity', session, this.source.antigravityJournal.current(key), ready, {
+      messageCount,
+      ...(quotaWait ? { quotaWait } : {}),
+    });
     const model = session.model ?? this.configuredModel;
     if (model) summary.model = model;
     const fingerprint = JSON.stringify(summary);

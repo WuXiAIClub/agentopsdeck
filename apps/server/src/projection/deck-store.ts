@@ -1611,6 +1611,8 @@ function sameSessionSummary(left: SessionSummary | undefined, right: SessionSumm
     && left!.contextSampleBasis === right.contextSampleBasis
     && JSON.stringify(left!.nativeUsage) === JSON.stringify(right.nativeUsage)
     && left!.compactionCount === right.compactionCount
+    && left!.messageCount === right.messageCount
+    && JSON.stringify(left!.quotaWait) === JSON.stringify(right.quotaWait)
     && left!.rolloutBytes === right.rolloutBytes
     && left!.lastTurnCompactions === right.lastTurnCompactions
     && left!.maxTurnCompactions === right.maxTurnCompactions

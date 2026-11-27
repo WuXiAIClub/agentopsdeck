@@ -27,12 +27,12 @@ html[data-color-mode="dark"] .git-repo-card {
 }
 
 .git-repo-body {
-  --git-unit: 5px;
-  --git-space: clamp(.5rem, calc(.375rem + var(--git-unit)), 1.15rem);
+  --git-unit: 4px;
+  --git-space: clamp(.35rem, calc(.25rem + .65 * var(--git-unit)), .72rem);
   display: flex;
   flex-direction: column;
   gap: var(--git-space);
-  padding: clamp(.5rem, calc(.375rem + 1.8 * var(--git-unit)), 1.5rem);
+  padding: clamp(.4rem, calc(.3rem + 1.05 * var(--git-unit)), .9rem);
 }
 
 @supports (container-type: size) and (width: 1cqi) {
@@ -47,13 +47,13 @@ html[data-color-mode="dark"] .git-repo-card {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: var(--git-space);
+  gap: calc(var(--git-space) * .85);
   flex: none;
-  padding: var(--git-space);
+  padding: calc(var(--git-space) * .8) var(--git-space);
   border: 1px solid var(--aod-glass-rim);
-  border-radius: 17px;
+  border-radius: 12px;
   background: var(--aod-glass-light), var(--aod-glass-layer);
-  box-shadow: inset 0 1px var(--aod-glass-rim), 0 5px 15px rgb(22 27 69 / .1);
+  box-shadow: inset 0 1px var(--aod-glass-rim), 0 3px 10px rgb(22 27 69 / .08);
 }
 
 .git-repo-hero::before {
@@ -73,12 +73,12 @@ html[data-color-mode="dark"] .git-repo-card {
 }
 
 .git-repo-hero .workspace-glass-emblem {
-  width: clamp(2rem, calc(1.5rem + 2.8 * var(--git-unit)), 3.25rem);
+  width: clamp(1.6rem, calc(1.3rem + 1.45 * var(--git-unit)), 2.2rem);
 }
 .git-repo-hero .workspace-glass-emblem > svg { width: 48%; height: 48%; }
 
 .git-repo-hero-main {
-  flex: 1 1 min(12rem, 100%);
+  flex: 1 1 min(10rem, 100%);
   min-width: 0;
   overflow-wrap: anywhere;
 }
@@ -87,30 +87,30 @@ html[data-color-mode="dark"] .git-repo-card {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   color: var(--git-meta);
-  font-size: clamp(.6875rem, calc(.625rem + .4 * var(--git-unit)), .8125rem);
+  font-size: clamp(.625rem, calc(.58rem + .28 * var(--git-unit)), .72rem);
   font-weight: 640;
 }
 
 .git-repo-title-row {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 2px;
+  gap: 5px;
+  margin-top: 1px;
 }
 
 .git-repo-title-row strong,
 .git-repo-title-link {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   color: inherit;
   text-decoration: none;
-  font-size: clamp(.95rem, calc(.825rem + 1.35 * var(--git-unit)), 1.6rem);
+  font-size: clamp(.84rem, calc(.76rem + .75 * var(--git-unit)), 1.12rem);
   font-weight: 720;
-  letter-spacing: -.025em;
-  line-height: 1.22;
+  letter-spacing: -.02em;
+  line-height: 1.2;
 }
 
 .git-repo-title-link:hover {
@@ -120,12 +120,12 @@ html[data-color-mode="dark"] .git-repo-card {
 }
 
 .git-repo-description {
-  margin: 4px 0 0;
+  margin: 2px 0 0;
   color: var(--git-meta);
-  font-size: clamp(.72rem, calc(.66rem + .35 * var(--git-unit)), .875rem);
-  line-height: 1.4;
+  font-size: clamp(.66rem, calc(.62rem + .25 * var(--git-unit)), .76rem);
+  line-height: 1.35;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -134,20 +134,20 @@ html[data-color-mode="dark"] .git-repo-card {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   margin-left: auto;
 }
 
 .git-repo-chip {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 3px 8px;
+  gap: 3px;
+  padding: 2px 6px;
   border: 1px solid var(--aod-glass-rim);
   border-radius: 999px;
   background: var(--aod-glass-layer);
   color: var(--aod-ctx-ink);
-  font-size: clamp(.6875rem, calc(.625rem + .35 * var(--git-unit)), .8125rem);
+  font-size: clamp(.625rem, calc(.58rem + .25 * var(--git-unit)), .72rem);
   font-weight: 620;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -267,8 +267,8 @@ html[data-color-mode="dark"] .git-repo-card {
 
 .git-repo-metrics {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, clamp(10.5rem, calc(8.5rem + 6.5 * var(--git-unit)), 15rem)), 1fr));
-  gap: var(--git-space);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, clamp(8.5rem, calc(7rem + 4.5 * var(--git-unit)), 11.5rem)), 1fr));
+  gap: calc(var(--git-space) * .85);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -279,10 +279,10 @@ html[data-color-mode="dark"] .git-repo-card {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: var(--git-space);
-  padding: var(--git-space);
+  gap: calc(var(--git-space) * .75);
+  padding: calc(var(--git-space) * .75) calc(var(--git-space) * .85);
   border: 1px solid var(--aod-glass-rim);
-  border-radius: 14px;
+  border-radius: 11px;
   background: var(--aod-glass-layer);
   box-shadow: inset 0 1px var(--aod-glass-rim);
   animation: git-repo-read-in .32s cubic-bezier(.16, 1, .3, 1) both;
@@ -297,7 +297,7 @@ html[data-color-mode="dark"] .git-repo-card {
   display: grid;
   place-items: center;
   flex: none;
-  width: min(100%, clamp(3rem, calc(2.1rem + 4.2 * var(--git-unit)), 5.75rem));
+  width: min(100%, clamp(2.35rem, calc(1.85rem + 2.2 * var(--git-unit)), 3.35rem));
   aspect-ratio: 1;
   border-radius: 50%;
   background: radial-gradient(circle, var(--aod-glass-layer), transparent 72%);
@@ -308,7 +308,7 @@ html[data-color-mode="dark"] .git-repo-card {
 .git-repo-dial circle { fill: none; stroke: var(--git-track); stroke-width: 5.5; }
 .git-repo-dial .git-repo-arc { stroke: var(--git-fill); stroke-linecap: round; transition: stroke-dasharray .35s ease; }
 .git-repo-dial strong {
-  font-size: clamp(.78rem, calc(.66rem + .65 * var(--git-unit)), 1.35rem);
+  font-size: clamp(.68rem, calc(.6rem + .42 * var(--git-unit)), .95rem);
   font-weight: 720;
   font-variant-numeric: tabular-nums;
   letter-spacing: -.04em;
@@ -318,16 +318,20 @@ html[data-color-mode="dark"] .git-repo-card {
   display: grid;
   place-items: center;
   flex: none;
-  width: clamp(2.5rem, calc(2rem + 2.4 * var(--git-unit)), 3.75rem);
+  width: clamp(1.9rem, calc(1.6rem + 1.2 * var(--git-unit)), 2.5rem);
   aspect-ratio: 1;
   border: 1px solid var(--aod-glass-rim);
-  border-radius: 13px;
+  border-radius: 9px;
   background: linear-gradient(145deg, var(--aod-glass-layer), color-mix(in srgb, var(--git-fill) 18%, transparent));
   color: var(--git-fill);
 }
+.git-repo-kpi-badge svg {
+  width: 16px;
+  height: 16px;
+}
 
 .git-repo-metric-reading {
-  flex: 1 0 min(5.5rem, 100%);
+  flex: 1 0 min(4.8rem, 100%);
   min-width: 0;
   overflow-wrap: anywhere;
 }
@@ -335,25 +339,25 @@ html[data-color-mode="dark"] .git-repo-card {
 .git-repo-metric-label {
   display: block;
   color: var(--git-meta);
-  font-size: clamp(.6875rem, calc(.625rem + .4 * var(--git-unit)), .85rem);
+  font-size: clamp(.625rem, calc(.58rem + .26 * var(--git-unit)), .74rem);
   font-weight: 640;
 }
 
 .git-repo-metric-value {
   display: block;
-  font-size: clamp(1.15rem, calc(.95rem + 1.35 * var(--git-unit)), 1.85rem);
+  font-size: clamp(.94rem, calc(.82rem + .75 * var(--git-unit)), 1.28rem);
   font-weight: 740;
   font-variant-numeric: tabular-nums;
   line-height: 1.15;
-  letter-spacing: -.03em;
+  letter-spacing: -.025em;
 }
 
 .git-repo-metric-sub {
   display: block;
-  margin-top: 2px;
+  margin-top: 1px;
   color: var(--git-meta);
-  font-size: clamp(.6875rem, calc(.625rem + .35 * var(--git-unit)), .825rem);
-  line-height: 1.4;
+  font-size: clamp(.625rem, calc(.58rem + .22 * var(--git-unit)), .72rem);
+  line-height: 1.35;
 }
 
 .git-repo-progress {

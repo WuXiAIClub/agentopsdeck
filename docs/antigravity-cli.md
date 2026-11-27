@@ -12,14 +12,19 @@ integration and Web UI entry are implemented in `apps/server/src/antigravity/`,
 Setting `AOD_ANTIGRAVITY_ENABLED=true`, `AOD_ANTIGRAVITY_DEDICATED=true`,
 `AOD_ANTIGRAVITY_COMMAND`, `AOD_ANTIGRAVITY_HOME`, and `AOD_ANTIGRAVITY_WORKSPACE`
 enables the owner-only `antigravity` runtime in the Connector and Web UI.
-Image/text `attachments`, bounded tool output details, context and token usage
-metrics (`usage_update` / `session/prompt` `usage`), dynamic model discovery via
-`agy models` (with optional `AOD_ANTIGRAVITY_MODEL` default and optional
-`AOD_ANTIGRAVITY_MODEL_CHOICES` allowlist override + `session/set_model`),
-and workspace board context, plus dedicated manual compaction (`POST .../compact`
-running ACP `/compact` over `session/resume`, configurable via
-`AOD_ANTIGRAVITY_COMPACT_TIMEOUT_MS`, with `/stop` cancellation and without
-injecting chat messages into the transcript) are supported. Unsupported
+Image/text `attachments`, Codex-aligned structured tool classification and
+formatting (`read_file`, `edit_file`, `write_file`, `search_files`, `git`,
+`commandExecution`, diffs, and `sourceFiles` tracking), session metrics
+(message counts, compaction counts, last-turn native usage, and cumulative
+session totals via `usage_update` / `session/prompt` `usage` + the Native Token
+Usage panel), automatic quota-reached waiting & timed continuation when
+Antigravity reports a reset countdown (e.g. `Individual quota reached ... Resets in ...`),
+dynamic model discovery via `agy models` (with optional `AOD_ANTIGRAVITY_MODEL`
+default and optional `AOD_ANTIGRAVITY_MODEL_CHOICES` allowlist override +
+`session/set_model`), and workspace board context, plus dedicated manual
+compaction (`POST .../compact` running ACP `/compact` over `session/resume`,
+configurable via `AOD_ANTIGRAVITY_COMPACT_TIMEOUT_MS`, with `/stop` cancellation
+and without injecting chat messages into the transcript) are supported. Unsupported
 capabilities (`interactions`) remain disabled and are explicitly rejected with `409`.
 No native binaries are shipped.
 
@@ -35,7 +40,11 @@ quota check timestamp inline on the Gemini Models group header row (falling back
 to the first group when Gemini Models is not present). This is account quota,
 not per-session token usage or billing. Open the card to check it or use
 **Refresh**; the card auto-refreshes every 60 seconds while visible and the
-server shares a successful snapshot for up to 30 seconds.
+server shares a successful snapshot for up to 30 seconds. An optional, subtle
+**Quota flow animation** toggle in the card toolbar animates lightweight sparks
+drifting from active Antigravity session panes to the quota dial after tool
+calls and messages (purely visual, respects `prefers-reduced-motion`, and can be
+turned off at any time without affecting session behavior).
 
 The local administrator endpoint `GET /api/antigravity/usage` does not accept
 connector transport grants or a remote connector selector. It returns

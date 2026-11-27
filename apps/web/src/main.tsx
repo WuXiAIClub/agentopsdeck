@@ -159,7 +159,9 @@ import { PaneStatus } from './components/PaneStatus';
 import { failedRead, healthyRead, isCancelledRead } from './lib/history-read-health';
 import { Power } from 'lucide-react';
 import { CaptionIconButton, InstantToolbarTooltips } from './components/CaptionIconButton';
-import { sessionTokenMetrics } from './lib/session-token-metrics';
+import { sessionCumulativeTokenMetrics, sessionTokenMetrics } from './lib/session-token-metrics';
+import { AntigravityQuotaWaitBanner } from './components/AntigravityQuotaWaitBanner';
+import { emitAntigravityQuotaPulse } from './lib/antigravity-quota-fx';
 import { GlobalRefreshButton } from './components/GlobalRefreshButton';
 import { usePageRefreshGuard } from './lib/use-page-refresh-guard';
 import { SessionRailDivider, useSessionRail } from './components/SessionRail';
@@ -2852,6 +2854,31 @@ function DesktopChatPanel({ active, syncError, onRetrySync, maxMessageChars, ses
     }
   }
 
+  const quotaFxCountsRef = useRef<{ sessionKey: string; toolCount: number; assistantCount: number } | null>(null);
+  useEffect(() => {
+    const isAntigravity = session.source === 'antigravity'
+      || session.agentId === 'antigravity'
+      || session.sessionKey.startsWith('antigravity:');
+    if (!isAntigravity) return;
+    let toolCount = 0;
+    let assistantCount = 0;
+    for (const msg of renderedMessages) {
+      if (msg.role === 'tool' && msg.toolPhase === 'result') toolCount += 1;
+      else if (msg.role === 'assistant' && msg.text.trim()) assistantCount += 1;
+    }
+    const prev = quotaFxCountsRef.current;
+    if (!prev || prev.sessionKey !== session.sessionKey) {
+      quotaFxCountsRef.current = { sessionKey: session.sessionKey, toolCount, assistantCount };
+      return;
+    }
+    if (toolCount > prev.toolCount) {
+      emitAntigravityQuotaPulse({ sessionKey: session.sessionKey, kind: 'tool' });
+    } else if (assistantCount > prev.assistantCount) {
+      emitAntigravityQuotaPulse({ sessionKey: session.sessionKey, kind: 'message' });
+    }
+    quotaFxCountsRef.current = { sessionKey: session.sessionKey, toolCount, assistantCount };
+  }, [session.sessionKey, session.source, session.agentId, renderedMessages]);
+
   const messageTooLong = text.length > COMPOSER_MAX_MESSAGE_CHARS;
   const sendDisabled = sending || uploads.preparing || messageTooLong || (!text.trim() && pendingMedia.length === 0);
   const desktopMessagePane = useMemo(() => <ToolDetailCacheContext.Provider value={desktopDetailCache}><div className="relative flex min-h-0 flex-1 flex-col">
@@ -2906,7 +2933,7 @@ function DesktopChatPanel({ active, syncError, onRetrySync, maxMessageChars, ses
           </div>
         </>}
       </CaptionPanel>
-      {['codex', 'claude-code', 'ghcp'].includes(session.agentId ?? '') ? <SessionTokenUsage caption sessionKey={session.sessionKey} /> : null}
+      {['codex', 'claude-code', 'ghcp', 'antigravity'].includes(session.agentId ?? '') ? <SessionTokenUsage caption sessionKey={session.sessionKey} /> : null}
       <CaptionIconButton priority={45} label={tr('Toggle card connections')} draggable data-binding-drag title={tr('Drag to link a card')}
         onClick={event => event.currentTarget.closest('[data-workspace-pane]')?.dispatchEvent(new Event('agentopsdeck:binding-lines', { bubbles: true }))}><Eye size={15} /></CaptionIconButton>
       <CaptionIconButton priority={20} label={tr('Rename session')} onClick={() => renameSessionDialog(session, onRenamed)}><Pencil size={15} /></CaptionIconButton>
@@ -2936,6 +2963,12 @@ function DesktopChatPanel({ active, syncError, onRetrySync, maxMessageChars, ses
     ) : null}
     {compactNotice ? <p className="shrink-0 rounded-xl border border-blue-100 bg-blue-50/80 px-2 py-1 text-xs font-semibold text-blue-800" role="status">{translate(compactProgressLabel(session) ?? compactNotice)}</p> : null}
     {desktopMessagePane}
+    <AntigravityQuotaWaitBanner
+      session={displaySession}
+      messages={renderedMessages}
+      onRetryNow={() => { void submitMessage({ text: 'Continue from where you stopped.', key: `quota-retry:${Date.now()}` }); }}
+      onAutoResume={() => { void submitMessage({ text: 'Continue from where you stopped.', key: `quota-auto:${Date.now()}` }); }}
+    />
     {maxMessageChars !== undefined && COMPOSER_MAX_MESSAGE_CHARS < MAX_MESSAGE_CHARS ? <p className="shrink-0 px-4 py-1 text-xs text-slate-500" role="status">{tr('This Connector currently allows {limit} characters. Upgrade it to support longer messages.', { limit: formatNumber(COMPOSER_MAX_MESSAGE_CHARS) })}</p> : null}
     <div className="desktop-composer-dock" data-busy={sending || uploads.preparing || voiceState === 'listening' || !!sendError || !!voiceError}>
     <button type="button" className="composer-reveal" onClick={() => {
@@ -3546,7 +3579,7 @@ function SessionCard({ session, now, onClick, onRenamed }: { session: SessionSum
     <span className="sr-only">{translate(sessionStatusLabel(cardStatus))}</span>
   </button><details ref={menu} className="mobile-session-actions"><summary aria-label={tr("Session actions")}>…</summary><div>
     <button type="button" role="menuitem" className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left" onClick={() => { if (menu.current) menu.current.open = false; setModelOpen(true); }}><Bot size={15} />{tr('Session model')}</button>
-    {['codex', 'claude-code', 'ghcp'].includes(session.agentId ?? '') ? <SessionTokenUsage sessionKey={session.sessionKey} className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left" onOpen={() => { if (menu.current) menu.current.open = false; }} /> : null}
+    {['codex', 'claude-code', 'ghcp', 'antigravity'].includes(session.agentId ?? '') ? <SessionTokenUsage sessionKey={session.sessionKey} className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left" onOpen={() => { if (menu.current) menu.current.open = false; }} /> : null}
     <button type="button" role="menuitem" disabled={session.archived} className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-blue-700" onClick={() => { if (menu.current) menu.current.open = false; setQuickMessage(true); }}><Send size={15} />{tr('Quick message')}</button>
     <SessionOrganizationActions sessionKey={session.sessionKey} /><button type="button" role="menuitem" className="w-full rounded-xl px-3 py-2 text-left" onClick={() => { if (menu.current) menu.current.open = false; renameSessionDialog(session, onRenamed); }}>{tr('Rename session')}</button></div></details>
     {quickMessage ? <QuickSessionMessage session={session} onClose={closeQuickMessage} onAccepted={() => {}} /> : null}
@@ -4046,7 +4079,7 @@ function SessionDetail({ syncError, olderHistoryError, maxMessageChars, session,
         {session.source === 'codex' ? <SessionGoalControl key={`goal:${recoveryScope()}:${session.sessionKey}`} sessionKey={session.sessionKey} /> : null}
         {session.source === 'codex' ? <SessionAutomationControl key={`automation:${recoveryScope()}:${session.sessionKey}`} sessionKey={session.sessionKey} /> : null}
         {['codex', 'claude-code', 'ghcp'].includes(session.agentId ?? '') ? <SessionGuidanceControl key={`guidance:${recoveryScope()}:${session.sessionKey}`} sessionKey={session.sessionKey} /> : null}
-        {['codex', 'claude-code', 'ghcp'].includes(session.agentId ?? '') ? <SessionTokenUsage sessionKey={session.sessionKey} caption /> : null}
+        {['codex', 'claude-code', 'ghcp', 'antigravity'].includes(session.agentId ?? '') ? <SessionTokenUsage sessionKey={session.sessionKey} caption /> : null}
         <AutoScrollControl enabled={autoScrollEnabled} onChange={toggleAutoScroll} />
         <Button
           type="button"
@@ -4083,7 +4116,7 @@ function SessionDetail({ syncError, olderHistoryError, maxMessageChars, session,
         </>}</CaptionPanel>
         {showMobileStopButton ? <Button type="button" variant="secondary" size="icon" className="h-6 w-6 shrink-0 rounded-lg border-red-200 bg-red-50 text-red-700 hover:bg-red-100" disabled={!canStopMobileSession} onClick={() => void stopRun()} title={tr(session.runtime?.stopRequested ? 'Stop requested…' : 'Stop current run')} aria-label={tr("Stop current run")}><Square size={12} /></Button> : null}
       </div>
-      {mobileToolsExpanded && ['claude-code', 'ghcp'].includes(session.source ?? '') ? <div className="mt-1 overflow-x-auto">
+      {mobileToolsExpanded && ['claude-code', 'ghcp', 'antigravity'].includes(session.source ?? '') ? <div className="mt-1 overflow-x-auto">
         <DesktopHeaderStatusStrip session={displaySession} messages={renderedMessages} deliveryMode={deliveryMode} />
       </div> : null}
     </header>
@@ -4449,6 +4482,7 @@ function DashboardPage({ sessions, agents, gateway }: { sessions: HubSessionsSta
 function DesktopHeaderStatusStrip({ session, messages, deliveryMode }: { session: SessionSummary; messages: ChatMessage[]; deliveryMode: SendDeliveryMode }) {
   const { t: tr } = useI18n();
   const tokenUsage = sessionTokenMetrics(session);
+  const cumulative = sessionCumulativeTokenMetrics(session);
   const metrics = sessionMetrics(session, messages);
   const status = effectiveSessionStatus(session);
   const ratio = contextUsageRatio(session);
@@ -4470,9 +4504,13 @@ function DesktopHeaderStatusStrip({ session, messages, deliveryMode }: { session
       ? 'Native usage · last agent turn, not session totals.' : 'Native usage · last root-agent API call, not session totals.') + ` ${tr('Input')}: ${tokenUsage.input} · ${tr('Output')}: ${tokenUsage.output}`}>
       {tr(session.nativeUsage.scope === 'last-turn' ? 'Last turn' : 'Last call')} {formatTokenValue(session.nativeUsage.inputTokens)} / {formatTokenValue(session.nativeUsage.outputTokens)}
     </span> : null}
+    {cumulative.hasCumulative && session.nativeUsage ? <span className="text-slate-600" data-cumulative-usage title={`${tr('Total usage')} · ${tr('Input')}: ${cumulative.input} · ${tr('Output')}: ${cumulative.output} · ${tr('Total')}: ${cumulative.total}`}>
+      {tr('Total')} {formatTokenValue(cumulative.totalValue)}
+    </span> : null}
     <span className="hidden text-slate-500 2xl:inline">{tr(deliveryMode === 'mirror' ? 'mirror' : 'web')}</span>
   </div><dl className="pane-context-identity mt-2" data-session-token-metrics>
     <div><dt>{tr(tokenUsage.scope)}</dt><dd>{tr('Input')}: {tokenUsage.input} · {tr('Output')}: {tokenUsage.output}</dd></div>
+    {cumulative.hasCumulative && session.nativeUsage ? <div><dt>{tr('Total usage')}</dt><dd>{tr('Input')}: {cumulative.input} · {tr('Output')}: {cumulative.output} · {tr('Total')}: {cumulative.total}</dd></div> : null}
   </dl></>;
 }
 
@@ -4530,10 +4568,12 @@ function SessionContextPanel({ session, messages, deliveryMode, compact = false,
   const source = titleCase(session.source ?? 'unknown');
   const model = session.modelProvider && session.model ? `${session.modelProvider}/${session.model}` : (session.model ?? 'n/a');
   const tokenUsage = sessionTokenMetrics(session);
+  const cumulative = sessionCumulativeTokenMetrics(session);
   const tokenItems = [
     [tr('Messages'), metrics.messageCount === undefined ? '—' : formatNumber(metrics.messageCount)],
     [`${tr(tokenUsage.scope)} · ${tr('Input')}`, tokenUsage.input],
     [`${tr(tokenUsage.scope)} · ${tr('Output')}`, tokenUsage.output],
+    ...(cumulative.hasCumulative && session.nativeUsage ? [[tr('Total usage'), cumulative.total] as const] : []),
     [tr(contextUsageLabel(session)), formatContextUsage(session)],
     [tr('Compact'), formatCompactionCount(session)],
   ] as const;

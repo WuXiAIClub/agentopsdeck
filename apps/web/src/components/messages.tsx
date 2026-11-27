@@ -21,7 +21,7 @@ import { SourceReferencePreview } from './SourceReferencePreview';
 import { LongTextReference } from './LongTextReference';
 import { MessageDelivery, QueueMessageBody } from './MessageDelivery';
 import { RenderRecoveryBoundary } from './RenderRecoveryBoundary';
-import { compactToolEntryCount, groupedToolElapsedMs, isToolExecuting, toolVariantFromLabel, type ToolOutputVariant } from '../lib/tool-timeline';
+import { compactToolEntryCount, groupedToolElapsedMs, isToolExecuting, splitToolNameAndTarget, toolVariantFromLabel, type ToolOutputVariant } from '../lib/tool-timeline';
 import { parseToolDetail } from '../lib/tool-detail-format';
 import { ToolDetailBody, translateToolStatusLabel } from './ToolDetailBody';
 import { createMessageItemProjector } from '../lib/incremental-message-items';
@@ -997,9 +997,13 @@ function toGroupedToolTimelineEntry(group: { key: string; call?: ChatMessage; re
   const preview = [callText, resultText].filter(Boolean).join('\n\n');
   if (isToolOutputPlaceholder(preview)) return null;
   const resultDeltaText = group.result ? toolResultTextForTokenEstimate(resultText) : '';
-  const label = group.call?.toolName ?? toolEntryLabel(message, preview);
+  const rawLabel = group.call?.toolName ?? toolEntryLabel(message, preview);
+  const splitName = splitToolNameAndTarget(rawLabel);
+  const label = splitName.name;
   const executing = isToolExecuting(group.call, group.result);
-  const hint = group.result?.status === 'failed' ? 'failed' : (executing ? 'executing' : undefined);
+  const hint = group.result?.status === 'failed'
+    ? 'failed'
+    : (executing ? 'executing' : splitName.target);
   // Named tools already determine the variant; don't scan their output for a
   // fallback agent hint which isn't displayed on grouped entries.
   const variant = toolVariantFromLabel(label) ?? toolOutputVariant(preview, label, agentCallHint(preview));
@@ -1056,8 +1060,10 @@ function toToolTimelineEntry(message: ChatMessage, index: number, messages: Chat
   if (isToolOutputPlaceholder(preview)) return null;
   const resultText = toolResultTextForTokenEstimate(preview);
   if (!resultText) return null;
-  const label = toolEntryLabel(message, preview);
-  const hint = agentCallHint(preview);
+  const rawLabel = toolEntryLabel(message, preview);
+  const splitName = splitToolNameAndTarget(rawLabel);
+  const label = splitName.name;
+  const hint = splitName.target ?? agentCallHint(preview);
   const variant = toolOutputVariant(preview, label, hint);
   const nextMessage = messages[index + 1];
   const elapsedMs = nextMessage ? Math.max(0, nextMessage.createdAt - message.createdAt) : undefined;

@@ -64,7 +64,7 @@ export function ToolDetailBody({
             <span className="tool-detail-section-title">
               {parsed.output.kind === 'agentStatus'
                 ? tr('Sub-agent status')
-                : parsed.output.kind === 'fileChanges'
+                : parsed.output.kind === 'fileChanges' || parsed.output.kind === 'diff'
                   ? tr('File changes')
                   : tr('Output')}
             </span>
@@ -126,6 +126,17 @@ function renderOutputBlock(block: ToolOutputBlock, tr: (key: TranslationKey) => 
         <div className="tool-detail-file-list">
           {block.changes.map((change, idx) => renderFileChangeRow(change, idx))}
         </div>
+      );
+    case 'diff':
+      return (
+        <pre className="tool-detail-code tool-detail-code--diff">
+          {block.lines.map((line, idx) => (
+            <span key={idx} className={cn('tool-detail-diff-line', `is-${line.kind}`)}>
+              {line.text}
+              {'\n'}
+            </span>
+          ))}
+        </pre>
       );
     case 'params':
       return block.items.length > 0 ? renderParamGrid(block.items) : <div className="tool-detail-empty">{tr('No output')}</div>;

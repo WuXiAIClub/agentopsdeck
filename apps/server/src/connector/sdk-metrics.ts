@@ -12,11 +12,19 @@ export type SdkMetricSample = {
   reconciledCalls?: Array<NativeTokenCounts & { id: string; model: string }>;
   compacted?: true;
 };
+export type SdkCumulativeTotals = {
+  inputTokens: number;
+  outputTokens: number;
+  totalTokens: number;
+  cacheReadTokens?: number;
+  cacheWriteTokens?: number;
+};
 export type SdkMetrics = {
   executionId?: string;
   sequence?: number;
   context?: SdkMetricSample['context'];
   usage?: SdkMetricSample['usage'];
+  totals?: SdkCumulativeTotals;
   /** Omitted for old sessions whose earlier compactions were not observed. */
   compactionCount?: number;
 };
