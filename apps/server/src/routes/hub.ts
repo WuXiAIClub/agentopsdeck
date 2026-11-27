@@ -52,6 +52,7 @@ import { registerHubWorkspaceCards } from './hub-workspace-cards.js';
 import { registerHubWorkspaceDrawingRoutes } from './hub-workspace-drawings.js';
 import { registerHubNativeDrawioRoutes } from './hub-workspace-native-drawio.js';
 import { registerHubWebsiteRoutes } from './hub-websites.js';
+import { registerHubAhp } from '../ahp/hub-http.js';
 import { registerHubResearchRoutes } from './hub-workspace-research.js';
 import { registerHubQuickChat } from './hub-quick-chat.js';
 import { QuickChatService } from '../hub/quick-chat-service.js';
@@ -380,6 +381,8 @@ export function registerHubRoutes(app: Hono, deps: {
     if (deps.administrative && isHubConnectionFileRequest(c.req.method, path)) return next();
     if (deps.administrative && isHubConnectionControlRequest(c.req.method, path)) return next();
     if (deps.administrative && isHubConnectionVerificationRequest(c.req.method, path)) return next();
+    if (deps.administrative && deps.asyncConnectorClient && ['GET', 'HEAD', 'POST'].includes(c.req.method)
+      && /^\/api\/hub\/v1\/connections\/[^/]+\/ahp$/.test(path)) return next();
     if (deps.administrative && isHubDockerSandboxRequest(c.req.method, path)) return next();
     if (deps.asyncEvents && ['GET', 'HEAD'].includes(c.req.method) && path === `${base}/events/stream`) return next();
     if (deps.asyncSharedReads && ['GET', 'HEAD'].includes(c.req.method)
@@ -609,6 +612,7 @@ export function registerHubRoutes(app: Hono, deps: {
   registerHubWorkspaceDrawingRoutes(app, visualEditorDeps);
   registerHubNativeDrawioRoutes(app, { ...visualEditorDeps, editorUrl: deps.config.hub.drawioEditorUrl });
   const websites = registerHubWebsiteRoutes(app, connectionProxyDeps());
+  const ahp = registerHubAhp(app, connectionProxyDeps());
   const research = registerHubResearchRoutes(app, { config: deps.config.hub.research,
     ...(deps.administrative ? { mode: 'async' as const, access: deps.administrative.createWorkspaceResearchAccess() }
       : { principal, audit: deps.hubStore.identities.audit }),
@@ -1152,7 +1156,7 @@ export function registerHubRoutes(app: Hono, deps: {
   const closeWorkspace = createIndependentDrain([
     () => workspaceSync?.close(), () => legacyWorkspaceSync.close(),
     () => workspacePreferences.close(), () => workspaceLayouts.close(), () => workspaceReadOwner.close(),
-    () => completions.close(), () => websites.close(), () => automation.close(), () => tokenUsage.close(),
+    () => completions.close(), () => websites.close(), () => ahp.close(), () => automation.close(), () => tokenUsage.close(),
   ], 'hub-route-drain');
   const closeContent = createIndependentDrain([
     () => fileBoards?.close(), () => fileCards?.close(), () => sharedContent?.close(),

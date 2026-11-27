@@ -57,6 +57,21 @@ function executableExamples(content) {
     .map(match => match[1].trim());
 }
 
+test('VS Code Agent Host AHP docs stay paired, navigable and document loopback isolation', () => {
+  for (const [language, anchor] of [['', '#vs-code-agent-host-ahp'], ['.zh-CN', '#vs-code-agent-hostahp']]) {
+    assert.ok(text(`docs/README${language}.md`).includes(`integrations${language}.md${anchor}`));
+    assert.ok(text(`docs/modules${language}.md`).includes('apps/server/src/ahp'));
+    const integrations = text(`docs/integrations${language}.md`);
+    const api = text(`docs/api${language}.md`);
+    for (const contract of ['AOD_AHP_VSCODE_CLI', 'AOD_AHP_INSTANCE_ID', 'AOD_AHP_SESSION_URI', '127.0.0.1']) {
+      assert.ok(integrations.includes(contract), `Missing AHP integration contract: ${contract}`);
+    }
+    for (const contract of ['/api/hub/v1/connections/:connectionId/ahp', '/api/connector/v1/ahp', 'Idempotency-Key']) {
+      assert.ok(api.includes(contract), `Missing AHP API contract: ${contract}`);
+    }
+  }
+});
+
 test('Antigravity Connector docs stay paired, navigable and document isolation and capability boundaries', () => {
   const english = text('docs/antigravity-cli.md'), chinese = text('docs/antigravity-cli.zh-CN.md');
   assert.deepEqual(english.match(/^```bash\n([\s\S]*?)^```/gm), chinese.match(/^```bash\n([\s\S]*?)^```/gm));

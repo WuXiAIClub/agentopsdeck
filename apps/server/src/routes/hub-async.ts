@@ -49,6 +49,7 @@ import { registerHubSessionAuxiliary } from './hub-session-auxiliary.js';
 import { registerHubAutomation } from './hub-automation.js';
 import { registerHubTokenUsage } from './hub-token-usage.js';
 import { registerHubWebsiteRoutes } from './hub-websites.js';
+import { registerHubAhp } from '../ahp/hub-http.js';
 import { registerAsyncHubSessionGuidance } from './hub-session-guidance-async.js';
 import { registerAsyncHubBoardBindings } from './hub-async-workspace-board-bindings.js';
 import { registerAsyncHubDelegations } from './hub-async-workspace-delegations.js';
@@ -219,6 +220,7 @@ export async function registerAsyncHubRoutes(outer: Hono, deps: AsyncHubRouteDep
     proxy(access => registerHubAutomation(app, { mode: 'async', access, asyncConnectorClient: resolver }));
     proxy(access => registerHubTokenUsage(app, { mode: 'async', access, asyncConnectorClient: resolver }));
     proxy(access => registerHubWebsiteRoutes(app, { mode: 'async', access, asyncConnectorClient: resolver }));
+    proxy(access => registerHubAhp(app, { mode: 'async', access, asyncConnectorClient: resolver }));
     own(registerHubConnectionControl(app, { mode: 'async', asyncConnectorClient: resolver,
       createAccess: () => services.createConnectionControlAccess(), error: connectorReadError }));
     own(registerHubConnectionVerification(app, { mode: 'async', asyncConnectorClient: resolver,

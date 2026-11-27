@@ -1713,6 +1713,12 @@ export class CodexAppServer {
       const coldTranscriptOnly = !execution && thread.status?.type === 'notLoaded'
         && latestTurn?.status !== 'interrupted'
         && !arrayValue(latestTurn?.items).some(item => item.type === 'commandExecution');
+      // Worker-owned cold threads cannot enumerate native terminals before
+      // startOwnedTurn's journaled thread/resume + post-load idle proof.
+      // Still require rollout provenance, terminal turns, settled command
+      // items and interrupted-wrapper settlement before publishing idle state.
+      const coldOwnedLoadDeferred = Boolean(this.options.queuedConsumer) && !execution
+        && thread.status?.type === 'notLoaded' && !coldTranscriptOnly;
       // A cold Goal successor cannot enumerate native terminals yet. Record
       // only the lost owned outcome below, then let final reconciliation save
       // a blocked checkpoint. The existing worker can load/re-prove that
@@ -1727,7 +1733,39 @@ export class CodexAppServer {
           const terminalCheck = () => {
             if (this.closed || this.executionUnavailable || !sameRead()) throw new RunControlConflict();
           };
-          if (rollout instanceof RolloutProjection) {
+          if (coldOwnedLoadDeferred) {
+            if (rolloutUnavailable || typeof thread.path !== 'string' || !thread.path.trim()
+              || thread.turns.some((turn: any) => !['completed', 'failed', 'interrupted'].includes(turn.status)
+                || arrayValue(turn.items).some((item: any) => item.type === 'commandExecution'
+                  && !['completed', 'failed', 'declined'].includes(item.status)))) {
+              executionSafetyUnconfirmed = true;
+            } else {
+              const interruptedTurns = thread.turns.filter((turn: any) => turn.status === 'interrupted');
+              if (interruptedTurns.length) {
+                if (rollout instanceof RolloutProjection) {
+                  const observed = await this.rolloutReader.observeLeasedProjectionWithin(thread.path,
+                    Math.max(1, Math.ceil(projectionDeadline - performance.now())), () => {
+                      const snapshot = rollout as RolloutProjection;
+                      rollout = '';
+                      return snapshot;
+                    }, async (snapshot, expired) => {
+                      const check = () => { if (expired()) throw new RolloutObservationPendingError(); terminalCheck(); };
+                      for (const turn of interruptedTurns) {
+                        check();
+                        await this.requireInterruptedTurnSettled(threadId, turn, check, snapshot);
+                      }
+                      if (expired()) throw new RolloutObservationPendingError();
+                    });
+                  rollout = observed.snapshot;
+                } else {
+                  for (const turn of interruptedTurns) {
+                    terminalCheck();
+                    await this.requireInterruptedTurnSettled(threadId, turn, terminalCheck, rollout);
+                  }
+                }
+              }
+            }
+          } else if (rollout instanceof RolloutProjection) {
             const observed = await this.rolloutReader.observeLeasedProjectionWithin(thread.path,
               Math.max(1, Math.ceil(projectionDeadline - performance.now())), () => {
                 // Transfer only once the reader admits this original observer.
@@ -1848,6 +1886,12 @@ export class CodexAppServer {
             return !this.closed && !this.executionUnavailable && child === this.child
               && generation === this.nativeConnectionGeneration && connectionId === this.connectionId;
           });
+        else if (!options.readOnly && !execution) {
+          const existing = this.options.store.getSession(sessionKey);
+          if (existing && !existing.runtime && existing.status !== 'unknown') {
+            this.options.store.upsertSession({ ...existing, status: 'unknown' });
+          }
+        }
       }
       liveTurnId = latestTurn?.status === 'inProgress' ? latestTurn.id : undefined;
       if (resumedOwnedTerminal && !maintenanceRecovery && !executionSafetyUnconfirmed
@@ -2732,6 +2776,7 @@ export class CodexAppServer {
         if (!current || !this.isSessionHistoryReady(sessionKey) || version !== this.projectionVersion(sessionKey)
           || goal !== this.goalExecutionVersions.get(sessionKey) || !activity.current()
           || runtimeBusy(current.runtime) || current.runtime && current.runtime.sync !== 'current'
+          || current.status === 'unknown'
           || (!allowBgContinuation && (current.hasActiveRun || current.status === 'running'))) throw new TurnStartDeferred();
       };
       beforeClaim();

@@ -18,6 +18,7 @@ import { fileURLToPath } from 'node:url';
 import { hermesConfig, type HermesConfig } from './hermes/config.js';
 import { claudeConfig, type ClaudeConfig } from './claude/config.js';
 import { copilotConfig, type CopilotConfig } from './copilot/config.js';
+import { ahpConfig, type AhpConfig } from './ahp/config.js';
 import { antigravityConfig, type AntigravityConfig } from './antigravity/config.js';
 import { parseGitStatusAccounts, type GitStatusAccountConfig } from './git-status/config.js';
 import { AGENTOPSDECK_VERSION } from '@agentopsdeck/shared';
@@ -33,6 +34,7 @@ export type ServerConfig = {
   hermes?: HermesConfig;
   claude?: ClaudeConfig;
   copilot?: CopilotConfig;
+  ahp?: AhpConfig;
   antigravity?: AntigravityConfig;
   gitStatusAccounts: GitStatusAccountConfig[];
   port: number;
@@ -217,6 +219,9 @@ export function loadConfig(env = process.env): ServerConfig {
   const hermes = hermesConfig(env);
   const claude = claudeConfig(env);
   const copilot = copilotConfig(env);
+  const ahp = ahpConfig(env);
+  if (ahp && (parseServerRole(env.AOD_SERVER_ROLE) !== 'connector' || listenHost !== '127.0.0.1' || !env.AOD_DATA_DIR?.trim()
+    || !env.AOD_CONNECTOR_BOOTSTRAP_TOKEN?.trim())) throw new Error('AHP requires a dedicated loopback Connector with independent state and a token');
   const antigravity = antigravityConfig(env);
   const gitStatusAccounts = parseGitStatusAccounts(env);
   const websiteGateway = parseWebsiteGateway(env);
@@ -234,6 +239,7 @@ export function loadConfig(env = process.env): ServerConfig {
     ...(hermes ? { hermes } : {}),
     ...(claude ? { claude } : {}),
     ...(copilot ? { copilot } : {}),
+    ...(ahp ? { ahp } : {}),
     ...(antigravity ? { antigravity } : {}),
     gitStatusAccounts,
     port: Number(env.AOD_PORT ?? env.PORT ?? 8890),

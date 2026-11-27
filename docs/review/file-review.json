@@ -17,13 +17,13 @@
     "Native devices, providers, full backend, browser accessibility, artifacts and redistribution rights remain unaccepted."
   ],
   "summary": {
-    "totalFiles": 3614,
+    "totalFiles": 3622,
     "byKind": {
       "config": 58,
       "docs": 55,
       "asset": 8,
-      "test": 1757,
-      "runtime": 1722,
+      "test": 1759,
+      "runtime": 1728,
       "generated": 14
     },
     "byModule": {
@@ -33,8 +33,8 @@
       "native": 143,
       "main-integration": 35,
       "storage": 218,
+      "server": 12,
       "antigravity": 17,
-      "server": 5,
       "execution": 471,
       "api-auth": 392,
       "hub-notebook": 22,
@@ -43,7 +43,7 @@
       "api-completion": 7,
       "hub": 552,
       "web-ui": 405,
-      "web": 7,
+      "web": 8,
       "web-state": 383,
       "web-menu-tests": 1,
       "web-menu": 1,
@@ -57,13 +57,13 @@
       "external": 2
     },
     "byDepth": {
-      "semantic": 3560,
-      "structural": 35,
+      "semantic": 3542,
+      "structural": 61,
       "asset": 19
     },
     "byDisposition": {
-      "no-finding": 3579,
-      "pending": 35
+      "no-finding": 3561,
+      "pending": 61
     },
     "completedSemanticOrAssetFiles": 3568,
     "remainingFiles": 35,
@@ -2440,18 +2440,17 @@
     },
     {
       "path": "apps/server/package.json",
-      "size": 1031,
-      "sha256": "88a61f088eb23a9369768732368765347743e2882a5da4471e6a5f4d10064121",
+      "size": 1078,
+      "sha256": "d535814f4d4125e976bbf428829567bfc38cbec5627671f720bb301e4eb48207",
       "module": "main",
       "kind": "config",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
         "current-source-sha256-and-size",
-        "main-human-review-of-recorded-scope",
-        "actual-local-checks-with-explicit-limitations"
+        "changed-surface-and-contract-inspection"
       ],
-      "notes": "Reviewed ESM server entry, workspace contract, native/browser dependencies and exact security floor declarations. Frozen install/build/typecheck pass; node-pty/browser/provider/platform acceptance remains separate.",
+      "notes": "Inspected exact MIT dependency @microsoft/agent-host-protocol@1.1.0 in server manifest; full supply-chain and final release license notice review remain open.",
       "findings": []
     },
     {
@@ -2650,6 +2649,111 @@
         "line-by-line-semantic-audit"
       ],
       "notes": "JSON root object with 2 keys; 14 lines. No candidates in the four limited privacy-pattern categories; not proof of absence. Complete semantic/control-flow/caller inspection not completed in this bounded pass. Syntax/pattern evidence and any test execution do not establish security approval. Remaining closure: full control-flow/callers/tests and applicable migration/authority/retention/portability/provenance checks for this file.",
+      "findings": []
+    },
+    {
+      "path": "apps/server/src/ahp/config.ts",
+      "size": 850,
+      "sha256": "2cdc0302fe6d0fdd704b7fb8ad5c6657e1ed04a3850c5a59ce4597aaa927b784",
+      "module": "server",
+      "kind": "runtime",
+      "depth": "structural",
+      "disposition": "pending",
+      "checks": [
+        "current-source-sha256-and-size",
+        "changed-surface-and-contract-inspection"
+      ],
+      "notes": "Inspected Windows path and exact editor/session validation; real process deployment acceptance remains open.",
+      "findings": []
+    },
+    {
+      "path": "apps/server/src/ahp/connector-http.ts",
+      "size": 6150,
+      "sha256": "245f30e98ff5483f23af04342fb0f70dd38845317e0cbbead937811eb77fd56d",
+      "module": "server",
+      "kind": "runtime",
+      "depth": "structural",
+      "disposition": "pending",
+      "checks": [
+        "current-source-sha256-and-size",
+        "changed-surface-and-contract-inspection"
+      ],
+      "notes": "Inspected bounded text/body, non-delegated bearer checks, dispatch gate and retained receipt lifecycle; fake Agent Host tested.",
+      "findings": []
+    },
+    {
+      "path": "apps/server/src/ahp/http.test.ts",
+      "size": 5618,
+      "sha256": "b217e9fb55abfa4c1e9ce12d9ce8bd02e4526878134f623edd0c4aac6aa82199",
+      "module": "server",
+      "kind": "test",
+      "depth": "structural",
+      "disposition": "pending",
+      "checks": [
+        "current-source-sha256-and-size",
+        "changed-surface-and-contract-inspection"
+      ],
+      "notes": "Inspected async Hub/Connector worker fixture, pinned identity, ownership, delegation, duplicate and unknown outcome assertions.",
+      "findings": []
+    },
+    {
+      "path": "apps/server/src/ahp/hub-http.ts",
+      "size": 5393,
+      "sha256": "e8ff19350bb2f6412859c6afe4ec1c901f6756d95b070076a6b69456ee4958b4",
+      "module": "server",
+      "kind": "runtime",
+      "depth": "structural",
+      "disposition": "pending",
+      "checks": [
+        "current-source-sha256-and-size",
+        "changed-surface-and-contract-inspection"
+      ],
+      "notes": "Inspected bounded owner proxy, Weixin exclusion, original dispatch and response projection; browser acceptance remains open.",
+      "findings": []
+    },
+    {
+      "path": "apps/server/src/ahp/session.test.ts",
+      "size": 5989,
+      "sha256": "0163db71175cc46a2a8f19d2b230b2d8ea5eacfed6515a661ea4f4caff0888ad",
+      "module": "server",
+      "kind": "test",
+      "depth": "structural",
+      "disposition": "pending",
+      "checks": [
+        "current-source-sha256-and-size",
+        "changed-surface-and-contract-inspection"
+      ],
+      "notes": "Inspected protocol unit tests covering live text deltas, exact ACK, read-only/foreign chat rejection and disconnect/timeout fencing.",
+      "findings": []
+    },
+    {
+      "path": "apps/server/src/ahp/session.ts",
+      "size": 8071,
+      "sha256": "1923b0b39d37c64e85ed0d13fbb2f75e6f9f293c334ca42275cffe28c6e6fb5d",
+      "module": "server",
+      "kind": "runtime",
+      "depth": "structural",
+      "disposition": "pending",
+      "checks": [
+        "current-source-sha256-and-size",
+        "changed-surface-and-contract-inspection"
+      ],
+      "notes": "Inspected single-session AHP binding, 100-turn text reducer, exact turn/seq echo verification and unconfirmed-dispatch fencing; full protocol fuzzing remains open.",
+      "findings": []
+    },
+    {
+      "path": "apps/server/src/ahp/vscode-transport.ts",
+      "size": 3588,
+      "sha256": "e2b3e310ed39de10df1322ab75ebafd528e7c6bc10848b4d6fdb823e82a49c6a",
+      "module": "server",
+      "kind": "runtime",
+      "depth": "structural",
+      "disposition": "pending",
+      "checks": [
+        "current-source-sha256-and-size",
+        "changed-surface-and-contract-inspection"
+      ],
+      "notes": "Inspected local code-tunnel.exe endpoint discovery, exact schema-2 named-pipe validation, bounded 4 MiB WebSocket frames and token redaction; live Windows acceptance remains open.",
       "findings": []
     },
     {
@@ -4198,20 +4302,17 @@
     },
     {
       "path": "apps/server/src/application-standalone-connector-async.test.ts",
-      "size": 30146,
-      "sha256": "dcf739618d95fd181bca2b6c6d0c4ac2150b5961842d15bdd1c73ac782969cb7",
+      "size": 31204,
+      "sha256": "48b965ed3aeab6e2a43442114e0d498026eec46e949976f569a41358cabf39fc",
       "module": "api-auth",
       "kind": "test",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "清单全部字节读取与 SHA-256/size 对照（非人工全文语义审查）",
-        "TypeScript AST 语法/声明/import/调用位置提取（无源码执行）",
-        "测试静态 call site/断言方法/临时资源夹具位置提取，不等于逐断言正确性核对",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "changed-surface-and-contract-inspection"
       ],
-      "notes": "本文件 421 行；声明 key@22, base@22, secret@23, bearer@23, origin@24, gate@25, release@25, promise@25；直接依赖 node:assert/strict, node:test, apps/server/src/gateway/admin-client.ts, apps/server/src/gateway/ws-client.ts, node:fs, node:os。静态 test/describe/it 调用 15、断言调用 151；断言位置 assert.equal@33, assert.equal@34, assert.equal@36, assert.equal@37, assert.equal@39, assert.match@39, assert.equal@40, assert.equal@41, assert.equal@42, assert.equal@44；夹具/资源位置 mkdtempSync@119, writeFileSync@130, readFileSync@131, writeFileSync@141, rmSync@142, readFileSync@259, readFileSync@280, readFileSync@320, readFileSync@344, writeFileSync@371。待沿本文件上述 imports 对照全部 branch、setup/teardown、assertion 的确切目标与失败语义；循环与动态导入不以 AST 数量代替运行 case，主审全 backend 的运行结果不在此擅自记为本文件深审。",
+      "notes": "Inspected standalone AHP mount, capabilities, Connector identity and auth assertions with absent VS Code CLI.",
       "findings": []
     },
     {
@@ -7433,29 +7534,17 @@
     },
     {
       "path": "apps/server/src/codex/app-server.ts",
-      "sha256": "215267b09dceece8bd38c5a92d0d773b3e16111fc77883783e6933abe6d11752",
-      "size": 419361,
+      "sha256": "bd41d30f7727d5eb85d9238fa29ae36e35f2a0e98ea2bcd6641d0975d0adbd6a",
+      "size": 422058,
       "module": "codex",
       "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "Read the entire 6275-line pre-patch source in bounded chunks, including explicit rereads of truncated regions; statically reviewed all applied changes yielding 6333 current lines. No source regions intentionally excluded.",
-        "Read applicable AGENTS.md, README.md, SECURITY.md, docs/upstream-sync.md and the open-source review standard. Only the two authorized source/test files and this private report were edited via apply_patch; no credentials, Git history, production actions, application launches, compiles or tests accessed/executed.",
-        "Traced runtime override descriptor ownership, bounded read before parse, whole-object validation before map population, static protected diagnostics, and both model update callers through the atomic preference replacement contract.",
-        "Traced UTF-8 high-water retention accounting before delta concatenation, completed-item retention, enriched-text revalidation, per-item/per-turn/per-instance byte and item limits, duplicate/stale admission, overflow veto and original shutdown/projector ownership.",
-        "Traced explicit frozen null-prototype provider environment snapshot into configuredModelProvider and ProviderModelCatalog; inspected production constructor assembly and the deliberate omission/rejection of unsupported environment references.",
-        "Inspected direct native observation/notification, execution admission/ACK, queue unknown/head, settings validation/persistence and runtime projection contracts; supporting contracts are scoped reads unless explicitly identified as fully read.",
-        "Compared original findings with current source and the parent's actual scoped test evidence; source review does not convert the unresolved generic recovery receipt gap into a fix.",
-        "For 005, replaced both runtime mutation calls with one bounded reader and validator shared with startup. Raw model/key bounds and complete next-object count/serialized UTF-8 bounds reject before file writes, map publication, thinking persistence or ACK. Existing invalid objects are rejected without filtering/overwrite.",
-        "Preserved exclusive same-directory temporary, fsync-before-rename, existing Unix mode/symlink destination, hard-link/dangling-link rejection and publication only after replacement. Separate model/thinking writes and unknown ACK outcomes remain unchanged; no recovery receipt rewrite.",
-        "Computed exact frozen current SHA-256 and byte size using read-only filesystem commands. Parent current-byte serial security plus ACK rerun passed 30/30; saved TAP totals independently read. Parent final standalone server build/tsc passed exit 0; saved invocation inspected.",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit",
-        "codex-reasoning-compat-review",
-        "Scoped terminal-reload delta review: checked exact resume identity and status before fallback or settlement, synchronous transport guards, fresh post-ACK history and Goal checks, and retained protection on unknown results. Targeted isolated tests passed; live recovery and full current-file re-audit not performed."
+        "current-source-sha256-and-size",
+        "changed-surface-and-contract-inspection"
       ],
-      "notes": "001/002/004/005 are fixed-targeted-verified against frozen current source/test hashes by the parent's actual 30/30 security plus ACK rerun and final standalone server build/tsc exit 0. NEW005 enforces the existing 128-character/512-entry/64-KiB runtime contract for both mutation paths; HTTP/worker outer admission still allows 4096 characters, but unsupported runtime values reject before effects. Startup accepts valid compact files within raw-byte bounds; mutations exceeding the pretty-encoded limit reject rather than rewrite them. Whole-file approval remains false. EXE-APP-COMPLETE-003 remains UNRESOLVED with its original status and durable recovery receipt gap unchanged. Only assigned source/test and private report edits; no public ledger edits, credentials, histories, reviewer tests/compiles/application launches or production actions.",
+      "notes": "Inspected cold worker-owned unmanaged refresh deferring loaded-only backgroundTerminals RPC to startOwnedTurn post-resume proof while preserving rollout/interrupted-wrapper and status:unknown pre-claim fences; full app-server semantic re-review remains open.",
       "findings": [],
       "historicalFindingReferences": [
         "EXE-APP-COMPLETE-003",
@@ -7565,22 +7654,17 @@
     },
     {
       "path": "apps/server/src/codex/background-terminals.test.ts",
-      "size": 57100,
-      "sha256": "82aa42eb7730186290385c7febda0514395f9fc8640431b1d2232a7ceb785e95",
+      "size": 60393,
+      "sha256": "5e3ca1606930d43f9c615ba6b46f0a8d660636a2fe11005eab6c4cb2f6e79263",
       "module": "execution",
       "kind": "test",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "inventory-sha256-size-recomputed",
-        "typescript-full-text-ast-structure",
-        "imports-and-declarations-indexed",
-        "sensitive-pattern-categories-only",
-        "fixture-hook-assertion-and-effect-sites-indexed-not-executed",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "changed-surface-and-contract-inspection"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/codex/background-terminals.test.ts (execution/test); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Inspected regression test covering worker-owned unloaded unmanaged refresh with non-zero commandExecution and aborted interrupted wrapper fencing.",
       "findings": []
     },
     {
@@ -11967,18 +12051,17 @@
     },
     {
       "path": "apps/server/src/config.ts",
-      "size": 31590,
-      "sha256": "8ceda501cf101303205cd005233a35fcbc05023926366c80d69b27f63f84e28c",
+      "size": 32006,
+      "sha256": "165ebd0567c039d353717be7b54af5824415e8867c8fa77270b966f687a9c54d",
       "module": "api-auth",
       "kind": "config",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
         "current-source-sha256-and-size",
-        "2026-11-25-antigravity-connector-review",
-        "typecheck-and-targeted-tests"
+        "changed-surface-and-contract-inspection"
       ],
-      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
+      "notes": "Inspected AHP optional enablement, dedicated role, loopback and explicit state/token guards; full config semantic re-review remains open.",
       "findings": [],
       "historicalFindingReferences": [
         "AOD-AUTH-002",
@@ -12448,19 +12531,17 @@
     },
     {
       "path": "apps/server/src/connector/async-codex-dispatch.test.ts",
-      "size": 32418,
-      "sha256": "e48dd3dc77a79505b3976a37cbe26af1d9059b1208e195694ae26ee7310a2794",
+      "size": 33475,
+      "sha256": "d06fc7401567ae3fbede7551ca68b735e17fcb6eeaa9c3064b9a74b1e1f0f9bf",
       "module": "connector",
       "kind": "test",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "清单路径及 SHA-256/size 重核",
-        "TypeScript AST 语法/声明/导入结构定位（非 semantic）",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "changed-surface-and-contract-inspection"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/async-codex-dispatch.test.ts (connector/test); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Inspected regression test covering cold owned FIFO load with prior failed commandExecution status and rollout provenance.",
       "findings": []
     },
     {
@@ -13076,21 +13157,17 @@
     },
     {
       "path": "apps/server/src/connector/async-connector-surface.ts",
-      "sha256": "3b66529537e1bf9c0141fbf7114755c7dc337f8ae984848c29af2fcc5ce9287e",
-      "size": 34582,
+      "sha256": "bc295c388f114ecdd929a20f0e1a11dfa655709ac351ab1bf127e55f419d97f2",
+      "size": 35040,
       "module": "api-completion",
       "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "Complete 514-line content read, including surface assembly, readiness, route order, model handlers and shutdown ownership.",
-        "Worker models:write admission precedes actual-byte 8192-byte JSON collection; handle.check follows collection before setId/object/list validation and reconciliation.",
-        "Changed body contract and original read-authority contract read fully; existing 10-case async body evidence compared to current source.",
-        "Reconciliation helper and filesystem writer read fully; post-effect delivery proof cannot authorize or undo an asynchronous filesystem commit.",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "changed-surface-and-contract-inspection"
       ],
-      "notes": "AOD-API-COMP-003's worker JSON collection defect is repaired at the named upload boundary. AOD-API-COMP-005 is a separate source-confirmed continuity defect in the non-dry-run writer. Existing EXE-COMPLETE-003 filesystem permissions/unbounded file-read finding remains unresolved; neither it nor all runtime adapters are approved by this review.",
+      "notes": "Inspected AHP registration after protocol middleware, capability visibility and shutdown lifetime; full Connector surface semantic re-review remains open.",
       "findings": [],
       "readEvidence": {
         "complete": true,
@@ -15427,19 +15504,17 @@
     },
     {
       "path": "apps/server/src/connector/connector-authority-domain.ts",
-      "size": 9191,
-      "sha256": "4ab055e5810543f5d59121ce85474786b8b32f8f74c943ee6e27d608d482f293",
+      "size": 13136,
+      "sha256": "2e0456a5e52e371431804b4154b10c9ba76da73e4c5fb59b5166f02a6a61a4d2",
       "module": "connector",
       "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "exact-current-source-size-and-sha256",
-        "full-source-read",
-        "token-and-http-authority-contract-read",
-        "authority-local-credential-regressions-pass"
+        "current-source-sha256-and-size",
+        "changed-surface-and-contract-inspection"
       ],
-      "notes": "Full 116-line source read with agents-http, HTTP original authorization capture/recheck and token store contracts. Fixed command validation distinguishes authentication and explicit scoped authority, returns redacted observations rather than tokens, and rereads original worker authority before delivery/effects. Local credential/authority/namespace focused selectors pass. This does not certify all commands in the much larger connector-owner-domain.",
+      "notes": "Inspected AHP worker input/output shapes, bearer admission and receipt recheck; full domain semantic re-review remains open.",
       "findings": [],
       "historicalFindingReferences": [
         "AOD-CONNECTOR-003"
@@ -17017,18 +17092,17 @@
     },
     {
       "path": "apps/server/src/connector/connector-owner-domain.ts",
-      "size": 91624,
-      "sha256": "318b287aaf923464f2cbdea1b439b48ebe8c16c498b02c578815f895d421911d",
+      "size": 91630,
+      "sha256": "40c3a5ef4e6d4f88259dc9c1b0f08535329bf0bcffa3df68df8beb63b23a3ce4",
       "module": "connector",
       "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
         "current-source-sha256-and-size",
-        "2026-11-25-antigravity-connector-review",
-        "typecheck-and-targeted-tests"
+        "changed-surface-and-contract-inspection"
       ],
-      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
+      "notes": "Inspected original worker dispatch awaiting asynchronous AHP receipt admission; full worker semantic re-review remains open.",
       "findings": []
     },
     {
@@ -38865,20 +38939,17 @@
     },
     {
       "path": "apps/server/src/routes/hub-async.ts",
-      "size": 26409,
-      "sha256": "b566a7c7f3d2402582413d80afc1b5fb16be48c075e830207d351866797e7a9a",
+      "size": 26563,
+      "sha256": "eb2cc9bdbd592a52ec9c960005883661c6b4f8afaec08f3bf90ce7fa497d2fa6",
       "module": "api-auth",
       "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "清单全部字节读取与 SHA-256/size 对照（非人工全文语义审查）",
-        "TypeScript AST 语法/声明/import/调用位置提取（无源码执行）",
-        "入口/资源调用静态位置与直接 import 邻接记录，未批准传递权限",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "changed-surface-and-contract-inspection"
       ],
-      "notes": "本文件 357 行；声明 AsyncHubRouteDeps@80, Close@93, base@94, isHubPath@95, alias@99, registerAsyncHubRoutes@111, services@112, reads@112；直接依赖 hono, hono/http-exception, apps/server/src/config.ts, apps/server/src/hub/administrative-route-services.ts, apps/server/src/hub/connector-read-services.ts, apps/server/src/hub/async-event-feed.ts。HTTP 注册位置 app.use@146；FS/worker/timer 等静态资源位置 Hono@117。上述导入及注册的 current actor、await 后最终 effect、owner/cleanup/secret/input 分支尚未全链路核对；以结构记录留待后续人工审查，不声称安全通过。",
+      "notes": "Inspected AHP registration using owner proxy factory and retained shutdown; full Hub semantic re-review remains open.",
       "findings": []
     },
     {
@@ -41719,18 +41790,17 @@
     },
     {
       "path": "apps/server/src/routes/hub.ts",
-      "size": 95308,
-      "sha256": "ea4159999551bc731a6526928e39ac95eaccc4848ce01d7095b68dd94aa04868",
+      "size": 95625,
+      "sha256": "3acaf0da2c0ea90b7639bfcf4c80d97fbb469457f8fe0e1b2efc37190bc59fa7",
       "module": "api-auth",
       "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
         "current-source-sha256-and-size",
-        "2026-11-25-antigravity-connector-review",
-        "typecheck-and-targeted-tests"
+        "changed-surface-and-contract-inspection"
       ],
-      "notes": "Reviewed Antigravity Connector runtime/domain/route/config/test wiring. Preserves existing Codex, Claude Code, Copilot, OpenClaw, and Hermes isolation and ownership boundaries; verified with server typecheck and targeted Connector/Antigravity tests.",
+      "notes": "Inspected AHP registration in legacy composition only; full legacy Hub semantic re-review remains open.",
       "findings": [],
       "evidence": {
         "fullSourceRead": true,
@@ -45028,6 +45098,21 @@
       "findings": []
     },
     {
+      "path": "apps/web/src/components/AhpChat.tsx",
+      "size": 6250,
+      "sha256": "0927e18775af9d3d1a5294fd824976a183c6cba7a8fbead6b7d14136d49f5c78",
+      "module": "web",
+      "kind": "runtime",
+      "depth": "structural",
+      "disposition": "pending",
+      "checks": [
+        "current-source-sha256-and-size",
+        "changed-surface-and-contract-inspection"
+      ],
+      "notes": "Inspected plain text rendering, capability gate, scope fencing and session-storage unknown marker; browser accessibility acceptance remains open.",
+      "findings": []
+    },
+    {
       "path": "apps/web/src/components/AnchoredPanel.tsx",
       "size": 1819,
       "sha256": "2bf88213144c0983a6a013ccac93186f1bfa8b9698e3ef513137d1eadae42748",
@@ -47707,19 +47792,17 @@
     },
     {
       "path": "apps/web/src/components/hub-connections.tsx",
-      "size": 96363,
-      "sha256": "dfdfa82ab636abe2dfd5ed8bf52cef73c40d167f6f2f5e7f023c63760c89e5c7",
+      "size": 96494,
+      "sha256": "c1c773924c9825f20255e229a4bb18fdcafd8164207f9e91fde615ed16c88607",
       "module": "web-ui",
       "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "inventory-sha256-size",
-        "typescript-ast-structure-not-semantic",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "changed-surface-and-contract-inspection"
       ],
-      "notes": "[\"仅结构起点：1819行、30个声明、22个静态导入、parseDiagnostics=0。声明形状：PanelState, TestState, connectionStatusBadge, envLabel, ownerLabel, MaintenanceControls, ConnectionRow, handleDelete, handleRename, AddConnectionForm, applySandboxPreset, handleLaunchDockerSandbox。\",\"AST定位而非控制流证明：useEffect=9；JSX关注属性：role@155, aria-label@158, aria-label@236, onKeyDown@241, aria-label@280, aria-label@291, aria-label@302, aria-label@522, role@525, aria-label@525, role@528, role@540, role@552, aria-label@1057, aria-label@1072, href@1076, aria-label@1081, aria-label@1090, aria-label@1091, role@1096, aria-label@1097, aria-label@1099, aria-label@1111, onKeyDown@1118, aria-label@1140, aria-label@1156, aria-label@1165, aria-label@1294, onKeyDown@1301, aria-label@1322, onKeyDown@1329, aria-label@1347, href@1548, aria-label@1558, role@1608, aria-label@1608, role@1617。\",\"除下述手工观察另有说明外，未完整阅读运行体/调用者/契约；结构定位不等于XSS、权限、恢复、双语或a11y审查通过。\"]",
+      "notes": "Inspected expanded connection integration and identity remount; browser, keyboard and touch acceptance remain open.",
       "findings": []
     },
     {
@@ -53746,17 +53829,17 @@
     },
     {
       "path": "apps/web/src/lib/translations.ts",
-      "size": 293121,
-      "sha256": "5149a7179a34efc6dabbe9b461c961e7feaf1debc000790b2c3f9ce5f392ad8b",
+      "size": 293871,
+      "sha256": "232d5a1bf48c707893759426025d4d8530dd2ad15318fe7effcfc586bcf0572a",
       "module": "web-state",
       "kind": "runtime",
       "depth": "structural",
       "disposition": "pending",
       "checks": [
-        "workspace-quota-appearance-targeted-review",
-        "exact-file-sha256-and-size"
+        "current-source-sha256-and-size",
+        "changed-surface-and-contract-inspection"
       ],
-      "notes": "Checked the new Simplified Chinese group labels, reused existing translations, and passed both static i18n guards. Full catalog semantic review not repeated.",
+      "notes": "Inspected paired AHP notices/actions and i18n source checks; full catalog semantic re-review remains open.",
       "findings": []
     },
     {
@@ -59359,32 +59442,32 @@
     },
     {
       "path": "docs/README.md",
-      "size": 3077,
-      "sha256": "b0386a544ad49b35203b90db7f8885d83186a2bd63acd3b5195ab0ad264cec26",
+      "size": 3167,
+      "sha256": "2c723b0af1288044f3441c08ea1851d298aa97159fbd0295b307384698252974",
       "module": "release-boundary",
       "kind": "docs",
       "depth": "structural",
       "disposition": "pending",
       "checks": [
-        "standalone-antigravity-quota-targeted-review",
-        "exact-file-sha256-and-size"
+        "current-source-sha256-and-size",
+        "changed-surface-and-contract-inspection"
       ],
-      "notes": "Checked that the bilingual navigation and guide identify the standalone workspace quota card. Documentation tests passed; no live UI walkthrough.",
+      "notes": "Inspected English documentation index link to VS Code Agent Host AHP section.",
       "findings": []
     },
     {
       "path": "docs/README.zh-CN.md",
-      "size": 2943,
-      "sha256": "22075b4c168df11b8a7ce12dfa5ec64eb2e57418538174d9fd42f4826e0ec8fa",
+      "size": 3032,
+      "sha256": "614411529672cf325fef6afe5eabdb1e378f0802c4856fd49690d3249a084a21",
       "module": "release-boundary",
       "kind": "docs",
       "depth": "structural",
       "disposition": "pending",
       "checks": [
-        "standalone-antigravity-quota-targeted-review",
-        "exact-file-sha256-and-size"
+        "current-source-sha256-and-size",
+        "changed-surface-and-contract-inspection"
       ],
-      "notes": "Checked that the bilingual navigation and guide identify the standalone workspace quota card. Documentation tests passed; no live UI walkthrough.",
+      "notes": "Inspected Simplified Chinese documentation index link to VS Code Agent Host AHP section.",
       "findings": []
     },
     {
@@ -59419,51 +59502,47 @@
     },
     {
       "path": "docs/api.md",
-      "size": 5201,
-      "sha256": "8d098e2ab00daad0aa0d42e0542defe40a70b9ffdcee4d66c17e31638fe7e9d0",
+      "size": 6066,
+      "sha256": "5c006f77a74699435bdf1e34efb761850d40477d5b72f81f173b7745c322f70b",
       "module": "governance",
       "kind": "docs",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "Read current source bytes only to calculate SHA-256 and exact byte size; hash reading alone is not content review",
-        "Read route-inventory/non-normative schema and no-live-Try-it-out limitations",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "changed-surface-and-contract-inspection"
       ],
-      "notes": "Generated OpenAPI is a source route inventory, not SDK auth/body/error/SSE/WebSocket contracts. Route generators/implementation/tests and EN/CN exact parity not fully reviewed; no live endpoint accessed.",
+      "notes": "Inspected documented AHP request/response, scope and retry contract against source and bilingual guide.",
       "findings": []
     },
     {
       "path": "docs/api.zh-CN.md",
-      "size": 4259,
-      "sha256": "0e5540165aebf8194978e69c895e7eb8734a9698b30c2bfaf874f0b2b373b4f2",
+      "size": 5076,
+      "sha256": "241a055078262ee80855163ab05c9c2bc58b9460196b6c343960059982bfa27a",
       "module": "governance",
       "kind": "docs",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "Read current source bytes only to calculate SHA-256 and exact byte size; hash reading alone is not content review",
-        "Read route-inventory/non-normative schema and no-live-Try-it-out limitations",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "changed-surface-and-contract-inspection"
       ],
-      "notes": "Generated OpenAPI is a source route inventory, not SDK auth/body/error/SSE/WebSocket contracts. Route generators/implementation/tests and EN/CN exact parity not fully reviewed; no live endpoint accessed.",
+      "notes": "Inspected Simplified Chinese AHP request/response, scope and retry contract against source and English guide.",
       "findings": []
     },
     {
       "path": "docs/api/openapi.json",
-      "size": 533360,
-      "sha256": "702c014b782cc7108516b32d577a100bc04fca89b993d30bfa28f33b88031aa6",
+      "size": 537839,
+      "sha256": "8e1f2196564da36e24de6860795d5b494b1b33c61bf9beef5725e7bdba31d5a8",
       "module": "release-boundary",
       "kind": "config",
       "depth": "structural",
       "disposition": "pending",
       "checks": [
-        "antigravity-account-quota-targeted-source-review",
-        "exact-file-sha256-and-size"
+        "current-source-sha256-and-size",
+        "changed-surface-and-contract-inspection"
       ],
-      "notes": "Deterministic regenerated inventory includes the quota registration and source locations, including historical source-line drift. Inventory is not a normative contract or access-control guarantee.",
+      "notes": "Generated AHP HTTP route sources verified by inventory generator and test; not a complete authorization or payload schema.",
       "findings": []
     },
     {
@@ -59747,18 +59826,17 @@
     },
     {
       "path": "docs/integrations.md",
-      "size": 7470,
-      "sha256": "8caa7ed3044c2a9a761c74a6815a9c5640fae197843a5d96a4206d526ea69e36",
+      "size": 8718,
+      "sha256": "5594e8d7108be48a69eb595edc1b199a9f0f6d545471dd11092886732488aed9",
       "module": "governance",
       "kind": "docs",
       "depth": "structural",
       "disposition": "pending",
       "checks": [
         "current-source-sha256-and-size",
-        "scoped-installation-pr-review",
-        "paired-native-environment-and-bridge-contract-guidance"
+        "changed-surface-and-contract-inspection"
       ],
-      "notes": "Changed Codex guidance covers native catalog priority, dedicated executable/HOME, permitted provider variable names, loopback NO_PROXY and optional Vekil Responses-over-Chat restrictions. Full current-file security/publication rereview remains pending.",
+      "notes": "Inspected experimental AHP setup and loopback trust boundary; deployed acceptance remains open.",
       "findings": [],
       "previousReview": {
         "path": "docs/integrations.md",
@@ -59777,18 +59855,17 @@
     },
     {
       "path": "docs/integrations.zh-CN.md",
-      "size": 6673,
-      "sha256": "b1b444c1b2cc86085498bf2ffaaa4dd9dfc3098623fe567d1b995b3c30ae4b53",
+      "size": 7917,
+      "sha256": "5e16bfa233a0499ace06d7d826099cb503fa2505883347760192427e3e4b912f",
       "module": "governance",
       "kind": "docs",
       "depth": "structural",
       "disposition": "pending",
       "checks": [
         "current-source-sha256-and-size",
-        "scoped-installation-pr-review",
-        "paired-native-environment-and-bridge-contract-guidance"
+        "changed-surface-and-contract-inspection"
       ],
-      "notes": "Changed Codex guidance covers native catalog priority, dedicated executable/HOME, permitted provider variable names, loopback NO_PROXY and optional Vekil Responses-over-Chat restrictions. Full current-file security/publication rereview remains pending.",
+      "notes": "Inspected Simplified Chinese experimental AHP setup and loopback trust boundary; deployed acceptance remains open.",
       "findings": [],
       "previousReview": {
         "path": "docs/integrations.zh-CN.md",
@@ -59824,18 +59901,17 @@
     },
     {
       "path": "docs/modules.md",
-      "size": 8636,
-      "sha256": "7405e1499f8fbb762c1c972033ce92e24cbf3a1567c643512a4d5d6bf86d079e",
+      "size": 8816,
+      "sha256": "d48b8f267d401d9f6042b1231e81c3adae5c871e324984b9abfb51b1078dd8db",
       "module": "governance",
       "kind": "docs",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
         "current-source-sha256-and-size",
-        "2026-11-25-antigravity-connector-review",
-        "typecheck-and-targeted-tests"
+        "changed-surface-and-contract-inspection"
       ],
-      "notes": "Reviewed paired English/Simplified Chinese Antigravity Connector documentation and navigation links. Documents AOD 1.0.0 isolation, dedicated HOME requirements, enabled Connector/Web UI capabilities, and 409-rejected unsupported capabilities.",
+      "notes": "Inspected English module map entry for apps/server/src/ahp.",
       "findings": [],
       "previousReview": {
         "path": "docs/modules.md",
@@ -59869,18 +59945,17 @@
     },
     {
       "path": "docs/modules.zh-CN.md",
-      "size": 7331,
-      "sha256": "e112822d5c7ae532b41202e4842f0182bf4629879e0c73821723afd9842d97cc",
+      "size": 7500,
+      "sha256": "07cdc7097e048aa6f741209fb5b25f4d75b0c5383811764735f2fef781ff2800",
       "module": "governance",
       "kind": "docs",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
         "current-source-sha256-and-size",
-        "2026-11-25-antigravity-connector-review",
-        "typecheck-and-targeted-tests"
+        "changed-surface-and-contract-inspection"
       ],
-      "notes": "Reviewed paired English/Simplified Chinese Antigravity Connector documentation and navigation links. Documents AOD 1.0.0 isolation, dedicated HOME requirements, enabled Connector/Web UI capabilities, and 409-rejected unsupported capabilities.",
+      "notes": "Inspected Simplified Chinese module map entry for apps/server/src/ahp.",
       "findings": [],
       "previousReview": {
         "path": "docs/modules.zh-CN.md",
@@ -62828,19 +62903,17 @@
     },
     {
       "path": "pnpm-lock.yaml",
-      "size": 125042,
-      "sha256": "4eb7b47f14d9b49939f7d74a4d6f90cf2458ded148f9b138f7d71b09cff7323b",
+      "size": 125344,
+      "sha256": "e679135c74450d7eb84b875ab3679d05e3312678135509f0e6b8022650ea895b",
       "module": "governance",
       "kind": "config",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
         "current-source-sha256-and-size",
-        "generated-schema-provenance-or-lockfile-resolution-inspection-not-semantic",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "changed-surface-and-contract-inspection"
       ],
-      "notes": "Generated inventory/lockfile inspected structurally against provenance, schemas and dependency gates; not complete human semantic review of each generated entry.",
+      "notes": "Inspected frozen lockfile resolution for @microsoft/agent-host-protocol@1.1.0; full dependency tree audit and release notice review remain open.",
       "findings": [],
       "previousReview": {
         "path": "pnpm-lock.yaml",
@@ -62893,17 +62966,17 @@
     },
     {
       "path": "scripts/api-docs.test.mjs",
-      "size": 4214,
-      "sha256": "029e111064d5ddc53ec820ebde72444d522dfa527815379ea6f69c0f1e7e5504",
+      "size": 4397,
+      "sha256": "7801ef9a2bdc2cb181e50226c973fd10d98801611b58f440d12e115236314bae",
       "module": "main",
       "kind": "test",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
         "current-source-sha256-and-size",
-        "complete-current-source-and-relevant-contract-review"
+        "changed-surface-and-contract-inspection"
       ],
-      "notes": "Fully read all 71 current test lines and the complete 142-line API inventory generator. Reviewed deterministic source references, stable operation identity, duplicate shape merging, wildcard parameter conversion, mutable/lexically shadowed symbols, literal loop expansion and explicit unresolved paths. Temporary source fixtures register cleanup before writes; imports are inert and generate no provider calls. Tests deliberately do not fabricate authorization, request/response schemas or endpoint servers; the generated inventory remains structurally reviewed, not a normative complete API contract. Current documentation/API selection passed.",
+      "notes": "Inspected assertions for both AHP operations on Hub and Connector inventory paths.",
       "findings": []
     },
     {
@@ -63727,8 +63800,8 @@
     },
     {
       "path": "scripts/documentation.test.mjs",
-      "sha256": "774894d1ff1434f1fd1cb24b9c860ad9ab26c3f4e060ff79883b1801a3b8d493",
-      "size": 9901,
+      "sha256": "a070c89f1fa2e9c92ef62e114029209f74a39cb1a97f229db21d7969f5f98b0d",
+      "size": 10839,
       "module": "release-boundary",
       "kind": "test",
       "depth": "structural",
@@ -63736,10 +63809,9 @@
       "findings": [],
       "checks": [
         "current-source-sha256-and-size",
-        "scoped-installation-pr-review",
-        "ten-documentation-tests-including-real-crlf-fixture-passed"
+        "changed-surface-and-contract-inspection"
       ],
-      "notes": "Documentation reads normalize CRLF before multiline contract checks. A temporary CRLF file reproduces the Windows checkout regression. Ten targeted documentation tests passed. Full current-file semantic/security rereview remains pending."
+      "notes": "Inspected bilingual AHP integration and API contract documentation assertions."
     },
     {
       "path": "scripts/encrypted-stopped-backup.test.mjs",

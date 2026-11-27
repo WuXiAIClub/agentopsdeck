@@ -5,6 +5,7 @@ import { ReadRequestError } from '../lifecycle/read-request-owner.js';
 import { isOpenClawCliAvailable } from '../openclaw/cli.js';
 import { readGatewayModelSetStatus, reconcileGatewayModelSet } from './model-set.js';
 import { UpdateAuthorizationError } from './update-service.js';
+import { registerConnectorAhp } from '../ahp/connector-http.js';
 import type { ServerConfig } from '../config.js';
 import { DeckStore } from '../projection/deck-store.js';
 import type { EventSnapshotRead } from '../routes/events.js';
@@ -118,6 +119,7 @@ export async function createAsyncConnectorSurface(options: AsyncConnectorSurface
   let maintenance: ReturnType<typeof createAsyncConnectorMaintenance> | undefined;
   let legacyReads: ReturnType<typeof registerAsyncLegacySessionReads> | undefined;
   let hotSessions: ReturnType<typeof createHotSessionWarmer> | undefined;
+  let ahp: ReturnType<typeof registerConnectorAhp> | undefined;
   let surfaceDeck: DeckStore | undefined;
   const hotTracker = new HotSessionTracker();
   const refreshes = createTaskDrain();
@@ -211,7 +213,7 @@ export async function createAsyncConnectorSurface(options: AsyncConnectorSurface
     state = 'closing';
     // Fence HTTP, all read/control owners and every executor synchronously.
     const consumers = safe(() => projectionConsumersDrain?.());
-    const drains = [() => localOperator.close(), () => surfaceRoutes.close(), () => hotSessions?.close(), () => maintenance?.close(), () => legacyReads?.close(), () => http?.close(), () => machine?.close(), () => workspace?.close(), () => boardBindings?.close(), () => reads?.close(), () => control?.close(),
+    const drains = [() => localOperator.close(), () => surfaceRoutes.close(), () => hotSessions?.close(), () => ahp?.close(), () => maintenance?.close(), () => legacyReads?.close(), () => http?.close(), () => machine?.close(), () => workspace?.close(), () => boardBindings?.close(), () => reads?.close(), () => control?.close(),
       () => authority?.close(), () => refreshes.close(), () => historyReads.close()].map(safe);
     const preparation = physicalPreparation, start = physicalStart, refresh = refreshWork;
     void Promise.resolve().then(async () => {
@@ -279,6 +281,7 @@ export async function createAsyncConnectorSurface(options: AsyncConnectorSurface
       },
       publicReads: { authority, changes: events.changes, replay: replayEvents, agents: () => binding!.agents(),
         mediaRoot: config.inboundMediaDir, sampler, connector: options.connector, diagnostics, ...wait } });
+    if (config.ahp) ahp = registerConnectorAhp(app, config.ahp, { command: (kind, input) => owner.command(kind, input), available: ready });
     const base = '/api/connector/v1';
     const authFailure = (error: unknown, scope: string): { error: string; status: 403 | 408 | 503 } => {
       const status = error instanceof UpdateAuthorizationError ? 403
@@ -345,6 +348,8 @@ export async function createAsyncConnectorSurface(options: AsyncConnectorSurface
               scopedTokens: true, sessions: true, messages: true, events: true, media: true, users: true, pairing: false,
               modelSet: true, interactions: true, sessionFileIndex: true,
               connectorUpdate: config.connector.updateEnabled, workspaceFiles: !!Object.keys(config.fileBrowserRoots ?? {}).length,
+              vsCodeChat: !!config.ahp && handle.principal.scopes.includes('messages:read')
+                && !handle.principal.scopes.includes('execution:delegate'),
             },
             runtimes: {
               hermes: { enabled: hermesEnabled, ready: hermes.ready === true, ownerOnly: true,

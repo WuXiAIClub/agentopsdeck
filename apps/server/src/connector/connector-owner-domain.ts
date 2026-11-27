@@ -942,7 +942,7 @@ export function createConnectorOwnerCommands(owner: ConnectorUserStore, tokens?:
       return value as ConnectorOwnerCommands[K]['output'];
     }
     if (isConnectorAuthorityKind(kind)) {
-      const value = executeConnectorAuthority(kind, input, owner, tokens);
+      const value = await executeConnectorAuthority(kind, input, owner, tokens);
       if (!validConnectorAuthorityOutput(kind, value)) throw new ConnectorOwnerUnavailable();
       return value as ConnectorOwnerCommands[K]['output'];
     }

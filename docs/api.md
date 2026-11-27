@@ -51,6 +51,21 @@ inventing a second write/retry system.
 - Only call a disposable instance when testing integration. Document imports and
   schema validation alone are not end-to-end provider acceptance.
 
+## VS Code chat (experimental)
+
+`GET /api/hub/v1/connections/:connectionId/ahp` returns `title`, `canSend`,
+and up to 40 recent text turns (`id`, `prompt`, `response`, `active`) to the
+connection owner. `POST` on the same path accepts JSON `{ "text": "..." }`
+(up to 16,384 UTF-8 bytes) with an `Idempotency-Key` and returns `{ "id": "..." }`
+after VS Code acknowledges the turn. Responses are not cacheable. Open the
+chat with `GET` first. A transport or authorization failure after submission
+is not proof that a message was not sent. Check VS Code; do not replay it.
+
+The matching Connector path `/api/connector/v1/ahp` is enabled only by
+[explicit Windows configuration](integrations.md#vs-code-agent-host-ahp).
+It requires non-delegated `messages:read` or `messages:send` Connector
+authority, respectively, and does not proxy tool approvals or arbitrary RPC.
+
 ## Update and test
 
 The generator parses static literal/constant/template routes and literal loops.

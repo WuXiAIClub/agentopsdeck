@@ -753,6 +753,61 @@ test('read-only display refresh on an unloaded unmanaged thread with commandExec
   assert.ok(setup.runtime.displayHistory.get(unmanagedKey));
 });
 
+test('worker-owned refresh on an unloaded unmanaged thread with commandExecution defers terminal listing to owned load while fencing unconfirmed cleanup', async context => {
+  const setup = fixture(context);
+  const directory = mkdtempSync(join(tmpdir(), 'agentopsdeck-unloaded-worker-'));
+  context.after(() => rmSync(directory, { recursive: true, force: true }));
+  const settledRollout = join(directory, 'settled.jsonl');
+  writeFileSync(settledRollout, JSON.stringify({ timestamp: '2026-10-23T00:00:00.000Z', type: 'event_msg', payload: { type: 'task_complete', turn_id: 'original-run' } }) + '\n');
+  const abortedRollout = join(directory, 'aborted.jsonl');
+  writeFileSync(abortedRollout, [
+    { type: 'event_msg', payload: { type: 'task_started', turn_id: 'original-run' } },
+    { type: 'response_item', payload: { type: 'custom_tool_call', name: 'exec', call_id: 'wrapper', input: 'synthetic' } },
+    { type: 'response_item', payload: { type: 'custom_tool_call_output', call_id: 'wrapper', output: 'aborted by user after 0.1s' } },
+  ].map(row => JSON.stringify(row)).join('\n') + '\n');
+  const unmanagedKey = 'codex:unmanaged-worker-cold';
+  setup.runtime.child = { stdin: { writable: true } };
+  setup.runtime.options.queuedConsumer = { run: async () => 'not_started', close: async () => {} };
+  setup.runtime.options.credentialExecutionReader = { get: async () => undefined };
+  setup.runtime.options.historyReader = {
+    prepare: async (_key: string, messages: any[]) => ({ messages, sourceIds: messages.map(m => m.id), queue: [] }),
+    close: async () => {},
+  };
+  let turnStatus: 'completed' | 'interrupted' = 'completed';
+  let toolStatus: 'completed' | 'failed' | 'inProgress' = 'failed';
+  let path = settledRollout;
+  setup.runtime.request = async (method: string) => {
+    if (method === 'thread/read') return {
+      thread: {
+        id: 'unmanaged-worker-cold', path, status: { type: 'notLoaded' },
+        turns: [{ id: 'original-run', status: turnStatus, items: [
+          { id: 'cmd-1', type: 'commandExecution', status: toolStatus, command: 'exit 1', exitCode: 1 },
+          { id: 'reply', type: 'agentMessage', text: 'Previous completed turn' },
+        ] }],
+      },
+    };
+    throw new Error(`unexpected RPC method on unloaded thread: ${method}`);
+  };
+  try {
+    setup.store.upsertSession({ sessionKey: unmanagedKey, agentId: 'codex', title: 'Unmanaged Worker Cold', status: 'unknown' });
+    await setup.runtime.refreshSession(unmanagedKey, { readOnly: false });
+    assert.equal(setup.codex.isSessionHistoryReady(unmanagedKey), true);
+    assert.equal(setup.store.getSession(unmanagedKey)?.status, 'idle');
+    const observation = await setup.codex.observeOwnedQueue(unmanagedKey, true);
+    observation.release?.();
+
+    setup.store.upsertSession({ sessionKey: unmanagedKey, agentId: 'codex', title: 'Unmanaged Worker Cold', status: 'idle' });
+    delete setup.store.getSession(unmanagedKey)!.runtime;
+    turnStatus = 'interrupted';
+    path = abortedRollout;
+    await setup.runtime.refreshSession(unmanagedKey, { readOnly: false });
+    assert.equal(setup.store.getSession(unmanagedKey)?.status, 'unknown');
+    await assert.rejects(setup.codex.observeOwnedQueue(unmanagedKey, true));
+  } finally {
+    setup.runtime.child = undefined;
+  }
+});
+
 test('requestSessionRecovery clears recoveryAt cooldown and loaded background-work polls every 5s without re-reading unchanged rollout', async context => {
   const setup = fixture(context);
   const directory = mkdtempSync(join(tmpdir(), 'agentopsdeck-bg-fast-poll-'));

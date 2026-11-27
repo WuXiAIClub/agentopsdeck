@@ -86,6 +86,28 @@ No pinned native/provider compatibility matrix is claimed for this source draft.
 
 ## Other adapters
 
+### VS Code Agent Host (AHP)
+
+The experimental Windows client connects to an explicitly selected VS Code
+editor instance over its authenticated local named pipe. It can attach to one
+existing chat, read recent text, and submit text without starting another
+Copilot process. It does not change VS Code's tool approval policy or
+automatically retry an unconfirmed message.
+
+Use a dedicated Windows Connector (`AOD_SERVER_ROLE=connector`) on `127.0.0.1`
+with its own `AOD_DATA_DIR`, unused port and fresh `AOD_CONNECTOR_BOOTSTRAP_TOKEN`.
+Privately set `AOD_AHP_VSCODE_CLI` to the absolute path to `code-tunnel.exe`,
+`AOD_AHP_INSTANCE_ID` to the exact editor instance, and `AOD_AHP_SESSION_URI` to
+the selected `ahp-session:/…` URI. Discover these identifiers locally with the
+VS Code CLI; the endpoint discovery output includes a secret. Do not copy it
+into the Hub, logs or source control.
+
+Register the loopback Connector in a trusted, same-machine Hub as the
+connection owner. In its connection details choose **Open VS Code chat**.
+This is the original chat, not a new conversation or a shared Hub session.
+The Hub can read and send text on your behalf; do not use an untrusted or
+shared Hub. Keep the Connector and named pipe off the network.
+
 Antigravity CLI is being developed separately on the feature branch. Its ACP
 transport tests do not yet provide a selectable production connector; see
 [Antigravity CLI development](antigravity-cli.md) for the implemented contracts

@@ -43,6 +43,20 @@ IPC 帧需阅读源码与测试。清单未声明 `security` **不代表匿名�
   阅读客户端观察/恢复代码。
 - 集成测试只操作临时实例；导入文档或 schema 校验不等于供应商端到端验收。
 
+## VS Code 会话（实验性）
+
+`GET /api/hub/v1/connections/:connectionId/ahp` 向连接所有者返回
+`title`、`canSend` 及最多 40 轮近期文本（`id`、`prompt`、`response`、`active`）。
+同路径的 `POST` 接收 JSON `{ "text": "..." }`（最多 16,384 UTF-8 字节），
+要求提供 `Idempotency-Key`；VS Code 确认接收后返回 `{ "id": "..." }`。
+响应不可缓存。发送前先用 `GET` 打开会话。提交后出现传输或授权错误，不代表
+消息一定没发出。请在 VS Code 中确认，不要重放。
+
+对应 Connector 路径 `/api/connector/v1/ahp` 仅在
+[显式配置 Windows 接入](integrations.zh-CN.md#vs-code-agent-hostahp)时启用。
+读取和发送分别要求非委托的 `messages:read` 和 `messages:send` 权限，
+不代理工具审批或任意 RPC。
+
 ## 更新与测试
 
 生成器解析静态字面量/常量/模板路径及字面量循环。

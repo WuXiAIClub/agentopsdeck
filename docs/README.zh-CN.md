@@ -13,6 +13,7 @@ AgentOpsDeck（AOD）1.0.0 是从源码运行的、自托管智能体运维工�
 | 登录及使用工作区 | [使用指南](user-guide.zh-CN.md) |
 | 配置独立实例 | [配置指南](configuration.zh-CN.md) |
 | 启用智能体、拆分 Hub/Connector | [集成指南](integrations.zh-CN.md) |
+| VS Code Agent Host 接入状态 | [AHP](integrations.zh-CN.md#vs-code-agent-hostahp) |
 | 查看尚未完成的 Antigravity CLI 连接器 | [Antigravity CLI 开发](antigravity-cli.zh-CN.md) |
 | 打开独立的 Antigravity 账号额度卡片 | [Antigravity 账号额度卡片](antigravity-cli.zh-CN.md#账号额度卡片) |
 | 核对原生隔离与安装器门槛 | [原生安全](native-security.zh-CN.md) |
