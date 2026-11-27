@@ -16,6 +16,7 @@ its permissions. No public image, installer or GitHub repository is assumed here
 | Review the unfinished Antigravity CLI connector | [Antigravity CLI development](antigravity-cli.md) |
 | Open the standalone Antigravity account quota card | [Antigravity account quota card](antigravity-cli.md#account-quota-card) |
 | Review native isolation and installer gates | [Native security](native-security.md) |
+| Configure Android LAN priority and HTTPS fallback | [Android Hub connections](../apps/android/README.md#configure-your-hub) |
 | Plan remote access, backup and upgrades | [Operations](operations.md) |
 | Diagnose installation or session problems | [Troubleshooting](troubleshooting.md) |
 | Change code and run tests | [Development](development.md) |

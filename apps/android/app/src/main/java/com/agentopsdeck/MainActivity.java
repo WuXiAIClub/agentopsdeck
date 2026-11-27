@@ -74,6 +74,7 @@ public class MainActivity extends Activity {
     private SharedPreferences preferences;
     private TextView title;
     private String origin;
+    private volatile String lanOrigin;
     private ValueCallback<Uri[]> fileCallback;
     private int fileCallbackGeneration;
     private File pendingFile;
@@ -107,8 +108,13 @@ public class MainActivity extends Activity {
         super.onCreate(state);
         preferences = getSharedPreferences("client", MODE_PRIVATE);
         origin = ServerAddress.normalize(preferences.getString("origin", ServerAddress.DEFAULT));
-        String lastLan = preferences.getString("lastLan", "");
-        if (ServerAddress.isLan(lastLan) && preferences.getBoolean("lanEnabled", false) && isWifiConnection()) origin = lastLan;
+        String savedLan = preferences.getString("lanOrigin", "");
+        if (!savedLan.isEmpty()) {
+            try { lanOrigin = ServerAddress.normalizeLan(savedLan); }
+            catch (IllegalArgumentException error) {
+                Toast.makeText(this, R.string.lan_saved_invalid, Toast.LENGTH_LONG).show();
+            }
+        }
         cacheStore = new CacheStore(this);
         nativeVideo = new NativeVideoPlayer(this);
         nativeSpeech = new NativeVoiceRecorder(this, SPEECH_PERMISSION);
@@ -147,8 +153,6 @@ public class MainActivity extends Activity {
         root.addView(toolbar);
         setContentView(root);
         WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
-        createWebView();
-        scheduleConnectionCheck();
         connectivity = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
         networkCallback = new ConnectivityManager.NetworkCallback() {
             @Override public void onAvailable(Network network) { scheduleConnectionCheck(); }
@@ -159,6 +163,7 @@ public class MainActivity extends Activity {
         };
         try { connectivity.registerDefaultNetworkCallback(networkCallback); }
         catch (RuntimeException error) { networkCallback = null; }
+        selectConnection(true);
         if (!preferences.contains("lanEnabled")) root.post(this::editLan);
         root.requestApplyInsets();
     }
@@ -179,16 +184,22 @@ public class MainActivity extends Activity {
         int generation = ++connectionGeneration;
         String publicOrigin = ServerAddress.normalize(preferences.getString("origin", ServerAddress.DEFAULT));
         boolean enabled = preferences.getBoolean("lanEnabled", false);
-        String currentOrigin = origin;
+        String configuredLan = lanOrigin;
         ConnectivityManager manager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
         NetworkCapabilities capabilities = manager.getNetworkCapabilities(manager.getActiveNetwork());
         boolean wifi = capabilities != null && capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
                 && !capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN);
-        if (connect) title.setText("AgentOpsDeck · 正在选择连接…");
+        if (connect) title.setText(getString(R.string.connection_selecting));
         connectionWorker.execute(() -> {
-            String selected = ConnectionRouter.select(publicOrigin, enabled, wifi, currentOrigin, ServerProbe::reachable);
+            String candidate = ConnectionRouter.select(publicOrigin, configuredLan, enabled, wifi, ServerProbe::reachable);
             runOnUiThread(() -> {
                 if (destroyed || generation != connectionGeneration) return;
+                String selected = !candidate.equals(publicOrigin) && !isWifiConnection() ? publicOrigin : candidate;
+                if (connect && webView != null && !foreground) {
+                    suggestedOrigin = selected;
+                    updateConnectionTitle();
+                    return;
+                }
                 if (connect || webView == null) {
                     if (connectionDialog != null) { connectionDialog.dismiss(); connectionDialog = null; }
                     origin = selected;
@@ -197,28 +208,22 @@ public class MainActivity extends Activity {
                     suggestedOrigin = null;
                     updateConnectionTitle();
                     if (connectionDialog != null) { connectionDialog.dismiss(); connectionDialog = null; }
-                    if (userRequested) Toast.makeText(this, "当前已使用优先线路", Toast.LENGTH_SHORT).show();
+                    if (userRequested) Toast.makeText(this, R.string.connection_already_preferred, Toast.LENGTH_SHORT).show();
                 } else {
                     suggestedOrigin = selected;
                     updateConnectionTitle();
                     if (!foreground || !ConnectionRouter.shouldOfferSwitch(origin, selected, userRequested)) return;
                     if (connectionDialog != null) connectionDialog.dismiss();
-                    connectionDialog = new AlertDialog.Builder(this).setTitle("切换连接线路？")
-                            .setMessage("可切换到 " + selected + "。切换会重新加载页面；请先确认没有正在发送的消息或上传。不会自动重发消息，服务器任务继续运行。")
-                            .setNegativeButton("暂不切换", null)
-                            .setPositiveButton("切换连接", (dialog, which) -> {
-                                origin = selected;
-                                createWebView();
-                            }).show();
+                    confirmConnection(selected);
                 }
             });
         });
     }
 
     private void updateConnectionTitle() {
-        title.setText("AgentOpsDeck · " + (ServerAddress.isLan(origin) ? "局域网 · " : "公网 · ") + Uri.parse(origin).getHost()
-                + (suggestedOrigin == null ? "" : " · 可切换"));
-        title.setContentDescription("当前连接 " + origin + "，点击检查并选择线路");
+        title.setText("AgentOpsDeck · " + getString(ServerAddress.isLan(origin) ? R.string.connection_lan : R.string.connection_public)
+                + " · " + Uri.parse(origin).getHost() + (suggestedOrigin == null ? "" : " · " + getString(R.string.connection_switch_available)));
+        title.setContentDescription(getString(R.string.connection_description, origin));
     }
 
     private boolean isWifiConnection() {
@@ -234,44 +239,46 @@ public class MainActivity extends Activity {
         if (connectionDialog != null) connectionDialog.dismiss();
         String[] choices = ConnectionRouter.manualOrigins(
                 preferences.getString("origin", ServerAddress.DEFAULT),
+                lanOrigin,
                 preferences.getBoolean("lanEnabled", false), isWifiConnection());
         String[] labels = new String[choices.length];
         for (int index = 0; index < choices.length; index++) {
-            labels[index] = (choices[index].equals(origin) ? "当前 · " : "")
-                    + (ServerAddress.isLan(choices[index]) ? "局域网 · " : "公网 · ") + choices[index];
+            labels[index] = (choices[index].equals(origin) ? getString(R.string.connection_current) + " " : "")
+                    + getString(ServerAddress.isLan(choices[index]) ? R.string.connection_lan : R.string.connection_public)
+                    + " · " + choices[index];
         }
-        connectionDialog = new AlertDialog.Builder(this).setTitle("手动选择连接线路")
+        connectionDialog = new AlertDialog.Builder(this).setTitle(R.string.connection_choose)
                 .setItems(labels, (dialog, which) -> confirmConnection(choices[which]))
-                .setNegativeButton("取消", null).show();
+                .setNegativeButton(android.R.string.cancel, null).show();
     }
 
     private void confirmConnection(String selected) {
         if (selected.equals(origin)) return;
-        connectionDialog = new AlertDialog.Builder(this).setTitle("切换连接线路？")
-                .setMessage("切换到 " + selected + " 将重新加载页面，请先保存草稿并确认消息发送或上传已结束。不会自动重发消息，服务器任务继续运行。不同地址可能需要单独登录。")
-                .setNegativeButton("取消", null)
-                .setPositiveButton("切换", (dialog, which) -> connectManually(selected)).show();
+        connectionDialog = new AlertDialog.Builder(this).setTitle(R.string.connection_switch_title)
+                .setMessage(getString(R.string.connection_switch_warning, selected))
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(R.string.connection_switch, (dialog, which) -> connectManually(selected)).show();
     }
 
     private void connectManually(String selected) {
         if (destroyed || manualConnectionPending) return;
-        if (ServerAddress.isLan(selected)
-                && (!preferences.getBoolean("lanEnabled", false) || !isWifiConnection())) {
-            Toast.makeText(this, "请连接可信 Wi-Fi 并启用局域网连接", Toast.LENGTH_LONG).show();
+        boolean lan = !selected.equals(ServerAddress.normalize(preferences.getString("origin", ServerAddress.DEFAULT)));
+        if (lan && (!selected.equals(lanOrigin) || !preferences.getBoolean("lanEnabled", false) || !isWifiConnection())) {
+            Toast.makeText(this, R.string.lan_requires_wifi, Toast.LENGTH_LONG).show();
             return;
         }
         int generation = ++connectionGeneration;
         manualConnectionPending = true;
-        title.setText("AgentOpsDeck · 正在检查所选线路…");
+        title.setText(R.string.connection_checking);
         connectionWorker.execute(() -> {
-            boolean reachable = !ServerAddress.isLan(selected) || ServerProbe.reachable(selected);
+            boolean reachable = !lan || ServerProbe.reachable(selected);
             runOnUiThread(() -> {
                 manualConnectionPending = false;
                 if (destroyed || generation != connectionGeneration) return;
                 updateConnectionTitle();
                 if (!foreground) return;
-                if (!reachable || (ServerAddress.isLan(selected) && !isWifiConnection())) {
-                    Toast.makeText(this, "所选局域网线路暂不可达，保留当前连接", Toast.LENGTH_LONG).show();
+                if (!reachable || (lan && !isWifiConnection())) {
+                    Toast.makeText(this, R.string.lan_unreachable, Toast.LENGTH_LONG).show();
                     return;
                 }
                 origin = selected;
@@ -281,18 +288,57 @@ public class MainActivity extends Activity {
     }
 
     private void editLan() {
-        boolean enabled = preferences.getBoolean("lanEnabled", false);
-        new AlertDialog.Builder(this).setTitle("局域网优先连接")
-                .setMessage("仅在可信 Wi-Fi 下尝试电脑地址：\n192.0.2.24:8790\n192.0.2.82:8790\n\n不可达时使用公网 HTTPS 地址。局域网 HTTP 不加密，请确认这两个地址属于你的 AgentOpsDeck 电脑。首次局域网连接需要单独登录，不会复制公网登录凭据或缓存。\n\n启动和手动重连自动选择；使用中不弹窗打断，不自动切换。顶部显示可切换时，点击顶部连接信息手动选择；不会重发操作。电脑 IP 变化后需更新地址白名单，建议在路由器固定 IP。\n\n当前：" + (enabled ? "已启用" : "未启用"))
-                .setNegativeButton("仅用公网", (dialog, which) -> {
-                    preferences.edit().putBoolean("lanEnabled", false).apply();
-                    selectConnection(webView == null, true);
-                })
-                .setNeutralButton("取消", null)
-                .setPositiveButton("信任并启用", (dialog, which) -> {
-                    preferences.edit().putBoolean("lanEnabled", true).apply();
-                    selectConnection(webView == null, true);
-                }).show();
+        LinearLayout form = new LinearLayout(this);
+        form.setOrientation(LinearLayout.VERTICAL);
+        form.setPadding(dp(20), 0, dp(20), 0);
+        EditText publicInput = new EditText(this);
+        publicInput.setSingleLine(true);
+        publicInput.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_URI);
+        publicInput.setHint(R.string.public_origin_hint);
+        publicInput.setText(preferences.getString("origin", ServerAddress.DEFAULT));
+        EditText lanInput = new EditText(this);
+        lanInput.setSingleLine(true);
+        lanInput.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_URI);
+        lanInput.setHint(R.string.lan_origin_hint);
+        lanInput.setText(preferences.getString("lanOrigin", ""));
+        android.widget.CheckBox trust = new android.widget.CheckBox(this);
+        trust.setText(R.string.lan_trust);
+        trust.setChecked(preferences.getBoolean("lanEnabled", false) && lanOrigin != null);
+        form.addView(publicInput);
+        form.addView(lanInput);
+        form.addView(trust);
+        android.widget.ScrollView scroll = new android.widget.ScrollView(this);
+        scroll.addView(form);
+        AlertDialog dialog = new AlertDialog.Builder(this).setTitle(R.string.connection_settings)
+                .setMessage(R.string.lan_settings_warning).setView(scroll)
+                .setNegativeButton(android.R.string.cancel, null).setPositiveButton(R.string.connection_save, null).create();
+        dialog.setOnShowListener(ignored -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view -> {
+            String nextPublic;
+            String nextLan = lanInput.getText().toString().trim();
+            try { nextPublic = ServerAddress.normalize(publicInput.getText().toString()); }
+            catch (IllegalArgumentException error) {
+                publicInput.setError(getString(R.string.public_origin_invalid)); publicInput.requestFocus(); return;
+            }
+            try {
+                if (!nextLan.isEmpty() || trust.isChecked()) nextLan = ServerAddress.normalizeLan(nextLan);
+            } catch (IllegalArgumentException error) {
+                lanInput.setError(getString(R.string.lan_origin_invalid)); lanInput.requestFocus(); return;
+            }
+            lanOrigin = nextLan.isEmpty() ? null : nextLan;
+            preferences.edit().putString("origin", nextPublic).putString("lanOrigin", nextLan)
+                    .putBoolean("lanEnabled", trust.isChecked()).remove("lastLan").apply();
+            dialog.dismiss();
+            selectConnection(webView == null, true);
+        }));
+        dialog.show();
+    }
+
+    private String[] trustedLanOrigins() {
+        boolean activeLan = ServerAddress.isLan(origin);
+        String configured = preferences.getBoolean("lanEnabled", false) ? lanOrigin : null;
+        // A confirmed active connection remains usable until the user agrees to reload.
+        if (configured == null) return activeLan ? new String[]{origin} : new String[0];
+        return activeLan && !origin.equals(configured) ? new String[]{configured, origin} : new String[]{configured};
     }
 
     private void createWebView() {
@@ -300,7 +346,6 @@ public class MainActivity extends Activity {
         ++connectionGeneration;
         activeCacheScope = null;
         suggestedOrigin = null;
-        if (ServerAddress.isLan(origin)) preferences.edit().putString("lastLan", origin).apply();
         nativeVideo.close();
         nativeSpeech.cancel();
         if (fileCallback != null) {
@@ -470,7 +515,8 @@ public class MainActivity extends Activity {
 
             @Override public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
                 Uri url = request.getUrl();
-                if ("http".equalsIgnoreCase(url.getScheme()) && !sameOrigin(url)) {
+                if (view != currentWebView || view != webView || generation != webGeneration
+                        || ("http".equalsIgnoreCase(url.getScheme()) && !sameOrigin(url))) {
                     return new WebResourceResponse("text/plain", "UTF-8", 403, "Forbidden", Collections.emptyMap(),
                             new ByteArrayInputStream(new byte[0]));
                 }
@@ -479,7 +525,7 @@ public class MainActivity extends Activity {
                 if (path == null || path.contains("..") || path.indexOf('\\') >= 0) return null;
                 if (path.equals("/android-connection.mjs")) {
                     String config = "export const publicOrigin=" + JSONObject.quote(preferences.getString("origin", ServerAddress.DEFAULT))
-                            + ";export const lanOrigins=" + new org.json.JSONArray(java.util.Arrays.asList(ServerAddress.LAN_ORIGINS)) + ";";
+                            + ";export const lanOrigins=" + new org.json.JSONArray(java.util.Arrays.asList(trustedLanOrigins())) + ";";
                     return new WebResourceResponse("text/javascript", "UTF-8", 200, "OK",
                             Collections.singletonMap("Cache-Control", "no-store"), new ByteArrayInputStream(config.getBytes(StandardCharsets.UTF_8)));
                 }
@@ -494,7 +540,7 @@ public class MainActivity extends Activity {
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 if (view != currentWebView || view != webView || generation != webGeneration) return true;
                 Uri url = Uri.parse(resourceUrl(request.getUrl().toString(), origin));
-                if (!request.isForMainFrame()) return false;
+                if (!request.isForMainFrame()) return "http".equalsIgnoreCase(url.getScheme()) && !sameOrigin(url);
                 if (sameOrigin(url)) {
                     if (url.getPath() != null && url.getPath().startsWith("/api/")) {
                         download(url.toString(), null, null);
@@ -548,7 +594,7 @@ public class MainActivity extends Activity {
             headers.put("Cache-Control", name.startsWith("assets/") ? "private, max-age=31536000, immutable" : "no-cache");
             headers.put("X-Content-Type-Options", "nosniff");
             if (mime.equals("text/html")) {
-                headers.put("Content-Security-Policy", "object-src 'none'; base-uri 'self'; form-action 'self'");
+                headers.put("Content-Security-Policy", ServerAddress.contentSecurityPolicy(origin));
             }
             return new WebResourceResponse(mime, "UTF-8", 200, "OK", headers, stream);
         } catch (Exception error) {
@@ -563,7 +609,7 @@ public class MainActivity extends Activity {
     }
 
     private String resourceUrl(String url, String currentOrigin) {
-        return ResourceAddress.route(url, currentOrigin, preferences.getString("origin", ServerAddress.DEFAULT));
+        return ResourceAddress.route(url, currentOrigin, preferences.getString("origin", ServerAddress.DEFAULT), trustedLanOrigins());
     }
 
     private static String mimeType(String path) {
@@ -577,9 +623,9 @@ public class MainActivity extends Activity {
 
     private void showMenu(View anchor) {
         PopupMenu menu = new PopupMenu(this, anchor);
-        menu.getMenu().add("Server address");
-        menu.getMenu().add("局域网优先 / 连接设置");
-        menu.getMenu().add("手动选择连接线路");
+        menu.getMenu().add(0, 1002, 0, R.string.public_origin_settings);
+        menu.getMenu().add(0, 1003, 0, R.string.connection_settings);
+        menu.getMenu().add(0, 1004, 0, R.string.connection_choose);
         menu.getMenu().add("Reconnect / reload");
         menu.getMenu().add("Open in browser");
         menu.getMenu().add("性能与缓存");
@@ -588,10 +634,10 @@ public class MainActivity extends Activity {
         menu.getMenu().add(0, 1001, 0, com.agentopsdeck.R.string.cancel_downloads);
         menu.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == 1001) { cancelDownloads(); return true; }
+            if (item.getItemId() == 1002) { editServer(); return true; }
+            if (item.getItemId() == 1003) { editLan(); return true; }
+            if (item.getItemId() == 1004) { showConnectionChoices(); return true; }
             switch (item.getTitle().toString()) {
-                case "Server address": editServer(); break;
-                case "局域网优先 / 连接设置": editLan(); break;
-                case "手动选择连接线路": showConnectionChoices(); break;
                 case "Reconnect / reload":
                     new AlertDialog.Builder(this).setTitle("重新选择连接并加载？")
                             .setMessage("请先确认消息发送或上传已结束。不会自动重发操作，服务器任务不受影响。")
@@ -617,9 +663,9 @@ public class MainActivity extends Activity {
         input.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_URI);
         input.setText(preferences.getString("origin", ServerAddress.DEFAULT));
         input.setPadding(dp(20), dp(16), dp(20), dp(16));
-        AlertDialog dialog = new AlertDialog.Builder(this).setTitle("HTTPS server address").setView(input)
-                .setMessage("Connect to your existing AgentOpsDeck backend. No backend changes are required.")
-                .setNegativeButton("Cancel", null).setPositiveButton("Connect", null).create();
+        AlertDialog dialog = new AlertDialog.Builder(this).setTitle(R.string.public_origin_settings).setView(input)
+                .setMessage(R.string.public_origin_warning)
+                .setNegativeButton(android.R.string.cancel, null).setPositiveButton(R.string.connection_save, null).create();
         dialog.setOnShowListener(ignored -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view -> {
             try {
                 String next = ServerAddress.normalize(input.getText().toString());
@@ -628,7 +674,7 @@ public class MainActivity extends Activity {
                     selectConnection(false, true);
                 }
                 dialog.dismiss();
-            } catch (IllegalArgumentException error) { input.setError(error.getMessage()); }
+            } catch (IllegalArgumentException error) { input.setError(getString(R.string.public_origin_invalid)); }
         }));
         dialog.show();
     }

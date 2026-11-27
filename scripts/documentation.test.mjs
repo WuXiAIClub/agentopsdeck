@@ -57,6 +57,22 @@ function executableExamples(content) {
     .map(match => match[1].trim());
 }
 
+test('Android manual Hub connection guide is bilingual and indexed without embedding an operator address', () => {
+  const guide = text('apps/android/README.md');
+  const [english, chinese] = guide.split('## 中文');
+  assert.ok(chinese);
+  for (const section of [english, chinese]) {
+    for (const contract of ['HTTPS', 'HTTP', 'IPv4', 'Wi-Fi', 'CSP', 'lanProbe', 'lanOrigin']) {
+      assert.ok(section.includes(contract), contract);
+    }
+  }
+  for (const language of ['', '.zh-CN']) assert.ok(text(`docs/README${language}.md`).includes('../apps/android/README.md#'));
+  for (const match of guide.matchAll(/\[[^\]]*\]\(([^)]+)\)/g)) {
+    assert.ok(existsSync(resolve(repository, 'apps/android', match[1].split('#')[0])), match[1]);
+  }
+  assert.doesNotMatch(guide, /https?:\/\/(?:10\.|172\.(?:1[6-9]|2\d|3[01])\.|192\.168\.)/);
+});
+
 test('Antigravity Connector docs stay paired, navigable and document isolation and capability boundaries', () => {
   const english = text('docs/antigravity-cli.md'), chinese = text('docs/antigravity-cli.zh-CN.md');
   assert.deepEqual(english.match(/^```bash\n([\s\S]*?)^```/gm), chinese.match(/^```bash\n([\s\S]*?)^```/gm));

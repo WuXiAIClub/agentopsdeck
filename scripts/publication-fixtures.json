@@ -2,7 +2,7 @@
   {
     "path": "apps/android/app/src/test/java/com/agentopsdeck/ServerAddressTest.java",
     "category": "credential-url",
-    "sha256": "c6ec0ad656ab6eecde5f88444dc926e2a90520e021f745dcb6be8089868f3e06",
+    "sha256": "2459f7cb366f50b3aaf2581ec86fd1e5019b0eb1f1b667df16abcb294a0584ea",
     "reason": "Synthetic URL-userinfo rejection fixture; exact reviewed bytes only."
   },
   {

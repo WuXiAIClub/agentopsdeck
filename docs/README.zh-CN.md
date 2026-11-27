@@ -16,6 +16,7 @@ AgentOpsDeck（AOD）1.0.0 是从源码运行的、自托管智能体运维工�
 | 查看尚未完成的 Antigravity CLI 连接器 | [Antigravity CLI 开发](antigravity-cli.zh-CN.md) |
 | 打开独立的 Antigravity 账号额度卡片 | [Antigravity 账号额度卡片](antigravity-cli.zh-CN.md#账号额度卡片) |
 | 核对原生隔离与安装器门槛 | [原生安全](native-security.zh-CN.md) |
+| 配置 Android 局域网优先及 HTTPS 回退 | [Android Hub 连接](../apps/android/README.md#配置-hub) |
 | 规划远程访问、备份及升级 | [运维指南](operations.zh-CN.md) |
 | 排查安装或会话问题 | [故障排查](troubleshooting.zh-CN.md) |
 | 修改源码及运行测试 | [开发指南](development.zh-CN.md) |
