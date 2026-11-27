@@ -1,6 +1,7 @@
 import { CONNECTOR_SCOPES, type ConnectorScope, type ConnectorPrincipal, type ConnectorTokenStore } from '../auth/connector-token.js';
 import { AuthPersistenceError } from '../auth/private-store.js';
 import type { ConnectorUser, ConnectorUserStore } from './connector-user-store.js';
+import { CommandCapacity, CommandConflict } from '../commands/receipts.js';
 
 type Empty = Record<string, never>;
 export type AuthorizedResult<T> = { authorized: false } | { authorized: true; value: T };
@@ -17,6 +18,10 @@ export type ConnectorAuthorityCommands = {
   authorizedUserCreate: { input: { authorization: string; label: string }; output: AuthorizedResult<ConnectorUser> };
   authorizedUserUpdate: { input: { authorization: string; id: string; label: string }; output: AuthorizedResult<ConnectorUser | null> };
   authorizedUsersPermission: { input: { authorization: string; scope: 'users:read' | 'users:write' }; output: boolean };
+  ahpClaim: { input: { authorization: string; tokenId: string; resource: string; key: string; digest: string };
+    output: { state: 'fresh' | 'unknown' | 'unavailable' | 'denied' | 'conflict' | 'busy' } | { state: 'accepted'; id: string } };
+  ahpSettle: { input: { resource: string; key: string; id: string | null }; output: boolean };
+  ahpAdmission: { input: { authorization: string; tokenId: string }; output: boolean };
 };
 export type ConnectorAuthorityKind = keyof ConnectorAuthorityCommands;
 // Append-only, continuing the original Connector command numbers.
@@ -25,6 +30,8 @@ export const connectorAuthoritySteps: Readonly<Record<ConnectorAuthorityKind, nu
   tokenCreate: 23, tokenRevoke: 24, authorizedUsersList: 25, authorizedUserGet: 26,
   authorizedUserCreate: 27, authorizedUserUpdate: 28,
   authorizedUsersPermission: 29,
+  ahpClaim: 723, ahpSettle: 724,
+  ahpAdmission: 725,
 });
 export const isConnectorAuthorityKind = (kind: string): kind is ConnectorAuthorityKind => Object.hasOwn(connectorAuthoritySteps, kind);
 const str = (v: unknown): v is string => typeof v === 'string' && !v.includes('\0') && Buffer.byteLength(v) <= 4096;
@@ -53,8 +60,17 @@ const metadata = (v: unknown) => record(v, ['id', 'label', 'scopes', 'createdAt'
   && (!Object.hasOwn(v, 'identityAmbiguous') || v.identityAmbiguous === true)
   && (!Object.hasOwn(v, 'delegationHubId') || hubId(v.delegationHubId)
     && (v.scopes as string[]).includes('messages:send') && (v.scopes as string[]).includes('execution:delegate'));
+const uuid = (v: unknown): v is string => typeof v === 'string' && /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(v);
+const ahpResource = (v: unknown) => typeof v === 'string' && v.startsWith('ahp-session:/') && uuid(v.slice(13));
+const commandKey = (v: unknown) => typeof v === 'string' && /^[A-Za-z0-9._:-]{1,200}$/.test(v);
 export function validConnectorAuthorityInput(kind: ConnectorAuthorityKind, v: unknown): boolean {
   switch (kind) {
+    case 'ahpAdmission': return record(v, ['authorization', 'tokenId']) && authorization(v.authorization) && text(v.tokenId);
+    case 'ahpClaim': return record(v, ['authorization', 'tokenId', 'resource', 'key', 'digest'])
+      && authorization(v.authorization) && text(v.tokenId) && ahpResource(v.resource) && commandKey(v.key)
+      && typeof v.digest === 'string' && /^[0-9a-f]{64}$/.test(v.digest);
+    case 'ahpSettle': return record(v, ['resource', 'key', 'id'])
+      && ahpResource(v.resource) && commandKey(v.key) && (v.id === null || uuid(v.id));
     case 'tokensList': return record(v, []);
     case 'tokenHasScope': return record(v, ['tokenId', 'scope']) && storedId(v.tokenId) && CONNECTOR_SCOPES.includes(v.scope as ConnectorScope);
     case 'tokenDelegationHub': case 'tokenRevoke': return record(v, ['tokenId']) && storedId(v.tokenId);
@@ -72,6 +88,9 @@ export function validConnectorAuthorityInput(kind: ConnectorAuthorityKind, v: un
 }
 export function validConnectorAuthorityOutput(kind: ConnectorAuthorityKind, v: unknown): boolean {
   switch (kind) {
+    case 'ahpClaim': return record(v, ['state'], ['id']) && (v.state === 'accepted' ? uuid(v.id)
+      : !Object.hasOwn(v, 'id') && ['fresh', 'unknown', 'unavailable', 'denied', 'conflict', 'busy'].some(state => state === v.state));
+    case 'ahpSettle': case 'ahpAdmission': return typeof v === 'boolean';
     case 'tokenAuthenticate': return v === null || record(v, ['tokenId', 'label', 'scopes']) && storedId(v.tokenId) && storedString(v.label) && storedScopes(v.scopes);
     case 'tokenHasScope': case 'tokenRevoke': case 'authorizedUsersPermission': return typeof v === 'boolean';
     case 'tokenDelegationHub': return v === null || hubId(v);
@@ -88,11 +107,48 @@ export function validConnectorAuthorityOutput(kind: ConnectorAuthorityKind, v: u
 /** Private owner port, not an HTTP token-management endpoint. Token management
  * must retain the operator gate when its callers migrate. All user authorization
  * and the corresponding SQL run without await in this original Worker turn. */
-export function executeConnectorAuthority(kind: ConnectorAuthorityKind, input: unknown,
-  owner: ConnectorUserStore, tokens: ConnectorTokenStore | undefined): unknown {
+export async function executeConnectorAuthority(kind: ConnectorAuthorityKind, input: unknown,
+  owner: Pick<ConnectorUserStore, 'commands' | 'sdkCommandAdmissionOpen' | 'listUsers' | 'getUser' | 'createUser' | 'updateUser'>,
+  tokens: ConnectorTokenStore | undefined): Promise<unknown> {
   if (!tokens || !validConnectorAuthorityInput(kind, input)) throw new AuthPersistenceError();
   const v = input as Record<string, unknown>;
+  const allowed = (authorization: string, tokenId: string) => {
+    const principal = tokens.authenticateAuthorization(authorization);
+    return principal?.tokenId === tokenId && principal.scopes.includes('messages:send')
+      && !principal.scopes.includes('execution:delegate');
+  };
   switch (kind) {
+    case 'ahpAdmission': return allowed(v.authorization as string, v.tokenId as string) && owner.sdkCommandAdmissionOpen;
+    case 'ahpClaim': {
+      const claim = input as ConnectorAuthorityCommands['ahpClaim']['input'];
+      class AdmissionDenied extends Error {}
+      class AdmissionUnavailable extends Error {}
+      const check = () => {
+        if (!allowed(claim.authorization, claim.tokenId)) throw new AdmissionDenied();
+        if (!owner.sdkCommandAdmissionOpen) throw new AdmissionUnavailable();
+      };
+      try {
+        check();
+        const result = await owner.commands.claimAsync(JSON.stringify(['ahp-text', claim.resource]), claim.key,
+          { digest: claim.digest }, false, undefined, undefined, undefined, false, check, check);
+        check();
+        if (result.fresh) return { state: 'fresh' };
+        const id = result.receipt.result?.body.id;
+        if (result.receipt.result?.status === 200 && uuid(id)) return { state: 'accepted', id };
+        return { state: result.receipt.result?.status === 409 ? 'busy' : 'unknown' };
+      } catch (error) {
+        if (error instanceof CommandConflict) return { state: 'conflict' };
+        if (error instanceof AdmissionDenied) return { state: 'denied' };
+        if (error instanceof CommandCapacity || error instanceof AdmissionUnavailable) return { state: 'unavailable' };
+        throw error;
+      }
+    }
+    case 'ahpSettle': {
+      const result = input as ConnectorAuthorityCommands['ahpSettle']['input'];
+      const receipt = owner.commands.settle(JSON.stringify(['ahp-text', result.resource]), result.key,
+        result.id === null ? { status: 409, body: {} } : { status: 200, body: { id: result.id } });
+      return receipt.state === (result.id === null ? 'rejected' : 'accepted');
+    }
     case 'tokenAuthenticate': return tokens.authenticateAuthorization(v.authorization as string) ?? null;
     case 'tokenHasScope': return tokens.hasScope(v.tokenId as string, v.scope as ConnectorScope);
     case 'tokenDelegationHub': return tokens.delegationHubId(v.tokenId as string) ?? null;

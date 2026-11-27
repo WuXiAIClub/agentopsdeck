@@ -24,6 +24,7 @@ admission timeouts proof of execution termination.
 
 | Source module | Responsibility and boundary |
 | --- | --- |
+| [`apps/server/src/ahp`](../apps/server/src/ahp) | Experimental Windows VS Code Agent Host transport and single-chat text client. Not connected to Hub routes or the session UI. |
 | [`apps/server/src/antigravity`](../apps/server/src/antigravity) | Experimental Linux ACP transport, private HOME ownership and journal/cleanup-gated execution contracts. Not connected to production or the agent picker; see [CLI development](antigravity-cli.md). |
 | [`apps/server/src/antigravity`](../apps/server/src/antigravity) | Linux Antigravity CLI ACP transport, isolated configuration and synthetic protocol tests; production lifecycle, durable identity binding and UI integration are not yet implemented. |
 | [`apps/server/src/auth`](../apps/server/src/auth) | Access keys, sessions/cookies, passkeys, audit/rate limits, trusted request sources and original request scopes; never log authentication material. |

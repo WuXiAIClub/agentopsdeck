@@ -14,6 +14,7 @@ import { AlertTriangle, Check, ChevronDown, ChevronUp, Clock, Loader2, Pencil, P
 import { AGENTOPSDECK_VERSION, AGENTOPSDECK_BUILD, CONNECTOR_PROTOCOL, negotiateConnectorProtocol, type ConnectorCapabilities, type ConnectorUpdateStatus, type GatewayModelSetStatus } from '@agentopsdeck/shared';
 import { api, recoveryEpoch, recoveryScope, type HubPrincipal, type ConnectorUser, type ConnectorUsersByConnection, type HubConnection, type HubConnectionTestResult, type HubUser } from '../api';
 import { HubUserAccess } from './HubUserAccess';
+import { AhpChat } from './AhpChat';
 import { ConnectorMemberManager } from './AccessRoleMatrix';
 import { HubLoginActivity } from './HubLoginActivity';
 import { EnvironmentExecutionSettings } from './ExecutionSetup';
@@ -320,6 +321,7 @@ function ConnectionRow({
           {conn.connectorUrl && <div className="sm:col-span-2"><dt className="font-bold text-slate-500 uppercase tracking-wide text-[0.6rem]">{tr("Connector URL")}</dt><dd className="text-slate-800 truncate">{conn.connectorUrl}</dd></div>}
           {'error' in conn && conn.error && <div className="sm:col-span-2"><dt className="font-bold text-red-500 uppercase tracking-wide text-[0.6rem]">{tr("Last error")}</dt><dd className="text-red-700">{String(conn.error)}</dd></div>}
             <MaintenanceControls conn={conn} recovery={recovery} controlRecovery={controlRecovery} />
+            {conn.status !== 'disabled' && <AhpChat key={identity} connectionId={conn.id} />}
             <AdmissionMaintenanceControls key={JSON.stringify([recovery.scope, conn.id])} connectionId={conn.id} recovery={recovery} />
             {conn.kind === 'remote' && <LifecycleControls key={JSON.stringify([recovery.scope, recovery.epoch, conn.id, conn.updatedAt])} connectionId={conn.id} recovery={lifecycleRecovery} />}
         </dl>

@@ -115,7 +115,7 @@ for (const format of ['json', 'sqlite'] as const) for (const keyed of [true, fal
   });
 }
 async function fixture(t: TestContext, format: 'json' | 'sqlite' = 'sqlite', keyed = true,
-  configure?: (options: StandaloneConnectorLayerOptions, root: string) => void, paired = false, withSystem = false) {
+  configure?: (options: StandaloneConnectorLayerOptions, root: string, config: ReturnType<typeof loadConfig>) => void, paired = false, withSystem = false) {
   const root = mkdtempSync(join(tmpdir(), 'standalone-parent-')), logs: string[] = [];
   const diagnostics = new PerformanceDiagnostics(line => logs.push(line));
   const config = { ...loadConfig({ HOME: root, AOD_SERVER_ROLE: 'connector',
@@ -173,13 +173,31 @@ async function fixture(t: TestContext, format: 'json' | 'sqlite' = 'sqlite', key
       } };
     },
   };
-  configure?.(options, root);
+  configure?.(options, root, config);
   layer = await createAsyncStandaloneConnectorLayer(config, options);
   const current = layer;
   const request = (path: string, init?: RequestInit) => current.app.request(origin + path, init);
   const headers = keyed ? { 'x-agentopsdeck-key': secret } : {};
   return { root, config, files, before, owner, layer, calls, hooks, logs, diagnostics, request, headers };
 }
+
+test('standalone Connector mounts opt-in VS Code chat behind Connector bearer auth', async t => {
+  const path = '/api/connector/v1/ahp';
+  const f = await fixture(t, 'json', true, (_options, root, config) => {
+    config.ahp = { cli: join(root, 'missing-code-tunnel.exe'), instanceId: 'fixture-editor-instance',
+      sessionUri: 'ahp-session:/11111111-1111-4111-8111-111111111111' };
+  });
+  await f.layer.start();
+  assert.equal((await f.request(path)).status, 403);
+  const headers = { authorization: `Bearer ${bearer}` };
+  const capabilities = await f.request('/api/connector/v1/capabilities', { headers });
+  assert.equal(capabilities.status, 200);
+  assert.equal((await capabilities.json()).features.vsCodeChat, true);
+  const unavailable = await f.request(path, { headers });
+  assert.equal(unavailable.status, 503);
+  assert.equal(unavailable.headers.get('cache-control'), 'no-store');
+  assert.equal(unavailable.headers.get('x-agentopsdeck-node-id'), await f.owner.command('nodeIdentity', {}));
+});
 
 for (const format of ['json', 'sqlite'] as const) for (const keyed of [true, false]) {
   test(`standalone paired ${format}/${keyed ? 'Key' : 'no-Key'}: actual parent transfers original Auth peer and commits one physical message`, async t => {

@@ -14,6 +14,10 @@ test('checked-in OpenAPI inventory is deterministic and maps to existing source'
   assert.equal(document.security, undefined);
   assert.ok(document.paths['/api/auth/status'].get);
   assert.ok(document.paths['/api/auth/login'].post);
+  for (const path of ['/api/connector/v1/ahp', '/api/hub/v1/connections/{connectionId}/ahp']) {
+    assert.ok(document.paths[path].get);
+    assert.ok(document.paths[path].post);
+  }
   const shapes = Object.keys(document.paths).map(path => path.replace(/\{\w+\}/g, '{}'));
   assert.equal(new Set(shapes).size, shapes.length);
   const identities = new Set();

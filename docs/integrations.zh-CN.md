@@ -72,6 +72,24 @@ Gemini API。遵循 Vekil 当前兼容要求：Chat 模型的图像及工具能�
 
 ## 其他适配器
 
+### VS Code Agent Host（AHP）
+
+实验性的 Windows 客户端通过已认证的本机命名管道连接到明确指定的 VS Code
+编辑器实例。它可以连接一条已有会话，读取近期文本并发送文本，不另启
+Copilot 进程。它不修改 VS Code 的工具审批策略，也不会自动重发未确认消息。
+
+使用专用 Windows Connector（`AOD_SERVER_ROLE=connector`），仅监听
+`127.0.0.1`，使用独立的 `AOD_DATA_DIR`、空闲端口及新生成的
+`AOD_CONNECTOR_BOOTSTRAP_TOKEN`。在私有配置中将 `AOD_AHP_VSCODE_CLI` 设为
+`code-tunnel.exe` 的绝对路径，`AOD_AHP_INSTANCE_ID` 设为明确的编辑器实例，
+`AOD_AHP_SESSION_URI` 设为选定的 `ahp-session:/…` URI。通过本机 VS Code CLI
+查找这些标识；端点发现结果含有密钥，不要复制到 Hub、日志或版本库。
+
+在同一台机器上，以连接所有者身份把仅监听回环地址的 Connector 注册到可信
+Hub；在连接详情中选择**打开 VS Code 会话**。这里操作的是原会话，不会新建
+对话，也不会将它变成共享 Hub 会话。Hub 可代你读取和发送文本，因此不要
+接入不可信或共享的 Hub，也不要把 Connector 或命名管道开放到网络。
+
 Antigravity CLI 正在功能分支中独立开发。ACP 传输测试还不代表已提供可选择的
 生产连接器；参见 [Antigravity CLI 开发](antigravity-cli.zh-CN.md)，了解已实现的
 契约以及尚待完成的生命周期、标识和界面接入。目前不宣称可以启用。

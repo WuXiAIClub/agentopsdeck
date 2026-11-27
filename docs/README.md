@@ -13,6 +13,7 @@ its permissions. No public image, installer or GitHub repository is assumed here
 | Log in and use the workspace | [User guide](user-guide.md) |
 | Configure an independent instance | [Configuration](configuration.md) |
 | Enable agents or separate Hub/Connector | [Integrations](integrations.md) |
+| VS Code Agent Host integration status | [AHP](integrations.md#vs-code-agent-host-ahp) |
 | Review the unfinished Antigravity CLI connector | [Antigravity CLI development](antigravity-cli.md) |
 | Open the standalone Antigravity account quota card | [Antigravity account quota card](antigravity-cli.md#account-quota-card) |
 | Review native isolation and installer gates | [Native security](native-security.md) |
