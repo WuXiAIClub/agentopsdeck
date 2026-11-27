@@ -97,8 +97,14 @@ export function CoBoundSessionsBar({
     return tail.length > 14 ? `${tail.slice(0, 12)}…` : tail;
   };
 
-  return (
-    <div className="workspace-cobound-bar" data-cobound-bar data-bound-count={boundKeys.length}>
+  const isNotebookCaption = pane.kind === 'notebook';
+  const content = (
+    <div
+      className={isNotebookCaption ? 'workspace-cobound-bar workspace-cobound-bar--caption' : 'workspace-cobound-bar'}
+      data-cobound-bar
+      data-cobound-placement={isNotebookCaption ? 'caption' : 'bar'}
+      data-bound-count={boundKeys.length}
+    >
       <div className="workspace-cobound-pills" role="group" aria-label={t('Co-bound sessions')}>
         {boundKeys.map(sKey => {
           const isCurrent = activeSessionKey === sKey;
@@ -156,4 +162,6 @@ export function CoBoundSessionsBar({
       )}
     </div>
   );
+
+  return isNotebookCaption ? <ResourceToolbar>{content}</ResourceToolbar> : content;
 }

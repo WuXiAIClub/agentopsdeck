@@ -1,5 +1,6 @@
 import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
 import { TextDecoder } from 'node:util';
+import { parseAntigravityQuotaWait, type AntigravityQuotaWaitState } from '@agentopsdeck/shared';
 import type { AntigravityConfig } from './config.js';
 import { antigravityEnvironment, verifyAntigravityEnvironment } from './environment.js';
 import { projectAntigravityUpdate, type AntigravityProjectedUpdate } from './message-projection.js';
@@ -43,7 +44,10 @@ function synchronousAssertion(assert: () => void) {
 }
 
 export class AntigravityAcpError extends Error {
-  constructor(readonly code: number) {
+  constructor(
+    readonly code: number,
+    readonly quotaWait?: AntigravityQuotaWaitState,
+  ) {
     super(code === -32000 ? 'Antigravity authentication required in its dedicated home' : 'Antigravity ACP request failed');
   }
 }
@@ -300,7 +304,10 @@ export class AntigravityAcpClient {
     this.pending.delete(value.id as number);
     if (value.error !== undefined) {
       if (!record(value.error) || !Number.isSafeInteger(value.error.code)) { pending.reject(failure()); throw failure(); }
-      pending.reject(new AntigravityAcpError(value.error.code as number));
+      const quotaWait = typeof value.error.message === 'string'
+        ? parseAntigravityQuotaWait(value.error.message)
+        : undefined;
+      pending.reject(new AntigravityAcpError(value.error.code as number, quotaWait));
     } else pending.resolve(value.result);
   }
 

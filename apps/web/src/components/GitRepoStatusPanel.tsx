@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useId, useMemo, useRef, useState, type FormEvent } from 'react';
 import {
   CheckCircle2,
   CircleDot,
@@ -13,6 +13,7 @@ import {
   Lock,
   Play,
   RefreshCw,
+  Settings,
   ShieldCheck,
   Star,
   XCircle,
@@ -30,7 +31,9 @@ import { ResourceAction, ResourceTitle, ResourceToolbar } from './ResourceToolba
 import { CardKindIcon } from './CardKindIcon';
 import './git-repo-status-card.css';
 
-const AUTO_REFRESH_INTERVAL_MS = 60_000;
+export const GIT_REPO_AUTH_REFRESH_INTERVAL_MS = 5 * 60_000;
+export const GIT_REPO_PUBLIC_REFRESH_INTERVAL_MS = 10 * 60_000;
+export const GIT_REPO_RATE_LIMIT_BACKOFF_MS = 15 * 60_000;
 
 type ViewTab = 'all' | 'prs' | 'actions';
 
@@ -59,9 +62,12 @@ export default function GitRepoStatusPanel({ scope, cardId = 'default' }: { scop
   const [activeRepo, setActiveRepo] = useState('');
   const [inputError, setInputError] = useState(false);
   const [tab, setTab] = useState<ViewTab>('all');
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [generation, setGeneration] = useState(0);
   const [forceRefresh, setForceRefresh] = useState(false);
   const [result, setResult] = useState<FetchState>();
+  const lastFetchedAtRef = useRef(0);
+  const rateLimitedUntilRef = useRef(0);
 
   useEffect(() => {
     if (!scope || scope !== recoveryScope()) return;
@@ -95,26 +101,31 @@ export default function GitRepoStatusPanel({ scope, cardId = 'default' }: { scop
     return () => controller.abort();
   }, [scope, cardId]);
 
+  const currentAccount = useMemo(
+    () => accounts.find(item => item.id === accountId) ?? accounts[0],
+    [accounts, accountId],
+  );
+  const autoRefreshIntervalMs = currentAccount?.authenticated
+    ? GIT_REPO_AUTH_REFRESH_INTERVAL_MS
+    : GIT_REPO_PUBLIC_REFRESH_INTERVAL_MS;
+
   useEffect(() => {
     if (!scope || scope !== recoveryScope() || !activeRepo) return;
-    const interval = window.setInterval(() => {
-      if (document.visibilityState === 'visible') {
-        setForceRefresh(false);
-        setGeneration(value => value + 1);
-      }
-    }, AUTO_REFRESH_INTERVAL_MS);
-    const onVisibility = () => {
-      if (document.visibilityState === 'visible') {
-        setForceRefresh(false);
-        setGeneration(value => value + 1);
-      }
+    const maybeAutoRefresh = () => {
+      if (document.visibilityState !== 'visible') return;
+      const now = Date.now();
+      if (now < rateLimitedUntilRef.current) return;
+      if (lastFetchedAtRef.current > 0 && now - lastFetchedAtRef.current < autoRefreshIntervalMs) return;
+      setForceRefresh(false);
+      setGeneration(value => value + 1);
     };
-    document.addEventListener('visibilitychange', onVisibility);
+    const interval = window.setInterval(maybeAutoRefresh, autoRefreshIntervalMs);
+    document.addEventListener('visibilitychange', maybeAutoRefresh);
     return () => {
       window.clearInterval(interval);
-      document.removeEventListener('visibilitychange', onVisibility);
+      document.removeEventListener('visibilitychange', maybeAutoRefresh);
     };
-  }, [scope, activeRepo]);
+  }, [scope, activeRepo, autoRefreshIntervalMs]);
 
   useEffect(() => {
     if (!scope || scope !== recoveryScope() || !accountsReady || !activeRepo) return;
@@ -123,21 +134,23 @@ export default function GitRepoStatusPanel({ scope, cardId = 'default' }: { scop
     void api.gitRepoStatus(activeRepo, requestAccount, controller.signal, forceRefresh).then(
       response => {
         if (controller.signal.aborted || scope !== recoveryScope()) return;
+        lastFetchedAtRef.current = Date.now();
+        rateLimitedUntilRef.current = 0;
         setResult({ generation, repo: activeRepo, accountId: requestAccount, status: response.status });
       },
       error => {
         if (controller.signal.aborted || scope !== recoveryScope()) return;
         const errorCode = error instanceof ApiResponseError ? error.message : 'git_repo_status_unavailable';
+        lastFetchedAtRef.current = Date.now();
+        if (errorCode === 'git_rate_limited') {
+          rateLimitedUntilRef.current = Date.now() + GIT_REPO_RATE_LIMIT_BACKOFF_MS;
+        }
         setResult({ generation, repo: activeRepo, accountId: requestAccount, errorCode });
       },
     );
     return () => controller.abort();
   }, [scope, accountsReady, activeRepo, accountId, generation, forceRefresh, accounts]);
 
-  const currentAccount = useMemo(
-    () => accounts.find(item => item.id === accountId) ?? accounts[0],
-    [accounts, accountId],
-  );
   const presetRepos = useMemo(() => {
     const list = [...(currentAccount?.defaultRepo ? [currentAccount.defaultRepo] : []), ...(currentAccount?.repos ?? [])];
     return [...new Set(list)];
@@ -164,6 +177,8 @@ export default function GitRepoStatusPanel({ scope, cardId = 'default' }: { scop
     setDraftRepo(normalized);
     setAccountId(nextAccount);
     setActiveRepo(normalized);
+    setSettingsOpen(false);
+    rateLimitedUntilRef.current = 0;
     setForceRefresh(false);
     setGeneration(value => value + 1);
     saveGitRepoSelection(scope, cardId, { accountId: nextAccount, repo: normalized });
@@ -212,14 +227,25 @@ export default function GitRepoStatusPanel({ scope, cardId = 'default' }: { scop
   const readyPrCount = status ? Math.max(0, status.pullRequests.openCount - status.pullRequests.draftCount) : 0;
   const cardTitle = status ? `${t('Git repository status')} · ${status.repository.fullName}` : t('Git repository status');
 
+  const showSettings = settingsOpen || !activeRepo || inputError;
+
   return (
     <section className="git-repo-card" aria-label={t('Git repository status')} aria-busy={busy}>
       <ResourceTitle>{cardTitle}</ResourceTitle>
       <ResourceToolbar>
         <ResourceAction
+          label={t('Repository settings')}
+          aria-expanded={showSettings}
+          aria-pressed={settingsOpen}
+          onClick={() => setSettingsOpen(open => !open)}
+        >
+          <Settings size={15} />
+        </ResourceAction>
+        <ResourceAction
           label={t('Refresh')}
           disabled={busy || !activeRepo}
           onClick={() => {
+            rateLimitedUntilRef.current = 0;
             setForceRefresh(true);
             setGeneration(value => value + 1);
           }}
@@ -275,59 +301,63 @@ export default function GitRepoStatusPanel({ scope, cardId = 'default' }: { scop
           )}
         </div>
 
-        <form className="git-repo-picker" onSubmit={handleSubmit} aria-label={t('Select Git repository')}>
-          {accounts.length > 0 && (
-            <select
-              name="git-repo-account"
-              aria-label={t('Git account')}
-              value={accountId}
-              onChange={event => handleAccountChange(event.target.value)}
-            >
-              {accounts.map(account => (
-                <option key={account.id} value={account.id}>
-                  {account.label}
-                </option>
-              ))}
-            </select>
-          )}
-          <input
-            type="text"
-            name="git-repo-slug"
-            list={presetRepos.length ? datalistId : undefined}
-            aria-label={t('Repository (owner/repo)')}
-            placeholder={t('Repository (owner/repo)')}
-            value={draftRepo}
-            onChange={event => {
-              setDraftRepo(event.target.value);
-              if (inputError) setInputError(false);
-            }}
-            spellCheck={false}
-            autoComplete="off"
-          />
-          {presetRepos.length > 0 && (
-            <datalist id={datalistId}>
-              {presetRepos.map(slug => <option key={slug} value={slug} />)}
-            </datalist>
-          )}
-          <button type="submit" className="git-repo-picker-submit" disabled={busy || !draftRepo.trim()}>
-            <Play size={12} aria-hidden="true" />
-            <span>{t('Load')}</span>
-          </button>
-        </form>
-
-        {presetRepos.length > 0 && (
-          <div className="git-repo-presets" role="group" aria-label={t('Configured repositories')}>
-            {presetRepos.map(slug => (
-              <button
-                key={slug}
-                type="button"
-                aria-pressed={activeRepo.toLowerCase() === slug.toLowerCase()}
-                onClick={() => applyRepo(slug)}
-              >
-                {slug}
+        {showSettings && (
+          <>
+            <form className="git-repo-picker" onSubmit={handleSubmit} aria-label={t('Select Git repository')}>
+              {accounts.length > 0 && (
+                <select
+                  name="git-repo-account"
+                  aria-label={t('Git account')}
+                  value={accountId}
+                  onChange={event => handleAccountChange(event.target.value)}
+                >
+                  {accounts.map(account => (
+                    <option key={account.id} value={account.id}>
+                      {account.label}
+                    </option>
+                  ))}
+                </select>
+              )}
+              <input
+                type="text"
+                name="git-repo-slug"
+                list={presetRepos.length ? datalistId : undefined}
+                aria-label={t('Repository (owner/repo)')}
+                placeholder={t('Repository (owner/repo)')}
+                value={draftRepo}
+                onChange={event => {
+                  setDraftRepo(event.target.value);
+                  if (inputError) setInputError(false);
+                }}
+                spellCheck={false}
+                autoComplete="off"
+              />
+              {presetRepos.length > 0 && (
+                <datalist id={datalistId}>
+                  {presetRepos.map(slug => <option key={slug} value={slug} />)}
+                </datalist>
+              )}
+              <button type="submit" className="git-repo-picker-submit" disabled={busy || !draftRepo.trim()}>
+                <Play size={12} aria-hidden="true" />
+                <span>{t('Load')}</span>
               </button>
-            ))}
-          </div>
+            </form>
+
+            {presetRepos.length > 0 && (
+              <div className="git-repo-presets" role="group" aria-label={t('Configured repositories')}>
+                {presetRepos.map(slug => (
+                  <button
+                    key={slug}
+                    type="button"
+                    aria-pressed={activeRepo.toLowerCase() === slug.toLowerCase()}
+                    onClick={() => applyRepo(slug)}
+                  >
+                    {slug}
+                  </button>
+                ))}
+              </div>
+            )}
+          </>
         )}
 
         {inputError && <p className="git-repo-alert" role="alert">{t('Enter a valid repository in owner/repo format.')}</p>}

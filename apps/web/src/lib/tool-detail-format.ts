@@ -38,6 +38,11 @@ export type ToolFileChangeItem = {
   rawKind?: string | undefined;
 };
 
+export type ToolDiffLine = {
+  kind: 'header' | 'add' | 'remove' | 'context';
+  text: string;
+};
+
 export type ToolOutputBlock =
   | {
       kind: 'terminal';
@@ -53,6 +58,10 @@ export type ToolOutputBlock =
   | {
       kind: 'fileChanges';
       changes: ToolFileChangeItem[];
+    }
+  | {
+      kind: 'diff';
+      lines: ToolDiffLine[];
     }
   | {
       kind: 'params';
@@ -400,6 +409,10 @@ function parseOutputBlock(raw: string): {
 
   const { parsed, value } = unwrapJsonPayload(raw);
   if (!parsed) {
+    const diffLines = tryParseUnifiedDiff(raw);
+    if (diffLines) {
+      return { block: { kind: 'diff', lines: diffLines } };
+    }
     return { block: { kind: 'text', text: raw } };
   }
 
@@ -537,6 +550,28 @@ function parseOutputBlock(raw: string): {
   }
 
   return { block: { kind: 'json', code: JSON.stringify(value, null, 2) } };
+}
+
+function tryParseUnifiedDiff(text: string): ToolDiffLine[] | null {
+  const normalized = text.replace(/\r\n/g, '\n').trim();
+  if (!/^---\s+\S+\n\+\+\+\s+\S+/m.test(normalized)) return null;
+  const rawLines = normalized.split('\n');
+  let changeLines = 0;
+  const lines: ToolDiffLine[] = rawLines.map(line => {
+    if (line.startsWith('--- ') || line.startsWith('+++ ') || line.startsWith('@@ ')) {
+      return { kind: 'header', text: line };
+    }
+    if (line.startsWith('+')) {
+      changeLines += 1;
+      return { kind: 'add', text: line };
+    }
+    if (line.startsWith('-')) {
+      changeLines += 1;
+      return { kind: 'remove', text: line };
+    }
+    return { kind: 'context', text: line };
+  });
+  return changeLines > 0 ? lines : null;
 }
 
 function tryParseCodexShellTranscript(text: string): {

@@ -1,9 +1,11 @@
 import type { GitRepoPullRequestSummary, GitRepoStatus, GitRepoWorkflowRun } from '@agentopsdeck/shared';
 import { normalizeGitRepoSlug, type GitStatusAccountConfig } from './config.js';
 
-export const GIT_STATUS_CACHE_TTL_MS = 30_000;
+export const GIT_STATUS_CACHE_TTL_MS = 180_000;
 const REFRESH_COOLDOWN_MS = 5_000;
-const FAILURE_BACKOFF_MS = 5_000;
+const FAILURE_BACKOFF_MS = 15_000;
+const RATE_LIMIT_DEFAULT_BACKOFF_MS = 60_000;
+const RATE_LIMIT_MAX_BACKOFF_MS = 15 * 60_000;
 const MAX_CACHE_ENTRIES = 64;
 const MAX_RESPONSE_BYTES = 512 * 1024;
 const UPSTREAM_TIMEOUT_MS = 12_000;
@@ -238,7 +240,7 @@ export function createGitRepoStatusReader(
   const wallClock = options.wallClock ?? (() => Date.now());
   const inflight = new Map<string, Promise<GitRepoStatus>>();
   const cache = new Map<string, { value: GitRepoStatus; cachedAt: number; expiresAt: number }>();
-  const backoff = new Map<string, number>();
+  const backoff = new Map<string, { until: number; code: GitStatusErrorCode; status: 429 | 503; retryAfterSeconds?: number }>();
 
   function rememberCache(key: string, value: GitRepoStatus) {
     const current = now();
@@ -297,10 +299,11 @@ export function createGitRepoStatusReader(
     const pending = inflight.get(cacheKey);
     if (pending) return pending;
 
-    const retryUntil = backoff.get(cacheKey) ?? 0;
-    if (!refreshAllowed && current < retryUntil) {
+    const retryBlock = backoff.get(cacheKey);
+    if (!refreshAllowed && retryBlock && current < retryBlock.until) {
       if (existing) return existing.value;
-      throw new GitRepoStatusError('git_repo_status_unavailable', 503);
+      const remainingSec = Math.max(1, Math.ceil((retryBlock.until - current) / 1000));
+      throw new GitRepoStatusError(retryBlock.code, retryBlock.status, retryBlock.status === 429 ? remainingSec : undefined);
     }
 
     const [owner, name] = slug.split('/') as [string, string];
@@ -403,8 +406,20 @@ export function createGitRepoStatusReader(
         backoff.delete(cacheKey);
         return status;
       } catch (error) {
-        if (error instanceof GitRepoStatusError && error.status === 503) {
-          backoff.set(cacheKey, now() + FAILURE_BACKOFF_MS);
+        if (error instanceof GitRepoStatusError && error.status === 429) {
+          const waitMs = Math.min(
+            RATE_LIMIT_MAX_BACKOFF_MS,
+            Math.max(RATE_LIMIT_DEFAULT_BACKOFF_MS, (error.retryAfterSeconds ?? 60) * 1000),
+          );
+          backoff.set(cacheKey, {
+            until: now() + waitMs,
+            code: 'git_rate_limited',
+            status: 429,
+            ...(error.retryAfterSeconds !== undefined ? { retryAfterSeconds: error.retryAfterSeconds } : {}),
+          });
+          if (existing && !params.refresh) return existing.value;
+        } else if (error instanceof GitRepoStatusError && error.status === 503) {
+          backoff.set(cacheKey, { until: now() + FAILURE_BACKOFF_MS, code: 'git_repo_status_unavailable', status: 503 });
           if (existing) return existing.value;
         }
         throw error;

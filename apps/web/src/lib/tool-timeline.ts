@@ -26,18 +26,28 @@ export function groupedToolElapsedMs(call?: TimestampedMessage, result?: Timesta
   return current && next ? Math.max(0, next.createdAt - current.createdAt) : undefined;
 }
 
+export function splitToolNameAndTarget(rawName: string): { name: string; target?: string } {
+  const trimmed = rawName.trim();
+  const match = /^(read_file|edit_file|write_file|delete_file|move_file|search_files|commandExecution|git):(.+)$/i.exec(trimmed);
+  if (match && match[1] && match[2]) {
+    return { name: match[1], target: match[2] };
+  }
+  return { name: trimmed };
+}
+
 export function toolVariantFromLabel(label: string): ToolOutputVariant | undefined {
   const names = label
     .replace(/^Tool:\s*/i, '')
     .split(/\s+\+\s+/)
-    .map((name) => name.trim().toLowerCase().replace(/^functions\./, '').replace(/^.*__/, ''));
-  if (names.some((name) => ['commandexecution', 'exec', 'exec_command', 'terminal', 'bash', 'shell'].includes(name))) return 'exec';
+    .map((name) => splitToolNameAndTarget(name).name.trim().toLowerCase().replace(/^functions\./, '').replace(/^.*__/, ''));
+  if (names.some((name) => ['git'].includes(name))) return 'git';
+  if (names.some((name) => ['commandexecution', 'exec', 'exec_command', 'run_command', 'execute', 'terminal', 'bash', 'shell'].includes(name))) return 'exec';
   if (names.some((name) => ['process', 'wait', 'write_stdin'].includes(name))) return 'process';
-  if (names.some((name) => ['read', 'write', 'edit', 'apply_patch', 'filechange', 'read_file', 'write_file', 'patch'].includes(name))) return 'file';
+  if (names.some((name) => ['read', 'write', 'edit', 'delete', 'move', 'search', 'apply_patch', 'filechange', 'read_file', 'write_file', 'edit_file', 'delete_file', 'move_file', 'search_files', 'view_file', 'grep', 'patch'].includes(name))) return 'file';
   if (names.some((name) => ['image', 'image_generate', 'imagegeneration', 'imageview', 'music_generate', 'video_generate', 'view_image'].includes(name))) return 'media';
-  if (names.some((name) => ['web_fetch', 'web_search', 'websearch'].includes(name))) return 'http';
-  if (names.some((name) => ['sessions_spawn', 'subagents', 'spawn_agent', 'wait_agent', 'close_agent', 'resume_agent', 'collabagenttoolcall'].includes(name))) return 'subagent';
+  if (names.some((name) => ['fetch', 'web_fetch', 'web_search', 'websearch'].includes(name))) return 'http';
+  if (names.some((name) => ['sessions_spawn', 'subagents', 'spawn_agent', 'wait_agent', 'close_agent', 'resume_agent', 'collabagenttoolcall', 'invoke_subagent', 'define_subagent', 'manage_subagents'].includes(name))) return 'subagent';
   if (names.some((name) => ['sessions_send', 'send_message', 'send_input', 'followup_task'].includes(name))) return 'agent-call';
-  if (names.some((name) => name.startsWith('sessions_') || ['cron', 'create_goal', 'get_goal', 'request_user_input', 'session_status', 'update_goal', 'update_plan', 'agentopsdeck_board_read', 'agentopsdeck_board_update'].includes(name))) return 'server';
+  if (names.some((name) => name.startsWith('sessions_') || ['cron', 'create_goal', 'get_goal', 'request_user_input', 'session_status', 'update_goal', 'update_plan', 'switch_mode', 'think', 'agentopsdeck_board_read', 'agentopsdeck_board_update'].includes(name))) return 'server';
   return undefined;
 }

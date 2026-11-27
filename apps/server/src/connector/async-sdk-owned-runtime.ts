@@ -1,4 +1,4 @@
-import type { AgentReadiness } from '@agentopsdeck/shared';
+import type { AgentReadiness, AntigravityQuotaWaitState } from '@agentopsdeck/shared';
 import type { AsyncConnectorOwner } from './async-connector-owner.js';
 import type { AsyncSdkExecutionDriver } from './async-sdk-execution-driver.js';
 import type { SdkOwnedTurn } from './sdk-execution-driver.js';
@@ -29,6 +29,7 @@ export type AsyncSdkOwnedOptions<R extends SdkAgentId, C extends Config, D exten
   owner: Owner; runtime: R; config: C; diagnostics?: PerformanceDiagnostics;
   projection?: Pick<DeckStore, 'upsertSession' | 'replaceMessages' | 'removeSession'>;
   changed?: (key: string) => void;
+  getQuotaWait?: (key: string) => AntigravityQuotaWaitState | undefined;
   hasNativeBinding?: (config: C, nativeSessionId: string) => boolean;
   check: (config: C) => SdkPreflight;
   deleteNative: (config: C, request: PrivateWorkerDeletion) => SdkPreflight;
@@ -201,12 +202,16 @@ export class AsyncSdkOwnedRuntime<R extends SdkAgentId, C extends Config, D exte
       if (this.closed) return;
       if (entry.generation !== generation) continue;
       this.assertOwnership();
-      const { snapshot, page } = value, target = this.options.projection;
+      const { snapshot, page, messageCount } = value, target = this.options.projection;
       if (snapshot.deletion?.phase === 'deleted' || !snapshot.session) {
         this.fingerprints.delete(key); target?.removeSession(key); return;
       }
       const session = { ...snapshot.session, ...(snapshot.deletion ? { nativeState: 'unknown' as const } : {}) };
-      const summary = sdkSessionView(this.id, session, snapshot.execution ?? undefined, this.startupState === 'ready' && this.canExecute());
+      const quotaWait = this.options.getQuotaWait?.(key);
+      const summary = sdkSessionView(this.id, session, snapshot.execution ?? undefined, this.startupState === 'ready' && this.canExecute(), {
+        ...(messageCount !== undefined ? { messageCount } : {}),
+        ...(quotaWait ? { quotaWait } : {}),
+      });
       const resolvedModel = session.model ?? this.config.model;
       if (resolvedModel !== undefined) summary.model = resolvedModel;
       const fingerprint = JSON.stringify(summary);

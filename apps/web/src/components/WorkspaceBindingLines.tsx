@@ -187,7 +187,7 @@ export const WorkspaceBindingLines = memo(function WorkspaceBindingLines({ surfa
     const host = surface.current;
     if (!host) return;
     let source: Pane | undefined;
-    const eligible = (pane: Pane) => pane.kind !== 'antigravity-quota' && pane.kind !== 'git-repo-status' && !(pane.kind === 'metric-card' && pane.resourceId === 'catalog');
+    const eligible = (pane: Pane) => pane.kind !== 'antigravity-quota' && pane.kind !== 'git-repo-status' && pane.kind !== 'session-hub' && !(pane.kind === 'metric-card' && pane.resourceId === 'catalog');
     const paneAt = (target: EventTarget | null) => target instanceof Element
       ? stablePanes.find(p => p.id === target.closest<HTMLElement>('[data-workspace-pane]')?.dataset.remotePane) : undefined;
     const clear = () => { source = undefined; for (const node of host.querySelectorAll<HTMLElement>('[data-binding-drop]')) delete node.dataset.bindingDrop; };

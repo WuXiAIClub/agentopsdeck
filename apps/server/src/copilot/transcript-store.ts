@@ -219,7 +219,9 @@ export class CopilotTranscriptStore {
         WHERE session_key = ? AND execution_id = ? AND tool_call_id = ? AND phase = 'call' LIMIT 2`)
         .all(key, row.execution_id, row.tool_call_id) as { data: string }[];
       if (calls.length === 1) {
-        const call = read(calls[0]!.data), text = `Input\n${call.text}\n\nResult\n${detail.text}`;
+        const call = read(calls[0]!.data);
+        const structured = call.text.trimStart().startsWith('[tool ') || detail.text.trimStart().startsWith('[tool ');
+        const text = structured ? `${call.text}\n\n${detail.text}` : `Input\n${call.text}\n\nResult\n${detail.text}`;
         return { text: text.slice(0, COPILOT_TOOL_DETAIL_CHARS),
           truncated: call.truncated || detail.truncated || text.length > COPILOT_TOOL_DETAIL_CHARS };
       }
@@ -246,6 +248,11 @@ export class CopilotTranscriptStore {
       messages.unshift(this.read(row, key, nativeId)); bytes += size; cursor = String(row.sequence);
     }
     return { messages, bytes, scanned: messages.length, ...(hasMore ? { before: cursor } : {}) };
+  }
+
+  count(key: string): number {
+    if (!key.startsWith(`${this.runtime}:`)) return 0;
+    return this.counts.count(key);
   }
 
   page(key: string, limit = 200, before?: string) {

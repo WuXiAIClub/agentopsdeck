@@ -15,7 +15,7 @@ import { usePaneHoverFocus } from '../lib/use-pane-hover-focus';
 import { usePageRefreshGuard } from '../lib/use-page-refresh-guard';
 import { useFileCardGuard } from '../lib/workspace-file-card-context';
 import { CaptionIconButton } from './CaptionIconButton';
-import { usePaneToolbarTarget } from './PaneToolbar';
+import { usePaneTitleTarget, usePaneToolbarTarget } from './PaneToolbar';
 import { useWorkspaceBoardRevision } from '../lib/use-workspace-board-revision';
 import { workspaceFileCardResource } from '@agentopsdeck/shared';
 const NotebookEditor = lazy(() => import('./NotebookEditor'));
@@ -189,9 +189,12 @@ function GlobalNotebookItem({ initial }: { initial: SessionNotebookDocument }) {
 
 function Notebook({ sessionKey, globalId, title, renderTrigger, layout, onLayout, layoutNotice, layoutReady = true, embedded = false, workspaceHost, caption = false }: { sessionKey?: string; globalId?: string; title: string; renderTrigger?: (trigger: ReactNode) => ReactNode; layout?: HubNotebookLayout; onLayout?: (change: Partial<HubNotebookLayout>) => void; layoutNotice?: ReactNode; layoutReady?: boolean; embedded?: boolean; workspaceHost?: HTMLElement | undefined; caption?: boolean }) {
   const inheritedToolbar = usePaneToolbarTarget();
+  const inheritedTitleTarget = usePaneTitleTarget();
   // Global notes keep their original React root when docked, so their caption
-  // slot is resolved from the stable host, not from a different context tree.
-  const toolbar = workspaceHost?.closest('.session-workspace-pane')?.querySelector('.session-pane-custom-actions') ?? inheritedToolbar;
+  // slots are resolved from the stable host, not from a different context tree.
+  const hostPane = workspaceHost?.closest('.session-workspace-pane');
+  const toolbar = hostPane?.querySelector('.session-pane-custom-actions') ?? inheritedToolbar;
+  const titleSlot = hostPane?.querySelector('.session-pane-title-slot') ?? inheritedTitleTarget;
   const { t } = useI18n();
   const hoverFocus = usePaneHoverFocus(true);
   const paused = useContext(NotebookPausedContext);
@@ -235,7 +238,7 @@ function Notebook({ sessionKey, globalId, title, renderTrigger, layout, onLayout
   const [autoCollapse, setAutoCollapse] = useState(() => { try { return localStorage.getItem(`${viewKey}:auto-collapse`) === 'true'; } catch { return false; } });
   const [hovered, setHovered] = useState(false), [focused, setFocused] = useState(false);
   const [opening, setOpening] = useState(false);
-  const noteTitle = appearance.title || (globalId ? title : label);
+  const noteTitle = appearance.title || (globalId || embedded ? title : label);
   const rename = () => { setNameDraft(appearance.title || noteTitle); setRenaming(true); };
   const saveName = () => { updateAppearance({ title: nameDraft.trim().slice(0, 120) }); setRenaming(false); };
   const controller = useNotebookController(JSON.stringify(['content', global ? 'hub' : 'session', globalId ?? sessionKey ?? 'default']), {
@@ -436,7 +439,37 @@ function Notebook({ sessionKey, globalId, title, renderTrigger, layout, onLayout
       onContextMenu={event => { if (!(event.target instanceof HTMLElement && event.target.closest('textarea,input,a,[contenteditable]'))) { event.preventDefault(); setMenu(value => !value); } }}
       onKeyDown={event => { if (event.key === 'Escape') { event.stopPropagation(); if (renaming) setRenaming(false); else if (menu) setMenu(false); else if (!embedded) close(); } }}>
       {embedded && toolbar && createPortal(<button ref={appearanceTrigger} type="button" aria-label={t('Notebook appearance')} title={t('Notebook appearance')} aria-expanded={menu} onClick={() => setMenu(value => !value)}><Palette size={14} /></button>, toolbar)}
-      {(!embedded || renaming) && <header className="notebook-header">
+      {embedded && titleSlot && createPortal(
+        renaming ? (
+          <input
+            name="sessionnotebook-caption-rename"
+            className="notebook-caption-title-input"
+            autoFocus
+            aria-label={t('Notebook name')}
+            maxLength={120}
+            value={nameDraft}
+            onPointerDown={event => event.stopPropagation()}
+            onChange={event => setNameDraft(event.target.value)}
+            onBlur={saveName}
+            onKeyDown={event => {
+              if (event.key === 'Enter') { event.preventDefault(); saveName(); }
+              if (event.key === 'Escape') { event.stopPropagation(); setRenaming(false); }
+            }}
+          />
+        ) : (
+          <span
+            className="notebook-caption-title"
+            tabIndex={0}
+            title={t('Double-click to rename')}
+            onDoubleClick={event => { event.stopPropagation(); rename(); }}
+            onKeyDown={event => { if (event.key === 'F2') { event.preventDefault(); rename(); } }}
+          >
+            {noteTitle}
+          </span>
+        ),
+        titleSlot,
+      )}
+      {(!embedded || (renaming && !titleSlot)) && <header className="notebook-header">
         {!embedded && !dedicatedMobile && <button type="button" className="notebook-drag" aria-label={t('Move notebook')} title={t('Drag to move · arrow keys also work')} {...titleDrag}
           onKeyDown={event => {
             if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;

@@ -68,9 +68,16 @@ export function validConnectorSdkJournalInput(kind: ConnectorSdkJournalKind, val
       && (!Object.hasOwn(value.sample as object, 'reconciledCalls') || value.runtime === 'claude-code');
   }
 }
+function totals(v: unknown): boolean {
+  if (!fields(v, ['inputTokens', 'outputTokens', 'totalTokens'], ['cacheReadTokens', 'cacheWriteTokens'])) return false;
+  return metricNumber(v.inputTokens) && metricNumber(v.outputTokens) && metricNumber(v.totalTokens)
+    && (v.cacheReadTokens === undefined || metricNumber(v.cacheReadTokens))
+    && (v.cacheWriteTokens === undefined || metricNumber(v.cacheWriteTokens));
+}
 function metrics(v: unknown): boolean {
-  if (!fields(v, [], ['executionId', 'sequence', 'context', 'usage', 'compactionCount'])
+  if (!fields(v, [], ['executionId', 'sequence', 'context', 'usage', 'totals', 'compactionCount'])
     || v.executionId !== undefined && !id(v.executionId) || v.sequence !== undefined && !metricNumber(v.sequence)
+    || v.totals !== undefined && !totals(v.totals)
     || v.compactionCount !== undefined && !metricNumber(v.compactionCount)) return false;
   return sample({ eventId: 'snapshot', sequence: 1, compacted: true, ...(v.context !== undefined ? { context: v.context } : {}),
     ...(v.usage !== undefined ? { usage: v.usage } : {}) });

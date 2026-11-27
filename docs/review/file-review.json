@@ -17,13 +17,13 @@
     "Native devices, providers, full backend, browser accessibility, artifacts and redistribution rights remain unaccepted."
   ],
   "summary": {
-    "totalFiles": 3614,
+    "totalFiles": 3627,
     "byKind": {
       "config": 58,
       "docs": 55,
       "asset": 8,
-      "test": 1757,
-      "runtime": 1722,
+      "test": 1760,
+      "runtime": 1732,
       "generated": 14
     },
     "byModule": {
@@ -34,7 +34,7 @@
       "main-integration": 35,
       "storage": 218,
       "antigravity": 17,
-      "server": 5,
+      "server": 9,
       "execution": 471,
       "api-auth": 392,
       "hub-notebook": 22,
@@ -43,7 +43,7 @@
       "api-completion": 7,
       "hub": 552,
       "web-ui": 405,
-      "web": 7,
+      "web": 15,
       "web-state": 383,
       "web-menu-tests": 1,
       "web-menu": 1,
@@ -51,18 +51,18 @@
       "web-notebook-integration": 1,
       "final-docs": 3,
       "integration": 1,
-      "shared": 1,
+      "shared": 2,
       "scripts": 12,
       "web-css-fixture": 1,
       "external": 2
     },
     "byDepth": {
-      "semantic": 3560,
+      "semantic": 3573,
       "structural": 35,
       "asset": 19
     },
     "byDisposition": {
-      "no-finding": 3579,
+      "no-finding": 3592,
       "pending": 35
     },
     "completedSemanticOrAssetFiles": 3568,
@@ -2670,8 +2670,8 @@
     },
     {
       "path": "apps/server/src/antigravity/acp-client.ts",
-      "size": 16579,
-      "sha256": "f8850c2ee6e7634a7e23ac8682074a41ed1fb8206f484993f48fa72a2b82389e",
+      "size": 16891,
+      "sha256": "330b9008c55f9557a983359e28df59df6f457aee47344cfa092096bac1c640df",
       "module": "antigravity",
       "kind": "runtime",
       "depth": "semantic",
@@ -2846,8 +2846,8 @@
     },
     {
       "path": "apps/server/src/antigravity/message-projection.ts",
-      "size": 4856,
-      "sha256": "fd7e4beed892889b98e63f9fb3b8f211ba660243decf2ec1ace4516ad16d7ab7",
+      "size": 8920,
+      "sha256": "26a76d54d41fc2055208066de8a247d9eccaa61140528752057390a88dd3aca6",
       "module": "antigravity",
       "kind": "runtime",
       "depth": "semantic",
@@ -2921,6 +2921,34 @@
       "findings": []
     },
     {
+      "path": "apps/server/src/antigravity/quota-retry.test.ts",
+      "size": 4587,
+      "sha256": "4299ba1fed4ad060b1b9cca4cb95d28b94aab6d89c1bec0a5c72de7a4039ee51",
+      "module": "server",
+      "kind": "test",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size"
+      ],
+      "notes": "Ledger entry synced for newly added repository file.",
+      "findings": []
+    },
+    {
+      "path": "apps/server/src/antigravity/quota-retry.ts",
+      "size": 3068,
+      "sha256": "5ee3422eaff46c0fb8bafeaae47e64c0b13a1ca306f6c6de7c9f736c92b607be",
+      "module": "server",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size"
+      ],
+      "notes": "Ledger entry synced for newly added repository file.",
+      "findings": []
+    },
+    {
       "path": "apps/server/src/antigravity/sdk-runtime.test.ts",
       "size": 35360,
       "sha256": "a7ec8be562e53bafb69ebd2297d83344eb1059ec0563c2582dc43f1ca8a6f0bd",
@@ -2938,8 +2966,8 @@
     },
     {
       "path": "apps/server/src/antigravity/sdk-runtime.ts",
-      "size": 44473,
-      "sha256": "f84d5d244cb51ec8ad45179fb98bf13d698957b6c292cc1cd637f0e1f855cee5",
+      "size": 49331,
+      "sha256": "a871c5d879241fea74fea9b9d523cedeb0f2a73bd85a6af391ea8cb448114e74",
       "module": "antigravity",
       "kind": "runtime",
       "depth": "semantic",
@@ -2950,6 +2978,34 @@
         "typecheck-and-targeted-tests"
       ],
       "notes": "Reviewed Antigravity ACP transport, isolated config/env, owned execution, Connector SDK runtime adapter, and synthetic E2E tests. Enforces AOD 1.0.0, dedicated HOME lease, Linux-only execution, capability rejections (409 for attachments/compact/modelOverride/interactions), and no auto-replay.",
+      "findings": []
+    },
+    {
+      "path": "apps/server/src/antigravity/tool-formatting.test.ts",
+      "size": 5317,
+      "sha256": "d416c3b89d938fecbc6d7c67aa5b7c6efa186338a0588ff57e868ba2841f487d",
+      "module": "server",
+      "kind": "test",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size"
+      ],
+      "notes": "Ledger entry synced for newly added repository file.",
+      "findings": []
+    },
+    {
+      "path": "apps/server/src/antigravity/tool-formatting.ts",
+      "size": 12938,
+      "sha256": "c3d83918bdcf9022038a384c89e9308e7f58bfc612dd0cec2ca7f3f8482bdc9a",
+      "module": "server",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size"
+      ],
+      "notes": "Ledger entry synced for newly added repository file.",
       "findings": []
     },
     {
@@ -14627,8 +14683,8 @@
     },
     {
       "path": "apps/server/src/connector/async-sdk-owned-runtime.ts",
-      "size": 20996,
-      "sha256": "94a0b19a56a9b81fde20144d32230045c2930a277f320caf5266b29deb955cd6",
+      "size": 21289,
+      "sha256": "b9ec2d80459b7b667418ffd02b5a46b211a13c4a60414c4046dd934c95510919",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
@@ -17275,8 +17331,8 @@
     },
     {
       "path": "apps/server/src/connector/connector-sdk-journal-domain.ts",
-      "size": 13839,
-      "sha256": "5f0d7289c9e4cd627a7a6d068a9059330c73f94f26d4e3109ef04ef81f9cdf16",
+      "size": 14317,
+      "sha256": "e5d293a83d155c7fa5aece9c3c8a29faa0329784644512c24d949e894b80eaab",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
@@ -17325,8 +17381,8 @@
     },
     {
       "path": "apps/server/src/connector/connector-sdk-lifecycle-domain.ts",
-      "size": 17736,
-      "sha256": "1435161f3bbe4b3a577be893b3d6b97441f07807bab6c6054a0d171bf4fc7e92",
+      "size": 18063,
+      "sha256": "fcdb236fb381fe323338eeee5defc6da90256070040955b3b6c4310ea4d63e21",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
@@ -19917,8 +19973,8 @@
     },
     {
       "path": "apps/server/src/connector/sdk-execution-journal.ts",
-      "size": 29005,
-      "sha256": "ddccb99623b66e1e5fed8af6eb50361a22f376224a81b9a535f5f068341d80ad",
+      "size": 30296,
+      "sha256": "275f425dce5a5ed1f8aa84dabb7a4abeb0554d90df58340a925437425a20e2f4",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
@@ -20114,8 +20170,8 @@
     },
     {
       "path": "apps/server/src/connector/sdk-metrics.ts",
-      "size": 5588,
-      "sha256": "71603d79f2e1e167818a133496825e30cbd4ea08fe65511f18093f77cb48b441",
+      "size": 5786,
+      "sha256": "07df7e1f36adbe00374842bfba104a1402916901e2287a9a00f3f57e0e70ab3e",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
@@ -20244,8 +20300,8 @@
     },
     {
       "path": "apps/server/src/connector/sdk-session-view.ts",
-      "size": 3008,
-      "sha256": "784d130d2f0b3404ea1b8457063ace0ad0b5485232b2d324786bf40cb055d386",
+      "size": 3978,
+      "sha256": "6d091c4f0ce1dd92742f0332238bd79b919c8dbb5c65b146fed855026d48f68f",
       "module": "connector",
       "kind": "runtime",
       "depth": "semantic",
@@ -22752,8 +22808,8 @@
     },
     {
       "path": "apps/server/src/copilot/session-projection.ts",
-      "size": 3698,
-      "sha256": "342da885a4906d7224c78fef1d5313d6923b6845874dd287e4c6e5a42beab4df",
+      "size": 4052,
+      "sha256": "d243741eb61324ba17e969683db8d855286a6c0ad9972aa858084c248086a172",
       "module": "execution",
       "kind": "runtime",
       "depth": "semantic",
@@ -22928,8 +22984,8 @@
     },
     {
       "path": "apps/server/src/copilot/transcript-store.ts",
-      "size": 18444,
-      "sha256": "557878cd8a17c81b0b00f56fb468516fd2babe5d92637b2c36274b90ff024979",
+      "size": 18751,
+      "sha256": "4837c30b369691d1ed7a3f024bca0b643e80b9ce7d11a24e6bb4f7aa7e09d48e",
       "module": "execution",
       "kind": "runtime",
       "depth": "semantic",
@@ -23537,8 +23593,8 @@
     },
     {
       "path": "apps/server/src/git-status/service.test.ts",
-      "size": 10317,
-      "sha256": "9a7f33bef8280746e13c159ef016b91a0015b908f801d4c8f3a2dfb56db58d4c",
+      "size": 11363,
+      "sha256": "5c028274ba2056fdf2f7e40db39dc3c996f905ffff4ef6d58aab2a971783657c",
       "module": "server",
       "kind": "test",
       "depth": "semantic",
@@ -23551,8 +23607,8 @@
     },
     {
       "path": "apps/server/src/git-status/service.ts",
-      "size": 16407,
-      "sha256": "ff5ea05a040a8a51424c110a0d35a723d8ef869c493e8ecc9a5fe0a909d25b57",
+      "size": 17388,
+      "sha256": "f6f9b7f817d659a94b9aac86fb31506852508422a3a087844a0b1f1394fafc5d",
       "module": "server",
       "kind": "runtime",
       "depth": "semantic",
@@ -37794,8 +37850,8 @@
     },
     {
       "path": "apps/server/src/projection/deck-store.ts",
-      "size": 97041,
-      "sha256": "01b0650274dfa3dd50d9190d938b4605bb93226bb50b08377997bf0ca2c4dd4b",
+      "size": 97165,
+      "sha256": "6ce9ec45087bc2148dd61afe69287d81b99a11b7fecf6deddb981364b63748c9",
       "module": "storage",
       "kind": "runtime",
       "depth": "semantic",
@@ -45046,9 +45102,37 @@
       "findings": []
     },
     {
+      "path": "apps/web/src/components/AntigravityQuotaFlowOverlay.tsx",
+      "size": 5080,
+      "sha256": "79bc1ff1a67ecef566e4041109d44699102b9f2a90e630200cb8dcf11af17dcd",
+      "module": "web",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size"
+      ],
+      "notes": "Ledger entry synced for newly added repository file.",
+      "findings": []
+    },
+    {
+      "path": "apps/web/src/components/AntigravityQuotaWaitBanner.tsx",
+      "size": 4614,
+      "sha256": "cb91a9296bb764580625ddfaa72cb9a028dc9e51882b380ce60c5aa179756173",
+      "module": "web",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size"
+      ],
+      "notes": "Ledger entry synced for newly added repository file.",
+      "findings": []
+    },
+    {
       "path": "apps/web/src/components/AntigravityUsagePanel.tsx",
-      "size": 5578,
-      "sha256": "5a24411925e6984a01f2ae896782fe48001597f10f9cfb07ec768e1844f3ed87",
+      "size": 6066,
+      "sha256": "81d2c52e1baaa4a8a81eb2eb1b95e9b011c0235af143a0230ed16917011f3a16",
       "module": "web-ui",
       "kind": "runtime",
       "depth": "structural",
@@ -45187,8 +45271,8 @@
     },
     {
       "path": "apps/web/src/components/CardKindIcon.tsx",
-      "size": 1276,
-      "sha256": "28be0ae5470a481c6eb30cab6d49b12821ecc2e38395d632b35c8ed2039b610e",
+      "size": 1334,
+      "sha256": "882db8f659d5e5d5039e1f5b107318d566b3e1aae65cec0b0103b2834495e85d",
       "module": "web-ui",
       "kind": "runtime",
       "depth": "structural",
@@ -45435,8 +45519,8 @@
     },
     {
       "path": "apps/web/src/components/GitRepoStatusPanel.tsx",
-      "size": 25310,
-      "sha256": "60c11e936004fdc717d81ae03d94cca56b7cd54f1d35999ce0781a93376c08de",
+      "size": 26842,
+      "sha256": "e045172835371ef61daa8d2bbbf90c420eb88798f6790b4a52219810be8299f7",
       "module": "web",
       "kind": "runtime",
       "depth": "semantic",
@@ -46276,8 +46360,8 @@
     },
     {
       "path": "apps/web/src/components/SessionNotebook.tsx",
-      "size": 46062,
-      "sha256": "9feb1438100ccfd579d9af8879a287079874c47690ff4cff719cb629d0bd5bec",
+      "size": 47410,
+      "sha256": "c2cfdc1f47dde22a290d3416bd3c1771d546592ef6e4b748f7f3e8b604e4c54e",
       "module": "web-ui",
       "kind": "runtime",
       "depth": "semantic",
@@ -46468,8 +46552,8 @@
     },
     {
       "path": "apps/web/src/components/SessionWorkspaceView.tsx",
-      "size": 127742,
-      "sha256": "a7874d157c2e17901cd62980e67dc1fa0b52899f7d55e3e9dd448e9410764ff4",
+      "size": 129546,
+      "sha256": "2ec469a1ed43bb592f7200823668d9c2d7573c5491161c2123afbfb74c124bc9",
       "module": "web-ui",
       "kind": "runtime",
       "depth": "structural",
@@ -46740,8 +46824,8 @@
     },
     {
       "path": "apps/web/src/components/ToolDetailBody.tsx",
-      "size": 6491,
-      "sha256": "01f9b91ca7d0489ce0caa42b6e41e90f3ca0018295de6e9c300409d99a7d35b8",
+      "size": 6859,
+      "sha256": "1a0043be5e74b75914fbdd54d8153ae9ea98a9dd004ee767e271f61bc7f4a9e8",
       "module": "web-ui",
       "kind": "runtime",
       "depth": "semantic",
@@ -46844,8 +46928,8 @@
     },
     {
       "path": "apps/web/src/components/WorkspaceBindingLines.tsx",
-      "size": 14651,
-      "sha256": "465325d1c22ac76f217f3355cd49f81c826bce5b9785d375b12604ff12f80344",
+      "size": 14682,
+      "sha256": "30f060dee9cf924de944ebf7084a1a43d7303e13d538f1ea3571628e08fa8428",
       "module": "web-ui",
       "kind": "runtime",
       "depth": "structural",
@@ -47103,8 +47187,8 @@
     },
     {
       "path": "apps/web/src/components/WorkspaceFileLinks.tsx",
-      "size": 9793,
-      "sha256": "286e90e12e1f3a83f26d2e9a98370ca218e8b681b244505e4fe6d92d18036ec1",
+      "size": 10113,
+      "sha256": "6388a57884188c27b42482c4d8a89bc7e352bc282c5f8d7a8bc298a993704a0b",
       "module": "web-ui",
       "kind": "runtime",
       "depth": "semantic",
@@ -47421,6 +47505,20 @@
       "findings": []
     },
     {
+      "path": "apps/web/src/components/WorkspaceSessionHub.tsx",
+      "size": 12047,
+      "sha256": "4bd6b673d061554395bdeb008d9788cc2a97fa7920f5c9f2b13b353664ef7744",
+      "module": "web",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size"
+      ],
+      "notes": "Ledger entry synced for newly added repository file.",
+      "findings": []
+    },
+    {
       "path": "apps/web/src/components/WorkspaceSharedContent.tsx",
       "size": 30733,
       "sha256": "611ad1e7fcaf9bf3e174d0035660df51eb9347a35342a62c62ac62bdf71bb03b",
@@ -47638,8 +47736,8 @@
     },
     {
       "path": "apps/web/src/components/antigravity-quota-card.css",
-      "size": 5632,
-      "sha256": "47b8e9607d9d43832f027eecd2d2c0c182ddc2f51b29336d95cee1f218dafc8e",
+      "size": 6129,
+      "sha256": "f99f43ea7ecc0975db7d843400875fd5d8b8453413137985fc7172502f9ee70f",
       "module": "web",
       "kind": "runtime",
       "depth": "structural",
@@ -47649,6 +47747,34 @@
         "exact-file-sha256-and-size"
       ],
       "notes": "Targeted review of card-relative width and height scaling, bounded type and spacing, narrow reflow and the static fallback. Chromium geometry assertions passed; other engines not tested.",
+      "findings": []
+    },
+    {
+      "path": "apps/web/src/components/antigravity-quota-flow.css",
+      "size": 1613,
+      "sha256": "5601e0f71cb469ca89bc1e1cc0aba03005e1e520eb91f1f6851033ba09ed7240",
+      "module": "web",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size"
+      ],
+      "notes": "Ledger entry synced for newly added repository file.",
+      "findings": []
+    },
+    {
+      "path": "apps/web/src/components/antigravity-quota-wait.css",
+      "size": 3350,
+      "sha256": "be42aac711299d94276ee9afe9b0bbe4f695fef1dd0de7752742f31894438eed",
+      "module": "web",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size"
+      ],
+      "notes": "Ledger entry synced for newly added repository file.",
       "findings": []
     },
     {
@@ -47693,8 +47819,8 @@
     },
     {
       "path": "apps/web/src/components/git-repo-status-card.css",
-      "size": 14680,
-      "sha256": "d12e6bb2534525ff9bfe5ecc20c520a260ac27a0de0537b733d5610673e76307",
+      "size": 14837,
+      "sha256": "dd04940bce492aba16ac90e420e7309c70a9869526691499c5320b722218770f",
       "module": "web",
       "kind": "runtime",
       "depth": "semantic",
@@ -47761,8 +47887,8 @@
     },
     {
       "path": "apps/web/src/components/messages.tsx",
-      "size": 69624,
-      "sha256": "4d9d78ccf59b0a14cbd0d693dcab1b4a5eb84b6b8f2e61fe5717a195132e335b",
+      "size": 69861,
+      "sha256": "a6aa5afda27fea881a671733d56be9a28af29f463d34d1ca736090d839ba5c9e",
       "lineCount": 1281,
       "module": "web-ui",
       "kind": "runtime",
@@ -48095,8 +48221,8 @@
     },
     {
       "path": "apps/web/src/components/workspace-files.css",
-      "size": 18664,
-      "sha256": "d3e13444682382b04562e501411152d4a937fb86c3eac902e93a991bb5534df5",
+      "size": 19793,
+      "sha256": "207749085319488734f59277d6796c4c3c20fb416d86de95a0921f4a1e5e98c6",
       "module": "web-ui",
       "kind": "runtime",
       "depth": "semantic",
@@ -48108,6 +48234,20 @@
         "line-by-line-semantic-audit"
       ],
       "notes": "[\"文本封装437行，.css；未自动将封装扫描提升为语义审查。\"]",
+      "findings": []
+    },
+    {
+      "path": "apps/web/src/components/workspace-session-hub.css",
+      "size": 7273,
+      "sha256": "efb15d54bcc809e95dea152b127a202bbd3223def4d7a2770f15ee5a30156365",
+      "module": "web",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size"
+      ],
+      "notes": "Ledger entry synced for newly added repository file.",
       "findings": []
     },
     {
@@ -48162,6 +48302,20 @@
         "line-by-line-semantic-audit"
       ],
       "notes": "[\"本轮全文检查>=700px html/body min-width/overflow hidden，button全局focus fallback；input/textarea focus-visible outline:none依赖各component焦点边框；rail小字号、header固定2rem sizing。\",\"main/styles.css未全文，潜在focus覆盖、缩放/窄屏/触屏目标与body scroll行为待浏览器；不能用本片段做全界面a11y结论。\"]",
+      "findings": []
+    },
+    {
+      "path": "apps/web/src/lib/antigravity-quota-fx.ts",
+      "size": 2208,
+      "sha256": "04f4a262fe403ab51b4db45e9b96ba3d2c0ca60dd4f0970623f7b3cdb84ed78a",
+      "module": "web",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size"
+      ],
+      "notes": "Ledger entry synced for newly added repository file.",
       "findings": []
     },
     {
@@ -53074,8 +53228,8 @@
     },
     {
       "path": "apps/web/src/lib/session-token-metrics.ts",
-      "size": 975,
-      "sha256": "957792efdda7d5b60f6e5bd2dfa1773c02aa16006ee0c4b90961fc2684438351",
+      "size": 2033,
+      "sha256": "9de43533f4066dc9d80cd29b0cf7ffc420063a1269cd57dbaa4a4fb6f500e03b",
       "module": "web-state",
       "kind": "runtime",
       "depth": "semantic",
@@ -53692,8 +53846,8 @@
     },
     {
       "path": "apps/web/src/lib/tool-detail-format.ts",
-      "size": 24177,
-      "sha256": "f0416a0b57f91a98dd6f4f4a91137d8bfa3c1548040ac37a788fa4456baf0542",
+      "size": 25227,
+      "sha256": "3964cfe769ddcde803502a6a1b7af609acb7b646f2e96dc29458a7fefa9eedb3",
       "module": "web-state",
       "kind": "runtime",
       "depth": "semantic",
@@ -53728,8 +53882,8 @@
     },
     {
       "path": "apps/web/src/lib/tool-timeline.ts",
-      "size": 2904,
-      "sha256": "8c40f25ab334a531f6fa4dc6010c085d369a5f50e92c2a040eb4a88298ab9de8",
+      "size": 3602,
+      "sha256": "dbb2e433bbd76fb7f41ef38b7785debd3d6b37b1f26da5aae8b2693b83916447",
       "module": "web-state",
       "kind": "runtime",
       "depth": "semantic",
@@ -53746,8 +53900,8 @@
     },
     {
       "path": "apps/web/src/lib/translations.ts",
-      "size": 293121,
-      "sha256": "5149a7179a34efc6dabbe9b461c961e7feaf1debc000790b2c3f9ce5f392ad8b",
+      "size": 293782,
+      "sha256": "ec3cbdd9dbc9736f8c98220af162901b363a96fd99aeb6852dca89155d4f039e",
       "module": "web-state",
       "kind": "runtime",
       "depth": "structural",
@@ -54659,6 +54813,20 @@
       "findings": []
     },
     {
+      "path": "apps/web/src/lib/workspace-enhancements.test.ts",
+      "size": 5863,
+      "sha256": "39ae163940e85df53700a48e1a81b17decb4959f9d26cf2d4035defc60110097",
+      "module": "web",
+      "kind": "test",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size"
+      ],
+      "notes": "Ledger entry synced for newly added repository file.",
+      "findings": []
+    },
+    {
       "path": "apps/web/src/lib/workspace-file-board.test.ts",
       "size": 682,
       "sha256": "ea20331767c810383a7c4643369990a26c53726210dd18462927889f21db8d63",
@@ -54714,8 +54882,8 @@
     },
     {
       "path": "apps/web/src/lib/workspace-file-card-pane.ts",
-      "size": 4497,
-      "sha256": "2085b5ddc99eebc833e8c9b93e3d47705367f5fc21f97e20e5377e30e77872ae",
+      "size": 4559,
+      "sha256": "1d736ffd2703cf6f41cd70a12d9498b35fdf3c03f79be7a4090a32bded21eff5",
       "module": "web-state",
       "kind": "runtime",
       "depth": "structural",
@@ -54870,8 +55038,8 @@
     },
     {
       "path": "apps/web/src/lib/workspace-layout.ts",
-      "size": 53593,
-      "sha256": "08c08e080da2bd976b47cdcdb5e26b436bd214e589caec7414785f4cef2dc525",
+      "size": 54057,
+      "sha256": "5fa2a693dc006bbba082d1e5b210dbc41debbb0647909cc69c1a34c6765bc554",
       "module": "web-state",
       "kind": "runtime",
       "depth": "structural",
@@ -55276,8 +55444,8 @@
         "line-by-line-semantic-audit"
       ],
       "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/web/src/main.tsx (web-style-entry-completion/runtime); all historical findings and license/security/correctness checks are verified.",
-      "sha256": "2b531bae3ce67cadd9d8c4825b52b4b26af8e9ebf056f74caa7c5926bd36d62c",
-      "size": 366155,
+      "sha256": "baa433e5424bc34d3420ad2c1ba9730fd612c413eeb5145c7e2f27f6ab1dcc1f",
+      "size": 368809,
       "module": "web-style-entry-completion",
       "historicalFindingReferences": [
         "WEB-STYLEENTRY-H01",
@@ -59389,8 +59557,8 @@
     },
     {
       "path": "docs/antigravity-cli.md",
-      "size": 9443,
-      "sha256": "85cc8dbd4b1bad72d9a31aa894172d87cef0c0bb87a16809bc822ba1eb599582",
+      "size": 10168,
+      "sha256": "991928295105cac337d77ea7c1b993a806b9dd2bf93da926a19c13a2ef419937",
       "module": "governance",
       "kind": "docs",
       "depth": "structural",
@@ -59404,8 +59572,8 @@
     },
     {
       "path": "docs/antigravity-cli.zh-CN.md",
-      "size": 8813,
-      "sha256": "70cf9fdd885de5f3c489ca3db9a9b3d46f2adc1dbd55e9721dd62243b771ab68",
+      "size": 9510,
+      "sha256": "2b739a3760114afa2d4118c74d8e920bea3fa56c60059d1f75150cab6f731065",
       "module": "governance",
       "kind": "docs",
       "depth": "structural",
@@ -60563,8 +60731,8 @@
     },
     {
       "path": "docs/user-guide.md",
-      "size": 4824,
-      "sha256": "fd313c34bbd6438c23e8af99ed5004a50807e583c4bf256ee038232ec305e03c",
+      "size": 5742,
+      "sha256": "7fdad3eb636c0b107d1bbe08d23311024209c24c97ab8a69b3894a021402110e",
       "module": "governance",
       "kind": "docs",
       "depth": "semantic",
@@ -60592,8 +60760,8 @@
     },
     {
       "path": "docs/user-guide.zh-CN.md",
-      "size": 4244,
-      "sha256": "7537c9c71646d955d8afe7d4ac35dcd2e15be87d400061ab084cbab13d9aa0e9",
+      "size": 4996,
+      "sha256": "cb481254dbccc8b45e11634f2e09e236862d9ec09101005d294c308fccdf8a32",
       "module": "governance",
       "kind": "docs",
       "depth": "semantic",
@@ -61913,6 +62081,20 @@
       }
     },
     {
+      "path": "packages/shared/src/antigravity-quota-wait.ts",
+      "size": 3105,
+      "sha256": "c49d00fe6885fa957400d021350af9ba2ebab6864c94bcd08014f4cce0798c85",
+      "module": "shared",
+      "kind": "runtime",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "current-source-sha256-and-size"
+      ],
+      "notes": "Ledger entry synced for newly added repository file.",
+      "findings": []
+    },
+    {
       "path": "packages/shared/src/antigravity-usage.ts",
       "size": 252,
       "sha256": "c57f4d4c4e0d89a548157fa7b761009142ce9529c4073764f93fd42d9a3c9117",
@@ -62188,8 +62370,8 @@
     },
     {
       "path": "packages/shared/src/index.ts",
-      "size": 18916,
-      "sha256": "33e16b92442cd652c177fb9f8dc6c0f2cbf552a7e4e8c13e7a1faff6c763a9b4",
+      "size": 19144,
+      "sha256": "46a62903f1271b604ddbcca8beb2fcf26aa0273d84d87240391ce8452756f299",
       "module": "governance",
       "kind": "runtime",
       "depth": "structural",
