@@ -4,16 +4,16 @@ import java.net.URI;
 import java.util.Locale;
 
 public final class ResourceAddress {
-    public static String route(String value, String currentOrigin, String publicOrigin) {
+    public static String route(String value, String currentOrigin, String publicOrigin, String[] lanOrigins) {
         try {
             String current = ServerAddress.normalizeConnection(currentOrigin);
             String fallback = ServerAddress.normalize(publicOrigin);
-            if (!ServerAddress.isLan(current) && !current.equals(fallback)) return value;
+            if (!java.util.Arrays.asList(lanOrigins).contains(current) && !current.equals(fallback)) return value;
             URI address = URI.create(value);
             if (!address.isAbsolute() || address.getRawUserInfo() != null) return value;
             String source = ServerAddress.normalizeConnection(new URI(address.getScheme(), null,
                     address.getHost(), address.getPort(), null, null, null).toString());
-            if (!source.equals(fallback) && !ServerAddress.isLan(source)) return value;
+            if (!source.equals(fallback) && !java.util.Arrays.asList(lanOrigins).contains(source)) return value;
             String path = address.getRawPath();
             if (!isResourcePath(path) || !address.normalize().getRawPath().equals(path)) return value;
             return current + path + (address.getRawQuery() == null ? "" : "?" + address.getRawQuery())

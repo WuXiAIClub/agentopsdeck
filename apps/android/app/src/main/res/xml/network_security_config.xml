@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-    <base-config cleartextTrafficPermitted="false" />
+    <!-- Runtime-selected LAN hosts are restricted by native origin checks and bundled-shell CSP. -->
+    <base-config cleartextTrafficPermitted="true" />
 </network-security-config>

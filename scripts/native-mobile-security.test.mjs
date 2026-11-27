@@ -142,10 +142,19 @@ function keys(text, pattern) {
   return [...text.matchAll(pattern)].map(match => match[1]).sort();
 }
 
-test('NAT-006 source: changed download UI and iOS permissions have paired nonempty EN/CN resources', () => {
-  const androidKeys = keys(source('apps/android/app/src/main/res/values/strings.xml'), /<string name="([^"]+)">[^<]+<\/string>/g);
-  assert.equal(androidKeys.length, 8);
-  assert.deepEqual(androidKeys, keys(source('apps/android/app/src/main/res/values-zh-rCN/strings.xml'), /<string name="([^"]+)">[^<]+<\/string>/g));
+test('NAT-006 source: download/connection UI and iOS permissions have paired nonempty EN/CN resources', () => {
+  const resources = ['values', 'values-zh-rCN'].map(locale => new Map(
+    [...source(`apps/android/app/src/main/res/${locale}/strings.xml`).matchAll(/<string name="([^"]+)">([^<]*)<\/string>/g)]
+      .map(match => [match[1], match[2]])));
+  assert.deepEqual([...resources[0].keys()].sort(), [...resources[1].keys()].sort());
+  for (const [name, english] of resources[0]) {
+    const chinese = resources[1].get(name);
+    assert.ok(english.trim() && chinese.trim(), name);
+    assert.deepEqual(english.match(/%\d+\$[sd]/g), chinese.match(/%\d+\$[sd]/g), name);
+  }
+  for (const binding of activity.matchAll(/R\.string\.((?:connection_|lan_|public_origin_)\w+)/g)) {
+    assert.ok(resources.every(locale => locale.has(binding[1])), binding[1]);
+  }
   for (const name of ['Localizable', 'InfoPlist']) {
     const english = keys(source(`apps/ios/Resources/en.lproj/${name}.strings`), /"([^"]+)" = "[^"]+";/g);
     assert.equal(english.length, 4);

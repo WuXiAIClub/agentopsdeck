@@ -47,6 +47,17 @@ test('configured public origin and trusted destination are enforced', () => {
   assert.equal(createResourceRouter('http://192.0.2.99:8790', custom, lanOrigins)(custom + path), custom + path);
 });
 
+test('a user-selected private LAN origin is trusted exactly, not its subnet', () => {
+  const selected = 'http://10.1.2.3:8890';
+  const other = 'http://10.1.2.4:8890';
+  const path = '/api/artifacts/abc123';
+  const configured = createResourceRouter(selected, publicOrigin, [selected]);
+  assert.equal(configured(publicOrigin + path), selected + path);
+  assert.equal(configured(other + path), other + path);
+  assert.equal(configured('http://10.1.2.3:8891' + path), 'http://10.1.2.3:8891' + path);
+  assert.equal(createResourceRouter(other, publicOrigin, [selected])(publicOrigin + path), publicOrigin + path);
+});
+
 test('DOM adapter rewrites added resources and click targets without touching unrelated links', () => {
   let observe;
   let click;

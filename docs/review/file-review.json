@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "reviewedAt": "2026-11-24",
+  "reviewedAt": "2026-11-27",
   "sourceVersion": "1.0.0",
   "publicationApproved": false,
   "complete": false,
@@ -14,7 +14,10 @@
     "Generated current-byte ledger does not prove human observations",
     "Source repairs invalidate prior whole-file conclusions; changed snapshots remain pending complete rereview. Targeted findings do not approve public release.",
     "Current pending-file round distinguishes complete reading from incomplete source/contracts; tests do not promote a file.",
-    "Native devices, providers, full backend, browser accessibility, artifacts and redistribution rights remain unaccepted."
+    "Native devices, providers, full backend, browser accessibility, artifacts and redistribution rights remain unaccepted.",
+    "Android manual-LAN changes are source-review contributions, not APK publication approval. Real-device Wi-Fi/VPN, redirected subresource CSP and native dialog/lifecycle acceptance remain unperformed. No APK, operator address, credential or runtime deployment state is included.",
+    "Ported Android review records are bound to identical source bytes; unrelated current-main source and existing review records are retained. Current-main Android bundle/compiler and targeted regression checks are required before pushing.",
+    "Current AOD main already fails pnpm check:publication with unexpected-release-identity before this Android commit. Existing author attribution and Git history are preserved; rules are not bypassed. The user explicitly requested a draft source-review PR. Android current-main debug/instrumentation compilation and 70 targeted regression cases passed; check:review passed, but public-release gates and device acceptance remain unresolved."
   ],
   "summary": {
     "totalFiles": 3614,
@@ -57,16 +60,16 @@
       "external": 2
     },
     "byDepth": {
-      "semantic": 3560,
-      "structural": 35,
+      "semantic": 3553,
+      "structural": 42,
       "asset": 19
     },
     "byDisposition": {
-      "no-finding": 3579,
-      "pending": 35
+      "no-finding": 3572,
+      "pending": 42
     },
-    "completedSemanticOrAssetFiles": 3568,
-    "remainingFiles": 35,
+    "completedSemanticOrAssetFiles": 3572,
+    "remainingFiles": 42,
     "filesWithFindings": 0
   },
   "files": [
@@ -468,20 +471,36 @@
     },
     {
       "path": "apps/android/README.md",
-      "size": 990,
-      "sha256": "35f139d7f6e97af51e9feb9684141e202ea7d9b151d29bc4cd29876889a9cda9",
+      "size": 5089,
+      "sha256": "2f79d5d728213deca66e4c6671b83b7872e94491e60e294463f64da6b5eb8638",
       "module": "native",
       "kind": "docs",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
-        "Complete text bytes inspected structurally (16 lines); lexical observations are NOT semantic approval.",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "manual-lan-targeted-source-and-relevant-contract-review",
+        "existing-documentation-and-native-security-i18n-runner-27-passed"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/android/README.md (native/docs); all historical findings and license/security/correctness checks are verified.",
-      "findings": []
+      "notes": "Read complete current source and reviewed relevant manual-LAN contracts; no source finding at the stated depth. LAN input uses normalized RFC1918 IPv4 origins, explicit local trust, Wi-Fi-only single-origin probes and HTTPS fallback. Private-range classification does not grant trust: routing and authenticated resources use configured/confirmed exact origins. Existing active connections are preserved until confirmed reload; no operations or credentials are replayed/copied. Platform cleartext permission is intentionally broader than application trust, with exact-origin native/WebView checks, bundled CSP and HTTPS mixed-content denial. No device/emulator or private live LAN acceptance was performed. Redirected HTTP subresource CSP, Wi-Fi/VPN transitions, native settings dialogs and Android lifecycle behavior still need disposable-device verification. Debug packages were compiled, not distributed; release rights, notices and authorization remain unresolved.",
+      "findings": [],
+      "previousReview": {
+        "path": "apps/android/README.md",
+        "size": 990,
+        "sha256": "35f139d7f6e97af51e9feb9684141e202ea7d9b151d29bc4cd29876889a9cda9",
+        "module": "native",
+        "kind": "docs",
+        "depth": "semantic",
+        "disposition": "no-finding",
+        "checks": [
+          "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
+          "Complete text bytes inspected structurally (16 lines); lexical observations are NOT semantic approval.",
+          "final-open-source-1.0.0-review",
+          "line-by-line-semantic-audit"
+        ],
+        "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/android/README.md (native/docs); all historical findings and license/security/correctness checks are verified.",
+        "findings": []
+      }
     },
     {
       "path": "apps/android/VERSION-POLICY.json",
@@ -647,25 +666,41 @@
     },
     {
       "path": "apps/android/app/src/androidTest/java/com/agentopsdeck/ServerConnectionTest.java",
-      "size": 8888,
-      "sha256": "285c6badc0700041f959c4aaec95dc92189db6d7f0ce5ed8f9bf7cd3daa1d08e",
+      "size": 10867,
+      "sha256": "eaefe3e5453bc3e9f45e3d91268c3983a6e12ed405e4d15100af81cbf47cf32b",
       "module": "native",
       "kind": "test",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
-        "Complete text bytes inspected structurally (119 lines); lexical observations are NOT semantic approval.",
-        "Lexical credential/header or key-file handoff at line 110; caller authorization/behavior requires the stated depth, not pattern presence.",
-        "Lexical cancellation/lifecycle declarations at line 41; caller authorization/behavior requires the stated depth, not pattern presence.",
-        "Lexical network/transport declarations at line 57; caller authorization/behavior requires the stated depth, not pattern presence.",
-        "Lexical limits/deadline declarations at line 60; caller authorization/behavior requires the stated depth, not pattern presence.",
-        "Lexical test assertion declarations at line 3; caller authorization/behavior requires the stated depth, not pattern presence.",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "manual-lan-targeted-source-and-relevant-contract-review",
+        "android-java-and-debug-instrumentation-package-compile"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/android/app/src/androidTest/java/com/agentopsdeck/ServerConnectionTest.java (native/test); all historical findings and license/security/correctness checks are verified.",
-      "findings": []
+      "notes": "Reviewed changed connection/configuration contracts only; prior whole-file conclusions do not apply to these bytes and complete current-file rereview is pending. LAN input uses normalized RFC1918 IPv4 origins, explicit local trust, Wi-Fi-only single-origin probes and HTTPS fallback. Private-range classification does not grant trust: routing and authenticated resources use configured/confirmed exact origins. Existing active connections are preserved until confirmed reload; no operations or credentials are replayed/copied. Platform cleartext permission is intentionally broader than application trust, with exact-origin native/WebView checks, bundled CSP and HTTPS mixed-content denial. No device/emulator or private live LAN acceptance was performed. Redirected HTTP subresource CSP, Wi-Fi/VPN transitions, native settings dialogs and Android lifecycle behavior still need disposable-device verification. Debug packages were compiled, not distributed; release rights, notices and authorization remain unresolved.",
+      "findings": [],
+      "previousReview": {
+        "path": "apps/android/app/src/androidTest/java/com/agentopsdeck/ServerConnectionTest.java",
+        "size": 8888,
+        "sha256": "285c6badc0700041f959c4aaec95dc92189db6d7f0ce5ed8f9bf7cd3daa1d08e",
+        "module": "native",
+        "kind": "test",
+        "depth": "semantic",
+        "disposition": "no-finding",
+        "checks": [
+          "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
+          "Complete text bytes inspected structurally (119 lines); lexical observations are NOT semantic approval.",
+          "Lexical credential/header or key-file handoff at line 110; caller authorization/behavior requires the stated depth, not pattern presence.",
+          "Lexical cancellation/lifecycle declarations at line 41; caller authorization/behavior requires the stated depth, not pattern presence.",
+          "Lexical network/transport declarations at line 57; caller authorization/behavior requires the stated depth, not pattern presence.",
+          "Lexical limits/deadline declarations at line 60; caller authorization/behavior requires the stated depth, not pattern presence.",
+          "Lexical test assertion declarations at line 3; caller authorization/behavior requires the stated depth, not pattern presence.",
+          "final-open-source-1.0.0-review",
+          "line-by-line-semantic-audit"
+        ],
+        "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/android/app/src/androidTest/java/com/agentopsdeck/ServerConnectionTest.java (native/test); all historical findings and license/security/correctness checks are verified.",
+        "findings": []
+      }
     },
     {
       "path": "apps/android/app/src/androidTest/java/com/agentopsdeck/SystemSpeechFactoryTest.java",
@@ -689,19 +724,35 @@
     },
     {
       "path": "apps/android/app/src/main/AndroidManifest.xml",
-      "size": 1380,
-      "sha256": "d17e9d4b2e66fe88b796488a66e6530aaef9a56a97d8349203175acda073e5ad",
+      "size": 1379,
+      "sha256": "7b6615f32dfcd3a276c0df32c678f00a42acf858f3c56cd5ad1c0bb69f790107",
       "module": "native",
       "kind": "config",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "Complete XML permission/export/backup declarations inspected against MainActivity callbacks.",
-        "Referenced network_security_config.xml read: base cleartext denied.",
-        "No legacy external-storage permissions; exported activity is launcher-only; backup disabled."
+        "current-source-sha256-and-size",
+        "manual-lan-targeted-source-and-relevant-contract-review",
+        "android-java-and-debug-instrumentation-package-compile"
       ],
-      "notes": "Source contract review finds no additional defect in these declarations. RECORD_AUDIO is runtime-gated; no signing/configuration or device permission, TLS, backup, accessibility or media acceptance performed. Native runtime findings are not closed by this config record.",
-      "findings": []
+      "notes": "Reviewed changed connection/configuration contracts only; prior whole-file conclusions do not apply to these bytes and complete current-file rereview is pending. LAN input uses normalized RFC1918 IPv4 origins, explicit local trust, Wi-Fi-only single-origin probes and HTTPS fallback. Private-range classification does not grant trust: routing and authenticated resources use configured/confirmed exact origins. Existing active connections are preserved until confirmed reload; no operations or credentials are replayed/copied. Platform cleartext permission is intentionally broader than application trust, with exact-origin native/WebView checks, bundled CSP and HTTPS mixed-content denial. No device/emulator or private live LAN acceptance was performed. Redirected HTTP subresource CSP, Wi-Fi/VPN transitions, native settings dialogs and Android lifecycle behavior still need disposable-device verification. Debug packages were compiled, not distributed; release rights, notices and authorization remain unresolved.",
+      "findings": [],
+      "previousReview": {
+        "path": "apps/android/app/src/main/AndroidManifest.xml",
+        "size": 1380,
+        "sha256": "d17e9d4b2e66fe88b796488a66e6530aaef9a56a97d8349203175acda073e5ad",
+        "module": "native",
+        "kind": "config",
+        "depth": "semantic",
+        "disposition": "no-finding",
+        "checks": [
+          "Complete XML permission/export/backup declarations inspected against MainActivity callbacks.",
+          "Referenced network_security_config.xml read: base cleartext denied.",
+          "No legacy external-storage permissions; exported activity is launcher-only; backup disabled."
+        ],
+        "notes": "Source contract review finds no additional defect in these declarations. RECORD_AUDIO is runtime-gated; no signing/configuration or device permission, TLS, backup, accessibility or media acceptance performed. Native runtime findings are not closed by this config record.",
+        "findings": []
+      }
     },
     {
       "path": "apps/android/app/src/main/java/com/agentopsdeck/AuthenticatedDownload.java",
@@ -747,20 +798,37 @@
     },
     {
       "path": "apps/android/app/src/main/java/com/agentopsdeck/ConnectionRouter.java",
-      "size": 1579,
-      "sha256": "c11e89f5bbdd22458800b5a32746e63954670d319a86cb941914486acea9966e",
+      "size": 1122,
+      "sha256": "f210f82c95270e73e90eb092a2f06377accd85a9f842501191cd50795037074e",
       "module": "native",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
-        "Complete text bytes inspected structurally (36 lines); lexical observations are NOT semantic approval.",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "manual-lan-targeted-source-and-relevant-contract-review",
+        "android-java-and-debug-instrumentation-package-compile",
+        "gradle-selected-routing-unit-tests-15-passed"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/android/app/src/main/java/com/agentopsdeck/ConnectionRouter.java (native/runtime); all historical findings and license/security/correctness checks are verified.",
-      "findings": []
+      "notes": "Read complete current source and reviewed relevant manual-LAN contracts; no source finding at the stated depth. LAN input uses normalized RFC1918 IPv4 origins, explicit local trust, Wi-Fi-only single-origin probes and HTTPS fallback. Private-range classification does not grant trust: routing and authenticated resources use configured/confirmed exact origins. Existing active connections are preserved until confirmed reload; no operations or credentials are replayed/copied. Platform cleartext permission is intentionally broader than application trust, with exact-origin native/WebView checks, bundled CSP and HTTPS mixed-content denial. No device/emulator or private live LAN acceptance was performed. Redirected HTTP subresource CSP, Wi-Fi/VPN transitions, native settings dialogs and Android lifecycle behavior still need disposable-device verification. Debug packages were compiled, not distributed; release rights, notices and authorization remain unresolved.",
+      "findings": [],
+      "previousReview": {
+        "path": "apps/android/app/src/main/java/com/agentopsdeck/ConnectionRouter.java",
+        "size": 1579,
+        "sha256": "c11e89f5bbdd22458800b5a32746e63954670d319a86cb941914486acea9966e",
+        "module": "native",
+        "kind": "runtime",
+        "depth": "semantic",
+        "disposition": "no-finding",
+        "checks": [
+          "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
+          "Complete text bytes inspected structurally (36 lines); lexical observations are NOT semantic approval.",
+          "final-open-source-1.0.0-review",
+          "line-by-line-semantic-audit"
+        ],
+        "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/android/app/src/main/java/com/agentopsdeck/ConnectionRouter.java (native/runtime); all historical findings and license/security/correctness checks are verified.",
+        "findings": []
+      }
     },
     {
       "path": "apps/android/app/src/main/java/com/agentopsdeck/DownloadFileName.java",
@@ -781,24 +849,18 @@
     },
     {
       "path": "apps/android/app/src/main/java/com/agentopsdeck/MainActivity.java",
-      "size": 55187,
-      "sha256": "4585d477b8a26d578dc5d31f99fe4f45bb7e92c6df7ee8728d885753180f1980",
+      "size": 57247,
+      "sha256": "7fe11838502034dc34808a3599d86bea2af310872b3ddf080f48a3656c9da172",
       "module": "native",
       "kind": "runtime",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "Complete current assigned source read, including contiguous recovery of any truncated chunks; exact current bytes independently match the parent snapshot.",
-        "Relevant bounded caller, identity, resource-admission and regression contracts inspected as detailed below; no native or provider execution.",
-        "All 853 lines read; final 666-853 chunk and openExternal 738-756 truncation recovery completed; delegate and picker contracts rechecked at 414-480 and 759-781.",
-        "Bridge main-frame/origin validation, captured web/download generation fencing, private staging, cancellation, original-cookie snapshot and per-target cookie resolver traced.",
-        "Full ConnectionRouter, ServerProbe, CacheStore, NativeVoiceRecorder, NativeVideoPlayer, PrivateMediaDataSource and MediaCacheKey inspected with related routing, cache, recorder and video tests.",
-        "Explicit save UI and partial-write cleanup preserved; source-confirmed retired WebView delegate/file-picker identity gap recorded as NAT-FINAL-001.",
-        "Bounded downloader declarations/actual bytes, same-origin redirects, encoding and cancellation inspected via stable helper review; unbounded bridge/executor admission remains NAT-PENDING-006.",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "manual-lan-targeted-source-and-relevant-contract-review",
+        "android-java-and-debug-instrumentation-package-compile"
       ],
-      "notes": "Full current source plus relevant adjacent contracts now complete, superseding the parent incomplete broader-cache/speech/media/routing caller evidence only. Cache scope is exactly 64 hex characters; transactional delta limits and logical eviction are not whole physical-DB/queue proofs. Recorder keeps exact session identity, 60-second stop-not-send timer and 2 MiB private capture; video fences player generations with scoped cookie/version cache keys. Retired delegate/picker missing identity guards are source-confirmed, delayed Android delivery remains conditional and no credential leak is demonstrated. Existing hardcoded UI, queue/blob bounds, app-kill cleanup and device storage/transport acceptance remain open. No source patch in this followup.",
+      "notes": "Reviewed changed connection/configuration contracts only; prior whole-file conclusions do not apply to these bytes and complete current-file rereview is pending. LAN input uses normalized RFC1918 IPv4 origins, explicit local trust, Wi-Fi-only single-origin probes and HTTPS fallback. Private-range classification does not grant trust: routing and authenticated resources use configured/confirmed exact origins. Existing active connections are preserved until confirmed reload; no operations or credentials are replayed/copied. Platform cleartext permission is intentionally broader than application trust, with exact-origin native/WebView checks, bundled CSP and HTTPS mixed-content denial. No device/emulator or private live LAN acceptance was performed. Redirected HTTP subresource CSP, Wi-Fi/VPN transitions, native settings dialogs and Android lifecycle behavior still need disposable-device verification. Debug packages were compiled, not distributed; release rights, notices and authorization remain unresolved.",
       "findings": [],
       "historicalFindingReferences": [
         "NAT-004",
@@ -807,7 +869,37 @@
         "NAT-PENDING-002",
         "NAT-PENDING-006",
         "NAT-FINAL-001"
-      ]
+      ],
+      "previousReview": {
+        "path": "apps/android/app/src/main/java/com/agentopsdeck/MainActivity.java",
+        "size": 55187,
+        "sha256": "4585d477b8a26d578dc5d31f99fe4f45bb7e92c6df7ee8728d885753180f1980",
+        "module": "native",
+        "kind": "runtime",
+        "depth": "semantic",
+        "disposition": "no-finding",
+        "checks": [
+          "Complete current assigned source read, including contiguous recovery of any truncated chunks; exact current bytes independently match the parent snapshot.",
+          "Relevant bounded caller, identity, resource-admission and regression contracts inspected as detailed below; no native or provider execution.",
+          "All 853 lines read; final 666-853 chunk and openExternal 738-756 truncation recovery completed; delegate and picker contracts rechecked at 414-480 and 759-781.",
+          "Bridge main-frame/origin validation, captured web/download generation fencing, private staging, cancellation, original-cookie snapshot and per-target cookie resolver traced.",
+          "Full ConnectionRouter, ServerProbe, CacheStore, NativeVoiceRecorder, NativeVideoPlayer, PrivateMediaDataSource and MediaCacheKey inspected with related routing, cache, recorder and video tests.",
+          "Explicit save UI and partial-write cleanup preserved; source-confirmed retired WebView delegate/file-picker identity gap recorded as NAT-FINAL-001.",
+          "Bounded downloader declarations/actual bytes, same-origin redirects, encoding and cancellation inspected via stable helper review; unbounded bridge/executor admission remains NAT-PENDING-006.",
+          "final-open-source-1.0.0-review",
+          "line-by-line-semantic-audit"
+        ],
+        "notes": "Full current source plus relevant adjacent contracts now complete, superseding the parent incomplete broader-cache/speech/media/routing caller evidence only. Cache scope is exactly 64 hex characters; transactional delta limits and logical eviction are not whole physical-DB/queue proofs. Recorder keeps exact session identity, 60-second stop-not-send timer and 2 MiB private capture; video fences player generations with scoped cookie/version cache keys. Retired delegate/picker missing identity guards are source-confirmed, delayed Android delivery remains conditional and no credential leak is demonstrated. Existing hardcoded UI, queue/blob bounds, app-kill cleanup and device storage/transport acceptance remain open. No source patch in this followup.",
+        "findings": [],
+        "historicalFindingReferences": [
+          "NAT-004",
+          "NAT-006",
+          "NAT-PENDING-001",
+          "NAT-PENDING-002",
+          "NAT-PENDING-006",
+          "NAT-FINAL-001"
+        ]
+      }
     },
     {
       "path": "apps/android/app/src/main/java/com/agentopsdeck/MediaCacheKey.java",
@@ -908,38 +1000,72 @@
     },
     {
       "path": "apps/android/app/src/main/java/com/agentopsdeck/ResourceAddress.java",
-      "size": 1812,
-      "sha256": "23cc6f55564a31362209af11370288c674f5ca9d3bec1c45bdb0b7c33454d350",
+      "size": 1883,
+      "sha256": "9eb8df4408f61ca9a7975b9e158d8614bb1bc1e83d0d4fc514f77272f752a5c0",
       "module": "native",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
-        "Complete text bytes inspected structurally (33 lines); lexical observations are NOT semantic approval.",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "manual-lan-targeted-source-and-relevant-contract-review",
+        "android-java-and-debug-instrumentation-package-compile",
+        "gradle-selected-routing-unit-tests-15-passed"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/android/app/src/main/java/com/agentopsdeck/ResourceAddress.java (native/runtime); all historical findings and license/security/correctness checks are verified.",
-      "findings": []
+      "notes": "Read complete current source and reviewed relevant manual-LAN contracts; no source finding at the stated depth. LAN input uses normalized RFC1918 IPv4 origins, explicit local trust, Wi-Fi-only single-origin probes and HTTPS fallback. Private-range classification does not grant trust: routing and authenticated resources use configured/confirmed exact origins. Existing active connections are preserved until confirmed reload; no operations or credentials are replayed/copied. Platform cleartext permission is intentionally broader than application trust, with exact-origin native/WebView checks, bundled CSP and HTTPS mixed-content denial. No device/emulator or private live LAN acceptance was performed. Redirected HTTP subresource CSP, Wi-Fi/VPN transitions, native settings dialogs and Android lifecycle behavior still need disposable-device verification. Debug packages were compiled, not distributed; release rights, notices and authorization remain unresolved.",
+      "findings": [],
+      "previousReview": {
+        "path": "apps/android/app/src/main/java/com/agentopsdeck/ResourceAddress.java",
+        "size": 1812,
+        "sha256": "23cc6f55564a31362209af11370288c674f5ca9d3bec1c45bdb0b7c33454d350",
+        "module": "native",
+        "kind": "runtime",
+        "depth": "semantic",
+        "disposition": "no-finding",
+        "checks": [
+          "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
+          "Complete text bytes inspected structurally (33 lines); lexical observations are NOT semantic approval.",
+          "final-open-source-1.0.0-review",
+          "line-by-line-semantic-audit"
+        ],
+        "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/android/app/src/main/java/com/agentopsdeck/ResourceAddress.java (native/runtime); all historical findings and license/security/correctness checks are verified.",
+        "findings": []
+      }
     },
     {
       "path": "apps/android/app/src/main/java/com/agentopsdeck/ServerAddress.java",
-      "size": 1683,
-      "sha256": "bf04fb2a12c183ddb7e6bdf9076bccf7a4c7cb381d4ac5eea26a8423195ad0eb",
+      "size": 3431,
+      "sha256": "2c83500e44572eb1764648d9cf2a62ee80e9475377e39612551c521a856dfaa5",
       "module": "native",
       "kind": "runtime",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
-        "Complete text bytes inspected structurally (41 lines); lexical observations are NOT semantic approval.",
-        "Lexical network/transport declarations at line 7; caller authorization/behavior requires the stated depth, not pattern presence.",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "manual-lan-targeted-source-and-relevant-contract-review",
+        "android-java-and-debug-instrumentation-package-compile",
+        "gradle-selected-routing-unit-tests-15-passed"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/android/app/src/main/java/com/agentopsdeck/ServerAddress.java (native/runtime); all historical findings and license/security/correctness checks are verified.",
-      "findings": []
+      "notes": "Read complete current source and reviewed relevant manual-LAN contracts; no source finding at the stated depth. LAN input uses normalized RFC1918 IPv4 origins, explicit local trust, Wi-Fi-only single-origin probes and HTTPS fallback. Private-range classification does not grant trust: routing and authenticated resources use configured/confirmed exact origins. Existing active connections are preserved until confirmed reload; no operations or credentials are replayed/copied. Platform cleartext permission is intentionally broader than application trust, with exact-origin native/WebView checks, bundled CSP and HTTPS mixed-content denial. No device/emulator or private live LAN acceptance was performed. Redirected HTTP subresource CSP, Wi-Fi/VPN transitions, native settings dialogs and Android lifecycle behavior still need disposable-device verification. Debug packages were compiled, not distributed; release rights, notices and authorization remain unresolved.",
+      "findings": [],
+      "previousReview": {
+        "path": "apps/android/app/src/main/java/com/agentopsdeck/ServerAddress.java",
+        "size": 1683,
+        "sha256": "bf04fb2a12c183ddb7e6bdf9076bccf7a4c7cb381d4ac5eea26a8423195ad0eb",
+        "module": "native",
+        "kind": "runtime",
+        "depth": "semantic",
+        "disposition": "no-finding",
+        "checks": [
+          "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
+          "Complete text bytes inspected structurally (41 lines); lexical observations are NOT semantic approval.",
+          "Lexical network/transport declarations at line 7; caller authorization/behavior requires the stated depth, not pattern presence.",
+          "final-open-source-1.0.0-review",
+          "line-by-line-semantic-audit"
+        ],
+        "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/android/app/src/main/java/com/agentopsdeck/ServerAddress.java (native/runtime); all historical findings and license/security/correctness checks are verified.",
+        "findings": []
+      }
     },
     {
       "path": "apps/android/app/src/main/java/com/agentopsdeck/ServerProbe.java",
@@ -1000,72 +1126,139 @@
     },
     {
       "path": "apps/android/app/src/main/res/values-zh-rCN/strings.xml",
-      "size": 781,
-      "sha256": "dc8a160534014333324cf9655a7efe5a5c177743b52abd8c1bb83ddb58f8078b",
+      "size": 3629,
+      "sha256": "145791e8dafeac97d9dfc8c49f393c5e11dd7c4fd3574d1885c5db166a924d22",
       "module": "main-integration",
       "kind": "config",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "Complete XML text read; eight matching EN/CN key names and nonempty values checked.",
-        "Download limits, single network slot, explicit save and nonrevocable external-copy warning matched to MainActivity network download flow.",
-        "Focused paired-resource source assertions pass."
+        "current-source-sha256-and-size",
+        "manual-lan-targeted-source-and-relevant-contract-review",
+        "android-java-and-debug-instrumentation-package-compile",
+        "existing-documentation-and-native-security-i18n-runner-27-passed"
       ],
-      "notes": "These download strings are paired and source-appropriate; they are not a full app translation or runtime accessibility acceptance. The one-slot statement does not establish admission limits for independent blob bridge staging. Broader NAT-006 remains open.",
-      "findings": []
+      "notes": "Reviewed changed connection/configuration contracts only; prior whole-file conclusions do not apply to these bytes and complete current-file rereview is pending. LAN input uses normalized RFC1918 IPv4 origins, explicit local trust, Wi-Fi-only single-origin probes and HTTPS fallback. Private-range classification does not grant trust: routing and authenticated resources use configured/confirmed exact origins. Existing active connections are preserved until confirmed reload; no operations or credentials are replayed/copied. Platform cleartext permission is intentionally broader than application trust, with exact-origin native/WebView checks, bundled CSP and HTTPS mixed-content denial. No device/emulator or private live LAN acceptance was performed. Redirected HTTP subresource CSP, Wi-Fi/VPN transitions, native settings dialogs and Android lifecycle behavior still need disposable-device verification. Debug packages were compiled, not distributed; release rights, notices and authorization remain unresolved.",
+      "findings": [],
+      "previousReview": {
+        "path": "apps/android/app/src/main/res/values-zh-rCN/strings.xml",
+        "size": 781,
+        "sha256": "dc8a160534014333324cf9655a7efe5a5c177743b52abd8c1bb83ddb58f8078b",
+        "module": "main-integration",
+        "kind": "config",
+        "depth": "semantic",
+        "disposition": "no-finding",
+        "checks": [
+          "Complete XML text read; eight matching EN/CN key names and nonempty values checked.",
+          "Download limits, single network slot, explicit save and nonrevocable external-copy warning matched to MainActivity network download flow.",
+          "Focused paired-resource source assertions pass."
+        ],
+        "notes": "These download strings are paired and source-appropriate; they are not a full app translation or runtime accessibility acceptance. The one-slot statement does not establish admission limits for independent blob bridge staging. Broader NAT-006 remains open.",
+        "findings": []
+      }
     },
     {
       "path": "apps/android/app/src/main/res/values/strings.xml",
-      "size": 795,
-      "sha256": "809370ba07633bc3da88caedae565e2af1b5d05b94cc5c9eb908400b2f280063",
+      "size": 3734,
+      "sha256": "4d51f29660d85c1aa9e337b007bb2b7f652f38da659a3c54dcb6b8194df5f101",
       "module": "main-integration",
       "kind": "config",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "Complete XML text read; eight matching EN/CN key names and nonempty values checked.",
-        "Download limits, single network slot, explicit save and nonrevocable external-copy warning matched to MainActivity network download flow.",
-        "Focused paired-resource source assertions pass."
+        "current-source-sha256-and-size",
+        "manual-lan-targeted-source-and-relevant-contract-review",
+        "android-java-and-debug-instrumentation-package-compile",
+        "existing-documentation-and-native-security-i18n-runner-27-passed"
       ],
-      "notes": "These download strings are paired and source-appropriate; they are not a full app translation or runtime accessibility acceptance. The one-slot statement does not establish admission limits for independent blob bridge staging. Broader NAT-006 remains open.",
-      "findings": []
+      "notes": "Reviewed changed connection/configuration contracts only; prior whole-file conclusions do not apply to these bytes and complete current-file rereview is pending. LAN input uses normalized RFC1918 IPv4 origins, explicit local trust, Wi-Fi-only single-origin probes and HTTPS fallback. Private-range classification does not grant trust: routing and authenticated resources use configured/confirmed exact origins. Existing active connections are preserved until confirmed reload; no operations or credentials are replayed/copied. Platform cleartext permission is intentionally broader than application trust, with exact-origin native/WebView checks, bundled CSP and HTTPS mixed-content denial. No device/emulator or private live LAN acceptance was performed. Redirected HTTP subresource CSP, Wi-Fi/VPN transitions, native settings dialogs and Android lifecycle behavior still need disposable-device verification. Debug packages were compiled, not distributed; release rights, notices and authorization remain unresolved.",
+      "findings": [],
+      "previousReview": {
+        "path": "apps/android/app/src/main/res/values/strings.xml",
+        "size": 795,
+        "sha256": "809370ba07633bc3da88caedae565e2af1b5d05b94cc5c9eb908400b2f280063",
+        "module": "main-integration",
+        "kind": "config",
+        "depth": "semantic",
+        "disposition": "no-finding",
+        "checks": [
+          "Complete XML text read; eight matching EN/CN key names and nonempty values checked.",
+          "Download limits, single network slot, explicit save and nonrevocable external-copy warning matched to MainActivity network download flow.",
+          "Focused paired-resource source assertions pass."
+        ],
+        "notes": "These download strings are paired and source-appropriate; they are not a full app translation or runtime accessibility acceptance. The one-slot statement does not establish admission limits for independent blob bridge staging. Broader NAT-006 remains open.",
+        "findings": []
+      }
     },
     {
       "path": "apps/android/app/src/main/res/xml/network_security_config.xml",
-      "size": 146,
-      "sha256": "dea35ebed76536c24c13f74036f02dc874f944147cb3a49c2ad0550f71e3e0c7",
+      "size": 247,
+      "sha256": "461d4f85ed6c8b556fc4934b8df9ea0e722be2136f10e3354f7488cfd0793067",
       "module": "native",
       "kind": "config",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
-        "Complete text bytes inspected structurally (4 lines); lexical observations are NOT semantic approval.",
-        "XML parsed successfully; 2 elements; schema/platform meaning not validated.",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "manual-lan-targeted-source-and-relevant-contract-review",
+        "android-java-and-debug-instrumentation-package-compile"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/android/app/src/main/res/xml/network_security_config.xml (native/config); all historical findings and license/security/correctness checks are verified.",
-      "findings": []
+      "notes": "Reviewed changed connection/configuration contracts only; prior whole-file conclusions do not apply to these bytes and complete current-file rereview is pending. LAN input uses normalized RFC1918 IPv4 origins, explicit local trust, Wi-Fi-only single-origin probes and HTTPS fallback. Private-range classification does not grant trust: routing and authenticated resources use configured/confirmed exact origins. Existing active connections are preserved until confirmed reload; no operations or credentials are replayed/copied. Platform cleartext permission is intentionally broader than application trust, with exact-origin native/WebView checks, bundled CSP and HTTPS mixed-content denial. No device/emulator or private live LAN acceptance was performed. Redirected HTTP subresource CSP, Wi-Fi/VPN transitions, native settings dialogs and Android lifecycle behavior still need disposable-device verification. Debug packages were compiled, not distributed; release rights, notices and authorization remain unresolved.",
+      "findings": [],
+      "previousReview": {
+        "path": "apps/android/app/src/main/res/xml/network_security_config.xml",
+        "size": 146,
+        "sha256": "dea35ebed76536c24c13f74036f02dc874f944147cb3a49c2ad0550f71e3e0c7",
+        "module": "native",
+        "kind": "config",
+        "depth": "semantic",
+        "disposition": "no-finding",
+        "checks": [
+          "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
+          "Complete text bytes inspected structurally (4 lines); lexical observations are NOT semantic approval.",
+          "XML parsed successfully; 2 elements; schema/platform meaning not validated.",
+          "final-open-source-1.0.0-review",
+          "line-by-line-semantic-audit"
+        ],
+        "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/android/app/src/main/res/xml/network_security_config.xml (native/config); all historical findings and license/security/correctness checks are verified.",
+        "findings": []
+      }
     },
     {
       "path": "apps/android/app/src/test/java/com/agentopsdeck/ConnectionRouterTest.java",
-      "size": 1599,
-      "sha256": "2bb48da37f4258852b3dcb7337a2bee7142e928774deaad93c7b81805ad2a48b",
+      "size": 3080,
+      "sha256": "40d25978da801bd3ed7bffef103c487061ea496ddc86495e36cfeb08f8592ea9",
       "module": "native",
       "kind": "test",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
-        "Complete text bytes inspected structurally (34 lines); lexical observations are NOT semantic approval.",
-        "Lexical network/transport declarations at line 9; caller authorization/behavior requires the stated depth, not pattern presence.",
-        "Lexical test assertion declarations at line 3; caller authorization/behavior requires the stated depth, not pattern presence.",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "manual-lan-targeted-source-and-relevant-contract-review",
+        "android-java-and-debug-instrumentation-package-compile",
+        "gradle-selected-routing-unit-tests-15-passed"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/android/app/src/test/java/com/agentopsdeck/ConnectionRouterTest.java (native/test); all historical findings and license/security/correctness checks are verified.",
-      "findings": []
+      "notes": "Read complete current source and reviewed relevant manual-LAN contracts; no source finding at the stated depth. LAN input uses normalized RFC1918 IPv4 origins, explicit local trust, Wi-Fi-only single-origin probes and HTTPS fallback. Private-range classification does not grant trust: routing and authenticated resources use configured/confirmed exact origins. Existing active connections are preserved until confirmed reload; no operations or credentials are replayed/copied. Platform cleartext permission is intentionally broader than application trust, with exact-origin native/WebView checks, bundled CSP and HTTPS mixed-content denial. No device/emulator or private live LAN acceptance was performed. Redirected HTTP subresource CSP, Wi-Fi/VPN transitions, native settings dialogs and Android lifecycle behavior still need disposable-device verification. Debug packages were compiled, not distributed; release rights, notices and authorization remain unresolved.",
+      "findings": [],
+      "previousReview": {
+        "path": "apps/android/app/src/test/java/com/agentopsdeck/ConnectionRouterTest.java",
+        "size": 1599,
+        "sha256": "2bb48da37f4258852b3dcb7337a2bee7142e928774deaad93c7b81805ad2a48b",
+        "module": "native",
+        "kind": "test",
+        "depth": "semantic",
+        "disposition": "no-finding",
+        "checks": [
+          "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
+          "Complete text bytes inspected structurally (34 lines); lexical observations are NOT semantic approval.",
+          "Lexical network/transport declarations at line 9; caller authorization/behavior requires the stated depth, not pattern presence.",
+          "Lexical test assertion declarations at line 3; caller authorization/behavior requires the stated depth, not pattern presence.",
+          "final-open-source-1.0.0-review",
+          "line-by-line-semantic-audit"
+        ],
+        "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/android/app/src/test/java/com/agentopsdeck/ConnectionRouterTest.java (native/test); all historical findings and license/security/correctness checks are verified.",
+        "findings": []
+      }
     },
     {
       "path": "apps/android/app/src/test/java/com/agentopsdeck/DownloadFileNameTest.java",
@@ -1109,41 +1302,75 @@
     },
     {
       "path": "apps/android/app/src/test/java/com/agentopsdeck/ResourceAddressTest.java",
-      "size": 1362,
-      "sha256": "2c43ad64733da23ad33c7bf535351c7f781a4d6f23f12293791c51d19679844e",
+      "size": 2302,
+      "sha256": "26e45954aea65305820511b827b3956b6145db22787ae2ff93efcd5ca36fbea3",
       "module": "native",
       "kind": "test",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
-        "Complete text bytes inspected structurally (29 lines); lexical observations are NOT semantic approval.",
-        "Lexical network/transport declarations at line 8; caller authorization/behavior requires the stated depth, not pattern presence.",
-        "Lexical test assertion declarations at line 3; caller authorization/behavior requires the stated depth, not pattern presence.",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "manual-lan-targeted-source-and-relevant-contract-review",
+        "android-java-and-debug-instrumentation-package-compile",
+        "gradle-selected-routing-unit-tests-15-passed"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/android/app/src/test/java/com/agentopsdeck/ResourceAddressTest.java (native/test); all historical findings and license/security/correctness checks are verified.",
-      "findings": []
+      "notes": "Read complete current source and reviewed relevant manual-LAN contracts; no source finding at the stated depth. LAN input uses normalized RFC1918 IPv4 origins, explicit local trust, Wi-Fi-only single-origin probes and HTTPS fallback. Private-range classification does not grant trust: routing and authenticated resources use configured/confirmed exact origins. Existing active connections are preserved until confirmed reload; no operations or credentials are replayed/copied. Platform cleartext permission is intentionally broader than application trust, with exact-origin native/WebView checks, bundled CSP and HTTPS mixed-content denial. No device/emulator or private live LAN acceptance was performed. Redirected HTTP subresource CSP, Wi-Fi/VPN transitions, native settings dialogs and Android lifecycle behavior still need disposable-device verification. Debug packages were compiled, not distributed; release rights, notices and authorization remain unresolved.",
+      "findings": [],
+      "previousReview": {
+        "path": "apps/android/app/src/test/java/com/agentopsdeck/ResourceAddressTest.java",
+        "size": 1362,
+        "sha256": "2c43ad64733da23ad33c7bf535351c7f781a4d6f23f12293791c51d19679844e",
+        "module": "native",
+        "kind": "test",
+        "depth": "semantic",
+        "disposition": "no-finding",
+        "checks": [
+          "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
+          "Complete text bytes inspected structurally (29 lines); lexical observations are NOT semantic approval.",
+          "Lexical network/transport declarations at line 8; caller authorization/behavior requires the stated depth, not pattern presence.",
+          "Lexical test assertion declarations at line 3; caller authorization/behavior requires the stated depth, not pattern presence.",
+          "final-open-source-1.0.0-review",
+          "line-by-line-semantic-audit"
+        ],
+        "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/android/app/src/test/java/com/agentopsdeck/ResourceAddressTest.java (native/test); all historical findings and license/security/correctness checks are verified.",
+        "findings": []
+      }
     },
     {
       "path": "apps/android/app/src/test/java/com/agentopsdeck/ServerAddressTest.java",
-      "size": 902,
-      "sha256": "c6ec0ad656ab6eecde5f88444dc926e2a90520e021f745dcb6be8089868f3e06",
+      "size": 2919,
+      "sha256": "2459f7cb366f50b3aaf2581ec86fd1e5019b0eb1f1b667df16abcb294a0584ea",
       "module": "native",
       "kind": "test",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
-        "Complete text bytes inspected structurally (18 lines); lexical observations are NOT semantic approval.",
-        "Lexical network/transport declarations at line 9; caller authorization/behavior requires the stated depth, not pattern presence.",
-        "Lexical test assertion declarations at line 3; caller authorization/behavior requires the stated depth, not pattern presence.",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "manual-lan-targeted-source-and-relevant-contract-review",
+        "android-java-and-debug-instrumentation-package-compile",
+        "gradle-selected-routing-unit-tests-15-passed"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/android/app/src/test/java/com/agentopsdeck/ServerAddressTest.java (native/test); all historical findings and license/security/correctness checks are verified.",
-      "findings": []
+      "notes": "Read complete current source and reviewed relevant manual-LAN contracts; no source finding at the stated depth. LAN input uses normalized RFC1918 IPv4 origins, explicit local trust, Wi-Fi-only single-origin probes and HTTPS fallback. Private-range classification does not grant trust: routing and authenticated resources use configured/confirmed exact origins. Existing active connections are preserved until confirmed reload; no operations or credentials are replayed/copied. Platform cleartext permission is intentionally broader than application trust, with exact-origin native/WebView checks, bundled CSP and HTTPS mixed-content denial. No device/emulator or private live LAN acceptance was performed. Redirected HTTP subresource CSP, Wi-Fi/VPN transitions, native settings dialogs and Android lifecycle behavior still need disposable-device verification. Debug packages were compiled, not distributed; release rights, notices and authorization remain unresolved.",
+      "findings": [],
+      "previousReview": {
+        "path": "apps/android/app/src/test/java/com/agentopsdeck/ServerAddressTest.java",
+        "size": 902,
+        "sha256": "c6ec0ad656ab6eecde5f88444dc926e2a90520e021f745dcb6be8089868f3e06",
+        "module": "native",
+        "kind": "test",
+        "depth": "semantic",
+        "disposition": "no-finding",
+        "checks": [
+          "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
+          "Complete text bytes inspected structurally (18 lines); lexical observations are NOT semantic approval.",
+          "Lexical network/transport declarations at line 9; caller authorization/behavior requires the stated depth, not pattern presence.",
+          "Lexical test assertion declarations at line 3; caller authorization/behavior requires the stated depth, not pattern presence.",
+          "final-open-source-1.0.0-review",
+          "line-by-line-semantic-audit"
+        ],
+        "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/android/app/src/test/java/com/agentopsdeck/ServerAddressTest.java (native/test); all historical findings and license/security/correctness checks are verified.",
+        "findings": []
+      }
     },
     {
       "path": "apps/android/build.gradle",
@@ -1541,22 +1768,38 @@
     },
     {
       "path": "apps/android/web/resource-routing.test.mjs",
-      "size": 4159,
-      "sha256": "592f21b0d8e43617dfe7afbbfc0a2de1b608025170a2bff503ba423c2c76e43e",
+      "size": 4777,
+      "sha256": "e2cb1fbbb6bcbf29cff986c26b975e97c53b582899f71c89c951ad34daeaa154",
       "module": "native",
       "kind": "test",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
-        "Complete text bytes inspected structurally (79 lines); lexical observations are NOT semantic approval.",
-        "Lexical network/transport declarations at line 5; caller authorization/behavior requires the stated depth, not pattern presence.",
-        "Lexical test assertion declarations at line 16; caller authorization/behavior requires the stated depth, not pattern presence.",
-        "final-open-source-1.0.0-review",
-        "line-by-line-semantic-audit"
+        "current-source-sha256-and-size",
+        "manual-lan-targeted-source-and-relevant-contract-review",
+        "android-web-routing-runtime-crypto-tests-13-passed"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/android/web/resource-routing.test.mjs (native/test); all historical findings and license/security/correctness checks are verified.",
-      "findings": []
+      "notes": "Read complete current source and reviewed relevant manual-LAN contracts; no source finding at the stated depth. LAN input uses normalized RFC1918 IPv4 origins, explicit local trust, Wi-Fi-only single-origin probes and HTTPS fallback. Private-range classification does not grant trust: routing and authenticated resources use configured/confirmed exact origins. Existing active connections are preserved until confirmed reload; no operations or credentials are replayed/copied. Platform cleartext permission is intentionally broader than application trust, with exact-origin native/WebView checks, bundled CSP and HTTPS mixed-content denial. No device/emulator or private live LAN acceptance was performed. Redirected HTTP subresource CSP, Wi-Fi/VPN transitions, native settings dialogs and Android lifecycle behavior still need disposable-device verification. Debug packages were compiled, not distributed; release rights, notices and authorization remain unresolved.",
+      "findings": [],
+      "previousReview": {
+        "path": "apps/android/web/resource-routing.test.mjs",
+        "size": 4159,
+        "sha256": "592f21b0d8e43617dfe7afbbfc0a2de1b608025170a2bff503ba423c2c76e43e",
+        "module": "native",
+        "kind": "test",
+        "depth": "semantic",
+        "disposition": "no-finding",
+        "checks": [
+          "Assigned inventory SHA-256 and byte size recomputed from read-only source; exact match.",
+          "Complete text bytes inspected structurally (79 lines); lexical observations are NOT semantic approval.",
+          "Lexical network/transport declarations at line 5; caller authorization/behavior requires the stated depth, not pattern presence.",
+          "Lexical test assertion declarations at line 16; caller authorization/behavior requires the stated depth, not pattern presence.",
+          "final-open-source-1.0.0-review",
+          "line-by-line-semantic-audit"
+        ],
+        "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/android/web/resource-routing.test.mjs (native/test); all historical findings and license/security/correctness checks are verified.",
+        "findings": []
+      }
     },
     {
       "path": "apps/android/web/speech-composer.mjs",
@@ -59359,33 +59602,65 @@
     },
     {
       "path": "docs/README.md",
-      "size": 3077,
-      "sha256": "b0386a544ad49b35203b90db7f8885d83186a2bd63acd3b5195ab0ad264cec26",
+      "size": 3205,
+      "sha256": "f5fdb4e17484fecbb5d55f5af8ed6e6fd3aa1800965faa13f39fbbdecd275956",
       "module": "release-boundary",
       "kind": "docs",
       "depth": "structural",
       "disposition": "pending",
       "checks": [
-        "standalone-antigravity-quota-targeted-review",
-        "exact-file-sha256-and-size"
+        "current-source-sha256-and-size",
+        "manual-lan-targeted-source-and-relevant-contract-review",
+        "existing-documentation-and-native-security-i18n-runner-27-passed"
       ],
-      "notes": "Checked that the bilingual navigation and guide identify the standalone workspace quota card. Documentation tests passed; no live UI walkthrough.",
-      "findings": []
+      "notes": "Reviewed changed connection/configuration contracts only; prior whole-file conclusions do not apply to these bytes and complete current-file rereview is pending. LAN input uses normalized RFC1918 IPv4 origins, explicit local trust, Wi-Fi-only single-origin probes and HTTPS fallback. Private-range classification does not grant trust: routing and authenticated resources use configured/confirmed exact origins. Existing active connections are preserved until confirmed reload; no operations or credentials are replayed/copied. Platform cleartext permission is intentionally broader than application trust, with exact-origin native/WebView checks, bundled CSP and HTTPS mixed-content denial. No device/emulator or private live LAN acceptance was performed. Redirected HTTP subresource CSP, Wi-Fi/VPN transitions, native settings dialogs and Android lifecycle behavior still need disposable-device verification. Debug packages were compiled, not distributed; release rights, notices and authorization remain unresolved.",
+      "findings": [],
+      "previousReview": {
+        "path": "docs/README.md",
+        "size": 3077,
+        "sha256": "b0386a544ad49b35203b90db7f8885d83186a2bd63acd3b5195ab0ad264cec26",
+        "module": "release-boundary",
+        "kind": "docs",
+        "depth": "structural",
+        "disposition": "pending",
+        "checks": [
+          "standalone-antigravity-quota-targeted-review",
+          "exact-file-sha256-and-size"
+        ],
+        "notes": "Checked that the bilingual navigation and guide identify the standalone workspace quota card. Documentation tests passed; no live UI walkthrough.",
+        "findings": []
+      }
     },
     {
       "path": "docs/README.zh-CN.md",
-      "size": 2943,
-      "sha256": "22075b4c168df11b8a7ce12dfa5ec64eb2e57418538174d9fd42f4826e0ec8fa",
+      "size": 3055,
+      "sha256": "5392f585ad7c112091c3ffc31bf0f2f15906701e4a95ddcc48cd18d94ebe5787",
       "module": "release-boundary",
       "kind": "docs",
       "depth": "structural",
       "disposition": "pending",
       "checks": [
-        "standalone-antigravity-quota-targeted-review",
-        "exact-file-sha256-and-size"
+        "current-source-sha256-and-size",
+        "manual-lan-targeted-source-and-relevant-contract-review",
+        "existing-documentation-and-native-security-i18n-runner-27-passed"
       ],
-      "notes": "Checked that the bilingual navigation and guide identify the standalone workspace quota card. Documentation tests passed; no live UI walkthrough.",
-      "findings": []
+      "notes": "Reviewed changed connection/configuration contracts only; prior whole-file conclusions do not apply to these bytes and complete current-file rereview is pending. LAN input uses normalized RFC1918 IPv4 origins, explicit local trust, Wi-Fi-only single-origin probes and HTTPS fallback. Private-range classification does not grant trust: routing and authenticated resources use configured/confirmed exact origins. Existing active connections are preserved until confirmed reload; no operations or credentials are replayed/copied. Platform cleartext permission is intentionally broader than application trust, with exact-origin native/WebView checks, bundled CSP and HTTPS mixed-content denial. No device/emulator or private live LAN acceptance was performed. Redirected HTTP subresource CSP, Wi-Fi/VPN transitions, native settings dialogs and Android lifecycle behavior still need disposable-device verification. Debug packages were compiled, not distributed; release rights, notices and authorization remain unresolved.",
+      "findings": [],
+      "previousReview": {
+        "path": "docs/README.zh-CN.md",
+        "size": 2943,
+        "sha256": "22075b4c168df11b8a7ce12dfa5ec64eb2e57418538174d9fd42f4826e0ec8fa",
+        "module": "release-boundary",
+        "kind": "docs",
+        "depth": "structural",
+        "disposition": "pending",
+        "checks": [
+          "standalone-antigravity-quota-targeted-review",
+          "exact-file-sha256-and-size"
+        ],
+        "notes": "Checked that the bilingual navigation and guide identify the standalone workspace quota card. Documentation tests passed; no live UI walkthrough.",
+        "findings": []
+      }
     },
     {
       "path": "docs/antigravity-cli.md",
@@ -63727,8 +64002,8 @@
     },
     {
       "path": "scripts/documentation.test.mjs",
-      "sha256": "774894d1ff1434f1fd1cb24b9c860ad9ab26c3f4e060ff79883b1801a3b8d493",
-      "size": 9901,
+      "sha256": "14600094630e67ff652c379d850e9d68d9d30d13c927ce25afa69abc194bca31",
+      "size": 10740,
       "module": "release-boundary",
       "kind": "test",
       "depth": "structural",
@@ -63736,10 +64011,25 @@
       "findings": [],
       "checks": [
         "current-source-sha256-and-size",
-        "scoped-installation-pr-review",
-        "ten-documentation-tests-including-real-crlf-fixture-passed"
+        "manual-lan-targeted-source-and-relevant-contract-review"
       ],
-      "notes": "Documentation reads normalize CRLF before multiline contract checks. A temporary CRLF file reproduces the Windows checkout regression. Ten targeted documentation tests passed. Full current-file semantic/security rereview remains pending."
+      "notes": "Reviewed changed connection/configuration contracts only; prior whole-file conclusions do not apply to these bytes and complete current-file rereview is pending. LAN input uses normalized RFC1918 IPv4 origins, explicit local trust, Wi-Fi-only single-origin probes and HTTPS fallback. Private-range classification does not grant trust: routing and authenticated resources use configured/confirmed exact origins. Existing active connections are preserved until confirmed reload; no operations or credentials are replayed/copied. Platform cleartext permission is intentionally broader than application trust, with exact-origin native/WebView checks, bundled CSP and HTTPS mixed-content denial. No device/emulator or private live LAN acceptance was performed. Redirected HTTP subresource CSP, Wi-Fi/VPN transitions, native settings dialogs and Android lifecycle behavior still need disposable-device verification. Debug packages were compiled, not distributed; release rights, notices and authorization remain unresolved.",
+      "previousReview": {
+        "path": "scripts/documentation.test.mjs",
+        "sha256": "774894d1ff1434f1fd1cb24b9c860ad9ab26c3f4e060ff79883b1801a3b8d493",
+        "size": 9901,
+        "module": "release-boundary",
+        "kind": "test",
+        "depth": "structural",
+        "disposition": "pending",
+        "findings": [],
+        "checks": [
+          "current-source-sha256-and-size",
+          "scoped-installation-pr-review",
+          "ten-documentation-tests-including-real-crlf-fixture-passed"
+        ],
+        "notes": "Documentation reads normalize CRLF before multiline contract checks. A temporary CRLF file reproduces the Windows checkout regression. Ten targeted documentation tests passed. Full current-file semantic/security rereview remains pending."
+      }
     },
     {
       "path": "scripts/encrypted-stopped-backup.test.mjs",
@@ -65643,19 +65933,35 @@
     },
     {
       "path": "scripts/native-mobile-security.test.mjs",
-      "size": 17016,
-      "sha256": "b99a8c823314a78dcc970921e2de147d1edd898eeabef1f183d920005767a888",
+      "size": 17449,
+      "sha256": "0a10c8aaa36d512c5c9f4ec2bf91109c5ed3a5f6cbe2215325bbfc30e73b42c4",
       "module": "native",
       "kind": "test",
-      "depth": "semantic",
-      "disposition": "no-finding",
+      "depth": "structural",
+      "disposition": "pending",
       "checks": [
-        "Complete test file and isolated script runner inspected; 12 inert source assertion tests pass.",
-        "Inspects assigned current Java/Swift/JS/XML/plist sources only; no compiler/device/HTTP/export/native instrumentation invoked.",
-        "Asserts targeted redirect/cookie/byte/cancel/stale-WebView/blob/resource/release-block invariants."
+        "current-source-sha256-and-size",
+        "manual-lan-targeted-source-and-relevant-contract-review",
+        "existing-documentation-and-native-security-i18n-runner-27-passed"
       ],
-      "notes": "Regex/source assertions are necessary regression tripwires, not Java/Swift runtime semantics, genuine one-slot blob admission proof, native thread/race behavior or platform/rights acceptance. Broad NAT findings remain attached at runtime records.",
-      "findings": []
+      "notes": "Reviewed changed connection/configuration contracts only; prior whole-file conclusions do not apply to these bytes and complete current-file rereview is pending. LAN input uses normalized RFC1918 IPv4 origins, explicit local trust, Wi-Fi-only single-origin probes and HTTPS fallback. Private-range classification does not grant trust: routing and authenticated resources use configured/confirmed exact origins. Existing active connections are preserved until confirmed reload; no operations or credentials are replayed/copied. Platform cleartext permission is intentionally broader than application trust, with exact-origin native/WebView checks, bundled CSP and HTTPS mixed-content denial. No device/emulator or private live LAN acceptance was performed. Redirected HTTP subresource CSP, Wi-Fi/VPN transitions, native settings dialogs and Android lifecycle behavior still need disposable-device verification. Debug packages were compiled, not distributed; release rights, notices and authorization remain unresolved.",
+      "findings": [],
+      "previousReview": {
+        "path": "scripts/native-mobile-security.test.mjs",
+        "size": 17016,
+        "sha256": "b99a8c823314a78dcc970921e2de147d1edd898eeabef1f183d920005767a888",
+        "module": "native",
+        "kind": "test",
+        "depth": "semantic",
+        "disposition": "no-finding",
+        "checks": [
+          "Complete test file and isolated script runner inspected; 12 inert source assertion tests pass.",
+          "Inspects assigned current Java/Swift/JS/XML/plist sources only; no compiler/device/HTTP/export/native instrumentation invoked.",
+          "Asserts targeted redirect/cookie/byte/cancel/stale-WebView/blob/resource/release-block invariants."
+        ],
+        "notes": "Regex/source assertions are necessary regression tripwires, not Java/Swift runtime semantics, genuine one-slot blob admission proof, native thread/race behavior or platform/rights acceptance. Broad NAT findings remain attached at runtime records.",
+        "findings": []
+      }
     },
     {
       "path": "scripts/observe-local-maintenance.mjs",
@@ -66078,19 +66384,35 @@
     {
       "path": "scripts/publication-fixtures.json",
       "size": 9516,
-      "sha256": "fdc4560cb38de9a6c1e2a38749f6b199f8599e589c981ee454aabd291d0f8000",
+      "sha256": "08f77f1a65b791271fec8efa698794fad161328d5f3d89316526137def29e7aa",
       "module": "governance",
       "kind": "config",
       "depth": "semantic",
       "disposition": "no-finding",
       "checks": [
-        "Read the full assigned source/fixture contents; current digest binds the reviewed bytes, not a promotion criterion",
-        "Full fixture manifest read: explicit allowed fixture paths and publication-check consumer distinction",
-        "Checked that declarations are exemption inputs, not credential/publication acceptance records",
-        "supplemental-scoped-caller-interface-contract-review"
+        "current-source-sha256-and-size",
+        "manual-lan-targeted-source-and-relevant-contract-review",
+        "existing-linux-publication-regression-runner-15-passed"
       ],
-      "notes": "Full exact-file/category/hash/reason catalog and full publication-check.mjs consumer/test read. Exceptions only match credential-url in test file names with exact SHA-256; no fixture hashes changed or independent target acceptance claimed.",
-      "findings": []
+      "notes": "Read complete current source and reviewed relevant manual-LAN contracts; no source finding at the stated depth. LAN input uses normalized RFC1918 IPv4 origins, explicit local trust, Wi-Fi-only single-origin probes and HTTPS fallback. Private-range classification does not grant trust: routing and authenticated resources use configured/confirmed exact origins. Existing active connections are preserved until confirmed reload; no operations or credentials are replayed/copied. Platform cleartext permission is intentionally broader than application trust, with exact-origin native/WebView checks, bundled CSP and HTTPS mixed-content denial. The updated credential-URL fixture digest covers only the completely reviewed synthetic rejection test, not operator credentials; scanning rules remain unchanged. No device/emulator or private live LAN acceptance was performed. Redirected HTTP subresource CSP, Wi-Fi/VPN transitions, native settings dialogs and Android lifecycle behavior still need disposable-device verification. Debug packages were compiled, not distributed; release rights, notices and authorization remain unresolved.",
+      "findings": [],
+      "previousReview": {
+        "path": "scripts/publication-fixtures.json",
+        "size": 9516,
+        "sha256": "fdc4560cb38de9a6c1e2a38749f6b199f8599e589c981ee454aabd291d0f8000",
+        "module": "governance",
+        "kind": "config",
+        "depth": "semantic",
+        "disposition": "no-finding",
+        "checks": [
+          "Read the full assigned source/fixture contents; current digest binds the reviewed bytes, not a promotion criterion",
+          "Full fixture manifest read: explicit allowed fixture paths and publication-check consumer distinction",
+          "Checked that declarations are exemption inputs, not credential/publication acceptance records",
+          "supplemental-scoped-caller-interface-contract-review"
+        ],
+        "notes": "Full exact-file/category/hash/reason catalog and full publication-check.mjs consumer/test read. Exceptions only match credential-url in test file names with exact SHA-256; no fixture hashes changed or independent target acceptance claimed.",
+        "findings": []
+      }
     },
     {
       "path": "scripts/reconcile-local-maintenance.mjs",

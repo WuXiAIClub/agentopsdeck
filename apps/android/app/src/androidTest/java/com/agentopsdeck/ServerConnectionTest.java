@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.security.NetworkSecurityPolicy;
 import android.webkit.WebView;
+import android.webkit.WebResourceRequest;
+import android.net.Uri;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 import java.lang.reflect.Field;
@@ -20,34 +22,67 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 public class ServerConnectionTest {
-    @Test public void httpIsLimitedToExplicitComputerAddresses() {
+    @Test public void webViewGuardsCleartextDespiteRuntimeHostPlatformPermission() throws Exception {
         NetworkSecurityPolicy policy = NetworkSecurityPolicy.getInstance();
-        assertFalse(policy.isCleartextTrafficPermitted("192.0.2.24"));
-        assertFalse(policy.isCleartextTrafficPermitted("192.0.2.82"));
-        assertFalse(policy.isCleartextTrafficPermitted("example.com"));
-        assertFalse(policy.isCleartextTrafficPermitted("192.0.2.25"));
-        assertFalse(policy.isCleartextTrafficPermitted("127.0.0.1"));
+        assertTrue(policy.isCleartextTrafficPermitted("10.1.2.3"));
+        Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+        Context context = instrumentation.getTargetContext();
+        MainActivity activity = (MainActivity) instrumentation.startActivitySync(new Intent(context, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        Field web = MainActivity.class.getDeclaredField("webView");
+        web.setAccessible(true);
+        AtomicReference<WebView> view = new AtomicReference<>();
+        try {
+            for (int attempt = 0; attempt < 50 && view.get() == null; attempt++) {
+                Thread.sleep(100);
+                instrumentation.runOnMainSync(() -> {
+                    try { view.set((WebView) web.get(activity)); }
+                    catch (IllegalAccessException error) { throw new RuntimeException(error); }
+                });
+            }
+            assertNotNull(view.get());
+            instrumentation.runOnMainSync(() -> {
+                for (String address : new String[]{"http://192.0.2.24/api/auth/status", "http://example.com/api/auth/status",
+                        "http://127.0.0.1/api/auth/status"}) {
+                    assertEquals(403, view.get().getWebViewClient().shouldInterceptRequest(view.get(), request(address)).getStatusCode());
+                }
+            });
+        } finally { instrumentation.runOnMainSync(activity::finish); }
+    }
+
+    private static WebResourceRequest request(String address) {
+        return new WebResourceRequest() {
+            @Override public Uri getUrl() { return Uri.parse(address); }
+            @Override public boolean isForMainFrame() { return false; }
+            @Override public boolean isRedirect() { return false; }
+            @Override public boolean hasGesture() { return false; }
+            @Override public String getMethod() { return "GET"; }
+            @Override public java.util.Map<String, String> getRequestHeaders() { return java.util.Collections.emptyMap(); }
+        };
     }
 
     @Test public void liveLanWebViewLoadsApiAndCryptoBridge() throws Exception {
-        Assume.assumeTrue("Operator LAN fixture is not distributed", ServerAddress.LAN_ORIGINS.length > 0);
         Assume.assumeTrue("Explicit live LAN opt-in", "true".equals(InstrumentationRegistry.getArguments().getString("lanProbe")));
-        assertTrue("Actual computer LAN endpoint is reachable from Android", ServerProbe.reachable(ServerAddress.LAN_ORIGINS[0]));
+        String suppliedLan = InstrumentationRegistry.getArguments().getString("lanOrigin");
+        Assume.assumeTrue("Operator LAN fixture is not distributed", suppliedLan != null);
+        String lan = ServerAddress.normalizeLan(suppliedLan);
+        assertTrue("Actual computer LAN endpoint is reachable from Android", ServerProbe.reachable(lan));
         Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
         Context context = instrumentation.getTargetContext();
         MainActivity activity = (MainActivity) instrumentation.startActivitySync(new Intent(context, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
         Field origin = MainActivity.class.getDeclaredField("origin");
+        Field configuredLan = MainActivity.class.getDeclaredField("lanOrigin");
         Field web = MainActivity.class.getDeclaredField("webView");
         Field generation = MainActivity.class.getDeclaredField("connectionGeneration");
         Method create = MainActivity.class.getDeclaredMethod("createWebView");
-        for (Field field : new Field[]{origin, web, generation}) field.setAccessible(true);
+        for (Field field : new Field[]{origin, configuredLan, web, generation}) field.setAccessible(true);
         create.setAccessible(true);
         try {
             Thread.sleep(5000);
             instrumentation.runOnMainSync(() -> {
                 try {
                     generation.setInt(activity, generation.getInt(activity) + 1);
-                    origin.set(activity, ServerAddress.LAN_ORIGINS[0]);
+                    origin.set(activity, lan);
+                    configuredLan.set(activity, lan);
                     create.invoke(activity);
                 } catch (Exception error) { throw new RuntimeException(error); }
             });
@@ -93,8 +128,8 @@ public class ServerConnectionTest {
             }
             assertNotNull("LAN WebView API and native digest completed", result.get());
             JSONObject body = new JSONObject(new org.json.JSONArray("[" + result.get() + "]").getString(0));
-            assertEquals(ServerAddress.LAN_ORIGINS[0], body.getString("origin"));
-            String routed = ServerAddress.LAN_ORIGINS[0] + "/api/media/inbound/routing-test.mp4?name=a%20b#preview";
+            assertEquals(lan, body.getString("origin"));
+            String routed = lan + "/api/media/inbound/routing-test.mp4?name=a%20b#preview";
             assertEquals("Rendered download anchor uses LAN", routed, body.getString("routedAnchor"));
             assertEquals("Video resource mapper uses LAN", routed, body.getString("routedVideo"));
             if (resourceUrl != null) {
