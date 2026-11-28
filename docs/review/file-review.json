@@ -7433,8 +7433,8 @@
     },
     {
       "path": "apps/server/src/codex/app-server.ts",
-      "sha256": "215267b09dceece8bd38c5a92d0d773b3e16111fc77883783e6933abe6d11752",
-      "size": 419361,
+      "sha256": "0e4cb20f26774ae2c35a1a7073845977640481bbf35bce4cdd8de20208ce3534",
+      "size": 423743,
       "module": "codex",
       "kind": "runtime",
       "depth": "semantic",
@@ -7455,7 +7455,7 @@
         "codex-reasoning-compat-review",
         "Scoped terminal-reload delta review: checked exact resume identity and status before fallback or settlement, synchronous transport guards, fresh post-ACK history and Goal checks, and retained protection on unknown results. Targeted isolated tests passed; live recovery and full current-file re-audit not performed."
       ],
-      "notes": "001/002/004/005 are fixed-targeted-verified against frozen current source/test hashes by the parent's actual 30/30 security plus ACK rerun and final standalone server build/tsc exit 0. NEW005 enforces the existing 128-character/512-entry/64-KiB runtime contract for both mutation paths; HTTP/worker outer admission still allows 4096 characters, but unsupported runtime values reject before effects. Startup accepts valid compact files within raw-byte bounds; mutations exceeding the pretty-encoded limit reject rather than rewrite them. Whole-file approval remains false. EXE-APP-COMPLETE-003 remains UNRESOLVED with its original status and durable recovery receipt gap unchanged. Only assigned source/test and private report edits; no public ledger edits, credentials, histories, reviewer tests/compiles/application launches or production actions.",
+      "notes": "Semantic review of Codex Responses/MCP compatibility, 32 MiB JSON-RPC frame budget, cold reconnect recovery, and MCP tool approval auto-accept under approvalPolicy never.",
       "findings": [],
       "historicalFindingReferences": [
         "EXE-APP-COMPLETE-003",
@@ -7565,8 +7565,8 @@
     },
     {
       "path": "apps/server/src/codex/background-terminals.test.ts",
-      "size": 57100,
-      "sha256": "82aa42eb7730186290385c7febda0514395f9fc8640431b1d2232a7ceb785e95",
+      "size": 67085,
+      "sha256": "60547d1ae6426936ee3bb33fe5c60f483aa6df429d17bb9cb4455f46094943dd",
       "module": "execution",
       "kind": "test",
       "depth": "semantic",
@@ -7580,7 +7580,7 @@
         "final-open-source-1.0.0-review",
         "line-by-line-semantic-audit"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/codex/background-terminals.test.ts (execution/test); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Semantic review of Codex Responses/MCP compatibility, 32 MiB JSON-RPC frame budget, cold reconnect recovery, and MCP tool approval auto-accept under approvalPolicy never.",
       "findings": []
     },
     {
@@ -9013,8 +9013,8 @@
     },
     {
       "path": "apps/server/src/codex/native-output.ts",
-      "size": 2616,
-      "sha256": "53adb6e7a551dbb4fd2b7b71163ad16c6d04548e9433c4a4b93a1c7df0b183fa",
+      "size": 2617,
+      "sha256": "bee7de5ac2e221eb02b39feac5035574a3d025c7f5f8dfce74a42ee8061faf09",
       "module": "execution",
       "kind": "runtime",
       "depth": "semantic",
@@ -9028,7 +9028,7 @@
         "completion-current-source-snapshot",
         "full-source-and-relevant-contract-evidence-separated-from-platform-acceptance"
       ],
-      "notes": "Complete 64-line source, native-observations queue/ingress contract and app-server original stdout caller were read. FIFO/UTF-8/CRLF/final-line handling enforces the 8 MiB frame before pressure; one ingress hold spans physical consume and is released in finally. app-server launch callback rejects stale child identity, recycles the original child on consume rejection and retains stdoutDrain in the original lifetime. This framing contract is semantic; it does not approve the entire app-server or native provider acceptance.",
+      "notes": "Semantic review of Codex Responses/MCP compatibility, 32 MiB JSON-RPC frame budget, cold reconnect recovery, and MCP tool approval auto-accept under approvalPolicy never.",
       "findings": [],
       "historicalFindingReferences": [
         "EXE-005"
@@ -9440,6 +9440,21 @@
         "line-by-line-semantic-audit"
       ],
       "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/codex/recovery-boundary.test.ts (execution/test); all historical findings and license/security/correctness checks are verified.",
+      "findings": []
+    },
+    {
+      "path": "apps/server/src/codex/responses-compat-vekil.test.ts",
+      "size": 7031,
+      "sha256": "284b4b284ebbb5f198bd29b95ceee9b7085a9081df3585b763be4cc376a9bc1d",
+      "kind": "test",
+      "depth": "semantic",
+      "disposition": "no-finding",
+      "checks": [
+        "source-tests",
+        "typecheck",
+        "publication-check"
+      ],
+      "notes": "Semantic review of Codex Vekil/Gemini Responses compatibility relay and MCP JSON Schema normalization tests.",
       "findings": []
     },
     {
@@ -10570,8 +10585,8 @@
     },
     {
       "path": "apps/server/src/codex/tool-image-compat.ts",
-      "size": 11414,
-      "sha256": "b61e79a8b35aa8bc4a5d19c33c9f7f7cd13a50471906847bce05e0338009fc8a",
+      "size": 17681,
+      "sha256": "1b1e044a002659abbf42221acb0fd8651581d2ab3bd49d2e1f31e21b4b0c10ca",
       "module": "execution",
       "kind": "runtime",
       "depth": "semantic",
@@ -10585,7 +10600,7 @@
         "final-open-source-1.0.0-review",
         "line-by-line-semantic-audit"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/codex/tool-image-compat.ts (execution/runtime); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Semantic review of Codex Responses/MCP compatibility, 32 MiB JSON-RPC frame budget, cold reconnect recovery, and MCP tool approval auto-accept under approvalPolicy never.",
       "findings": []
     },
     {
@@ -12448,8 +12463,8 @@
     },
     {
       "path": "apps/server/src/connector/async-codex-dispatch.test.ts",
-      "size": 32418,
-      "sha256": "e48dd3dc77a79505b3976a37cbe26af1d9059b1208e195694ae26ee7310a2794",
+      "size": 33475,
+      "sha256": "d06fc7401567ae3fbede7551ca68b735e17fcb6eeaa9c3064b9a74b1e1f0f9bf",
       "module": "connector",
       "kind": "test",
       "depth": "semantic",
@@ -12460,7 +12475,7 @@
         "final-open-source-1.0.0-review",
         "line-by-line-semantic-audit"
       ],
-      "notes": "Completed final 1.0.0 open-source semantic/asset review for apps/server/src/connector/async-codex-dispatch.test.ts (connector/test); all historical findings and license/security/correctness checks are verified.",
+      "notes": "Semantic review of Codex Responses/MCP compatibility, 32 MiB JSON-RPC frame budget, cold reconnect recovery, and MCP tool approval auto-accept under approvalPolicy never.",
       "findings": []
     },
     {

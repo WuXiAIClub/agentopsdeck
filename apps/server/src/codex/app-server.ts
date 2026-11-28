@@ -1713,6 +1713,15 @@ export class CodexAppServer {
       const coldTranscriptOnly = !execution && thread.status?.type === 'notLoaded'
         && latestTurn?.status !== 'interrupted'
         && !arrayValue(latestTurn?.items).some(item => item.type === 'commandExecution');
+      // Worker-owned cold threads cannot enumerate native terminals before
+      // startOwnedTurn's journaled thread/resume + post-load idle proof.
+      // Still require rollout provenance, terminal turns, settled command
+      // items and interrupted-wrapper settlement before publishing idle state.
+      const coldOwnedLoadDeferred = Boolean(this.options.queuedConsumer) && !execution
+        && thread.status?.type === 'notLoaded' && !coldTranscriptOnly;
+      const coldSettledOwnedDisplay = Boolean(this.options.queuedConsumer) && coldOwnedDisplay
+        && execution!.sync === 'current' && !execution!.preparation && !execution!.reason && !execution!.nativeHistory;
+      let coldSettledOwnedActivityIdle = false;
       // A cold Goal successor cannot enumerate native terminals yet. Record
       // only the lost owned outcome below, then let final reconciliation save
       // a blocked checkpoint. The existing worker can load/re-prove that
@@ -1723,11 +1732,58 @@ export class CodexAppServer {
         && !!terminalSuccessorOwner(thread, execution?.runId);
       if (latestTurn && ['completed', 'failed', 'interrupted'].includes(latestTurn.status)) {
         readStage = 'terminal-cleanup-proof';
-        try { if (!executionSafetyUnconfirmed && !coldTranscriptOnly && !coldSuccessorRecovery) {
+        try { if ((!executionSafetyUnconfirmed || coldSettledOwnedDisplay) && !coldTranscriptOnly && !coldSuccessorRecovery) {
           const terminalCheck = () => {
             if (this.closed || this.executionUnavailable || !sameRead()) throw new RunControlConflict();
           };
-          if (rollout instanceof RolloutProjection) {
+          if (coldOwnedLoadDeferred || coldSettledOwnedDisplay) {
+            const needsRolloutProof = thread.turns.some((turn: any) => turn.status === 'interrupted'
+              || arrayValue(turn.items).some((item: any) => item.type === 'commandExecution'));
+            const invalidColdTurns = (needsRolloutProof && (rolloutUnavailable || typeof thread.path !== 'string' || !thread.path.trim()))
+              || thread.turns.some((turn: any) => !['completed', 'failed', 'interrupted'].includes(turn.status)
+                || hasNativeChildWork(arrayValue(turn.items), threadId)
+                || arrayValue(turn.items).some((item: any) => item.type === 'commandExecution'
+                  && !['completed', 'failed', 'declined'].includes(item.status)));
+            if (invalidColdTurns) {
+              executionSafetyUnconfirmed = true;
+            } else {
+              let goalProtected = false;
+              if (coldSettledOwnedDisplay && this.options.nativeJournal) {
+                const goal = nativeGoalEvidence(await this.request('thread/goal/get', { threadId }), threadId);
+                if (!await checkpoint()) throw new RunControlConflict();
+                goalProtected = Boolean(nativeGoalProtection(goal.status));
+              }
+              if (goalProtected) {
+                executionSafetyUnconfirmed = true;
+              } else {
+                const interruptedTurns = thread.turns.filter((turn: any) => turn.status === 'interrupted');
+                if (interruptedTurns.length) {
+                  if (rollout instanceof RolloutProjection) {
+                    const observed = await this.rolloutReader.observeLeasedProjectionWithin(thread.path,
+                      Math.max(1, Math.ceil(projectionDeadline - performance.now())), () => {
+                        const snapshot = rollout as RolloutProjection;
+                        rollout = '';
+                        return snapshot;
+                      }, async (snapshot, expired) => {
+                        const check = () => { if (expired()) throw new RolloutObservationPendingError(); terminalCheck(); };
+                        for (const turn of interruptedTurns) {
+                          check();
+                          await this.requireInterruptedTurnSettled(threadId, turn, check, snapshot);
+                        }
+                        if (expired()) throw new RolloutObservationPendingError();
+                      });
+                    rollout = observed.snapshot;
+                  } else {
+                    for (const turn of interruptedTurns) {
+                      terminalCheck();
+                      await this.requireInterruptedTurnSettled(threadId, turn, terminalCheck, rollout);
+                    }
+                  }
+                }
+                if (coldSettledOwnedDisplay) coldSettledOwnedActivityIdle = true;
+              }
+            }
+          } else if (rollout instanceof RolloutProjection) {
             const observed = await this.rolloutReader.observeLeasedProjectionWithin(thread.path,
               Math.max(1, Math.ceil(projectionDeadline - performance.now())), () => {
                 // Transfer only once the reader admits this original observer.
@@ -1842,12 +1898,18 @@ export class CodexAppServer {
           && ['completed', 'failed', 'interrupted'].includes(latestTurn.status)) {
           if (this.options.nativeJournal) await this.options.nativeJournal.recoverTerminal(execution, latestTurn.id, latestTurn.status);
           else this.legacyExecutions.recoverTerminal(execution, latestTurn.id, latestTurn.status);
-        } else if (!executionSafetyUnconfirmed) await this.syncThreadLifecycle(sessionKey, thread, connectionId, execution,
+        } else if (!executionSafetyUnconfirmed || coldSettledOwnedActivityIdle) await this.syncThreadLifecycle(sessionKey, thread, connectionId, execution,
           this.options.nativeJournal ? observed.outcomeUnknown : undefined, () => {
             authority();
             return !this.closed && !this.executionUnavailable && child === this.child
               && generation === this.nativeConnectionGeneration && connectionId === this.connectionId;
           });
+        else if (!options.readOnly && !execution) {
+          const existing = this.options.store.getSession(sessionKey);
+          if (existing && !existing.runtime && existing.status !== 'unknown') {
+            this.options.store.upsertSession({ ...existing, status: 'unknown' });
+          }
+        }
       }
       liveTurnId = latestTurn?.status === 'inProgress' ? latestTurn.id : undefined;
       if (resumedOwnedTerminal && !maintenanceRecovery && !executionSafetyUnconfirmed
@@ -2732,7 +2794,7 @@ export class CodexAppServer {
         if (!current || !this.isSessionHistoryReady(sessionKey) || version !== this.projectionVersion(sessionKey)
           || goal !== this.goalExecutionVersions.get(sessionKey) || !activity.current()
           || runtimeBusy(current.runtime) || current.runtime && current.runtime.sync !== 'current'
-          || (!allowBgContinuation && (current.hasActiveRun || current.status === 'running'))) throw new TurnStartDeferred();
+          || (!allowBgContinuation && (current.hasActiveRun || current.status === 'running' || current.status === 'unknown'))) throw new TurnStartDeferred();
       };
       beforeClaim();
       const previous = await this.options.credentialExecutionReader.get(sessionKey);
@@ -4288,7 +4350,11 @@ export class CodexAppServer {
       }
       try {
         if (this.interactions?.handle(message.method, message.id, message.params)) return;
-        if (['item/commandExecution/requestApproval', 'item/fileChange/requestApproval'].includes(message.method)) {
+        if (message.method === 'mcpServer/elicitation/request' && this.options.approvalPolicy === 'never'
+          && isRecord(message.params) && isRecord(message.params._meta)
+          && message.params._meta.codex_approval_kind === 'mcp_tool_call') {
+          this.write({ id: message.id, result: { action: 'accept', content: {} } });
+        } else if (['item/commandExecution/requestApproval', 'item/fileChange/requestApproval'].includes(message.method)) {
           this.write({ id: message.id, result: { decision: 'cancel' } });
         } else {
           this.write({ id: message.id, error: { code: -32601, message: 'Interactive Codex requests are not supported by AgentOpsDeck' } });

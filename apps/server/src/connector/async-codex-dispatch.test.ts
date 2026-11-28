@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { ConnectorTokenStore } from '../auth/connector-token.js';
@@ -93,7 +93,7 @@ async function fixture(t: import('node:test').TestContext, count = 1, ownedAutom
 
 function coldTransport(f: Awaited<ReturnType<typeof fixture>>, options: {
   goal?: any; background?: any[]; changed?: boolean; missingResumeAck?: boolean; busy?: boolean;
-  items?: any[]; resume?: () => void; read?: (resumed: boolean) => void;
+  path?: string; items?: any[]; resume?: () => void; read?: (resumed: boolean) => void;
 } = {}) {
   f.runtime.loadedThreadIds.delete('original');
   f.runtime.options.requestTimeoutMs = 250;
@@ -103,7 +103,7 @@ function coldTransport(f: Awaited<ReturnType<typeof fixture>>, options: {
     let result: any;
     if (request.method === 'thread/read') {
       options.read?.(resumed);
-      result = { thread: { id: 'original',
+      result = { thread: { id: 'original', ...(options.path ? { path: options.path } : {}),
       status: { type: resumed ? 'idle' : 'notLoaded' }, canAcceptDirectInput: resumed && !options.busy,
       turns: [{ id: 'prior', status: 'completed', items: options.items ?? [],
         ...(resumed && options.changed ? { extra: 'new-history' } : {}) }] } };
@@ -134,6 +134,23 @@ test('cold original FIFO durably authorizes one resume, persists its ACK, re-pro
     < f.writes.findIndex(w => w.method === 'thread/backgroundTerminals/list'));
   assert.equal((await f.owner.command('codexExecutionRead', { sessionKey: f.key }))?.runId, 'native-run');
   assert.equal(await f.owner.command('turnMaintenanceCount', { runtime: 'codex' }), 0);
+});
+
+test('cold original FIFO accepts prior non-zero commandExecution status when rollout provenance is present', async t => {
+  const f = await fixture(t, 1);
+  const directory = mkdtempSync(join(tmpdir(), 'codex-prior-failed-cmd-'));
+  t.after(() => rmSync(directory, { recursive: true, force: true }));
+  const rolloutPath = join(directory, 'prior-failed-cmd.jsonl');
+  writeFileSync(rolloutPath, JSON.stringify({ type: 'session_meta' }) + '\n');
+  coldTransport(f, {
+    path: rolloutPath,
+    items: [{ type: 'commandExecution', id: 'failed-cmd', status: 'failed', command: 'rg missing', exitCode: 1 }],
+  });
+  assert.equal(await f.dispatch.dispatch(f.prepared), 'admitted');
+  assert.deepEqual(f.writes.filter(w => ['thread/resume', 'turn/start'].includes(w.method)).map(w => w.method),
+    ['thread/resume', 'turn/start']);
+  assert.ok(f.writes.findIndex(w => w.method === 'thread/resume')
+    < f.writes.findIndex(w => w.method === 'thread/backgroundTerminals/list'));
 });
 
 function resumeNotifications(f: Awaited<ReturnType<typeof fixture>>) {
