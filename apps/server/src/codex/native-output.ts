@@ -1,7 +1,7 @@
 import { Writable, type Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 
-export const codexOutputFrameLimit = 8 * 1024 * 1024;
+export const codexOutputFrameLimit = 32 * 1024 * 1024;
 
 export function consumeCodexOutput(input: Readable, options: {
   receive(line: string): void;

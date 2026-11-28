@@ -753,6 +753,61 @@ test('read-only display refresh on an unloaded unmanaged thread with commandExec
   assert.ok(setup.runtime.displayHistory.get(unmanagedKey));
 });
 
+test('worker-owned refresh on an unloaded unmanaged thread with commandExecution defers terminal listing to owned load while fencing unconfirmed cleanup', async context => {
+  const setup = fixture(context);
+  const directory = mkdtempSync(join(tmpdir(), 'agentopsdeck-unloaded-worker-'));
+  context.after(() => rmSync(directory, { recursive: true, force: true }));
+  const settledRollout = join(directory, 'settled.jsonl');
+  writeFileSync(settledRollout, JSON.stringify({ timestamp: '2026-10-23T00:00:00.000Z', type: 'event_msg', payload: { type: 'task_complete', turn_id: 'original-run' } }) + '\n');
+  const abortedRollout = join(directory, 'aborted.jsonl');
+  writeFileSync(abortedRollout, [
+    { type: 'event_msg', payload: { type: 'task_started', turn_id: 'original-run' } },
+    { type: 'response_item', payload: { type: 'custom_tool_call', name: 'exec', call_id: 'wrapper', input: 'synthetic' } },
+    { type: 'response_item', payload: { type: 'custom_tool_call_output', call_id: 'wrapper', output: 'aborted by user after 0.1s' } },
+  ].map(row => JSON.stringify(row)).join('\n') + '\n');
+  const unmanagedKey = 'codex:unmanaged-worker-cold';
+  setup.runtime.child = { stdin: { writable: true } };
+  setup.runtime.options.queuedConsumer = { run: async () => 'not_started', close: async () => {} };
+  setup.runtime.options.credentialExecutionReader = { get: async () => undefined };
+  setup.runtime.options.historyReader = {
+    prepare: async (_key: string, messages: any[]) => ({ messages, sourceIds: messages.map(m => m.id), queue: [] }),
+    close: async () => {},
+  };
+  let turnStatus: 'completed' | 'interrupted' = 'completed';
+  let toolStatus: 'completed' | 'failed' | 'inProgress' = 'failed';
+  let path = settledRollout;
+  setup.runtime.request = async (method: string) => {
+    if (method === 'thread/read') return {
+      thread: {
+        id: 'unmanaged-worker-cold', path, status: { type: 'notLoaded' },
+        turns: [{ id: 'original-run', status: turnStatus, items: [
+          { id: 'cmd-1', type: 'commandExecution', status: toolStatus, command: 'exit 1', exitCode: 1 },
+          { id: 'reply', type: 'agentMessage', text: 'Previous completed turn' },
+        ] }],
+      },
+    };
+    throw new Error(`unexpected RPC method on unloaded thread: ${method}`);
+  };
+  try {
+    setup.store.upsertSession({ sessionKey: unmanagedKey, agentId: 'codex', title: 'Unmanaged Worker Cold', status: 'unknown' });
+    await setup.runtime.refreshSession(unmanagedKey, { readOnly: false });
+    assert.equal(setup.codex.isSessionHistoryReady(unmanagedKey), true);
+    assert.equal(setup.store.getSession(unmanagedKey)?.status, 'idle');
+    const observation = await setup.codex.observeOwnedQueue(unmanagedKey, true);
+    observation.release?.();
+
+    setup.store.upsertSession({ sessionKey: unmanagedKey, agentId: 'codex', title: 'Unmanaged Worker Cold', status: 'idle' });
+    delete setup.store.getSession(unmanagedKey)!.runtime;
+    turnStatus = 'interrupted';
+    path = abortedRollout;
+    await setup.runtime.refreshSession(unmanagedKey, { readOnly: false });
+    assert.equal(setup.store.getSession(unmanagedKey)?.status, 'unknown');
+    await assert.rejects(setup.codex.observeOwnedQueue(unmanagedKey, true));
+  } finally {
+    setup.runtime.child = undefined;
+  }
+});
+
 test('requestSessionRecovery clears recoveryAt cooldown and loaded background-work polls every 5s without re-reading unchanged rollout', async context => {
   const setup = fixture(context);
   const directory = mkdtempSync(join(tmpdir(), 'agentopsdeck-bg-fast-poll-'));
@@ -1008,4 +1063,141 @@ test('background-work keeps maintenance blocked while allowing explicit user-que
   await setup.runtime.drainQueuedTurn(setup.key);
   assert.equal(startedPrompts.length, 1);
   assert.match(startedPrompts[0]!, /continue while dev server runs/);
+});
+
+test('settled worker-owned session restores idle threadActivity on cold replacement connection without resuming prematurely', async context => {
+  const setup = fixture(context);
+  const directory = mkdtempSync(join(tmpdir(), 'agentopsdeck-cold-settled-reconnect-'));
+  context.after(() => rmSync(directory, { recursive: true, force: true }));
+  const settledRollout = join(directory, 'settled.jsonl');
+  writeFileSync(settledRollout, JSON.stringify({
+    timestamp: '2026-10-23T00:00:00.000Z', type: 'event_msg', payload: { type: 'task_complete', turn_id: 'original-run' },
+  }) + '\n');
+  const abortedRollout = join(directory, 'aborted.jsonl');
+  writeFileSync(abortedRollout, [
+    { type: 'event_msg', payload: { type: 'task_started', turn_id: 'original-run' } },
+    { type: 'response_item', payload: { type: 'custom_tool_call', name: 'exec', call_id: 'wrapper', input: 'synthetic' } },
+    { type: 'response_item', payload: { type: 'custom_tool_call_output', call_id: 'wrapper', output: 'aborted by user after 0.1s' } },
+  ].map(v => JSON.stringify(v)).join('\n') + '\n');
+
+  setup.turn.status = 'completed';
+  setup.turn.items = [
+    { id: 'cmd-1', type: 'commandExecution', status: 'completed', command: 'echo ok', exitCode: 0 } as any,
+    { id: 'reply', type: 'agentMessage', text: 'Completed reply' } as any,
+  ];
+  (setup.history.thread as any).path = settledRollout;
+  setup.runtime.loadedThreadIds.add('synthetic');
+  setup.runtime.request = async (method: string) => {
+    if (method === 'thread/read') return setup.history;
+    if (method === 'thread/backgroundTerminals/list') return { data: [] };
+    throw new Error(`unexpected RPC method: ${method}`);
+  };
+  setup.runtime.handleNotification('turn/completed', { threadId: 'synthetic', turn: setup.turn });
+  await setup.runtime.completingTurns.get(setup.key);
+  assert.equal(setup.database.codexExecutions.get(setup.key)?.sync, 'current');
+  assert.equal(setup.database.codexExecutions.get(setup.key)?.nativeHistory, undefined);
+
+  // Simulate codex app-server child restart -> cold ('notLoaded') thread on replacement connection.
+  setup.runtime.loadedThreadIds.clear();
+  setup.runtime.setConnection(undefined);
+  setup.runtime.setConnection('replacement-connection');
+  assert.equal(setup.store.getSession(setup.key)?.status, 'unknown');
+  assert.equal(setup.store.getSession(setup.key)?.hasActiveRun, true);
+
+  setup.runtime.child = { stdin: { writable: true } };
+  setup.runtime.options.queuedConsumer = { run: async () => 'not_started', close: async () => {} };
+  setup.runtime.options.credentialExecutionReader = { get: async () => setup.database.codexExecutions.get(setup.key) };
+  setup.runtime.options.historyReader = {
+    prepare: async (_key: string, messages: any[]) => ({ messages, sourceIds: messages.map(m => m.id), queue: [] }),
+    close: async () => {},
+  };
+  let turnStatus: 'completed' | 'interrupted' = 'completed';
+  let path = settledRollout;
+  setup.runtime.request = async (method: string) => {
+    if (method === 'thread/read') return {
+      thread: {
+        id: 'synthetic', path, status: { type: 'notLoaded' },
+        turns: [{ id: 'original-run', status: turnStatus, items: setup.turn.items }],
+      },
+    };
+    throw new Error(`unexpected RPC on cold readOnly refresh: ${method}`);
+  };
+  try {
+    await setup.codex.refreshSession(setup.key, { readOnly: true });
+    assert.equal(setup.store.getSession(setup.key)?.runtime?.threadActivity, 'idle');
+    assert.equal(setup.store.getSession(setup.key)?.status, 'idle');
+    assert.equal(setup.store.getSession(setup.key)?.hasActiveRun, false);
+    const observation = await setup.codex.observeOwnedQueue(setup.key, true);
+    observation.release?.();
+
+    // Unconfirmed interrupted executor on cold replacement connection stays fenced.
+    setup.database.codexExecutions.observe(setup.key, 'connection', 'original-run', 'interrupted');
+    setup.database.codexExecutions.settleHistory({ sessionKey: setup.key, commandId: 'original-command', runId: 'original-run' }, 'current');
+    setup.runtime.setConnection(undefined);
+    setup.runtime.setConnection('replacement-connection-2');
+    turnStatus = 'interrupted';
+    path = abortedRollout;
+    await setup.codex.refreshSession(setup.key, { readOnly: true });
+    assert.equal(setup.store.getSession(setup.key)?.status, 'unknown');
+    assert.equal(setup.store.getSession(setup.key)?.hasActiveRun, true);
+    await assert.rejects(setup.codex.observeOwnedQueue(setup.key, true));
+  } finally {
+    setup.runtime.child = undefined;
+  }
+});
+
+test('mcp_tool_call elicitation is auto-accepted only when approvalPolicy is never while arbitrary elicitations fail closed', async context => {
+  const setup = fixture(context);
+  const written: any[] = [];
+  setup.runtime.write = (msg: unknown) => { written.push(msg); };
+
+  // Default fixture has approvalPolicy === 'never': MCP tool call approval elicitation is accepted.
+  setup.runtime.receive(JSON.stringify({
+    jsonrpc: '2.0',
+    id: 41,
+    method: 'mcpServer/elicitation/request',
+    params: {
+      threadId: 'synthetic',
+      serverName: 'libtv',
+      mode: 'form',
+      message: 'Allow the libtv MCP server to run tool "upload_ticket"?',
+      requestedSchema: { type: 'object', properties: {} },
+      _meta: { codex_approval_kind: 'mcp_tool_call', tool_name: 'upload_ticket' },
+    },
+  }));
+  assert.deepEqual(written.at(-1), { id: 41, result: { action: 'accept', content: {} } });
+
+  // Arbitrary MCP form elicitation without codex_approval_kind === 'mcp_tool_call' remains unsupported (-32601).
+  setup.runtime.receive(JSON.stringify({
+    jsonrpc: '2.0',
+    id: 42,
+    method: 'mcpServer/elicitation/request',
+    params: {
+      threadId: 'synthetic',
+      serverName: 'libtv',
+      mode: 'form',
+      message: 'Enter API secret',
+      requestedSchema: { type: 'object', properties: { secret: { type: 'string' } } },
+    },
+  }));
+  assert.equal(written.at(-1)?.id, 42);
+  assert.equal(written.at(-1)?.error?.code, -32601);
+
+  // Under approvalPolicy === 'on-request', mcp_tool_call elicitation is NOT auto-accepted.
+  setup.runtime.options.approvalPolicy = 'on-request';
+  setup.runtime.receive(JSON.stringify({
+    jsonrpc: '2.0',
+    id: 43,
+    method: 'mcpServer/elicitation/request',
+    params: {
+      threadId: 'synthetic',
+      serverName: 'libtv',
+      mode: 'form',
+      message: 'Allow the libtv MCP server to run tool "upload_ticket"?',
+      requestedSchema: { type: 'object', properties: {} },
+      _meta: { codex_approval_kind: 'mcp_tool_call', tool_name: 'upload_ticket' },
+    },
+  }));
+  assert.equal(written.at(-1)?.id, 43);
+  assert.equal(written.at(-1)?.error?.code, -32601);
 });

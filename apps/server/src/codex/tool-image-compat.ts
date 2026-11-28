@@ -13,8 +13,188 @@ export type ToolImageCompatibilityOptions = {
   retryStaleConnectionItems?: boolean | undefined;
 };
 
-const STALE_CONNECTION_ITEM_ERROR = /input item(?: ID)? does not belong to this connection/i;
+const STALE_CONNECTION_ITEM_ERROR = /input item(?: ID)? does not belong to this connection|"code"\s*:\s*"invalid_request_body"|\(code=invalid_request_body\)/i;
 const MAX_RETRY_INSPECTION_BYTES = 64 * 1024;
+const GEMINI_TOOL_IMAGE_MODELS = new Set(['gemini-4-carbon', 'gemini-4-neon']);
+
+function normalizeSchemaRecordMap(value: RecordValue): RecordValue {
+  let changed = false;
+  const next: RecordValue = {};
+  for (const [key, entry] of Object.entries(value)) {
+    const normalized = normalizeToolJsonSchema(entry, false);
+    if (normalized !== entry) changed = true;
+    next[key] = normalized;
+  }
+  return changed ? next : value;
+}
+
+function normalizeSchemaList(list: unknown[]): unknown[] {
+  let changed = false;
+  const next = list.map(entry => {
+    const normalized = normalizeToolJsonSchema(entry, false);
+    if (normalized !== entry) changed = true;
+    return normalized;
+  });
+  return changed ? next : list;
+}
+
+function tupleItemsToSchema(list: unknown[]): RecordValue {
+  const normalized = normalizeSchemaList(list);
+  if (normalized.length === 0) return {};
+  if (normalized.length === 1 && record(normalized[0])) return normalized[0];
+  return { anyOf: normalized };
+}
+
+export function normalizeToolJsonSchema(schema: unknown, isRoot = true): unknown {
+  if (!record(schema)) return schema;
+  let changed = false;
+  const copy: RecordValue = { ...schema };
+
+  for (const mapKey of ['properties', '$defs', 'definitions', 'patternProperties'] as const) {
+    const rawMap = schema[mapKey];
+    if (record(rawMap)) {
+      const nextMap = normalizeSchemaRecordMap(rawMap);
+      if (nextMap !== rawMap) {
+        copy[mapKey] = nextMap;
+        changed = true;
+      }
+    }
+  }
+
+  for (const listKey of ['anyOf', 'oneOf', 'allOf'] as const) {
+    const rawList = schema[listKey];
+    if (Array.isArray(rawList)) {
+      const nextList = normalizeSchemaList(rawList);
+      if (nextList !== rawList) {
+        copy[listKey] = nextList;
+        changed = true;
+      }
+    }
+  }
+
+  for (const subKey of ['additionalProperties', 'not'] as const) {
+    const rawSub = schema[subKey];
+    if (record(rawSub)) {
+      const nextSub = normalizeToolJsonSchema(rawSub, false);
+      if (nextSub !== rawSub) {
+        copy[subKey] = nextSub;
+        changed = true;
+      }
+    }
+  }
+
+  if (Array.isArray(schema.items)) {
+    copy.items = tupleItemsToSchema(schema.items);
+    changed = true;
+  } else if (record(schema.items)) {
+    const nextItems = normalizeToolJsonSchema(schema.items, false);
+    if (nextItems !== schema.items) {
+      copy.items = nextItems;
+      changed = true;
+    }
+  }
+
+  if (Array.isArray(schema.prefixItems)) {
+    if (!record(copy.items)) {
+      copy.items = tupleItemsToSchema(schema.prefixItems);
+    }
+    delete copy.prefixItems;
+    changed = true;
+  }
+
+  const isArrayType = schema.type === 'array'
+    || (Array.isArray(schema.type) && schema.type.includes('array'));
+  if (isArrayType && !record(copy.items)) {
+    copy.items = {};
+    changed = true;
+  }
+
+  if (isRoot && schema.type === 'object' && !record(copy.properties)) {
+    copy.properties = {};
+    changed = true;
+  }
+
+  if (record(copy.properties) && Array.isArray(copy.anyOf)
+    && copy.anyOf.some(branch => record(branch) && branch.type === 'object')) {
+    const outerProperties = copy.properties;
+    const hasOuterRequired = Array.isArray(copy.required);
+    const outerRequired = copy.required;
+    const hasOuterAdditional = 'additionalProperties' in copy;
+    const outerAdditional = copy.additionalProperties;
+    copy.anyOf = copy.anyOf.map(branch => {
+      if (!record(branch) || branch.type !== 'object') return branch;
+      const mergedProps = record(branch.properties)
+        ? { ...branch.properties, ...outerProperties }
+        : outerProperties;
+      const nextBranch: RecordValue = { ...branch, properties: mergedProps };
+      if (hasOuterRequired && !Array.isArray(branch.required)) nextBranch.required = outerRequired;
+      if (hasOuterAdditional) nextBranch.additionalProperties = outerAdditional;
+      return nextBranch;
+    });
+    delete copy.properties;
+    delete copy.required;
+    delete copy.additionalProperties;
+    delete copy.type;
+    changed = true;
+  }
+
+  return changed ? copy : schema;
+}
+
+function normalizeToolEntry(tool: unknown): unknown {
+  if (!record(tool)) return tool;
+  if (tool.type === 'function' && record(tool.parameters)) {
+    const parameters = normalizeToolJsonSchema(tool.parameters, true);
+    return parameters === tool.parameters ? tool : { ...tool, parameters };
+  }
+  if (tool.type === 'namespace' && Array.isArray(tool.tools)) {
+    let changed = false;
+    const tools = tool.tools.map(subTool => {
+      const normalized = normalizeToolEntry(subTool);
+      if (normalized !== subTool) changed = true;
+      return normalized;
+    });
+    return changed ? { ...tool, tools } : tool;
+  }
+  return tool;
+}
+
+export function normalizeResponsesTools(body: unknown): unknown {
+  if (!record(body) || !Array.isArray(body.tools)) return body;
+  let changed = false;
+  const tools = body.tools.map(tool => {
+    const normalized = normalizeToolEntry(tool);
+    if (normalized !== tool) changed = true;
+    return normalized;
+  });
+  return changed ? { ...body, tools } : body;
+}
+
+export function normalizeResponsesInput(body: unknown): unknown {
+  if (!record(body) || !Array.isArray(body.input)) return body;
+  let changed = false;
+  const input = body.input.map(item => {
+    if (!record(item) || item.type !== 'function_call_output') return item;
+    const hasCallId = typeof item.call_id === 'string' && item.call_id.length > 0;
+    const hasExtraField = 'name' in item || 'namespace' in item;
+    if (hasCallId && !hasExtraField) return item;
+    changed = true;
+    if (!hasCallId) {
+      const label = typeof item.name === 'string' && item.name ? `[${item.name}]\n` : '';
+      const text = typeof item.output === 'string' ? item.output : JSON.stringify(item.output ?? '');
+      return {
+        type: 'message',
+        role: 'developer',
+        content: [{ type: 'input_text', text: `${label}${text}` }],
+      };
+    }
+    const copy: RecordValue = { ...item };
+    delete copy.name;
+    delete copy.namespace;
+    return copy;
+  });
+  return changed ? { ...body, input } : body;
+}
 
 export function toolImageCompatibilityArguments(options: ToolImageCompatibilityOptions, baseUrl: string) {
   if (!/^[a-zA-Z0-9_-]+$/.test(options.provider)) throw new Error('Invalid tool image compatibility provider');
@@ -39,7 +219,7 @@ export function stripStaleConnectionItems(body: unknown): unknown {
 }
 
 export function rewriteGeminiToolImages(body: unknown): unknown {
-  if (!record(body) || body.model !== 'gemini-4-carbon' || !Array.isArray(body.input)) return body;
+  if (!record(body) || typeof body.model !== 'string' || !GEMINI_TOOL_IMAGE_MODELS.has(body.model) || !Array.isArray(body.input)) return body;
   const calls = new Map<string, RecordValue>();
   const duplicates = new Set<string>();
   const outputs = new Set<string>();
@@ -135,7 +315,8 @@ export async function createToolImageCompatibilityRelay(options: ToolImageCompat
         }
         let original: unknown;
         try { original = JSON.parse(payload.toString('utf8')); } catch { outgoing.writeHead(400).end(); return; }
-        rewritten = route === '/responses' ? rewriteGeminiToolImages(original) : original;
+        const normalized = normalizeResponsesTools(normalizeResponsesInput(original));
+        rewritten = route === '/responses' ? rewriteGeminiToolImages(normalized) : normalized;
         if (rewritten !== original) payload = Buffer.from(JSON.stringify(rewritten));
         if (payload.length > limits.bodyBytes) { outgoing.writeHead(413).end(); return; }
       }
